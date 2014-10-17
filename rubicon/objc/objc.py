@@ -741,17 +741,12 @@ class ObjCMethod(object):
         f = self.get_callable()
         try:
             # Automatically convert Python strings into ObjC strings
-            # Use CFSTR because at() autoreleases; we need to create a new instance,
-            # and release it manually after it's been used.
-            from .core_foundation import CFSTR, to_str
+            from .core_foundation import at, to_str
             objc_args = [
-                (CFSTR(arg), True) if isinstance(arg, text) else (arg, False)
+                at(arg) if isinstance(arg, text) else arg
                 for arg in args
             ]
-            result = f(objc_id, self.selector, *(a[0] for a in objc_args))
-            for string, release in objc_args:
-                if release:
-                    string.release()
+            result = f(objc_id, self.selector, *objc_args)
             # Convert result to python type if it is a instance or class pointer.
             if self.restype == ObjCInstance:
                 result = ObjCInstance(result)
@@ -1078,7 +1073,7 @@ class ObjCInstance(object):
         return objc_instance
 
     def __repr__(self):
-        if self.__dict__['objc_class'].name == b'NSCFString':
+        if self.__dict__['objc_class'].__dict__['name'] == b'__NSCFString':
             # Display contents of NSString objects
             from .core_foundation import to_str
             string = to_str(self)

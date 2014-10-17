@@ -3,7 +3,7 @@ from __future__ import print_function, absolute_import, division
 from ctypes import *
 from ctypes import util
 
-from .objc import ObjCInstance
+from .objc import ObjCInstance, send_message
 from .types import *
 
 ######################################################################
@@ -51,7 +51,7 @@ def CFSTR(string):
 # kukac (caterpillar).
 def at(string):
     """Autoreleased version of CFSTR"""
-    return CFSTR(string).autorelease()
+    return ObjCInstance(send_message(CFSTR(string), 'autorelease'))
 
 def to_str(cfstring):
     length = cf.CFStringGetLength(cfstring)
