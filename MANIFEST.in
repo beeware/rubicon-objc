@@ -1,5 +1,8 @@
 include LICENSE
 include README.rst
 include tox.ini
+include Makefile
 recursive-include toga_iOS *.py
 recursive-include tests *.py
+recursive-include tests *.h
+recursive-include tests *.m
