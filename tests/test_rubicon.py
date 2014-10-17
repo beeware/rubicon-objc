@@ -10,7 +10,7 @@ import unittest
 if not hasattr(unittest.TestCase, 'assertIsNotNone'):
     import unittest2 as unittest
 
-from rubicon.objc import ObjCClass, ObjCSubclass, to_str, at
+from rubicon.objc import ObjCClass, ObjCSubclass
 
 
 # Load the test harness library
@@ -209,13 +209,13 @@ class RubiconTest(unittest.TestCase):
         "A method with a string argument can be passed."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-        self.assertEqual(to_str(example.duplicateString_(at("Wagga"))), "WaggaWagga")
+        self.assertEqual(example.duplicateString_("Wagga"), "WaggaWagga")
 
     def test_string_return(self):
         "If a method or field returns a string, you get a Python string back"
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-        self.assertEqual(to_str(example.toString()), "This is an ObjC Example object")
+        self.assertEqual(example.toString(), "This is an ObjC Example object")
 
     def test_float_method(self):
         "A method with a float arguments can be handled."
@@ -235,12 +235,12 @@ class RubiconTest(unittest.TestCase):
         example = Example.alloc().init()
 
         Thing = ObjCClass('Thing')
-        thing = Thing.alloc().initWithName_value_(at('This is thing'), 2)
+        thing = Thing.alloc().initWithName_value_('This is thing', 2)
 
         example.thing = thing
 
         the_thing = example.thing
-        self.assertEqual(to_str(the_thing.toString()), "This is thing 2")
+        self.assertEqual(the_thing.toString(), "This is thing 2")
 
     def test_interface(self):
         "An ObjC protocol implementation can be defined in Python."
@@ -257,12 +257,12 @@ class RubiconTest(unittest.TestCase):
 
             @Handler.method('v@i')
             def peek_withValue_(self, example, value):
-                results['string'] = to_str(example.toString()) + " peeked"
+                results['string'] = example.toString() + " peeked"
                 results['int'] = value + self.__dict__['value']
 
             @Handler.method('v@i')
             def poke_withValue_(self, example, value):
-                results['string'] = to_str(example.toString()) + " poked"
+                results['string'] = example.toString() + " poked"
                 results['int'] = value + self.__dict__['value']
 
         Handler = ObjCClass('Handler')

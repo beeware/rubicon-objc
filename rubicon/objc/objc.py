@@ -552,12 +552,31 @@ def cfunctype_for_encoding(encoding):
         return cfunctype_table[encoding]
 
     # Otherwise, create a new CFUNCTYPE for the encoding.
-    typecodes = {b'c':c_char, b'i':c_int, b's':c_short, b'l':c_long, b'q':c_longlong,
-                 b'C':c_ubyte, b'I':c_uint, b'S':c_ushort, b'L':c_ulong, b'Q':c_ulonglong,
-                 b'f':c_float, b'd':c_double, b'B':c_bool, b'v':None, b'*':c_char_p,
-                 b'@':c_void_p, b'#':c_void_p, b':':c_void_p, NSPointEncoding:NSPoint,
-                 NSSizeEncoding:NSSize, NSRectEncoding:NSRect, NSRangeEncoding:NSRange,
-                 PyObjectEncoding:py_object}
+    typecodes = {
+        b'c': c_char,
+        b'i': c_int,
+        b's': c_short,
+        b'l': c_long,
+        b'q': c_longlong,
+        b'C': c_ubyte,
+        b'I': c_uint,
+        b'S': c_ushort,
+        b'L': c_ulong,
+        b'Q': c_ulonglong,
+        b'f': c_float,
+        b'd': c_double,
+        b'B': c_bool,
+        b'v': None,
+        b'*': c_char_p,
+        b'@': c_void_p,
+        b'#': c_void_p,
+        b':': c_void_p,
+        NSPointEncoding: NSPoint,
+        NSSizeEncoding: NSSize,
+        NSRectEncoding: NSRect,
+        NSRangeEncoding: NSRange,
+        PyObjectEncoding: py_object
+    }
     argtypes = []
     for code in parse_type_encoding(encoding):
         if code in typecodes:
@@ -721,10 +740,23 @@ class ObjCMethod(object):
         provided."""
         f = self.get_callable()
         try:
-            result = f(objc_id, self.selector, *args)
+            # Automatically convert Python strings into ObjC strings
+            # Use CFSTR because at() autoreleases; we need to create a new instance,
+            # and release it manually after it's been used.
+            from .core_foundation import CFSTR, to_str
+            objc_args = [
+                (CFSTR(arg), True) if isinstance(arg, text) else (arg, False)
+                for arg in args
+            ]
+            result = f(objc_id, self.selector, *(a[0] for a in objc_args))
+            for string, release in objc_args:
+                if release:
+                    string.release()
             # Convert result to python type if it is a instance or class pointer.
             if self.restype == ObjCInstance:
                 result = ObjCInstance(result)
+                if result.__dict__['objc_class'].__dict__['name'] == b'__NSCFString':
+                    result = to_str(result)
             elif self.restype == ObjCClass:
                 result = ObjCClass(result)
             return result

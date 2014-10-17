@@ -38,15 +38,7 @@ Then, in a Python shell::
     # with colons replaced with underscores. So, the equivalent of
     # [NSURL URLWithString:@"http://pybee.org"];
     # would be:
-    >>> NSURL.URLWithString_(at("http://pybee.org/"))
-
-    # at() is a utility function creating NSString instances. To convert
-    # an NSString instance back into a Python string, use to_str():
-    >>> quote = at("Alea iacta est")
-    >>> print quote
-    <ObjCInstance 0x104e46910: __NSCFString at 140224573221152>
-    >>> print to_str(quote)
-    Alea iacta est
+    >>> NSURL.URLWithString_("http://pybee.org/")
 
     # To create a new Objective C class, define a Python class that
     # has the methods you want to define:
