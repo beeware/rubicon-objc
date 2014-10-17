@@ -750,7 +750,7 @@ class ObjCMethod(object):
             # Convert result to python type if it is a instance or class pointer.
             if self.restype == ObjCInstance:
                 result = ObjCInstance(result)
-                if result.__dict__['objc_class'].__dict__['name'] == b'__NSCFString':
+                if result.__dict__['objc_class'].__dict__['name'] == '__NSCFString':
                     result = to_str(result)
             elif self.restype == ObjCClass:
                 result = ObjCClass(result)
@@ -939,7 +939,7 @@ def cache_class_property_mutator(self, name):
     return None
 
 
-class ObjCClass(object):
+class ObjCClass(type):
     """Python wrapper for an Objective-C class."""
 
     # We only create one Python object for each Objective-C class.
@@ -978,15 +978,24 @@ class ObjCClass(object):
         if name in cls._registered_classes:
             return cls._registered_classes[name]
 
+        # Py2/3 compatibility; the class name must be "str".
+        # If the unicode class exists, we're in Python 2.
+        try:
+            unicode
+            objc_class_name = name
+        except NameError:
+            objc_class_name = name.decode('utf-8')
+
         # Otherwise create a new Python object and then initialize it.
-        objc_class = super(ObjCClass, cls).__new__(cls)
-        objc_class.__dict__['ptr'] = ptr
-        objc_class.__dict__['name'] = name
-        objc_class.__dict__['instance_methods'] = {}    # mapping of name -> instance method
-        objc_class.__dict__['class_methods'] = {}       # mapping of name -> class method
-        objc_class.__dict__['instance_properties'] = {} # mapping of name -> (accessor method, mutator method)
-        objc_class.__dict__['class_properties'] = {}    # mapping of name -> (accessor method, mutator method)
-        objc_class.__dict__['_as_parameter_'] = ptr     # for ctypes argument passing
+        objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
+                'ptr': ptr,
+                'name': objc_class_name,
+                'instance_methods': {},    # mapping of name -> instance method
+                'class_methods': {},       # mapping of name -> class method
+                'instance_properties': {}, # mapping of name -> (accessor method, mutator method)
+                'class_properties': {},    # mapping of name -> (accessor method, mutator method)
+                '_as_parameter_': ptr,     # for ctypes argument passing
+            })
 
         # Store the new class in dictionary of registered classes.
         cls._registered_classes[name] = objc_class
@@ -1073,7 +1082,7 @@ class ObjCInstance(object):
         return objc_instance
 
     def __repr__(self):
-        if self.__dict__['objc_class'].__dict__['name'] == b'__NSCFString':
+        if self.__dict__['objc_class'].__dict__['name'] == '__NSCFString':
             # Display contents of NSString objects
             from .core_foundation import to_str
             string = to_str(self)
