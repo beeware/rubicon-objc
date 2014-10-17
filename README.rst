@@ -63,6 +63,43 @@ Then, in a Python shell::
     >>> my_handler = Handler.alloc().initWithValue_(42)
     >>> my_handler.pokeWithValue_(37)
 
+Testing
+-------
+
+To run the Rubicon test suite:
+
+1. Compile the Rubicon test library. A ``Makefile`` has been provided to make
+this easy. Type::
+
+    $ make
+
+to compile it.
+
+.. admonition:: Cross platform support
+
+    This Makefile currently only works under OS/X; however, the build commands
+    aren't complicated; it should be fairly easy to reproduce the build on other
+    platforms. Pull requests to make the ``Makefile`` cross-platform are welcome.
+
+2. Put the Rubicon support library somewhere that it will be found by dynamic
+   library discovery. This means:
+
+   a. Under OS X, put the ``tests/objc`` directory in your ``DYLD_LIBRARY_PATH``
+
+   b. Under Linux, put the ``tests/objc`` directory in your ``LD_LIBRARY_PATH``
+
+   c. Under Windows.... something :-)
+
+
+3. Run the test suite::
+
+    $ python setup.py test
+
+   A ``tox`` configuration has also been provided; to run the tests across all
+   supported platforms, run::
+
+    $ tox
+
 .. Documentation
 .. -------------
 
