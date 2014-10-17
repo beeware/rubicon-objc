@@ -148,7 +148,7 @@ known_cftypes = {
     cf.CFNumberGetTypeID() : to_number
 }
 
-def cftype_to_value(cftype):
+def to_value(cftype):
     """Convert a CFType into an equivalent python type.
     The convertible CFTypes are taken from the known_cftypes
     dictionary, which may be added to if another library implements
@@ -170,12 +170,12 @@ cf.CFSetGetValues.restype = None
 # but CPython ctypes 1.1.0 complains, so just use c_void_p.
 cf.CFSetGetValues.argtypes = [c_void_p, c_void_p]
 
-def cfset_to_set(cfset):
+def to_set(cfset):
     """Convert CFSet to python set."""
     count = cf.CFSetGetCount(cfset)
     buffer = (c_void_p * count)()
     cf.CFSetGetValues(cfset, byref(buffer))
-    return set([ cftype_to_value(c_void_p(buffer[i])) for i in range(count) ])
+    return set(to_value(c_void_p(buffer[i])) for i in range(count))
 
 cf.CFArrayGetCount.restype = CFIndex
 cf.CFArrayGetCount.argtypes = [c_void_p]
@@ -183,11 +183,13 @@ cf.CFArrayGetCount.argtypes = [c_void_p]
 cf.CFArrayGetValueAtIndex.restype = c_void_p
 cf.CFArrayGetValueAtIndex.argtypes = [c_void_p, CFIndex]
 
-def cfarray_to_list(cfarray):
+def to_list(cfarray):
     """Convert CFArray to python list."""
     count = cf.CFArrayGetCount(cfarray)
-    return [ cftype_to_value(c_void_p(cf.CFArrayGetValueAtIndex(cfarray, i)))
-             for i in range(count) ]
+    return [
+        to_value(c_void_p(cf.CFArrayGetValueAtIndex(cfarray, i)))
+        for i in range(count)
+    ]
 
 
 kCFRunLoopDefaultMode = c_void_p.in_dll(cf, 'kCFRunLoopDefaultMode')
