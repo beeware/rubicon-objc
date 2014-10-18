@@ -3,9 +3,9 @@ Rubicon-ObjC
 
 Rubicon-ObjC is a bridge between Objective C and Python. It enables you to:
 
-* Use Python to instantiate objects defined in Objective C
-* Use Python to invoke methods on objects defined in Objective C
-* Subclass and extend Objective C classes in Python
+* Use Python to instantiate objects defined in Objective C,
+* Use Python to invoke methods on objects defined in Objective C, and
+* Subclass and extend Objective C classes in Python.
 
 It also includes wrappers of the some key data types from the Core Foundation
 framework (e.g., NSString).
