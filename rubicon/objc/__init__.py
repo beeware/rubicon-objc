@@ -23,6 +23,7 @@ from .types import (
     CGRectMake, NSMakeRect,
     CGPointMake, NSMakePoint,
     NSTimeInterval,
+    CFIndex, UniChar, unichar, CGGlyph,
     CFRange, NSRange,
     NSZeroPoint
 )

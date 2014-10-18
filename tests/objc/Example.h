@@ -30,11 +30,17 @@
 
 -(NSString *) toString;
 -(NSString *) duplicateString:(NSString *) in;
+-(NSString *) smiley;
+
+-(NSNumber *) theAnswer;
+-(NSNumber *) twopi;
 
 -(float) areaOfSquare: (float) size;
 -(double) areaOfCircle: (double) diameter;
 
 -(void) testPoke:(int) value;
 -(void) testPeek:(int) value;
+-(NSString *) getMessage;
+-(NSString *) reverseIt:(NSString *) input;
 
 @end

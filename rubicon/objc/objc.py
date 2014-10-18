@@ -772,17 +772,11 @@ class ObjCMethod(object):
         f = self.get_callable()
         try:
             # Automatically convert Python strings into ObjC strings
-            from .core_foundation import at, to_str
-            objc_args = [
-                at(arg) if isinstance(arg, text) else arg
-                for arg in args
-            ]
-            result = f(objc_id, self.selector, *objc_args)
+            from .core_foundation import from_value, to_value
+            result = f(objc_id, self.selector, *(from_value(arg) for arg in args))
             # Convert result to python type if it is a instance or class pointer.
             if self.restype == ObjCInstance:
-                result = ObjCInstance(result)
-                if result.__dict__['objc_class'].__dict__['name'] == '__NSCFString':
-                    result = to_str(result)
+                result = to_value(ObjCInstance(result))
             elif self.restype == ObjCClass:
                 result = ObjCClass(result)
             return result
@@ -974,11 +968,12 @@ def convert_method_arguments(encoding, args):
     """Used to convert Objective-C method arguments to Python values
     before passing them on to the Python-defined method.
     """
+    from .core_foundation import to_value
     new_args = []
     arg_encodings = parse_type_encoding(encoding)[3:]
     for e, a in zip(arg_encodings, args):
         if e == b'@':
-            new_args.append(ObjCInstance(a))
+            new_args.append(to_value(ObjCInstance(a)))
         elif e == b'#':
             new_args.append(ObjCClass(a))
         else:
@@ -995,6 +990,7 @@ def objc_method(encoding):
     encoding = b''.join(typecodes)
     def decorator(f):
         def objc_method(objc_self, objc_cmd, *args):
+            from .core_foundation import at
             py_self = ObjCInstance(objc_self)
             args = convert_method_arguments(encoding, args)
             result = f(py_self, *args)
@@ -1002,6 +998,8 @@ def objc_method(encoding):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
                 result = result.ptr.value
+            elif isinstance(result, text):
+                result = at(result).ptr.value
             return result
 
         def register(cls):
@@ -1022,6 +1020,7 @@ def objc_classmethod(encoding):
     encoding = b''.join(typecodes)
     def decorator(f):
         def objc_classmethod(objc_cls, objc_cmd, *args):
+            from .core_foundation import at
             py_cls = ObjCClass(objc_cls)
             args = convert_method_arguments(encoding, args)
             result = f(py_cls, *args)
@@ -1029,6 +1028,8 @@ def objc_classmethod(encoding):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
                 result = result.ptr.value
+            elif isinstance(result, text):
+                result = at(result).ptr.value
             return result
 
         def register(cls):

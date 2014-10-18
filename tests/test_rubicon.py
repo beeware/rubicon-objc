@@ -211,11 +211,31 @@ class RubiconTest(unittest.TestCase):
         example = Example.alloc().init()
         self.assertEqual(example.duplicateString_("Wagga"), "WaggaWagga")
 
+    def test_python2_string_argument(self):
+        "If a non-unicode string argument is provided, it is converted."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        self.assertEqual(example.duplicateString_(b"Wagga"), "WaggaWagga")
+
     def test_string_return(self):
         "If a method or field returns a string, you get a Python string back"
         Example = ObjCClass('Example')
         example = Example.alloc().init()
         self.assertEqual(example.toString(), "This is an ObjC Example object")
+
+    def test_constant_string_return(self):
+        "If a method or field returns a *constant* string, you get a Python string back"
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        self.assertEqual(example.smiley(), "%-)")
+
+    def test_number_return(self):
+        "If a method or field returns a NSNumber, it is converted back to native types"
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+
+        self.assertEqual(example.theAnswer(), 42)
+        self.assertAlmostEqual(example.twopi(), 2.0 * math.pi, 5)
 
     def test_float_method(self):
         "A method with a float arguments can be handled."
@@ -227,7 +247,7 @@ class RubiconTest(unittest.TestCase):
         "A method with a double arguments can be handled."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-        self.assertEqual(example.areaOfCircle_(1.5), 1.5 * math.pi)
+        self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"
@@ -265,6 +285,14 @@ class RubiconTest(unittest.TestCase):
                 results['string'] = example.toString() + " poked"
                 results['int'] = value + self.__dict__['value']
 
+            @objc_method('@@')
+            def reverse_(self, input):
+                return ''.join(reversed(input))
+
+            @objc_method('@')
+            def message(self):
+                return "Alea iacta est.";
+
             @objc_classmethod('vi')
             def fiddle_(cls, value):
                 results['string'] = "Fiddled with it"
@@ -290,6 +318,10 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(results['string'], 'This is an ObjC Example object poked')
         self.assertEqual(results['int'], 47)
+
+        self.assertEqual(example.getMessage(), 'Alea iacta est.')
+
+        self.assertEqual(example.reverseIt_('Alea iacta est.'), '.tse atcai aelA')
 
         Handler.fiddle_(99)
 

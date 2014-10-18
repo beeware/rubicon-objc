@@ -113,6 +113,22 @@ static int _staticIntField = 11;
     return [[NSString alloc] initWithFormat:@"%@%@", in, in];
 }
 
+-(NSString *) smiley
+{
+    return @"%-)";
+}
+
+/* NSNumber return value */
+-(NSNumber *) theAnswer
+{
+    return [NSNumber numberWithInt:42];
+}
+
+-(NSNumber *) twopi
+{
+    return [NSNumber numberWithFloat:2.0*M_PI];
+}
+
 /* Callback handling */
 -(void) testPoke:(int) value
 {
@@ -122,6 +138,16 @@ static int _staticIntField = 11;
 -(void) testPeek:(int) value
 {
     [self.callback peek:self withValue:value];
+}
+
+-(NSString *) getMessage
+{
+    return [self.callback message];
+}
+
+-(NSString *) reverseIt:(NSString *) input
+{
+    return [self.callback reverse:input];
 }
 
 @end

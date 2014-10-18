@@ -42,7 +42,7 @@ cf.CFAttributedStringCreate.argtypes = [CFAllocatorRef, c_void_p, c_void_p]
 
 def CFSTR(string):
     return ObjCInstance(c_void_p(cf.CFStringCreateWithCString(
-            None, string.encode('utf8'), kCFStringEncodingUTF8)))
+            None, string.encode('utf-8'), kCFStringEncodingUTF8)))
 
 # Other possible names for this method:
 # ampersat, arobe, apenstaartje (little monkey tail), strudel,
@@ -141,6 +141,17 @@ def to_number(cfnumber):
             return result.value
     else:
         raise Exception('to_number: unhandled CFNumber type %d' % numeric_type)
+
+def from_value(value):
+    """Convert a Python type into an equivalent CFType type.
+    """
+    if isinstance(value, text):
+        return at(value)
+    elif isinstance(value, bytes):
+        return at(value.decode('utf-8'))
+    else:
+        return value
+
 
 # Dictionary of cftypes matched to the method converting them to python values.
 known_cftypes = {
