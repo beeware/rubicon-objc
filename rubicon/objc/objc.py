@@ -939,6 +939,60 @@ def cache_class_property_mutator(self, name):
     return None
 
 
+def objc_method(encoding):
+    """Function decorator for instance methods."""
+    # Add encodings for hidden self and cmd arguments.
+    encoding = ensure_bytes(encoding)
+    typecodes = parse_type_encoding(encoding)
+    typecodes.insert(1, b'@:')
+    encoding = b''.join(typecodes)
+    def decorator(f):
+        def objc_method(objc_self, objc_cmd, *args):
+            py_self = ObjCInstance(objc_self)
+            args = convert_method_arguments(encoding, args)
+            result = f(py_self, *args)
+            if isinstance(result, ObjCClass):
+                result = result.ptr.value
+            elif isinstance(result, ObjCInstance):
+                result = result.ptr.value
+            return result
+
+        def register(cls):
+            return add_method(cls.__dict__['ptr'], f.__name__.replace('_', ':'), objc_method, encoding)
+
+        objc_method.register = register
+
+        return objc_method
+    return decorator
+
+
+def objc_classmethod(encoding):
+    """Function decorator for class methods."""
+    # Add encodings for hidden self and cmd arguments.
+    encoding = ensure_bytes(encoding)
+    typecodes = parse_type_encoding(encoding)
+    typecodes.insert(1, b'@:')
+    encoding = b''.join(typecodes)
+    def decorator(f):
+        def objc_classmethod(objc_cls, objc_cmd, *args):
+            py_cls = ObjCClass(objc_cls)
+            args = convert_method_arguments(encoding, args)
+            result = f(py_cls, *args)
+            if isinstance(result, ObjCClass):
+                result = result.ptr.value
+            elif isinstance(result, ObjCInstance):
+                result = result.ptr.value
+            return result
+
+        def register(cls):
+            return add_method(cls.__dict__['metaclass'], f.__name__.replace('_', ':'), objc_classmethod, encoding)
+
+        objc_classmethod.register = register
+
+        return objc_classmethod
+    return decorator
+
+
 class ObjCClass(type):
     """Python wrapper for an Objective-C class."""
 
@@ -949,34 +1003,57 @@ class ObjCClass(type):
     # program.
     _registered_classes = {}
 
-    def __new__(cls, class_name_or_ptr):
+    def __new__(cls, *args):
         """Create a new ObjCClass instance or return a previously created
         instance for the given Objective-C class.  The argument may be either
-        the name of the class to retrieve, or a pointer to the class."""
-        # Determine name and ptr values from passed in argument.
-        if isinstance(class_name_or_ptr, (bytes, text)):
-            if isinstance(class_name_or_ptr, text):
-                name = class_name_or_ptr.encode('utf-8')
+        the name of the class to retrieve, a pointer to the class, or the
+        usual (name, bases, attrs) triple that is provided when called as
+        a subclass."""
+
+        if len(args) == 1:
+            # A single argument provided. If it's a string, treat it as
+            # a class name. Anything else treat as a class pointer.
+
+            # Determine name and ptr values from passed in argument.
+            class_name_or_ptr = args[0]
+            attrs = {}
+
+            if isinstance(class_name_or_ptr, (bytes, text)):
+                name = ensure_bytes(class_name_or_ptr)
+                ptr = get_class(name)
+                if ptr.value is None:
+                    raise NameError("ObjC Class '%s' couldn't be found." % class_name_or_ptr)
             else:
-                name = class_name_or_ptr
-            ptr = get_class(name)
-            if ptr.value is None:
-                raise NameError("ObjC Class '%s' couldn't be found." % class_name_or_ptr)
+                ptr = class_name_or_ptr
+                # Make sure that ptr value is wrapped in c_void_p object
+                # for safety when passing as ctypes argument.
+                if not isinstance(ptr, c_void_p):
+                    ptr = c_void_p(ptr)
+                name = objc.class_getName(ptr)
+                # "nil" is an ObjC answer confirming the ptr didn't work.
+                if name == b'nil':
+                    raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
+
         else:
-            ptr = class_name_or_ptr
-            # Make sure that ptr value is wrapped in c_void_p object
-            # for safety when passing as ctypes argument.
-            if not isinstance(ptr, c_void_p):
-                ptr = c_void_p(ptr)
-            name = objc.class_getName(ptr)
-            # "nil" is an ObjC answer confirming the ptr didn't work.
-            if name == b'nil':
-                raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
+            name, bases, attrs = args
+            name = ensure_bytes(name)
+            if not isinstance(bases[0], ObjCClass):
+                raise RuntimError("Base class isn't an ObjCClass.")
+
+            # Create the ObjC class description
+            ptr = c_void_p(objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0))
+
+            # Register the ObjC class
+            objc.objc_registerClassPair(ptr)
+
 
         # Check if we've already created a Python object for this class
         # and if so, return it rather than making a new one.
         if name in cls._registered_classes:
             return cls._registered_classes[name]
+
+        # We can get the metaclass only after the class is registered.
+        metaclass = get_metaclass(name)
 
         # Py2/3 compatibility; the class name must be "str".
         # If the unicode class exists, we're in Python 2.
@@ -989,13 +1066,23 @@ class ObjCClass(type):
         # Otherwise create a new Python object and then initialize it.
         objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
                 'ptr': ptr,
+                'metaclass': metaclass,
                 'name': objc_class_name,
                 'instance_methods': {},    # mapping of name -> instance method
                 'class_methods': {},       # mapping of name -> class method
                 'instance_properties': {}, # mapping of name -> (accessor method, mutator method)
                 'class_properties': {},    # mapping of name -> (accessor method, mutator method)
+                'imp_table': {},           # Mapping of name -> Native method references
                 '_as_parameter_': ptr,     # for ctypes argument passing
             })
+
+        # Register all the methods, class methods, etc
+        for attr, method in attrs.items():
+            try:
+                objc_class.__dict__['imp_table'][attr] = method.register(objc_class)
+            except AttributeError:
+                # The class attribute doesn't have a register method.
+                pass
 
         # Store the new class in dictionary of registered classes.
         cls._registered_classes[name] = objc_class
@@ -1272,7 +1359,7 @@ class ObjCSubclass(object):
         typecodes.insert(1, b'@:')
         encoding = b''.join(typecodes)
         def decorator(f):
-            def objc_class_method(objc_cls, objc_cmd, *args):
+            def objc_classmethod(objc_cls, objc_cmd, *args):
                 py_cls = ObjCClass(objc_cls)
                 py_cls.__dict__['objc_cmd'] = objc_cmd
                 args = convert_method_arguments(encoding, args)
@@ -1283,8 +1370,8 @@ class ObjCSubclass(object):
                     result = result.ptr.value
                 return result
             name = f.__name__.replace('_', ':')
-            self.add_class_method(objc_class_method, name, encoding)
-            return objc_class_method
+            self.add_class_method(objc_classmethod, name, encoding)
+            return objc_classmethod
         return decorator
 
 ######################################################################

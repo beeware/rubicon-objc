@@ -10,7 +10,7 @@ import unittest
 if not hasattr(unittest.TestCase, 'assertIsNotNone'):
     import unittest2 as unittest
 
-from rubicon.objc import ObjCClass, ObjCSubclass
+from rubicon.objc import ObjCClass, ObjCSubclass, objc_method, objc_classmethod
 
 
 # Load the test harness library
@@ -247,25 +247,28 @@ class RubiconTest(unittest.TestCase):
 
         results = {}
 
-        class Handler_impl(object):
-            Handler = ObjCSubclass('NSObject', 'Handler')
+        NSObject = ObjCClass('NSObject')
 
-            @Handler.method('@i')
+        class Handler(NSObject):
+            @objc_method('@i')
             def initWithValue_(self, value):
                 self.__dict__['value'] = value
                 return self
 
-            @Handler.method('v@i')
+            @objc_method('v@i')
             def peek_withValue_(self, example, value):
                 results['string'] = example.toString() + " peeked"
                 results['int'] = value + self.__dict__['value']
 
-            @Handler.method('v@i')
+            @objc_method('v@i')
             def poke_withValue_(self, example, value):
                 results['string'] = example.toString() + " poked"
                 results['int'] = value + self.__dict__['value']
 
-        Handler = ObjCClass('Handler')
+            @objc_classmethod('vi')
+            def fiddle_(cls, value):
+                results['string'] = "Fiddled with it"
+                results['int'] = value
 
         # Create two handler instances so we can check the right one
         # is being invoked.
@@ -287,3 +290,8 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(results['string'], 'This is an ObjC Example object poked')
         self.assertEqual(results['int'], 47)
+
+        Handler.fiddle_(99)
+
+        self.assertEqual(results['string'], 'Fiddled with it')
+        self.assertEqual(results['int'], 99)
