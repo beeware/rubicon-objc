@@ -24,7 +24,7 @@ Then, in a Python shell::
 
     >>> from ctypes import cdll
     >>> from ctypes import util
-    >>> from rubicon.objc import ObjCClass, ObjCSubclass, at, to_str
+    >>> from rubicon.objc import ObjCClass, objc_method
 
     # Use ctypes to import a framework into the Python process
     >>> cdll.LoadLibrary(util.find_library('Foundation'))
@@ -41,25 +41,21 @@ Then, in a Python shell::
     >>> NSURL.URLWithString_("http://pybee.org/")
 
     # To create a new Objective C class, define a Python class that
-    # has the methods you want to define:
-    >>> class Handler_impl(object):
-    ...     Handler = ObjCSubclass('NSObject', 'Handler')
-    ...
-    ...     @Handler.method('@i')
+    # has the methods you want to define, decorated to provide the
+    # Objective C prototype:
+    >>> class Handler(NSObject):
+    ...     @objc_method('@i')
     ...     def initWithValue_(self, value):
     ...         # You can't store attributes directly on the object -
     ...         # you need to put them manually on the Python object
     ...         self.__dict__['value'] = value
     ...         return self
     ...
-    ...     @Handler.method('vi')
+    ...     @objc_method('vi')
     ...     def pokeWithValue_(self, value):
     ...         print ("Poking with", value)
 
-    # Then, create a wrapper for that class...
-    >>> Handler = ObjCClass('Handler')
-
-    # ...and use it:
+    # Then use the class:
     >>> my_handler = Handler.alloc().initWithValue_(42)
     >>> my_handler.pokeWithValue_(37)
 

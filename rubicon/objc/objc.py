@@ -938,6 +938,23 @@ def cache_class_property_mutator(self, name):
         return methods[1]
     return None
 
+######################################################################
+
+def convert_method_arguments(encoding, args):
+    """Used to convert Objective-C method arguments to Python values
+    before passing them on to the Python-defined method.
+    """
+    new_args = []
+    arg_encodings = parse_type_encoding(encoding)[3:]
+    for e, a in zip(arg_encodings, args):
+        if e == b'@':
+            new_args.append(ObjCInstance(a))
+        elif e == b'#':
+            new_args.append(ObjCClass(a))
+        else:
+            new_args.append(a)
+    return new_args
+
 
 def objc_method(encoding):
     """Function decorator for instance methods."""
@@ -993,6 +1010,39 @@ def objc_classmethod(encoding):
     return decorator
 
 
+class objc_ivar(object):
+    """Add instance variable named varname to the subclass.
+    varname should be a string.
+    vartype is a ctypes type.
+    The class must be registered AFTER adding instance variables."""
+    def __init__(self, vartype):
+        self.vartype = vartype
+
+    def pre_register(self, ptr, name):
+        return add_ivar(ptr, name, self.vartype)
+
+
+def objc_rawmethod(encoding):
+    """Decorator for instance methods without any fancy shenanigans.
+    The function must have the signature f(self, cmd, *args)
+    where both self and cmd are just pointers to objc objects."""
+    # Add encodings for hidden self and cmd arguments.
+    encoding = ensure_bytes(encoding)
+    typecodes = parse_type_encoding(encoding)
+    typecodes.insert(1, b'@:')
+    encoding = b''.join(typecodes)
+    def decorator(f):
+        name = f.__name__.replace('_', ':')
+
+        def register(cls):
+            return add_method(cls, name, f, encoding)
+        f.register = register
+        return f
+    return decorator
+
+######################################################################
+
+
 class ObjCClass(type):
     """Python wrapper for an Objective-C class."""
 
@@ -1043,49 +1093,57 @@ class ObjCClass(type):
             # Create the ObjC class description
             ptr = c_void_p(objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0))
 
+            # Pre-Register all the instance variables
+            for attr, obj in attrs.items():
+                try:
+                    obj.pre_register(ptr, attr)
+                except AttributeError:
+                    # The class attribute doesn't have a pre_register method.
+                    pass
+
             # Register the ObjC class
             objc.objc_registerClassPair(ptr)
 
-
         # Check if we've already created a Python object for this class
         # and if so, return it rather than making a new one.
-        if name in cls._registered_classes:
-            return cls._registered_classes[name]
-
-        # We can get the metaclass only after the class is registered.
-        metaclass = get_metaclass(name)
-
-        # Py2/3 compatibility; the class name must be "str".
-        # If the unicode class exists, we're in Python 2.
         try:
-            unicode
-            objc_class_name = name
-        except NameError:
-            objc_class_name = name.decode('utf-8')
+            objc_class = cls._registered_classes[name]
+        except KeyError:
 
-        # Otherwise create a new Python object and then initialize it.
-        objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
-                'ptr': ptr,
-                'metaclass': metaclass,
-                'name': objc_class_name,
-                'instance_methods': {},    # mapping of name -> instance method
-                'class_methods': {},       # mapping of name -> class method
-                'instance_properties': {}, # mapping of name -> (accessor method, mutator method)
-                'class_properties': {},    # mapping of name -> (accessor method, mutator method)
-                'imp_table': {},           # Mapping of name -> Native method references
-                '_as_parameter_': ptr,     # for ctypes argument passing
-            })
+            # We can get the metaclass only after the class is registered.
+            metaclass = get_metaclass(name)
+
+            # Py2/3 compatibility; the class name must be "str".
+            # If the unicode class exists, we're in Python 2.
+            try:
+                unicode
+                objc_class_name = name
+            except NameError:
+                objc_class_name = name.decode('utf-8')
+
+            # Otherwise create a new Python object and then initialize it.
+            objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
+                    'ptr': ptr,
+                    'metaclass': metaclass,
+                    'name': objc_class_name,
+                    'instance_methods': {},    # mapping of name -> instance method
+                    'class_methods': {},       # mapping of name -> class method
+                    'instance_properties': {}, # mapping of name -> (accessor method, mutator method)
+                    'class_properties': {},    # mapping of name -> (accessor method, mutator method)
+                    'imp_table': {},           # Mapping of name -> Native method references
+                    '_as_parameter_': ptr,     # for ctypes argument passing
+                })
+
+            # Store the new class in dictionary of registered classes.
+            cls._registered_classes[name] = objc_class
 
         # Register all the methods, class methods, etc
-        for attr, method in attrs.items():
+        for attr, obj in attrs.items():
             try:
-                objc_class.__dict__['imp_table'][attr] = method.register(objc_class)
+                objc_class.__dict__['imp_table'][attr] = obj.register(objc_class)
             except AttributeError:
                 # The class attribute doesn't have a register method.
                 pass
-
-        # Store the new class in dictionary of registered classes.
-        cls._registered_classes[name] = objc_class
 
         return objc_class
 
@@ -1212,170 +1270,6 @@ class ObjCInstance(object):
 
 ######################################################################
 
-def convert_method_arguments(encoding, args):
-    """Used by ObjCSubclass to convert Objective-C method arguments to
-    Python values before passing them on to the Python-defined method."""
-    new_args = []
-    arg_encodings = parse_type_encoding(encoding)[3:]
-    for e, a in zip(arg_encodings, args):
-        if e == b'@':
-            new_args.append(ObjCInstance(a))
-        elif e == b'#':
-            new_args.append(ObjCClass(a))
-        else:
-            new_args.append(a)
-    return new_args
-
-# ObjCSubclass is used to define an Objective-C subclass of an existing
-# class registered with the runtime.  When you create an instance of
-# ObjCSubclass, it registers the new subclass with the Objective-C
-# runtime and creates a set of function decorators that you can use to
-# add instance methods or class methods to the subclass.
-#
-# Typical usage would be to first create and register the subclass:
-#
-#     MySubclass = ObjCSubclass('NSObject', 'MySubclassName')
-#
-# then add methods with:
-#
-#     @MySubclass.method('v')
-#     def methodThatReturnsVoid(self):
-#         pass
-#
-#     @MySubclass.method('Bi')
-#     def boolReturningMethodWithInt_(self, x):
-#         return True
-#
-#     @MySubclass.classmethod('@')
-#     def classMethodThatReturnsId(self):
-#         return self
-#
-# It is probably a good idea to organize the code related to a single
-# subclass by either putting it in its own module (note that you don't
-# actually need to expose any of the method names or the ObjCSubclass)
-# or by bundling it all up inside a python class definition, perhaps
-# called MySubclassImplementation.
-#
-# It is also possible to add Objective-C ivars to the subclass, however
-# if you do so, you must call the __init__ method with register=False,
-# and then call the register method after the ivars have been added.
-# But rather than creating the ivars in Objective-C land, it is easier
-# to just define python-based instance variables in your subclass's init
-# method.
-#
-# This class is used only to *define* the interface and implementation
-# of an Objective-C subclass from python.  It should not be used in
-# any other way.  If you want a python representation of the resulting
-# class, create it with ObjCClass.
-#
-# Instances are created as a pointer to the objc object by using:
-#
-#     myinstance = send_message('MySubclassName', 'alloc')
-#     myinstance = send_message(myinstance, 'init')
-#
-# or wrapped inside an ObjCInstance object by using:
-#
-#     myclass = ObjCClass('MySubclassName')
-#     myinstance = myclass.alloc().init()
-#
-class ObjCSubclass(object):
-    """Use this to create a subclass of an existing Objective-C class.
-    It consists primarily of function decorators which you use to add methods
-    to the subclass."""
-
-    def __init__(self, superclass, name, register=True):
-        self._imp_table = {}
-        self.name = name
-        self.objc_cls = create_subclass(superclass, name)
-        self._as_parameter_ = self.objc_cls
-        if register:
-            self.register()
-
-    def register(self):
-        """Register the new class with the Objective-C runtime."""
-        objc.objc_registerClassPair(self.objc_cls)
-        # We can get the metaclass only after the class is registered.
-        self.objc_metaclass = get_metaclass(self.name)
-
-    def add_ivar(self, varname, vartype):
-        """Add instance variable named varname to the subclass.
-        varname should be a string.
-        vartype is a ctypes type.
-        The class must be registered AFTER adding instance variables."""
-        return add_ivar(self.objc_cls, varname, vartype)
-
-    def add_method(self, method, name, encoding):
-        imp = add_method(self.objc_cls, name, method, encoding)
-        self._imp_table[name] = imp
-
-    # http://iphonedevelopment.blogspot.com/2008/08/dynamically-adding-class-objects.html
-    def add_class_method(self, method, name, encoding):
-        imp = add_method(self.objc_metaclass, name, method, encoding)
-        self._imp_table[name] = imp
-
-    def rawmethod(self, encoding):
-        """Decorator for instance methods without any fancy shenanigans.
-        The function must have the signature f(self, cmd, *args)
-        where both self and cmd are just pointers to objc objects."""
-        # Add encodings for hidden self and cmd arguments.
-        encoding = ensure_bytes(encoding)
-        typecodes = parse_type_encoding(encoding)
-        typecodes.insert(1, b'@:')
-        encoding = b''.join(typecodes)
-        def decorator(f):
-            name = f.__name__.replace('_', ':')
-            self.add_method(f, name, encoding)
-            return f
-        return decorator
-
-    def method(self, encoding):
-        """Function decorator for instance methods."""
-        # Add encodings for hidden self and cmd arguments.
-        encoding = ensure_bytes(encoding)
-        typecodes = parse_type_encoding(encoding)
-        typecodes.insert(1, b'@:')
-        encoding = b''.join(typecodes)
-        def decorator(f):
-            def objc_method(objc_self, objc_cmd, *args):
-                py_self = ObjCInstance(objc_self)
-                py_self.__dict__['objc_cmd'] = objc_cmd
-                args = convert_method_arguments(encoding, args)
-                result = f(py_self, *args)
-                if isinstance(result, ObjCClass):
-                    result = result.ptr.value
-                elif isinstance(result, ObjCInstance):
-                    result = result.ptr.value
-                return result
-            name = f.__name__.replace('_', ':')
-            self.add_method(objc_method, name, encoding)
-            return objc_method
-        return decorator
-
-    def classmethod(self, encoding):
-        """Function decorator for class methods."""
-        # Add encodings for hidden self and cmd arguments.
-        encoding = ensure_bytes(encoding)
-        typecodes = parse_type_encoding(encoding)
-        typecodes.insert(1, b'@:')
-        encoding = b''.join(typecodes)
-        def decorator(f):
-            def objc_classmethod(objc_cls, objc_cmd, *args):
-                py_cls = ObjCClass(objc_cls)
-                py_cls.__dict__['objc_cmd'] = objc_cmd
-                args = convert_method_arguments(encoding, args)
-                result = f(py_cls, *args)
-                if isinstance(result, ObjCClass):
-                    result = result.ptr.value
-                elif isinstance(result, ObjCInstance):
-                    result = result.ptr.value
-                return result
-            name = f.__name__.replace('_', ':')
-            self.add_class_method(objc_classmethod, name, encoding)
-            return objc_classmethod
-        return decorator
-
-######################################################################
-
 # Instances of DeallocationObserver are associated with every
 # Objective-C object that gets wrapped inside an ObjCInstance.
 # Their sole purpose is to watch for when the Objective-C object
@@ -1389,25 +1283,26 @@ class ObjCSubclass(object):
 # happens when the usual method decorator turns the self argument
 # into an ObjCInstance), or else get trapped in an infinite recursion.
 
-class DeallocationObserver_Implementation(object):
-    DeallocationObserver = ObjCSubclass('NSObject', 'DeallocationObserver', register=False)
-    DeallocationObserver.add_ivar('observed_object', c_void_p)
-    DeallocationObserver.register()
+NSObject = ObjCClass('NSObject')
 
-    @DeallocationObserver.rawmethod('@@')
+class DeallocationObserver(NSObject):
+
+    observed_object = objc_ivar(c_void_p)
+
+    @objc_rawmethod('@@')
     def initWithObject_(self, cmd, anObject):
         self = send_super(self, 'init')
         self = self.value
         set_instance_variable(self, 'observed_object', anObject, c_void_p)
         return self
 
-    @DeallocationObserver.rawmethod('v')
+    @objc_rawmethod('v')
     def dealloc(self, cmd):
         anObject = get_instance_variable(self, 'observed_object', c_void_p)
         ObjCInstance._cached_objects.pop(anObject, None)
         send_super(self, 'dealloc')
 
-    @DeallocationObserver.rawmethod('v')
+    @objc_rawmethod('v')
     def finalize(self, cmd):
         # Called instead of dealloc if using garbage collection.
         # (which would have to be explicitly started with

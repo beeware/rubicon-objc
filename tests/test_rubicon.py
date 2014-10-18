@@ -10,7 +10,7 @@ import unittest
 if not hasattr(unittest.TestCase, 'assertIsNotNone'):
     import unittest2 as unittest
 
-from rubicon.objc import ObjCClass, ObjCSubclass, objc_method, objc_classmethod
+from rubicon.objc import ObjCClass, objc_method, objc_classmethod
 
 
 # Load the test harness library
