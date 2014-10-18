@@ -374,18 +374,19 @@ def ensure_bytes(x):
 ######################################################################
 
 def get_selector(name):
+    "Return a reference to the selector with the given name."
     return c_void_p(objc.sel_registerName(ensure_bytes(name)))
 
 def get_class(name):
+    "Return a reference to the class with the given name."
     return c_void_p(objc.objc_getClass(ensure_bytes(name)))
 
-def get_object_class(obj):
-    return c_void_p(objc.object_getClass(obj))
-
 def get_metaclass(name):
+    "Return a reference to the metaclass for the given name."
     return c_void_p(objc.objc_getMetaClass(ensure_bytes(name)))
 
 def get_superclass_of_object(obj):
+    "Return a reference to the superclass of the given object."
     cls = c_void_p(objc.object_getClass(obj))
     return c_void_p(objc.class_getSuperclass(cls))
 
@@ -416,13 +417,17 @@ def should_use_fpret(restype):
         return True
     return False
 
-# By default, assumes that restype is c_void_p
-# and that all arguments are wrapped inside c_void_p.
-# Use the restype and argtypes keyword arguments to
-# change these values.  restype should be a ctypes type
-# and argtypes should be a list of ctypes types for
-# the arguments of the message only.
 def send_message(receiver, selName, *args, **kwargs):
+    """Send a mesage named selName to the receiver with the provided arguments.
+
+    This is the equivalen of [receiver selname:args]
+
+    By default, assumes that return type for the message is c_void_p,
+    and that all arguments are wrapped inside c_void_p. Use the restype
+    and argtypes keyword arguments to change these values. restype should
+    be a ctypes type and argtypes should be a list of ctypes types for
+    the arguments of the message only.
+    """
     if isinstance(receiver, text):
         receiver = get_class(receiver)
     selector = get_selector(selName)
@@ -445,13 +450,19 @@ def send_message(receiver, selName, *args, **kwargs):
             result = c_void_p(result)
     return result
 
+
 class OBJC_SUPER(Structure):
     _fields_ = [ ('receiver', c_void_p), ('class', c_void_p) ]
 
 OBJC_SUPER_PTR = POINTER(OBJC_SUPER)
 
+
 #http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
 def send_super(receiver, selName, *args, **kwargs):
+    """Send a message named selName to the super of the receiver.
+
+    This is the equivalent of [super selname:args].
+    """
     if hasattr(receiver, '_as_parameter_'):
         receiver = receiver._as_parameter_
     superclass = get_superclass_of_object(receiver)
@@ -596,24 +607,17 @@ def cfunctype_for_encoding(encoding):
 
 ######################################################################
 
-# After calling create_subclass, you must first register
-# it with register_subclass before you may use it.
-# You can add new methods after the class is registered,
-# but you cannot add any new ivars.
-def create_subclass(superclass, name):
-    if isinstance(superclass, text):
-        superclass = get_class(superclass)
-    return c_void_p(objc.objc_allocateClassPair(superclass, ensure_bytes(name), 0))
-
-def register_subclass(subclass):
-    objc.objc_registerClassPair(subclass)
-
-# types is a string encoding the argument types of the method.
-# The first type code of types is the return type (e.g. 'v' if void)
-# The second type code must be '@' for id self.
-# The third type code must be ':' for SEL cmd.
-# Additional type codes are for types of other arguments if any.
 def add_method(cls, selName, method, types):
+    """Add a new instance method named selName to cls.
+
+    method should be a Python method that does all necessary type conversions.
+
+    types is a string encoding the argument types of the method.
+    The first type code of types is the return type (e.g. 'v' if void)
+    The second type code must be '@' for id self.
+    The third type code must be ':' for SEL cmd.
+    Additional type codes are for types of other arguments if any.
+    """
     type_encodings = parse_type_encoding(types)
     assert(type_encodings[1] == b'@')  # ensure id self typecode
     assert(type_encodings[2] == b':')  # ensure SEL cmd typecode
@@ -624,14 +628,20 @@ def add_method(cls, selName, method, types):
     objc.class_addMethod(cls, selector, imp, types)
     return imp
 
+
 def add_ivar(cls, name, vartype):
+    "Add a new instance variable of type vartype to cls."
     return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(vartype))
 
+
 def set_instance_variable(obj, varname, value, vartype):
+    "Do the equivalent of `obj.varname = value`, where value is of type vartype."
     objc.object_setInstanceVariable.argtypes = [c_void_p, c_char_p, vartype]
     objc.object_setInstanceVariable(obj, ensure_bytes(varname), value)
 
+
 def get_instance_variable(obj, varname, vartype):
+    "Return the value of `obj.varname`, where the value is of type vartype."
     variable = vartype()
     objc.object_getInstanceVariable(obj, ensure_bytes(varname), byref(variable))
     return variable.value
@@ -644,13 +654,34 @@ class ObjCMethod(object):
     # Note, need to map 'c' to c_byte rather than c_char, because otherwise
     # ctypes converts the value into a one-character string which is generally
     # not what we want at all, especially when the 'c' represents a bool var.
-    typecodes = {b'c':c_byte, b'i':c_int, b's':c_short, b'l':c_long, b'q':c_longlong,
-                 b'C':c_ubyte, b'I':c_uint, b'S':c_ushort, b'L':c_ulong, b'Q':c_ulonglong,
-                 b'f':c_float, b'd':c_double, b'B':c_bool, b'v':None, b'Vv':None, b'*':c_char_p,
-                 b'@':c_void_p, b'#':c_void_p, b':':c_void_p, b'^v':c_void_p, b'?':c_void_p,
-                 NSPointEncoding:NSPoint, NSSizeEncoding:NSSize, NSRectEncoding:NSRect,
-                 NSRangeEncoding:NSRange,
-                 PyObjectEncoding:py_object}
+    typecodes = {
+        b'c': c_byte,
+        b'i': c_int,
+        b's': c_short,
+        b'l': c_long,
+        b'q': c_longlong,
+        b'C': c_ubyte,
+        b'I': c_uint,
+        b'S': c_ushort,
+        b'L': c_ulong,
+        b'Q': c_ulonglong,
+        b'f': c_float,
+        b'd': c_double,
+        b'B': c_bool,
+        b'v': None,
+        b'Vv': None,
+        b'*': c_char_p,
+        b'@': c_void_p,
+        b'#': c_void_p,
+        b':': c_void_p,
+        b'^v': c_void_p,
+        b'?': c_void_p,
+        NSPointEncoding: NSPoint,
+        NSSizeEncoding: NSSize,
+        NSRectEncoding: NSRect,
+        NSRangeEncoding: NSRange,
+        PyObjectEncoding: py_object
+    }
 
     cfunctype_table = {}
 
@@ -908,7 +939,6 @@ def cache_class_property_methods(self, name):
             methods = None
     return methods
 
-
 def cache_class_property_accessor(self, name):
     """Returns a python representation of an accessor for the named
     property. Existence of a property is done by looking for the write
@@ -1014,7 +1044,8 @@ class objc_ivar(object):
     """Add instance variable named varname to the subclass.
     varname should be a string.
     vartype is a ctypes type.
-    The class must be registered AFTER adding instance variables."""
+    The class must be registered AFTER adding instance variables.
+    """
     def __init__(self, vartype):
         self.vartype = vartype
 
@@ -1025,7 +1056,8 @@ class objc_ivar(object):
 def objc_rawmethod(encoding):
     """Decorator for instance methods without any fancy shenanigans.
     The function must have the signature f(self, cmd, *args)
-    where both self and cmd are just pointers to objc objects."""
+    where both self and cmd are just pointers to objc objects.
+    """
     # Add encodings for hidden self and cmd arguments.
     encoding = ensure_bytes(encoding)
     typecodes = parse_type_encoding(encoding)
@@ -1219,6 +1251,7 @@ class ObjCInstance(object):
         # dictionary, effectively destroying the ObjCInstance.
         observer = send_message(send_message('DeallocationObserver', 'alloc'), 'initWithObject:', objc_instance)
         objc.objc_setAssociatedObject(objc_instance, observer, observer, 0x301)
+
         # The observer is retained by the object we associate it to.  We release
         # the observer now so that it will be deallocated when the associated
         # object is deallocated.
