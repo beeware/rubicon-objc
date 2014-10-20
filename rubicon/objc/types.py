@@ -37,10 +37,10 @@ else:
     NSInteger = c_int
     NSUInteger = c_uint
     CGFloat = c_float
-    NSPointEncoding = b'{_CGPoint=ff}'
-    NSSizeEncoding = b'{_CGSize=ff}'
-    NSRectEncoding = b'{_CGRect={_CGPoint=ff}{_CGSize=ff}}'
-    NSRangeEncoding = b'{_NSRange=II}'
+    NSPointEncoding = b'{CGPoint=ff}'
+    NSSizeEncoding = b'{CGSize=ff}'
+    NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
+    NSRangeEncoding = b'{NSRange=II}'
 
 NSIntegerEncoding = encoding_for_ctype(NSInteger)
 NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
