@@ -6,6 +6,7 @@ import platform, struct
 
 __LP64__ = (8*struct.calcsize("P") == 64)
 __i386__ = (platform.machine() == 'i386')
+__x86_64__ = (platform.machine() == 'x86_64')
 
 PyObjectEncoding = b'{PyObject=@}'
 

@@ -10,6 +10,7 @@ from .types import *
 
 __LP64__ = (8*struct.calcsize("P") == 64)
 __i386__ = (platform.machine() == 'i386')
+__x86_64__ = (platform.machine() == 'x86_64')
 
 if sizeof(c_void_p) == 4:
     c_ptrdiff_t = c_int32
@@ -100,8 +101,8 @@ objc.class_getMethodImplementation.restype = c_void_p
 objc.class_getMethodImplementation.argtypes = [c_void_p, c_void_p]
 
 # IMP class_getMethodImplementation_stret(Class cls, SEL name)
-objc.class_getMethodImplementation_stret.restype = c_void_p
-objc.class_getMethodImplementation_stret.argtypes = [c_void_p, c_void_p]
+#objc.class_getMethodImplementation_stret.restype = c_void_p
+#objc.class_getMethodImplementation_stret.argtypes = [c_void_p, c_void_p]
 
 # const char * class_getName(Class cls)
 objc.class_getName.restype = c_char_p
@@ -248,14 +249,16 @@ objc.objc_getProtocol.argtypes = [c_char_p]
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
 # id objc_msgSendSuper(struct objc_super *super, SEL op,  ...)
 
-# void objc_msgSendSuper_stret(struct objc_super *super, SEL op, ...)
-objc.objc_msgSendSuper_stret.restype = None
+# The _stret and _fpret variants only exist on x86-based architectures.
+if __i386__ or __x86_64__:
+    # void objc_msgSendSuper_stret(struct objc_super *super, SEL op, ...)
+    objc.objc_msgSendSuper_stret.restype = None
 
-# double objc_msgSend_fpret(id self, SEL op, ...)
-# objc.objc_msgSend_fpret.restype = c_double
+    # double objc_msgSend_fpret(id self, SEL op, ...)
+    objc.objc_msgSend_fpret.restype = c_double
 
-# void objc_msgSend_stret(void * stretAddr, id theReceiver, SEL theSelector,  ...)
-objc.objc_msgSend_stret.restype = None
+    # void objc_msgSend_stret(void * stretAddr, id theReceiver, SEL theSelector,  ...)
+    objc.objc_msgSend_stret.restype = None
 
 # void objc_registerClassPair(Class cls)
 objc.objc_registerClassPair.restype = None
@@ -394,7 +397,7 @@ def get_superclass_of_object(obj):
 # http://www.sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
 # http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
-def x86_should_use_stret(restype):
+def should_use_stret(restype):
     """Try to figure out when a return type will be passed on stack."""
     if type(restype) != type(Structure):
         return False
@@ -407,7 +410,7 @@ def x86_should_use_stret(restype):
 # http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
     """Determine if objc_msgSend_fpret is required to return a floating point type."""
-    if not __i386__:
+    if not (__i386__ or __x86_64__):
         # Unneeded on non-intel processors
         return False
     if __LP64__ and restype == c_longdouble:
@@ -438,7 +441,7 @@ def send_message(receiver, selName, *args, **kwargs):
         objc.objc_msgSend_fpret.restype = restype
         objc.objc_msgSend_fpret.argtypes = [c_void_p, c_void_p] + argtypes
         result = objc.objc_msgSend_fpret(receiver, selector, *args)
-    elif x86_should_use_stret(restype):
+    elif should_use_stret(restype):
         objc.objc_msgSend_stret.argtypes = [POINTER(restype), c_void_p, c_void_p] + argtypes
         result = restype()
         objc.objc_msgSend_stret(byref(result), receiver, selector, *args)
@@ -705,7 +708,7 @@ class ObjCMethod(object):
         try:
             self.argtypes = [self.ctype_for_encoding(t) for t in self.argument_types]
         except:
-            print ('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
+            print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
             self.argtypes = None
         # Get types for the return type.
         try:
@@ -716,7 +719,7 @@ class ObjCMethod(object):
             else:
                 self.restype = self.ctype_for_encoding(self.return_type)
         except:
-            print ('No restype encoding for %s (%s)' % (self.name, self.return_type))
+            print('No restype encoding for %s (%s)' % (self.name, self.return_type))
             self.restype = None
         self.func = None
 
@@ -1121,7 +1124,7 @@ class ObjCClass(type):
             name, bases, attrs = args
             name = ensure_bytes(name)
             if not isinstance(bases[0], ObjCClass):
-                raise RuntimError("Base class isn't an ObjCClass.")
+                raise RuntimeError("Base class isn't an ObjCClass.")
 
             # Create the ObjC class description
             ptr = c_void_p(objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0))
