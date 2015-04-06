@@ -853,19 +853,27 @@ def cache_instance_property_methods(self, name):
         # the process.
         methods = None
     else:
-        accessor_selector = get_selector(name)
-        mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
+        # Check 1: Does the class respond to the property?
         responds = objc.class_getProperty(self.__dict__['ptr'], name.encode('utf-8'))
-        if responds:
-            accessor = c_void_p(objc.class_getInstanceMethod(self.__dict__['ptr'], accessor_selector))
-            if accessor.value:
-                objc_accessor = ObjCMethod(accessor)
+
+        # Check 2: Does the class have an instance method to retrieve the given name
+        accessor_selector = get_selector(name)
+        accessor = objc.class_getInstanceMethod(self.__dict__['ptr'], accessor_selector)
+
+        # Check 3: Is there a setName: method to set the property with the given name
+        mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
+        mutator = objc.class_getInstanceMethod(self.__dict__['ptr'], mutator_selector)
+
+        # If the class responds as a property, or it has both an accessor *and*
+        # and mutator, then treat it as a property in Python.
+        if responds or (accessor and mutator):
+            if accessor:
+                objc_accessor = ObjCMethod(c_void_p(accessor))
             else:
                 objc_accessor = None
 
-            mutator = c_void_p(objc.class_getInstanceMethod(self.__dict__['ptr'], mutator_selector))
-            if mutator.value:
-                objc_mutator = ObjCMethod(mutator)
+            if mutator:
+                objc_mutator = ObjCMethod(c_void_p(mutator))
             else:
                 objc_mutator = None
 
