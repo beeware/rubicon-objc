@@ -1134,19 +1134,23 @@ class ObjCClass(type):
             if not isinstance(bases[0], ObjCClass):
                 raise RuntimeError("Base class isn't an ObjCClass.")
 
-            # Create the ObjC class description
-            ptr = c_void_p(objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0))
+            ptr = get_class(name)
+            if ptr.value is None:
+                # Create the ObjC class description
+                ptr = c_void_p(objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0))
 
-            # Pre-Register all the instance variables
-            for attr, obj in attrs.items():
-                try:
-                    obj.pre_register(ptr, attr)
-                except AttributeError:
-                    # The class attribute doesn't have a pre_register method.
-                    pass
+                # Pre-Register all the instance variables
+                for attr, obj in attrs.items():
+                    try:
+                        obj.pre_register(ptr, attr)
+                    except AttributeError:
+                        # The class attribute doesn't have a pre_register method.
+                        pass
 
-            # Register the ObjC class
-            objc.objc_registerClassPair(ptr)
+                # Register the ObjC class
+                objc.objc_registerClassPair(ptr)
+            else:
+                raise RuntimeError("ObjC runtime already contains a registered class named '%s'." % name.decode('utf-8'))
 
         # Check if we've already created a Python object for this class
         # and if so, return it rather than making a new one.

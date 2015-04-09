@@ -262,6 +262,21 @@ class RubiconTest(unittest.TestCase):
         the_thing = example.thing
         self.assertEqual(the_thing.toString(), "This is thing 2")
 
+    def test_duplicate_class_registration(self):
+        "If you define a class name twice in the same runtime, you get an error."
+
+        NSObject = ObjCClass('NSObject')
+
+        # First definition should work.
+        class MyClass(NSObject):
+            pass
+
+        # Second definition will raise an error.
+        # Without protection, this is a segfault.
+        with self.assertRaises(RuntimeError):
+            class MyClass(NSObject):
+                pass
+
     def test_interface(self):
         "An ObjC protocol implementation can be defined in Python."
 
