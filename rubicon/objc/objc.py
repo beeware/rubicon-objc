@@ -1000,7 +1000,7 @@ def objc_method(encoding):
     typecodes.insert(1, b'@:')
     encoding = b''.join(typecodes)
     def decorator(f):
-        def objc_method(objc_self, objc_cmd, *args):
+        def _objc_method(objc_self, objc_cmd, *args):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
             args = convert_method_arguments(encoding, args)
@@ -1014,11 +1014,11 @@ def objc_method(encoding):
             return result
 
         def register(cls):
-            return add_method(cls.__dict__['ptr'], f.__name__.replace('_', ':'), objc_method, encoding)
+            return add_method(cls.__dict__['ptr'], f.__name__.replace('_', ':'), _objc_method, encoding)
 
-        objc_method.register = register
+        _objc_method.register = register
 
-        return objc_method
+        return _objc_method
     return decorator
 
 
@@ -1030,7 +1030,7 @@ def objc_classmethod(encoding):
     typecodes.insert(1, b'@:')
     encoding = b''.join(typecodes)
     def decorator(f):
-        def objc_classmethod(objc_cls, objc_cmd, *args):
+        def _objc_classmethod(objc_cls, objc_cmd, *args):
             from .core_foundation import at
             py_cls = ObjCClass(objc_cls)
             args = convert_method_arguments(encoding, args)
@@ -1044,11 +1044,11 @@ def objc_classmethod(encoding):
             return result
 
         def register(cls):
-            return add_method(cls.__dict__['metaclass'], f.__name__.replace('_', ':'), objc_classmethod, encoding)
+            return add_method(cls.__dict__['metaclass'], f.__name__.replace('_', ':'), _objc_classmethod, encoding)
 
-        objc_classmethod.register = register
+        _objc_classmethod.register = register
 
-        return objc_classmethod
+        return _objc_classmethod
     return decorator
 
 
