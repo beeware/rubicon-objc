@@ -8,5 +8,7 @@
 - (void) peek: (Example *) example withValue: (int) value;
 - (NSString *) reverse: (NSString *) input;
 - (NSString *) message;
+- (NSSize) thingSize: (NSSize) theSize;
+- (NSRect) thingRect: (NSRect) theRect;
 
 @end

@@ -42,5 +42,7 @@
 -(void) testPeek:(int) value;
 -(NSString *) getMessage;
 -(NSString *) reverseIt:(NSString *) input;
+-(NSSize) testSize: (NSSize) theSize;
+-(NSRect) testRect: (NSRect) theRect;
 
 @end

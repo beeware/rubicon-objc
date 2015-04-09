@@ -150,4 +150,20 @@ static int _staticIntField = 11;
     return [self.callback reverse:input];
 }
 
+-(NSSize) testSize:(NSSize) theSize
+{
+    // return [self.callback thingSize:theSize];
+    NSSize size = [self.callback thingSize:theSize];
+    NSLog(@"returned size: %f %f", size.width, size.height);
+    return size;
+    // return NSMakeSize(theSize.width * 3.0, theSize.height * 2.0);
+}
+
+-(NSRect) testRect:(NSRect) theRect
+{
+    // return [self.callback thingRect:theRect];
+    return [self.callback thingRect:theRect];
+    // return NSMakeRect(theRect.origin.x, theRect.origin.y, theRect.size.width, theRect.size.height);
+}
+
 @end

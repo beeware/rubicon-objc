@@ -10,7 +10,7 @@ import unittest
 if not hasattr(unittest.TestCase, 'assertIsNotNone'):
     import unittest2 as unittest
 
-from rubicon.objc import ObjCClass, objc_method, objc_classmethod
+from rubicon.objc import ObjCClass, objc_method, objc_classmethod, NSRectEncoding, NSSizeEncoding, NSSize, NSMakeSize, NSMakeRect
 
 
 # Load the test harness library
@@ -298,6 +298,7 @@ class RubiconTest(unittest.TestCase):
                 results['string'] = "Fiddled with it"
                 results['int'] = value
 
+
         # Create two handler instances so we can check the right one
         # is being invoked.
         handler1 = Handler.alloc().initWithValue_(5)
@@ -327,3 +328,48 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(results['string'], 'Fiddled with it')
         self.assertEqual(results['int'], 99)
+
+    def test_interface_return_struct(self):
+        "An ObjC protocol implementation that returns values by struct can be defined in Python."
+
+        results = {}
+
+        NSObject = ObjCClass('NSObject')
+
+        class StructReturnHandler(NSObject):
+            @objc_method('@i')
+            def initWithValue_(self, value):
+                self.__dict__['value'] = value
+                return self
+
+            @objc_method(NSSizeEncoding + NSSizeEncoding)
+            def thingSize_(self, input):
+                results['size'] = True
+                return NSMakeSize(input.width + self.__dict__['value'], input.height * self.__dict__['value'])
+
+            @objc_method(NSRectEncoding + NSRectEncoding)
+            def thingRect_(self, input):
+                results['rect'] = True
+                return NSMakeRect(input.origin.y, input.origin.x, input.size.height, input.size.width)
+
+        # Create two handler instances so we can check the right one
+        # is being invoked.
+        handler1 = StructReturnHandler.alloc().initWithValue_(5)
+        handler2 = StructReturnHandler.alloc().initWithValue_(10)
+
+        # Create an Example object, and register a handler with it.
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        example.callback = handler1
+
+        outSize = example.testSize_(NSMakeSize(20,30))
+        self.assertEqual(outSize.width, 25)
+        self.assertEqual(outSize.height, 35)
+        self.assertTrue(results.get('size'))
+
+        outRect = example.testRect_(NSMakeRect(10,20,30,40))
+        self.assertEqual(outRect.origin.x, 10)
+        self.assertEqual(outRect.origin.y, 20)
+        self.assertEqual(outRect.size.width, 30)
+        self.assertEqual(outRect.size.height, 40)
+        self.assertTrue(results.get('rect'))
