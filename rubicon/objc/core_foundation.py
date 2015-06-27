@@ -153,28 +153,35 @@ def to_number(cfnumber):
         raise Exception('to_number: unhandled CFNumber type %d' % numeric_type)
 
 
-_NSDecimalNumber = None
-_decimal_factory_selector = None
-_decimal_factory = None
+# We need to be able to create raw NSDecimalNumber objects; if we use an
+# normal ObjCClass() wrapper, the return values of constructors will be
+# auto-converted back into Python Decimals. However, we want to cache
+# class/selector/method lookups so that we don't have the overhead
+# every time we use a decimal.
+class NSDecimalNumber(object):
+    objc_class = None
+
+    @classmethod
+    def from_decimal(cls, value):
+        if cls.objc_class is None:
+            cls.objc_class = get_class('NSDecimalNumber')
+            cls.selector = get_selector('decimalNumberWithString:')
+            method = c_void_p(objc.class_getClassMethod(cls.objc_class, cls.selector))
+            impl = c_void_p(objc.method_getImplementation(method))
+            cls.constructor = cast(impl, CFUNCTYPE(c_void_p, c_void_p))
+
+        return ObjCInstance(cls.constructor(cls.objc_class, cls.selector, at(value.to_eng_string())))
 
 
 def from_value(value):
     """Convert a Python type into an equivalent CFType type.
     """
-    global _decimal_factory, _NSDecimalNumber, _decimal_factory_selector
     if isinstance(value, text):
         return at(value)
     elif isinstance(value, bytes):
         return at(value.decode('utf-8'))
     elif isinstance(value, Decimal):
-        if _decimal_factory is None:
-            _NSDecimalNumber = get_class('NSDecimalNumber')
-            _decimal_factory_selector = get_selector('decimalNumberWithString:')
-            method = c_void_p(objc.class_getClassMethod(_NSDecimalNumber, _decimal_factory_selector))
-            constructor = c_void_p(objc.method_getImplementation(method))
-            _decimal_factory = cast(constructor, CFUNCTYPE(c_void_p, c_void_p))
-
-        return ObjCInstance(_decimal_factory(_NSDecimalNumber, _decimal_factory_selector, at(value.to_eng_string())))
+        return NSDecimalNumber.from_decimal(value)
     else:
         return value
 
