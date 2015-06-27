@@ -2,8 +2,9 @@ from __future__ import print_function, absolute_import, division
 
 from ctypes import *
 from ctypes import util
+from decimal import Decimal
 
-from .objc import ObjCInstance, send_message
+from .objc import ObjCInstance, send_message, get_class, get_selector, objc
 from .types import *
 
 ######################################################################
@@ -113,6 +114,7 @@ kCFNumberNSIntegerType = 15
 kCFNumberCGFloatType = 16
 kCFNumberMaxType = 16
 
+
 def to_number(cfnumber):
     """Convert CFNumber to python int or float."""
     numeric_type = cf.CFNumberGetType(cfnumber)
@@ -134,30 +136,55 @@ def to_number(cfnumber):
         kCFNumberCGFloatType: CGFloat
     }
 
-    if numeric_type in cfnum_to_ctype:
+    # NSDecimalNumber reports as a double. So does an NSNumber of type double.
+    # In the case of NSDecimalNumber, convert to a Python decimal.
+    if numeric_type == kCFNumberDoubleType \
+            and isinstance(cfnumber, ObjCInstance) \
+            and cfnumber.__dict__['objc_class'].name == 'NSDecimalNumber':
+        return Decimal(cfnumber.stringValue)
+
+    # Otherwise, just do the conversion.
+    try:
         t = cfnum_to_ctype[numeric_type]
         result = t()
         if cf.CFNumberGetValue(cfnumber, numeric_type, byref(result)):
             return result.value
-    else:
+    except KeyError:
         raise Exception('to_number: unhandled CFNumber type %d' % numeric_type)
+
+
+_NSDecimalNumber = None
+_decimal_factory_selector = None
+_decimal_factory = None
+
 
 def from_value(value):
     """Convert a Python type into an equivalent CFType type.
     """
+    global _decimal_factory, _NSDecimalNumber, _decimal_factory_selector
     if isinstance(value, text):
         return at(value)
     elif isinstance(value, bytes):
         return at(value.decode('utf-8'))
+    elif isinstance(value, Decimal):
+        if _decimal_factory is None:
+            _NSDecimalNumber = get_class('NSDecimalNumber')
+            _decimal_factory_selector = get_selector('decimalNumberWithString:')
+            method = c_void_p(objc.class_getClassMethod(_NSDecimalNumber, _decimal_factory_selector))
+            constructor = c_void_p(objc.method_getImplementation(method))
+            _decimal_factory = cast(constructor, CFUNCTYPE(c_void_p, c_void_p))
+
+        return ObjCInstance(_decimal_factory(_NSDecimalNumber, _decimal_factory_selector, at(value.to_eng_string())))
     else:
         return value
 
 
 # Dictionary of cftypes matched to the method converting them to python values.
 known_cftypes = {
-    cf.CFStringGetTypeID() : to_str,
-    cf.CFNumberGetTypeID() : to_number
+    cf.CFStringGetTypeID(): to_str,
+    cf.CFNumberGetTypeID(): to_number
 }
+
 
 def to_value(cftype):
     """Convert a CFType into an equivalent python type.
@@ -167,10 +194,10 @@ def to_value(cftype):
     if not cftype:
         return None
     typeID = cf.CFGetTypeID(cftype)
-    if typeID in known_cftypes:
+    try:
         convert_function = known_cftypes[typeID]
         return convert_function(cftype)
-    else:
+    except KeyError:
         return cftype
 
 cf.CFSetGetCount.restype = CFIndex

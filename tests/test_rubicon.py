@@ -3,8 +3,9 @@ from __future__ import print_function, absolute_import, division, unicode_litera
 
 from ctypes import *
 from ctypes import util
-
+from decimal import Decimal
 import math
+
 # Python 2.6 compatibility shim
 import unittest
 if not hasattr(unittest.TestCase, 'assertIsNotNone'):
@@ -248,6 +249,15 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
         self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
+
+    def test_decimal_method(self):
+        "A method with a NSDecimalNumber arguments can be handled."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+
+        result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
+        self.assertEqual(result, Decimal('6.0'))
+        self.assertTrue(isinstance(result, Decimal), 'Result should be a Decimal')
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"

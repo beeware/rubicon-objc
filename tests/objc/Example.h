@@ -37,6 +37,7 @@
 
 -(float) areaOfSquare: (float) size;
 -(double) areaOfCircle: (double) diameter;
+-(NSDecimalNumber *) areaOfTriangleWithWidth: (NSDecimalNumber *) width andHeight: (NSDecimalNumber *) height;
 
 -(void) testPoke:(int) value;
 -(void) testPeek:(int) value;

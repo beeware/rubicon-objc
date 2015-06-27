@@ -80,7 +80,7 @@ static int _staticIntField = 11;
     self.intField = v;
 }
 
-/* Float/Double argument/return value handling */
+/* Float/Double/Decimal argument/return value handling */
 -(float) areaOfSquare: (float) size
 {
     return size * size;
@@ -90,6 +90,13 @@ static int _staticIntField = 11;
 {
     return diameter * M_PI;
 }
+
+-(NSDecimalNumber *) areaOfTriangleWithWidth: (NSDecimalNumber *) width
+                                   andHeight: (NSDecimalNumber *) height
+{
+    return [width decimalNumberByMultiplyingBy:[height decimalNumberByDividingBy:[NSDecimalNumber decimalNumberWithString:@"2.0"]]];
+}
+
 
 /* Handling of object references. */
 -(void) mutateThing: (Thing *) thing

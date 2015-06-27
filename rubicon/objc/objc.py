@@ -790,6 +790,7 @@ class ObjCMethod(object):
                            'encoding = ' + self.encoding.decode('utf-8'))
             raise
 
+
 ######################################################################
 
 class ObjCBoundMethod(object):
