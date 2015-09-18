@@ -1,4 +1,5 @@
 sudo: false
+os: osx
 language: python
 python: 2.7
 env:
@@ -10,7 +11,7 @@ env:
   - TOX_ENV=pypy
 install:
   - pip install tox
-  - make
+  - make -f Makefile
 script:
-  - export LD_LIBRARY_PATH=`pwd`/tests/objc
+  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
   - tox -e $TOX_ENV
