@@ -5,9 +5,6 @@
 Rubicon-ObjC
 ============
 
-.. image:: https://travis-ci.org/pybee/rubicon-objc.svg?branch=master
-    :target: https://travis-ci.org/pybee/rubicon-objc
-
 Rubicon-ObjC is a bridge between Objective C and Python. It enables you to:
 
 * Use Python to instantiate objects defined in Objective C,
