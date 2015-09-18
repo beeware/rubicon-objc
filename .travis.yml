@@ -9,6 +9,8 @@ env:
   - TOX_ENV=pypy
 install:
   - pip install tox
+  - make
 script:
+  - export LD_LIBRARY_PATH=`pwd`/tests/objc
   - tox -e $TOX_ENV
 
