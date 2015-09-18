@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python: 2.7
 env:
@@ -13,4 +14,3 @@ install:
 script:
   - export LD_LIBRARY_PATH=`pwd`/tests/objc
   - tox -e $TOX_ENV
-
