@@ -45,18 +45,19 @@ Then, in a Python shell::
     >>> NSURL.URLWithString_("http://pybee.org/")
 
     # To create a new Objective C class, define a Python class that
-    # has the methods you want to define, decorated to provide the
-    # Objective C prototype:
+    # has the methods you want to define, decorate it to indicate that it
+    # should be exposed to the Objective C runtime, and annotate it to
+    # describe the type of any arguments that aren't of type ``id``:
     >>> class Handler(NSObject):
-    ...     @objc_method('@i')
-    ...     def initWithValue_(self, value):
+    ...     @objc_method
+    ...     def initWithValue_(self, value: int):
     ...         # You can't store attributes directly on the object -
     ...         # you need to put them manually on the Python object
     ...         self.__dict__['value'] = value
     ...         return self
     ...
-    ...     @objc_method('vi')
-    ...     def pokeWithValue_(self, value):
+    ...     @objc_method
+    ...     def pokeWithValue_(self, value: int) -> None:
     ...         print ("Poking with", value)
 
     # Then use the class:

@@ -295,31 +295,31 @@ class RubiconTest(unittest.TestCase):
         NSObject = ObjCClass('NSObject')
 
         class Handler(NSObject):
-            @objc_method('@i')
-            def initWithValue_(self, value):
+            @objc_method
+            def initWithValue_(self, value: int):
                 self.__dict__['value'] = value
                 return self
 
-            @objc_method('v@i')
-            def peek_withValue_(self, example, value):
+            @objc_method
+            def peek_withValue_(self, example, value: int) -> None:
                 results['string'] = example.toString() + " peeked"
                 results['int'] = value + self.__dict__['value']
 
-            @objc_method('v@i')
-            def poke_withValue_(self, example, value):
+            @objc_method
+            def poke_withValue_(self, example, value: int) -> None:
                 results['string'] = example.toString() + " poked"
                 results['int'] = value + self.__dict__['value']
 
-            @objc_method('@@')
+            @objc_method
             def reverse_(self, input):
                 return ''.join(reversed(input))
 
-            @objc_method('@')
+            @objc_method
             def message(self):
-                return "Alea iacta est.";
+                return "Alea iacta est."
 
-            @objc_classmethod('vi')
-            def fiddle_(cls, value):
+            @objc_classmethod
+            def fiddle_(cls, value: int) -> None:
                 results['string'] = "Fiddled with it"
                 results['int'] = value
 
