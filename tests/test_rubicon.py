@@ -5,11 +5,13 @@ from ctypes import *
 from ctypes import util
 from decimal import Decimal
 import math
-
-# Python 2.6 compatibility shim
 import unittest
-if not hasattr(unittest.TestCase, 'assertIsNotNone'):
-    import unittest2 as unittest
+
+try:
+    import platform
+    OSX_VERSION = platform.mac_ver()[0].split('.')[:2]
+except:
+    OSX_VERSION = None
 
 from rubicon.objc import ObjCClass, objc_method, objc_classmethod
 
@@ -250,6 +252,8 @@ class RubiconTest(unittest.TestCase):
         example = Example.alloc().init()
         self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
 
+    @unittest.skipIf(OSX_VERSION and OSX_VERSION < (10, 10),
+                     "Property handling doesn't work on OS X 10.9 (Snow Leopard) and earlier")
     def test_decimal_method(self):
         "A method with a NSDecimalNumber arguments can be handled."
         Example = ObjCClass('Example')

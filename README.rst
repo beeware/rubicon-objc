@@ -2,6 +2,9 @@
 .. image:: http://pybee.org/rubicon/static/images/rubicon-72.png
     :target: https://pybee.org/rubicon
 
+.. image:: https://travis-ci.org/pybee/rubicon-objc.svg?branch=master
+    :target: https://travis-ci.org/pybee/rubicon-objc
+
 Rubicon-ObjC
 ============
 
