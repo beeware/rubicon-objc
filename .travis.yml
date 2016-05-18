@@ -1,10 +1,13 @@
-os: osx
 matrix:
   include:
-    - env: PYTHON_VERSION=python33
-    - env: PYTHON_VERSION=python34
-    - env: PYTHON_VERSION=python35
+    - os: osx
+      env: PYTHON_VERSION=python33
+    - os: osx
+      env: PYTHON_VERSION=python34
+    - os: osx
+      env: PYTHON_VERSION=python35
 install:
+  - brew tap zoidbergwill/python
   - brew install $PYTHON_VERSION
   - make -f Makefile
 script:
