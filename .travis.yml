@@ -1,14 +1,7 @@
-matrix:
-  include:
-    - os: osx
-      env: PYTHON_VERSION=python33
-    - os: osx
-      env: PYTHON_VERSION=python34
-    - os: osx
-      env: PYTHON_VERSION=python35
+os: osx
+language: generic
 install:
-  - brew tap zoidbergwill/python
-  - brew install $PYTHON_VERSION
+  - brew install python3
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
