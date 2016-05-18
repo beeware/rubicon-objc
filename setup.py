@@ -28,7 +28,7 @@ setup(
     namespace_packages=['rubicon'],
     license='New BSD',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Objective C',
@@ -37,8 +37,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Software Development',
-        'Topic :: Software Development :: User Interfaces',
-        'Topic :: Software Development :: Widget Sets',
     ],
     test_suite='tests',
 )
