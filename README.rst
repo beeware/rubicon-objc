@@ -53,15 +53,14 @@ Then, in a Python shell::
     # describe the type of any arguments that aren't of type ``id``:
     >>> class Handler(NSObject):
     ...     @objc_method
-    ...     def initWithValue_(self, value: int):
-    ...         # You can't store attributes directly on the object -
-    ...         # you need to put them manually on the Python object
-    ...         self.__dict__['value'] = value
+    ...     def initWithValue_(self, v: int):
+    ...         self.value = v
     ...         return self
     ...
     ...     @objc_method
-    ...     def pokeWithValue_(self, value: int) -> None:
-    ...         print ("Poking with", value)
+    ...     def pokeWithValue_(self, v: int) -> None:
+    ...         print ("Poking with", v)
+    ...         print ("Internal value is", self.value)
 
     # Then use the class:
     >>> my_handler = Handler.alloc().initWithValue_(42)
