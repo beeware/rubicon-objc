@@ -9,7 +9,7 @@ import unittest
 
 try:
     import platform
-    OSX_VERSION = tuple(platform.mac_ver()[0].split('.')[:2])
+    OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
 except:
     OSX_VERSION = None
 
