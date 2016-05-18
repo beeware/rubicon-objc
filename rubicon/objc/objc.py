@@ -1208,18 +1208,20 @@ class ObjCClass(type):
         method = cache_class_method(self, name)
         if method:
             return ObjCBoundMethod(method, self.__dict__['ptr'])
-
-        # Otherwise, raise an exception.
-        raise AttributeError('ObjCClass %s has no attribute %s' % (self.name, name))
+        else:
+            try:
+                return self.__dict__[name]
+            except KeyError:
+                # Otherwise, raise an exception.
+                raise AttributeError('ObjCClass %s has no attribute %s' % (self.name, name))
 
     def __setattr__(self, name, value):
         # Set the value of an attribute.
         method = cache_class_property_mutator(self, name)
         if method:
             ObjCBoundMethod(method, self.__dict__['ptr'])(value)
-            return
-
-        raise AttributeError('ObjCClass %s cannot set attribute %s' % (self.__dict__['name'], name))
+        else:
+            self.__dict__[name] = value
 
 
 ######################################################################
@@ -1303,18 +1305,21 @@ class ObjCInstance(object):
         method = cache_instance_method(self.__dict__['objc_class'], name)
         if method:
             return ObjCBoundMethod(method, self)
-
-        # Otherwise raise an exception.
-        raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
+        else:
+            try:
+                return self.__dict__[name]
+            except KeyError:
+                # Otherwise, raise an exception.
+                raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
 
     def __setattr__(self, name, value):
         # Set the value of an attribute.
         method = cache_instance_property_mutator(self.__dict__['objc_class'], name)
         if method:
             ObjCBoundMethod(method, self)(value)
-            return
+        else:
+            self.__dict__[name] = value
 
-        raise AttributeError('ObjCInstance %s cannot set attribute %s' % (self.__dict__['objc_class'].name, name))
 
 ######################################################################
 
