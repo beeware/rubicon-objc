@@ -1,10 +1,6 @@
 os: osx
-python:
-  - "3.3"
-  - "3.4"
-  - "3.5"
 install:
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python setup.py test
+  - python3 setup.py test
