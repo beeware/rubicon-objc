@@ -93,13 +93,15 @@ class RubiconTest(unittest.TestCase):
         # We can invoke the method directly...
         obj1.setSpecialValue_(42)
 
-        # ... but retrieving like a property is an error:
+        # ... but retrieving like a property is an error
         with self.assertRaises(AttributeError):
             obj1.specialValue
 
-        # ... and mutating like a property is an error:
-        with self.assertRaises(AttributeError):
-            obj1.specialValue = 37
+        # ...until you set it explicitly...
+        obj1.specialValue = 37
+
+        # ...at which point it's fair game to be retrieved.
+        self.assertEqual(obj1.specialValue, 37)
 
     def test_non_existent_class(self):
         "A Name Error is raised if a class doesn't exist."
@@ -253,7 +255,7 @@ class RubiconTest(unittest.TestCase):
         self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
 
     @unittest.skipIf(OSX_VERSION and OSX_VERSION < (10, 10),
-                     "Property handling doesn't work on OS X 10.9 (Snow Leopard) and earlier")
+                     "Property handling doesn't work on OS X 10.9 (Mavericks) and earlier")
     def test_decimal_method(self):
         "A method with a NSDecimalNumber arguments can be handled."
         Example = ObjCClass('Example')
@@ -301,18 +303,18 @@ class RubiconTest(unittest.TestCase):
         class Handler(NSObject):
             @objc_method
             def initWithValue_(self, value: int):
-                self.__dict__['value'] = value
+                self.value = value
                 return self
 
             @objc_method
             def peek_withValue_(self, example, value: int) -> None:
                 results['string'] = example.toString() + " peeked"
-                results['int'] = value + self.__dict__['value']
+                results['int'] = value + self.value
 
             @objc_method
             def poke_withValue_(self, example, value: int) -> None:
                 results['string'] = example.toString() + " poked"
-                results['int'] = value + self.__dict__['value']
+                results['int'] = value + self.value
 
             @objc_method
             def reverse_(self, input):
@@ -336,6 +338,10 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
         example.callback = handler2
+
+        # Check some Python-side attributes
+        self.assertEqual(handler1.value, 5)
+        self.assertEqual(handler2.value, 10)
 
         # Invoke the callback; check that the results have been peeked as expected
         example.testPeek_(42)
