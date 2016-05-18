@@ -1,6 +1,13 @@
 os: osx
+language: generic
+matrix:
+  include:
+    - env: PYTHON_VERSION=python3.3
+    - env: PYTHON_VERSION=python3.4
+    - env: PYTHON_VERSION=python3.5
 install:
+  - brew install ${PYTHON_VERSION/\./}
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python3 setup.py test
+  - $PYTHON_VERSION setup.py test
