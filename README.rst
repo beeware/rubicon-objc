@@ -27,7 +27,9 @@ To install Rubicon, use pip::
 
     $ pip install rubicon-objc
 
-Then, in a Python shell::
+Then, in a Python shell
+
+.. code-block:: python
 
     >>> from ctypes import cdll
     >>> from ctypes import util
