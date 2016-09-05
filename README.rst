@@ -1,5 +1,5 @@
 
-.. image:: http://pybee.org/rubicon/static/images/rubicon-72.png
+.. image:: http://pybee.org/project/projects/bridges/rubicon/rubicon-72.png
     :target: https://pybee.org/rubicon
 
 .. image:: https://travis-ci.org/pybee/rubicon-objc.svg?branch=master
@@ -27,7 +27,9 @@ To install Rubicon, use pip::
 
     $ pip install rubicon-objc
 
-Then, in a Python shell::
+Then, in a Python shell
+
+.. code-block:: python
 
     >>> from ctypes import cdll
     >>> from ctypes import util
