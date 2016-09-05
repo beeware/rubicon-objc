@@ -5,4 +5,4 @@ try:
     # Ignore the error if it occurs.
     __import__("pkg_resources").declare_namespace(__name__)
 except ImportError:
-    print('Rubicon namespace package not registered!')
+    pass

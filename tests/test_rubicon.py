@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, absolute_import, division, unicode_literals
-
 from ctypes import *
 from ctypes import util
 from decimal import Decimal
+from enum import Enum
 import math
 import unittest
 
@@ -216,11 +215,32 @@ class RubiconTest(unittest.TestCase):
         example = Example.alloc().init()
         self.assertEqual(example.duplicateString_("Wagga"), "WaggaWagga")
 
-    def test_python2_string_argument(self):
-        "If a non-unicode string argument is provided, it is converted."
+    def test_enum_argument(self):
+        "An enumerated type can be used as an argument."
         Example = ObjCClass('Example')
-        example = Example.alloc().init()
-        self.assertEqual(example.duplicateString_(b"Wagga"), "WaggaWagga")
+
+        obj = Example.alloc().init()
+
+        self.assertEqual(obj.accessBaseIntField(), 22)
+        self.assertEqual(obj.accessIntField(), 33)
+
+        class MyEnum(Enum):
+            value1 = 8888
+            value2 = 9999
+            value3 = 3333
+            value4 = 4444
+
+        obj.mutateBaseIntFieldWithValue_(MyEnum.value1)
+        obj.mutateIntFieldWithValue_(MyEnum.value2)
+
+        self.assertEqual(obj.accessBaseIntField(), MyEnum.value1.value)
+        self.assertEqual(obj.accessIntField(), MyEnum.value2.value)
+
+        obj.baseIntField = MyEnum.value3
+        obj.intField = MyEnum.value4
+
+        self.assertEqual(obj.accessBaseIntField(), MyEnum.value3.value)
+        self.assertEqual(obj.accessIntField(), MyEnum.value4.value)
 
     def test_string_return(self):
         "If a method or field returns a string, you get a Python string back"

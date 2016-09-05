@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import, division
+from enum import Enum
 
 from ctypes import *
 from ctypes import util
@@ -176,6 +176,9 @@ class NSDecimalNumber(object):
 def from_value(value):
     """Convert a Python type into an equivalent CFType type.
     """
+    if isinstance(value, Enum):
+        value = value.value
+
     if isinstance(value, text):
         return at(value)
     elif isinstance(value, bytes):

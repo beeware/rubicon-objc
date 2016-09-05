@@ -1,4 +1,4 @@
-from __future__ import print_function, absolute_import, division, unicode_literals
+from enum import Enum
 
 import platform
 import struct
@@ -1216,6 +1216,9 @@ class ObjCClass(type):
                 raise AttributeError('ObjCClass %s has no attribute %s' % (self.name, name))
 
     def __setattr__(self, name, value):
+        # Convert enums to their underlying values.
+        if isinstance(value, Enum):
+            value = value.value
         # Set the value of an attribute.
         method = cache_class_property_mutator(self, name)
         if method:
@@ -1313,6 +1316,9 @@ class ObjCInstance(object):
                 raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
 
     def __setattr__(self, name, value):
+        # Convert enums to their underlying values.
+        if isinstance(value, Enum):
+            value = value.value
         # Set the value of an attribute.
         method = cache_instance_property_mutator(self.__dict__['objc_class'], name)
         if method:
