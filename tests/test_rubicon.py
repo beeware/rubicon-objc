@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from ctypes import *
 from ctypes import util
 from decimal import Decimal

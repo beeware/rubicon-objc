@@ -1,4 +1,3 @@
-from __future__ import print_function
 try:
     # If we're on iOS, we won't have pkg-resources; but then,
     # we won't need to register the namespace package, either.

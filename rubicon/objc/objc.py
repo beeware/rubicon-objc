@@ -19,7 +19,7 @@ elif sizeof(c_void_p) == 8:
 
 ######################################################################
 
-objc = cdll.LoadLibrary(util.find_library(b'objc'))
+objc = cdll.LoadLibrary(util.find_library('objc'))
 
 ######################################################################
 

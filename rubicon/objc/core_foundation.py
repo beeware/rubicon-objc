@@ -39,11 +39,12 @@ cf.CFStringGetTypeID.argtypes = []
 cf.CFAttributedStringCreate.restype = c_void_p
 cf.CFAttributedStringCreate.argtypes = [CFAllocatorRef, c_void_p, c_void_p]
 
-# Core Foundation type to Python type conversion functions
 
+# Core Foundation type to Python type conversion functions
 def CFSTR(string):
     return ObjCInstance(c_void_p(cf.CFStringCreateWithCString(
             None, string.encode('utf-8'), kCFStringEncodingUTF8)))
+
 
 # Other possible names for this method:
 # ampersat, arobe, apenstaartje (little monkey tail), strudel,
@@ -53,6 +54,7 @@ def CFSTR(string):
 def at(string):
     """Autoreleased version of CFSTR"""
     return ObjCInstance(send_message(CFSTR(string), 'autorelease'))
+
 
 def to_str(cfstring):
     length = cf.CFStringGetLength(cfstring)
@@ -218,6 +220,7 @@ cf.CFSetGetValues.restype = None
 # but CPython ctypes 1.1.0 complains, so just use c_void_p.
 cf.CFSetGetValues.argtypes = [c_void_p, c_void_p]
 
+
 def to_set(cfset):
     """Convert CFSet to python set."""
     count = cf.CFSetGetCount(cfset)
@@ -230,6 +233,7 @@ cf.CFArrayGetCount.argtypes = [c_void_p]
 
 cf.CFArrayGetValueAtIndex.restype = c_void_p
 cf.CFArrayGetValueAtIndex.argtypes = [c_void_p, CFIndex]
+
 
 def to_list(cfarray):
     """Convert CFArray to python list."""
