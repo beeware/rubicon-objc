@@ -73,8 +73,8 @@ Then, in a Python shell
     ...
     ...     @objc_method
     ...     def pokeWithValue_(self, v: int) -> None:
-    ...         print ("Poking with", v)
-    ...         print ("Internal value is", self.value)
+    ...         print("Poking with", v)
+    ...         print("Internal value is", self.value)
 
     # Then use the class:
     >>> my_handler = Handler.alloc().initWithValue_(42)
