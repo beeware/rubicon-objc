@@ -1,12 +1,24 @@
-
-.. image:: http://pybee.org/project/projects/bridges/rubicon/rubicon-72.png
+.. image:: http://pybee.org/project/projects/bridges/rubicon/rubicon.png
+    :width: 72px
     :target: https://pybee.org/rubicon
+
+Rubicon-ObjC
+============
+
+.. image:: https://img.shields.io/pypi/pyversions/rubicon-objc.svg
+    :target: https://pypi.python.org/pypi/rubicon-objc
+
+.. image:: https://img.shields.io/pypi/v/rubicon-objc.svg
+    :target: https://pypi.python.org/pypi/rubicon-objc
 
 .. image:: https://travis-ci.org/pybee/rubicon-objc.svg?branch=master
     :target: https://travis-ci.org/pybee/rubicon-objc
 
-Rubicon-ObjC
-============
+.. image:: https://badges.gitter.im/pybee/general.svg
+    :target: https://gitter.im/pybee/general
+
+.. image:: https://img.shields.io/pypi/l/rubicon-objc.svg
+    :target: https://github.com/pybee/rubicon-objc/blob/master/LICENSE
 
 Rubicon-ObjC is a bridge between Objective C and Python. It enables you to:
 
