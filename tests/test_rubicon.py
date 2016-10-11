@@ -11,7 +11,7 @@ try:
 except:
     OSX_VERSION = None
 
-from rubicon.objc import ObjCClass, objc_method, objc_classmethod
+from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property
 
 
 # Load the test harness library
@@ -381,3 +381,35 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(results['string'], 'Fiddled with it')
         self.assertEqual(results['int'], 99)
+
+    def test_class_properties(self):
+        "A Python class can have ObjC properties with synthezied getters and setters."
+
+        NSObject = ObjCClass('NSObject')
+        NSURL = ObjCClass('NSURL')
+
+        class URLBox(NSObject):
+
+            # takes no type: All properties are pointers
+            url = objc_property()
+
+            @objc_method
+            def getSchemeIfPresent(self):
+                if self.url is not None:
+                    return self.url.scheme
+                return None
+
+        box = URLBox.alloc().init()
+
+        # Default property value is None
+        self.assertIsNone(box.url)
+
+        # Assign an object via synthesized property setter and call method that uses synthesized property getter
+        url = NSURL.alloc().initWithString_('https://www.google.com')
+        box.url = url
+        self.assertEqual(box.getSchemeIfPresent(), 'https')
+
+        # Assign None to dealloc property and see if method returns expected None
+        box.url = None
+        self.assertIsNone(box.getSchemeIfPresent())
+
