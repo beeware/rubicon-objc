@@ -4,7 +4,7 @@ from .objc import (
     objc, send_message, send_super,
     get_selector,
     ObjCClass, ObjCInstance, NSObject,
-    objc_ivar, objc_rawmethod, objc_method, objc_classmethod
+    objc_ivar, objc_property, objc_rawmethod, objc_method, objc_classmethod
 )
 
 from .core_foundation import at, to_str, to_number, to_value, to_set, to_list
