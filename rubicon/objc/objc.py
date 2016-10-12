@@ -1062,6 +1062,63 @@ class objc_ivar(object):
         return add_ivar(ptr, name, self.vartype)
 
 
+class objc_property(object):
+    def __init__(self):
+        pass
+
+    def register_property(self, name, cls):
+        def getter(self) -> ObjCInstance:
+            return getattr(self, '_' + name, None)
+
+        def setter(self, new):
+            if not hasattr(self, '_' + name):
+                setattr(self, '_' + name, None)
+            if getattr(self, '_' + name) is None:
+                setattr(self, '_' + name, new)
+                if new is not None:
+                    getattr(self, '_' + name).retain()
+            else:
+                if not getattr(self, '_' + name).isEqualTo_(new):
+                    getattr(self, '_' + name).release()
+                    setattr(self, '_' + name, new)
+                    if new is not None:
+                        getattr(self, '_' + name).retain()
+
+        getter_encoding = encoding_from_annotation(getter)
+        setter_encoding = encoding_from_annotation(setter)
+
+        def _objc_getter(objc_self, objc_cmd, *args):
+            from .core_foundation import at
+            py_self = ObjCInstance(objc_self)
+            args = convert_method_arguments(getter_encoding, args)
+            result = getter(py_self, *args)
+            if isinstance(result, ObjCClass):
+                result = result.ptr.value
+            elif isinstance(result, ObjCInstance):
+                result = result.ptr.value
+            elif isinstance(result, text):
+                result = at(result).ptr.value
+            return result
+
+        def _objc_setter(objc_self, objc_cmd, *args):
+            from .core_foundation import at
+            py_self = ObjCInstance(objc_self)
+            args = convert_method_arguments(setter_encoding, args)
+            result = setter(py_self, *args)
+            if isinstance(result, ObjCClass):
+                result = result.ptr.value
+            elif isinstance(result, ObjCInstance):
+                result = result.ptr.value
+            elif isinstance(result, text):
+                result = at(result).ptr.value
+            return result
+
+        setter_name = 'set' + name[0].upper() + name[1:] + '_'
+
+        cls.__dict__['imp_table'][name] = add_method(cls.__dict__['ptr'], name, _objc_getter, getter_encoding)
+        cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name.replace('_', ':'), _objc_setter, setter_encoding)
+
+
 # def objc_rawmethod(encoding):
 #     """Decorator for instance methods without any fancy shenanigans.
 #     The function must have the signature f(self, cmd, *args)
@@ -1189,6 +1246,10 @@ class ObjCClass(type):
                 objc_class.__dict__['imp_table'][attr] = obj.register(objc_class)
             except AttributeError:
                 # The class attribute doesn't have a register method.
+                pass
+            try:
+                obj.register_property(attr, objc_class)
+            except AttributeError:
                 pass
 
         return objc_class
