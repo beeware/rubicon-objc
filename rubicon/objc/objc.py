@@ -682,6 +682,8 @@ class ObjCMethod(object):
         NSSizeEncoding: NSSize,
         NSRectEncoding: NSRect,
         NSRangeEncoding: NSRange,
+        UIEdgeInsetsEncoding: UIEdgeInsets,
+        NSEdgeInsetsEncoding: NSEdgeInsets,
         PyObjectEncoding: py_object
     }
 

@@ -36,6 +36,8 @@ if __LP64__:
     NSSizeEncoding = b'{CGSize=dd}'
     NSRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
     NSRangeEncoding = b'{_NSRange=QQ}'
+    UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
+    NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
 else:
     NSInteger = c_int
     NSUInteger = c_uint
@@ -44,6 +46,8 @@ else:
     NSSizeEncoding = b'{CGSize=ff}'
     NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
     NSRangeEncoding = b'{NSRange=II}'
+    UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
+    NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
 
 NSIntegerEncoding = encoding_for_ctype(NSInteger)
 NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
@@ -96,6 +100,33 @@ def NSMakePoint(x, y):
     return NSPoint(x, y)
 
 CGPointMake = NSMakePoint
+
+
+# iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
+class UIEdgeInsets(Structure):
+    _fields_ = [('top', CGFloat),
+                ('left', CGFloat),
+                ('bottom', CGFloat),
+                ('right', CGFloat)]
+
+def UIEdgeInsetsMake(top, left, bottom, right):
+    return UIEdgeInsets(top, left, bottom, right)
+
+UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+
+
+# macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
+class NSEdgeInsets(Structure):
+    _fields_ = [('top', CGFloat),
+                ('left', CGFloat),
+                ('bottom', CGFloat),
+                ('right', CGFloat)]
+
+def NSEdgeInsetsMake(top, left, bottom, right):
+    return NSEdgeInsets(top, left, bottom, right)
+
+# strangely, there is no NSEdgeInsetsZero, neither in public nor in private API.
+
 
 # NSDate.h
 NSTimeInterval = c_double
