@@ -13,7 +13,7 @@ from .types import (
     text,
     NSInteger, NSUInteger,
     CGFloat,
-    NSPointEncoding, NSSizeEncoding, NSRectEncoding, NSRangeEncoding,
+    NSPointEncoding, NSSizeEncoding, NSRectEncoding, NSRangeEncoding, UIEdgeInsetsEncoding, NSEdgeInsetsEncoding,
     CGPoint, NSPoint,
     CGSize, NSSize,
     CGRect, NSRect,
@@ -23,5 +23,7 @@ from .types import (
     NSTimeInterval,
     CFIndex, UniChar, unichar, CGGlyph,
     CFRange, NSRange,
-    NSZeroPoint
+    NSZeroPoint,
+    UIEdgeInsets, UIEdgeInsetsMake, UIEdgeInsetsZero,
+    NSEdgeInsets, NSEdgeInsetsMake
 )

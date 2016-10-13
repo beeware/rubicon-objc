@@ -11,7 +11,7 @@ try:
 except:
     OSX_VERSION = None
 
-from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property
+from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake
 
 
 # Load the test harness library
@@ -412,4 +412,19 @@ class RubiconTest(unittest.TestCase):
         # Assign None to dealloc property and see if method returns expected None
         box.url = None
         self.assertIsNone(box.getSchemeIfPresent())
+
+    def test_function_NSEdgeInsetsMake(self):
+        "Python can invoke NSEdgeInsetsMake to create NSEdgeInsets."
+
+        insets = NSEdgeInsets(0.0, 1.1, 2.2, 3.3)
+        other_insets = NSEdgeInsetsMake(0.0, 1.1, 2.2, 3.3)
+
+        # structs are NOT equal
+        self.assertNotEqual(insets, other_insets)
+
+        # but their values are
+        self.assertEqual(insets.top, other_insets.top)
+        self.assertEqual(insets.left, other_insets.left)
+        self.assertEqual(insets.bottom, other_insets.bottom)
+        self.assertEqual(insets.right, other_insets.right)
 
