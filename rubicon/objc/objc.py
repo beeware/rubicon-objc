@@ -739,6 +739,9 @@ class ObjCMethod(object):
         elif encoding[0:2] == b'r^' and encoding[2:] in self.typecodes:
             # const pointer, also don't care
             return POINTER(self.typecodes[encoding[2:]])
+        elif encoding[0:2] == b'^{' or encoding[0:3] == b'r^{':
+            # (const) pointer to a C structure, type handling up to caller
+            return c_void_p
         else:
             raise Exception('unknown encoding for %s: %s' % (self.name, encoding))
 
