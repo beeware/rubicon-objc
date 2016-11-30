@@ -805,6 +805,11 @@ class ObjCBoundMethod(object):
         """Initialize with a method and ObjCInstance or ObjCClass object."""
         self.method = method
         self.objc_id = objc_id
+        # set restype if previously set at class level via _RestypeHelper
+        if isinstance(self.objc_id, ObjCInstance):
+            restype = self.objc_id.objc_class.instance_restype.get(method.name)
+            if restype:
+                method.restype = restype
 
     def __repr__(self):
         return '<ObjCBoundMethod %s (%s)>' % (self.method.name, self.objc_id)
@@ -1147,6 +1152,23 @@ def objc_rawmethod(f):
 ######################################################################
 
 
+class _RestypeHelper(object):
+    """
+    Supports class level setting of instance method restypes.
+    """
+    def __init__(self, objc_class, method_name):
+        self.__dict__['objc_class'] = objc_class
+        self.__dict__['method_name'] = method_name.encode('utf8')
+
+    def __setattr__(self, name, value):
+        # Only support setting 'restype'. Raise the exception that
+        # would have been raised when we were instantiated, otherwise.
+        if name != 'restype':
+            raise AttributeError('ObjCClass %s has no attribute %s' % (
+                self.objc_class, self.objc_method))
+        self.objc_class.instance_restype[self.method_name] = value
+
+
 class ObjCClass(type):
     """Python wrapper for an Objective-C class."""
 
@@ -1235,6 +1257,7 @@ class ObjCClass(type):
                     'metaclass': metaclass,
                     'name': objc_class_name,
                     'instance_methods': {},     # mapping of name -> instance method
+                    'instance_restype': {},    # mapping of name -> ctypes.restype
                     'class_methods': {},        # mapping of name -> class method
                     'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
                     'class_properties': {},     # mapping of name -> (accessor method, mutator method)
@@ -1278,8 +1301,9 @@ class ObjCClass(type):
             try:
                 return self.__dict__[name]
             except KeyError:
-                # Otherwise, raise an exception.
-                raise AttributeError('ObjCClass %s has no attribute %s' % (self.name, name))
+                # Defer to _RestypeHelper in order to support
+                # class level setting of instance method restypes.
+                return _RestypeHelper(self, name)
 
     def __setattr__(self, name, value):
         # Convert enums to their underlying values.
