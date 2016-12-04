@@ -428,3 +428,66 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(insets.bottom, other_insets.bottom)
         self.assertEqual(insets.right, other_insets.right)
 
+    def test_NSArray_iterable(self):
+        "Pythonic interface for NSArray (and its subclasses) as iterable."
+
+        NSMutableArray = ObjCClass('NSMutableArray')
+
+        ns_array = NSMutableArray.array()
+        test_list = ['item1', 'item2', 'item3', 'item4', 'item5']
+        for item in test_list:
+            ns_array.addObject_(item)
+
+        # Todo: implement len
+        self.assertEqual(ns_array.count, 5)
+
+        # NSArray itself can be compared to other NSArrays
+        # NSArray can be copied via copy-slice [:]
+        self.assertEqual(ns_array[:], ns_array)
+
+        # Needed because an NSArray does NOT equal a Python list. Their elements can, however, be equal.
+        def compare(some_NSArray, python_list):
+            self.assertEqual([item for item in some_NSArray], python_list)
+
+        # Object retrieval via index
+        self.assertEqual(ns_array[3], test_list[3])
+
+        # positive indices
+        compare(ns_array[1:], test_list[1:])
+        compare(ns_array[2:3], test_list[2:3])
+        compare(ns_array[4:2], test_list[4:2])
+        compare(ns_array[:4], test_list[:4])
+
+        # negative indices
+        compare(ns_array[-1:], test_list[-1:])
+        compare(ns_array[-2:-3], test_list[-2:-3])
+        compare(ns_array[-4:-2], test_list[-4:-2])
+        compare(ns_array[:-4], test_list[:-4])
+
+        # positive indices with step 2
+        compare(ns_array[1::2], test_list[1::2])
+        compare(ns_array[2:3:2], test_list[2:3:2])
+        compare(ns_array[4:2:2], test_list[4:2:2])
+        compare(ns_array[:4:2], test_list[:4:2])
+
+        # negative indices with step 2
+        compare(ns_array[-1::2], test_list[-1::2])
+        compare(ns_array[-2:-3:2], test_list[-2:-3:2])
+        compare(ns_array[-4:-2:2], test_list[-4:-2:2])
+        compare(ns_array[:-4:2], test_list[:-4:2])
+
+        # positive indices with step -3
+        compare(ns_array[1::-3], test_list[1::-3])
+        compare(ns_array[2:3:-3], test_list[2:3:-3])
+        compare(ns_array[4:2:-3], test_list[4:2:-3])
+        compare(ns_array[:4:-3], test_list[:4:-3])
+
+        # negative indices with step -3
+        compare(ns_array[-1::-3], test_list[-1::-3])
+        compare(ns_array[-2:-3:-3], test_list[-2:-3:-3])
+        compare(ns_array[-4:-2:-3], test_list[-4:-2:-3])
+        compare(ns_array[:-4:-3], test_list[:-4:-3])
+
+        # test string representation
+        self.assertEqual(repr(ns_array), 'NSArray ' + repr(test_list))
+
