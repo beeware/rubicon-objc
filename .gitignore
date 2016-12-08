@@ -12,3 +12,10 @@ local
 *.o
 *.d
 *.dylib
+
+# OS X
+.DS_Store
+
+# PyCharm
+.idea/
+*.iml
