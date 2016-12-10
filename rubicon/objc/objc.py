@@ -1,21 +1,17 @@
 from enum import Enum
 
-import platform
-import struct
-
 from ctypes import *
 from ctypes import util
 
 from .types import *
-
-__LP64__ = (8*struct.calcsize("P") == 64)
-__i386__ = (platform.machine() == 'i386')
-__x86_64__ = (platform.machine() == 'x86_64')
+from .types import __LP64__, __i386__, __x86_64__, __arm__, __arm64__
 
 if sizeof(c_void_p) == 4:
     c_ptrdiff_t = c_int32
 elif sizeof(c_void_p) == 8:
     c_ptrdiff_t = c_int64
+else:
+    raise TypeError("Don't know a c_ptrdiff_t for %d-byte pointers" % sizeof(c_void_p))
 
 ######################################################################
 
@@ -249,16 +245,18 @@ objc.objc_getProtocol.argtypes = [c_char_p]
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
 # id objc_msgSendSuper(struct objc_super *super, SEL op,  ...)
 
-# The _stret and _fpret variants only exist on x86-based architectures.
-if __i386__ or __x86_64__:
+# The _stret variants only exist on x86-based architectures and ARM32.
+if __i386__ or __x86_64__ or __arm__:
     # void objc_msgSendSuper_stret(struct objc_super *super, SEL op, ...)
     objc.objc_msgSendSuper_stret.restype = None
 
-    # double objc_msgSend_fpret(id self, SEL op, ...)
-    objc.objc_msgSend_fpret.restype = c_double
-
     # void objc_msgSend_stret(void * stretAddr, id theReceiver, SEL theSelector,  ...)
     objc.objc_msgSend_stret.restype = None
+
+# The _fpret variant only exists on x86-based architectures.
+if __i386__ or __x86_64__:
+    # double objc_msgSend_fpret(id self, SEL op, ...)
+    objc.objc_msgSend_fpret.restype = c_double
 
 # void objc_registerClassPair(Class cls)
 objc.objc_registerClassPair.restype = None
@@ -408,28 +406,39 @@ def get_superclass_of_object(obj):
 # http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
-    """Try to figure out when a return type will be passed on stack."""
+    """Determine if objc_msgSend_stret is required to return a struct type."""
     if type(restype) != type(Structure):
+        # Not needed when restype is not a structure.
         return False
-    if not __LP64__ and sizeof(restype) <= 8:
+    elif __i386__:
+        # On i386: Use for structures not sized exactly like an integer (1, 2, 4, or 8 bytes).
+        return sizeof(restype) not in (1, 2, 4, 8)
+    elif __x86_64__:
+        # On x86_64: Use for structures larger than 16 bytes.
+        # (The ABI docs say that there are some special cases
+        # for vector types, but those can't really be used
+        # with ctypes anyway.)
+        return sizeof(restype) > 16
+    elif __arm__:
+        # On ARM32: Use for all structures, regardless of size.
+        return True
+    else:
+        # Other platforms: Doesn't exist.
         return False
-    if __LP64__ and sizeof(restype) <= 16:  # maybe? I don't know?
-        return False
-    return True
 
 
 # http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
     """Determine if objc_msgSend_fpret is required to return a floating point type."""
-    if not (__i386__ or __x86_64__):
-        # Unneeded on non-intel processors
+    if __x86_64__:
+        # On x86_64: Use only for long double.
+        return restype == c_longdouble
+    elif __i386__:
+        # On i386: Use for all floating-point types.
+        return restype in (c_float, c_double, c_longdouble)
+    else:
+        # Other platforms: Doesn't exist.
         return False
-    if __LP64__ and restype == c_longdouble:
-        # Use only for long double on x86_64
-        return True
-    if not __LP64__ and restype in (c_float, c_double, c_longdouble):
-        return True
-    return False
 
 
 def send_message(receiver, selName, *args, **kwargs):
