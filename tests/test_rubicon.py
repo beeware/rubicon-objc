@@ -290,6 +290,34 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertTrue(isinstance(result, Decimal), 'Result should be a Decimal')
+    
+    def test_struct_return(self):
+        "Methods returning structs of different sizes by value can be handled."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        
+        class struct_int_sized(Structure):
+            _fields_ = [("x", c_char * 4)]
+
+        example.intSizedStruct
+        example.objc_class.instance_methods["intSizedStruct"].restype = struct_int_sized
+        self.assertEqual(example.intSizedStruct().x, b"abc")
+        
+        class struct_oddly_sized(Structure):
+            _fields_ = [("x", c_char * 5)]
+        
+        example.oddlySizedStruct
+        example.objc_class.instance_methods["oddlySizedStruct"].restype = struct_oddly_sized
+        self.assertEqual(example.oddlySizedStruct().x, b"abcd")
+        
+        class struct_large(Structure):
+            _fields_ = [("x", c_char * 17)]
+        
+        example.largeStruct
+        example.objc_class.instance_methods["largeStruct"].restype = struct_large
+        self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
+        
+        # TODO other structs
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"

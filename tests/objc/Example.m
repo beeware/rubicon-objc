@@ -101,6 +101,22 @@ static int _staticIntField = 11;
     return [width decimalNumberByMultiplyingBy:[height decimalNumberByDividingBy:[NSDecimalNumber decimalNumberWithString:@"2.0"]]];
 }
 
+/* Handling of struct returns of different sizes. */
+-(struct int_sized) intSizedStruct {
+    struct int_sized ret = {"abc"};
+    return ret;
+}
+
+-(struct oddly_sized) oddlySizedStruct {
+    struct oddly_sized ret = {"abcd"};
+    return ret;
+}
+
+-(struct large) largeStruct {
+    struct large ret = {"abcdefghijklmnop"};
+    return ret;
+}
+
 
 /* Handling of object references. */
 -(void) mutateThing: (Thing *) thing
