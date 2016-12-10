@@ -1,7 +1,11 @@
 #import "Example.h"
 #import <stdio.h>
 
-@implementation Example;
+@implementation Example
+
+@synthesize intField = _intField;
+@synthesize thing = _thing;
+@synthesize callback = _callback;
 
 static int _staticIntField = 11;
 

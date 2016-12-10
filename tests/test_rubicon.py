@@ -20,6 +20,13 @@ if harnesslib is None:
     raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
 cdll.LoadLibrary(harnesslib)
 
+import sys
+import platform
+print("sys.platform = " + repr(sys.platform))
+print("platform.machine() = " + repr(platform.machine()))
+print("platform.version() = " + repr(platform.version()))
+print("sys.maxsize = " + hex(sys.maxsize))
+
 
 class RubiconTest(unittest.TestCase):
     def test_field(self):

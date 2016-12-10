@@ -4,7 +4,11 @@
 #import "Thing.h"
 #import "Callback.h"
 
-@interface Example : BaseExample
+@interface Example : BaseExample {
+    int _intField;
+    Thing *_thing;
+    id<Callback> _callback;
+}
 
 @property int intField;
 @property (retain) Thing *thing;
