@@ -457,19 +457,27 @@ def send_message(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', [])
+    
     # Choose the correct version of objc_msgSend based on return type.
+    # Use objc['name'] instead of objc.name to get a new function object
+    # that is independent of the one on the objc library.
+    # This way multiple threads sending messages don't overwrite
+    # each other's function signatures.
     if should_use_fpret(restype):
-        objc.objc_msgSend_fpret.restype = restype
-        objc.objc_msgSend_fpret.argtypes = [c_void_p, c_void_p] + argtypes
-        result = objc.objc_msgSend_fpret(receiver, selector, *args)
+        send = objc['objc_msgSend_fpret']
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
     elif should_use_stret(restype):
-        objc.objc_msgSend_stret.argtypes = [POINTER(restype), c_void_p, c_void_p] + argtypes
+        send = objc['objc_msgSend_stret']
+        send.argtypes = [POINTER(restype), c_void_p, c_void_p] + argtypes
         result = restype()
-        objc.objc_msgSend_stret(byref(result), receiver, selector, *args)
+        send(byref(result), receiver, selector, *args)
     else:
-        objc.objc_msgSend.restype = restype
-        objc.objc_msgSend.argtypes = [c_void_p, c_void_p] + argtypes
-        result = objc.objc_msgSend(receiver, selector, *args)
+        send = objc['objc_msgSend']
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
         if restype == c_void_p:
             result = c_void_p(result)
     return result
@@ -494,12 +502,14 @@ def send_super(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
-    objc.objc_msgSendSuper.restype = restype
+    
+    send = objc['objc_msgSendSuper']
+    send.restype = restype
     if argtypes:
-        objc.objc_msgSendSuper.argtypes = [OBJC_SUPER_PTR, c_void_p] + argtypes
+        send.argtypes = [OBJC_SUPER_PTR, c_void_p] + argtypes
     else:
-        objc.objc_msgSendSuper.argtypes = None
-    result = objc.objc_msgSendSuper(byref(super_struct), selector, *args)
+        send.argtypes = None
+    result = send(byref(super_struct), selector, *args)
     if restype == c_void_p:
         result = c_void_p(result)
     return result
