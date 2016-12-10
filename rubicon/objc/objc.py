@@ -470,9 +470,9 @@ def send_message(receiver, selName, *args, **kwargs):
         result = send(receiver, selector, *args)
     elif should_use_stret(restype):
         send = objc['objc_msgSend_stret']
-        send.argtypes = [POINTER(restype), c_void_p, c_void_p] + argtypes
-        result = restype()
-        send(byref(result), receiver, selector, *args)
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
     else:
         send = objc['objc_msgSend']
         send.restype = restype

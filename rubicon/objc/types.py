@@ -4,13 +4,19 @@ import platform
 import struct
 
 __LP64__ = (8*struct.calcsize("P") == 64)
-__i386__ = (platform.machine() == 'i386')
-__x86_64__ = (platform.machine() == 'x86_64')
+
+# platform.machine() indicates the machine's physical architecture,
+# which means that on a 64-bit Intel machine it is always "x86_64",
+# even if Python is built as 32-bit.
+_any_x86 = (platform.machine() in ('i386', 'x86_64'))
+__i386__ = (_any_x86 and not __LP64__)
+__x86_64__ = (_any_x86 and __LP64__)
 
 # On iOS, platform.machine() is a device identifier like "iPhone9,4",
-# but the platform.version() string contains the architecture. 
-__arm64__ = ('ARM64' in platform.version())
-__arm__ = (not __arm64__ and 'ARM' in platform.version())
+# but the platform.version() string contains the architecture.
+_any_arm = ('ARM' in platform.version())
+__arm64__ = (_any_arm and __LP64__)
+__arm__ = (_any_arm and not __LP64__)
 
 PyObjectEncoding = b'{PyObject=@}'
 
