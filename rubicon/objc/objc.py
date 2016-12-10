@@ -1426,30 +1426,36 @@ class ObjCInstance(object):
 
 NSObject = ObjCClass('NSObject')
 
-
-class DeallocationObserver(NSObject):
-
-    observed_object = objc_ivar(c_void_p)
-
-    @objc_rawmethod
-    def initWithObject_(self, cmd, anObject):
-        self = send_super(self, 'init')
-        self = self.value
-        set_instance_variable(self, 'observed_object', anObject, c_void_p)
-        return self
-
-    @objc_rawmethod
-    def dealloc(self, cmd) -> None:
-        anObject = get_instance_variable(self, 'observed_object', c_void_p)
-        ObjCInstance._cached_objects.pop(anObject, None)
-        send_super(self, 'dealloc')
-
-    @objc_rawmethod
-    def finalize(self, cmd) -> None:
-        # Called instead of dealloc if using garbage collection.
-        # (which would have to be explicitly started with
-        # objc_startCollectorThread(), so probably not too much reason
-        # to have this here, but I guess it can't hurt.)
-        anObject = get_instance_variable(self, 'observed_object', c_void_p)
-        ObjCInstance._cached_objects.pop(anObject, None)
-        send_super(self, 'finalize')
+# Try to reuse an existing DeallocationObserver class.
+# This allows reloading the module without having to restart
+# the interpreter, although any changes to DeallocationObserver
+# itself are only applied after a restart of course.
+try:
+    DeallocationObserver = ObjCClass("DeallocationObserver")
+except NameError:
+    class DeallocationObserver(NSObject):
+    
+        observed_object = objc_ivar(c_void_p)
+    
+        @objc_rawmethod
+        def initWithObject_(self, cmd, anObject):
+            self = send_super(self, 'init')
+            self = self.value
+            set_instance_variable(self, 'observed_object', anObject, c_void_p)
+            return self
+    
+        @objc_rawmethod
+        def dealloc(self, cmd) -> None:
+            anObject = get_instance_variable(self, 'observed_object', c_void_p)
+            ObjCInstance._cached_objects.pop(anObject, None)
+            send_super(self, 'dealloc')
+    
+        @objc_rawmethod
+        def finalize(self, cmd) -> None:
+            # Called instead of dealloc if using garbage collection.
+            # (which would have to be explicitly started with
+            # objc_startCollectorThread(), so probably not too much reason
+            # to have this here, but I guess it can't hurt.)
+            anObject = get_instance_variable(self, 'observed_object', c_void_p)
+            ObjCInstance._cached_objects.pop(anObject, None)
+            send_super(self, 'finalize')
