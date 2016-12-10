@@ -9,8 +9,8 @@ __x86_64__ = (platform.machine() == 'x86_64')
 
 # On iOS, platform.machine() is a device identifier like "iPhone9,4",
 # but the platform.version() string contains the architecture. 
-__arm__ = ('ARM32' in platform.version())
 __arm64__ = ('ARM64' in platform.version())
+__arm__ = (not __arm64__ and 'ARM' in platform.version())
 
 PyObjectEncoding = b'{PyObject=@}'
 
