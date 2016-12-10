@@ -56,7 +56,7 @@ else:
     NSPointEncoding = b'{CGPoint=ff}'
     NSSizeEncoding = b'{CGSize=ff}'
     NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
-    NSRangeEncoding = b'{NSRange=II}'
+    NSRangeEncoding = b'{_NSRange=II}'
     UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
     NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
 
