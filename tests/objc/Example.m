@@ -132,12 +132,12 @@ static int _staticIntField = 11;
 /* String argument/return value handling */
 -(NSString *) toString
 {
-    return [[NSString alloc] initWithFormat:@"This is an ObjC Example object"];
+    return [NSString stringWithFormat:@"This is an ObjC Example object"];
 }
 
 -(NSString *) duplicateString:(NSString *) in
 {
-    return [[NSString alloc] initWithFormat:@"%@%@", in, in];
+    return [NSString stringWithFormat:@"%@%@", in, in];
 }
 
 -(NSString *) smiley

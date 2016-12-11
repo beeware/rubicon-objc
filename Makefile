@@ -13,5 +13,5 @@ clean:
 	rm -rf tests/objc/*.o tests/objc/*.d tests/objc/librubiconharness.dylib
 
 %.o: %.m
-	clang -x objective-c -fobjc-arc -I./tests/objc -c $(EXTRA_FLAGS) $< -o $@
+	clang -x objective-c -I./tests/objc -c $(EXTRA_FLAGS) $< -o $@
 
