@@ -62,7 +62,7 @@ def to_str(cfstring):
     buffer = c_buffer(size + 1)
     result = cf.CFStringGetCString(cfstring, buffer, len(buffer), kCFStringEncodingUTF8)
     if result:
-        return text(buffer.value, 'utf-8')
+        return buffer.value.decode('utf-8')
 
 cf.CFDataCreate.restype = c_void_p
 cf.CFDataCreate.argtypes = [c_void_p, c_void_p, CFIndex]
@@ -181,7 +181,7 @@ def from_value(value):
     if isinstance(value, Enum):
         value = value.value
 
-    if isinstance(value, text):
+    if isinstance(value, str):
         return at(value)
     elif isinstance(value, bytes):
         return at(value.decode('utf-8'))

@@ -452,7 +452,7 @@ def send_message(receiver, selName, *args, **kwargs):
     be a ctypes type and argtypes should be a list of ctypes types for
     the arguments of the message only.
     """
-    if isinstance(receiver, text):
+    if isinstance(receiver, str):
         receiver = get_class(receiver)
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
@@ -539,7 +539,7 @@ cfunctype_table = {}
 
 # Limited to basic types and pointers to basic types.
 # Does not try to handle arrays, arbitrary structs, unions, or bitfields.
-# Assume that encoding is a bytes object and not unicode.
+# Assume that encoding is a bytes object and not str.
 def cfunctype_for_encoding(encoding):
     # Otherwise, create a new CFUNCTYPE for the encoding.
     typecodes = {
@@ -806,7 +806,7 @@ class ObjCMethod(object):
         except ArgumentError as error:
             # Add more useful info to argument error exceptions, then reraise.
             error.args += ('selector = ' + self.name.decode('utf-8'),
-                           'argtypes =' + text(self.argtypes),
+                           'argtypes =' + str(self.argtypes),
                            'encoding = ' + self.encoding.decode('utf-8'))
             raise
 
@@ -1026,7 +1026,7 @@ def objc_method(f):
             result = result.ptr.value
         elif isinstance(result, ObjCInstance):
             result = result.ptr.value
-        elif isinstance(result, text):
+        elif isinstance(result, str):
             result = at(result).ptr.value
         return result
 
@@ -1058,7 +1058,7 @@ def objc_classmethod(f):
             result = result.ptr.value
         elif isinstance(result, ObjCInstance):
             result = result.ptr.value
-        elif isinstance(result, text):
+        elif isinstance(result, str):
             result = at(result).ptr.value
         return result
 
@@ -1117,7 +1117,7 @@ class objc_property(object):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
                 result = result.ptr.value
-            elif isinstance(result, text):
+            elif isinstance(result, str):
                 result = at(result).ptr.value
             return result
 
@@ -1130,7 +1130,7 @@ class objc_property(object):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
                 result = result.ptr.value
-            elif isinstance(result, text):
+            elif isinstance(result, str):
                 result = at(result).ptr.value
             return result
 
@@ -1188,7 +1188,7 @@ class ObjCClass(type):
             class_name_or_ptr = args[0]
             attrs = {}
 
-            if isinstance(class_name_or_ptr, (bytes, text)):
+            if isinstance(class_name_or_ptr, (bytes, str)):
                 name = ensure_bytes(class_name_or_ptr)
                 ptr = get_class(name)
                 if ptr.value is None:
@@ -1236,14 +1236,7 @@ class ObjCClass(type):
 
             # We can get the metaclass only after the class is registered.
             metaclass = get_metaclass(name)
-
-            # Py2/3 compatibility; the class name must be "str".
-            # If the unicode class exists, we're in Python 2.
-            try:
-                unicode
-                objc_class_name = name
-            except NameError:
-                objc_class_name = name.decode('utf-8')
+            objc_class_name = name.decode('utf-8')
 
             # Otherwise create a new Python object and then initialize it.
             objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
@@ -1276,7 +1269,7 @@ class ObjCClass(type):
         return objc_class
 
     def __repr__(self):
-        return "<ObjCClass: %s at %s>" % (self.__dict__['name'], text(self.__dict__['ptr'].value))
+        return "<ObjCClass: %s at %s>" % (self.__dict__['name'], str(self.__dict__['ptr'].value))
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
@@ -1366,9 +1359,9 @@ class ObjCInstance(object):
             # Display contents of NSString objects
             from .core_foundation import to_str
             string = to_str(self)
-            return "<ObjCInstance %#x: %s (%s) at %s>" % (id(self), self.__dict__['objc_class'].name, string, text(self.__dict__['ptr'].value))
+            return "<ObjCInstance %#x: %s (%s) at %s>" % (id(self), self.__dict__['objc_class'].name, string, str(self.__dict__['ptr'].value))
 
-        return "<ObjCInstance %#x: %s at %s>" % (id(self), self.__dict__['objc_class'].name, text(self.__dict__['ptr'].value))
+        return "<ObjCInstance %#x: %s at %s>" % (id(self), self.__dict__['objc_class'].name, str(self.__dict__['ptr'].value))
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
