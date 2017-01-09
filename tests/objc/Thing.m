@@ -1,6 +1,8 @@
 #import "Thing.h"
 
-@implementation Thing;
+@implementation Thing
+
+@synthesize name = _name;
 
 -(id) initWithName: (NSString *) name
 {

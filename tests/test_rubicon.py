@@ -11,7 +11,7 @@ try:
 except:
     OSX_VERSION = None
 
-from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake
+from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
 
 
 # Load the test harness library
@@ -19,6 +19,16 @@ harnesslib = util.find_library('rubiconharness')
 if harnesslib is None:
     raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
 cdll.LoadLibrary(harnesslib)
+
+import sys
+import platform
+print("sys.platform = " + repr(sys.platform))
+print("platform.machine() = " + repr(platform.machine()))
+print("platform.version() = " + repr(platform.version()))
+print("sys.maxsize = " + hex(sys.maxsize))
+
+import faulthandler
+faulthandler.enable()
 
 
 class RubiconTest(unittest.TestCase):
@@ -52,6 +62,21 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(obj.accessBaseIntField(), 8888)
         self.assertEqual(obj.accessIntField(), 9999)
+
+    def test_method_send(self):
+        "An instance method can be invoked with send_message."
+        Example = ObjCClass('Example')
+
+        obj = Example.alloc().init()
+
+        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int), 22)
+        self.assertEqual(send_message(obj, "accessIntField", restype=c_int), 33)
+
+        send_message(obj, "mutateBaseIntFieldWithValue:", 8888, restype=None, argtypes=[c_int])
+        send_message(obj, "mutateIntFieldWithValue:", 9999, restype=None, argtypes=[c_int])
+
+        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int), 8888)
+        self.assertEqual(send_message(obj, "accessIntField", restype=c_int), 9999)
 
     def test_static_field(self):
         "A static field on a class can be accessed and mutated"
@@ -262,16 +287,28 @@ class RubiconTest(unittest.TestCase):
         self.assertAlmostEqual(example.twopi(), 2.0 * math.pi, 5)
 
     def test_float_method(self):
-        "A method with a float arguments can be handled."
+        "A method with a float argument can be handled."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
         self.assertEqual(example.areaOfSquare_(1.5), 2.25)
 
+    def test_float_method_send(self):
+        "A method with a float argument can be handled by send_message."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        self.assertEqual(send_message(example, "areaOfSquare:", 1.5, restype=c_float, argtypes=[c_float]), 2.25)
+
     def test_double_method(self):
-        "A method with a double arguments can be handled."
+        "A method with a double argument can be handled."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
         self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
+
+    def test_double_method_send(self):
+        "A method with a double argument can be handled by send_message."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        self.assertAlmostEqual(send_message(example, "areaOfCircle:", 1.5, restype=c_double, argtypes=[c_double]), 1.5 * math.pi, 5)
 
     @unittest.skipIf(OSX_VERSION and OSX_VERSION < (10, 10),
                      "Property handling doesn't work on OS X 10.9 (Mavericks) and earlier")
@@ -283,6 +320,53 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertTrue(isinstance(result, Decimal), 'Result should be a Decimal')
+    
+    def test_struct_return(self):
+        "Methods returning structs of different sizes by value can be handled."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        
+        class struct_int_sized(Structure):
+            _fields_ = [("x", c_char * 4)]
+
+        example.intSizedStruct
+        example.objc_class.instance_methods["intSizedStruct"].restype = struct_int_sized
+        self.assertEqual(example.intSizedStruct().x, b"abc")
+        
+        class struct_oddly_sized(Structure):
+            _fields_ = [("x", c_char * 5)]
+        
+        example.oddlySizedStruct
+        example.objc_class.instance_methods["oddlySizedStruct"].restype = struct_oddly_sized
+        self.assertEqual(example.oddlySizedStruct().x, b"abcd")
+        
+        class struct_large(Structure):
+            _fields_ = [("x", c_char * 17)]
+        
+        example.largeStruct
+        example.objc_class.instance_methods["largeStruct"].restype = struct_large
+        self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
+
+    def test_struct_return_send(self):
+        "Methods returning structs of different sizes by value can be handled when using send_message."
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+    
+        class struct_int_sized(Structure):
+            _fields_ = [("x", c_char * 4)]
+    
+        self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
+    
+    
+        class struct_oddly_sized(Structure):
+            _fields_ = [("x", c_char * 5)]
+        
+        self.assertEqual(send_message(example, "oddlySizedStruct", restype=struct_oddly_sized).x, b"abcd")
+    
+        class struct_large(Structure):
+            _fields_ = [("x", c_char * 17)]
+    
+        self.assertEqual(send_message(example, "largeStruct", restype=struct_large).x, b"abcdefghijklmnop")
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"

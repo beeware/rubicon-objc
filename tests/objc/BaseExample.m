@@ -1,6 +1,8 @@
 #import "BaseExample.h"
 
-@implementation BaseExample;
+@implementation BaseExample
+
+@synthesize baseIntField = _baseIntField;
 
 static int _staticBaseIntField = 1;
 

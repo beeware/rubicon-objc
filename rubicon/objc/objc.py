@@ -1,21 +1,17 @@
 from enum import Enum
 
-import platform
-import struct
-
 from ctypes import *
 from ctypes import util
 
 from .types import *
-
-__LP64__ = (8*struct.calcsize("P") == 64)
-__i386__ = (platform.machine() == 'i386')
-__x86_64__ = (platform.machine() == 'x86_64')
+from .types import __LP64__, __i386__, __x86_64__, __arm__, __arm64__
 
 if sizeof(c_void_p) == 4:
     c_ptrdiff_t = c_int32
 elif sizeof(c_void_p) == 8:
     c_ptrdiff_t = c_int64
+else:
+    raise TypeError("Don't know a c_ptrdiff_t for %d-byte pointers" % sizeof(c_void_p))
 
 ######################################################################
 
@@ -249,16 +245,18 @@ objc.objc_getProtocol.argtypes = [c_char_p]
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
 # id objc_msgSendSuper(struct objc_super *super, SEL op,  ...)
 
-# The _stret and _fpret variants only exist on x86-based architectures.
-if __i386__ or __x86_64__:
+# The _stret variants only exist on x86-based architectures and ARM32.
+if __i386__ or __x86_64__ or __arm__:
     # void objc_msgSendSuper_stret(struct objc_super *super, SEL op, ...)
     objc.objc_msgSendSuper_stret.restype = None
 
-    # double objc_msgSend_fpret(id self, SEL op, ...)
-    objc.objc_msgSend_fpret.restype = c_double
-
     # void objc_msgSend_stret(void * stretAddr, id theReceiver, SEL theSelector,  ...)
     objc.objc_msgSend_stret.restype = None
+
+# The _fpret variant only exists on x86-based architectures.
+if __i386__ or __x86_64__:
+    # double objc_msgSend_fpret(id self, SEL op, ...)
+    objc.objc_msgSend_fpret.restype = c_double
 
 # void objc_registerClassPair(Class cls)
 objc.objc_registerClassPair.restype = None
@@ -408,28 +406,39 @@ def get_superclass_of_object(obj):
 # http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
-    """Try to figure out when a return type will be passed on stack."""
+    """Determine if objc_msgSend_stret is required to return a struct type."""
     if type(restype) != type(Structure):
+        # Not needed when restype is not a structure.
         return False
-    if not __LP64__ and sizeof(restype) <= 8:
+    elif __i386__:
+        # On i386: Use for structures not sized exactly like an integer (1, 2, 4, or 8 bytes).
+        return sizeof(restype) not in (1, 2, 4, 8)
+    elif __x86_64__:
+        # On x86_64: Use for structures larger than 16 bytes.
+        # (The ABI docs say that there are some special cases
+        # for vector types, but those can't really be used
+        # with ctypes anyway.)
+        return sizeof(restype) > 16
+    elif __arm__:
+        # On ARM32: Use for all structures, regardless of size.
+        return True
+    else:
+        # Other platforms: Doesn't exist.
         return False
-    if __LP64__ and sizeof(restype) <= 16:  # maybe? I don't know?
-        return False
-    return True
 
 
 # http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
     """Determine if objc_msgSend_fpret is required to return a floating point type."""
-    if not (__i386__ or __x86_64__):
-        # Unneeded on non-intel processors
+    if __x86_64__:
+        # On x86_64: Use only for long double.
+        return restype == c_longdouble
+    elif __i386__:
+        # On i386: Use for all floating-point types.
+        return restype in (c_float, c_double, c_longdouble)
+    else:
+        # Other platforms: Doesn't exist.
         return False
-    if __LP64__ and restype == c_longdouble:
-        # Use only for long double on x86_64
-        return True
-    if not __LP64__ and restype in (c_float, c_double, c_longdouble):
-        return True
-    return False
 
 
 def send_message(receiver, selName, *args, **kwargs):
@@ -448,19 +457,27 @@ def send_message(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', [])
+    
     # Choose the correct version of objc_msgSend based on return type.
+    # Use objc['name'] instead of objc.name to get a new function object
+    # that is independent of the one on the objc library.
+    # This way multiple threads sending messages don't overwrite
+    # each other's function signatures.
     if should_use_fpret(restype):
-        objc.objc_msgSend_fpret.restype = restype
-        objc.objc_msgSend_fpret.argtypes = [c_void_p, c_void_p] + argtypes
-        result = objc.objc_msgSend_fpret(receiver, selector, *args)
+        send = objc['objc_msgSend_fpret']
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
     elif should_use_stret(restype):
-        objc.objc_msgSend_stret.argtypes = [POINTER(restype), c_void_p, c_void_p] + argtypes
-        result = restype()
-        objc.objc_msgSend_stret(byref(result), receiver, selector, *args)
+        send = objc['objc_msgSend_stret']
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
     else:
-        objc.objc_msgSend.restype = restype
-        objc.objc_msgSend.argtypes = [c_void_p, c_void_p] + argtypes
-        result = objc.objc_msgSend(receiver, selector, *args)
+        send = objc['objc_msgSend']
+        send.restype = restype
+        send.argtypes = [c_void_p, c_void_p] + argtypes
+        result = send(receiver, selector, *args)
         if restype == c_void_p:
             result = c_void_p(result)
     return result
@@ -485,12 +502,14 @@ def send_super(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
-    objc.objc_msgSendSuper.restype = restype
+    
+    send = objc['objc_msgSendSuper']
+    send.restype = restype
     if argtypes:
-        objc.objc_msgSendSuper.argtypes = [OBJC_SUPER_PTR, c_void_p] + argtypes
+        send.argtypes = [OBJC_SUPER_PTR, c_void_p] + argtypes
     else:
-        objc.objc_msgSendSuper.argtypes = None
-    result = objc.objc_msgSendSuper(byref(super_struct), selector, *args)
+        send.argtypes = None
+    result = send(byref(super_struct), selector, *args)
     if restype == c_void_p:
         result = c_void_p(result)
     return result
@@ -1407,30 +1426,36 @@ class ObjCInstance(object):
 
 NSObject = ObjCClass('NSObject')
 
-
-class DeallocationObserver(NSObject):
-
-    observed_object = objc_ivar(c_void_p)
-
-    @objc_rawmethod
-    def initWithObject_(self, cmd, anObject):
-        self = send_super(self, 'init')
-        self = self.value
-        set_instance_variable(self, 'observed_object', anObject, c_void_p)
-        return self
-
-    @objc_rawmethod
-    def dealloc(self, cmd) -> None:
-        anObject = get_instance_variable(self, 'observed_object', c_void_p)
-        ObjCInstance._cached_objects.pop(anObject, None)
-        send_super(self, 'dealloc')
-
-    @objc_rawmethod
-    def finalize(self, cmd) -> None:
-        # Called instead of dealloc if using garbage collection.
-        # (which would have to be explicitly started with
-        # objc_startCollectorThread(), so probably not too much reason
-        # to have this here, but I guess it can't hurt.)
-        anObject = get_instance_variable(self, 'observed_object', c_void_p)
-        ObjCInstance._cached_objects.pop(anObject, None)
-        send_super(self, 'finalize')
+# Try to reuse an existing DeallocationObserver class.
+# This allows reloading the module without having to restart
+# the interpreter, although any changes to DeallocationObserver
+# itself are only applied after a restart of course.
+try:
+    DeallocationObserver = ObjCClass("DeallocationObserver")
+except NameError:
+    class DeallocationObserver(NSObject):
+    
+        observed_object = objc_ivar(c_void_p)
+    
+        @objc_rawmethod
+        def initWithObject_(self, cmd, anObject):
+            self = send_super(self, 'init')
+            self = self.value
+            set_instance_variable(self, 'observed_object', anObject, c_void_p)
+            return self
+    
+        @objc_rawmethod
+        def dealloc(self, cmd) -> None:
+            anObject = get_instance_variable(self, 'observed_object', c_void_p)
+            ObjCInstance._cached_objects.pop(anObject, None)
+            send_super(self, 'dealloc')
+    
+        @objc_rawmethod
+        def finalize(self, cmd) -> None:
+            # Called instead of dealloc if using garbage collection.
+            # (which would have to be explicitly started with
+            # objc_startCollectorThread(), so probably not too much reason
+            # to have this here, but I guess it can't hurt.)
+            anObject = get_instance_variable(self, 'observed_object', c_void_p)
+            ObjCInstance._cached_objects.pop(anObject, None)
+            send_super(self, 'finalize')
