@@ -11,6 +11,9 @@ try:
 except:
     OSX_VERSION = None
 
+import faulthandler
+faulthandler.enable()
+
 from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
 
 
@@ -26,9 +29,6 @@ print("sys.platform = " + repr(sys.platform))
 print("platform.machine() = " + repr(platform.machine()))
 print("platform.version() = " + repr(platform.version()))
 print("sys.maxsize = " + hex(sys.maxsize))
-
-import faulthandler
-faulthandler.enable()
 
 
 class RubiconTest(unittest.TestCase):
@@ -319,7 +319,7 @@ class RubiconTest(unittest.TestCase):
 
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
-        self.assertTrue(isinstance(result, Decimal), 'Result should be a Decimal')
+        self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
     
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
