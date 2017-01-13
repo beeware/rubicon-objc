@@ -16,6 +16,7 @@ else:
 ######################################################################
 
 objc = cdll.LoadLibrary(util.find_library('objc'))
+Foundation = cdll.LoadLibrary(util.find_library('Foundation'))
 
 ######################################################################
 
@@ -1306,7 +1307,7 @@ class ObjCClass(type):
         if method:
             ObjCBoundMethod(method, self.__dict__['ptr'])(value)
         else:
-            self.__dict__[name] = value
+            super(ObjCClass, self).__setattr__(name, value)
 
 
 ######################################################################
@@ -1343,6 +1344,10 @@ class ObjCInstance(object):
         class_ptr = c_void_p(objc.object_getClass(object_ptr))
         objc_instance.__dict__['objc_class'] = ObjCClass(class_ptr)
 
+        # If it's an array, we need the internal counter in the instance to implement iterable.
+        if objc.class_getName(class_ptr).decode('utf-8').startswith('__NSArray'):
+            objc_instance.__dict__['_counter'] = 0
+
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
         cls._cached_objects[object_ptr.value] = objc_instance
@@ -1361,14 +1366,69 @@ class ObjCInstance(object):
 
         return objc_instance
 
+    def __getitem__(self, key):
+        classname = objc.class_getName(self.__dict__['objc_class'].ptr).decode('utf-8')
+        if classname.startswith('__NSArray') or classname.startswith('__NSSingleObjectArray'):
+            if isinstance(key, int):
+                # Support negative indices as indexing from the right
+                if key < 0:
+                    key = self.count - (-1 * key)
+                if key > (self.count - 1) or key < 0:
+                    raise IndexError('list index out of range')
+                else:
+                    return self.objectAtIndex_(key)
+            elif isinstance(key, slice):
+                array = ObjCClass('NSMutableArray').array()
+                helper = [item for item in self]
+                for item in helper[key]:
+                    array.addObject_(item)
+                return array
+            else:
+                raise TypeError('list indices must be integers or slices, not ' + type(key).__name__)
+
+        raise TypeError(repr(classname) + ' object does not support indexing')
+
+    def __iter__(self):
+        classname = objc.class_getName(self.__dict__['objc_class'].ptr).decode('utf-8')
+        if classname.startswith('__NSArray') or classname.startswith('__NSSingleObjectArray'):
+            return self
+        raise TypeError(repr(classname) + ' object is not iterable')
+
+    def __next__(self):
+        classname = objc.class_getName(self.__dict__['objc_class'].ptr).decode('utf-8')
+        if classname.startswith('__NSArray') or classname.startswith('__NSSingleObjectArray'):
+            if self._counter == self.count:
+                self._counter = 0
+                raise StopIteration
+            item = self.objectAtIndex_(self._counter)
+            self._counter += 1
+            return item
+        raise TypeError(repr(classname) + ' is not iterable')
+
+    def __eq__(self, other):
+        classname = objc.class_getName(self.__dict__['objc_class'].ptr).decode('utf-8')
+        if classname.startswith('__NSArray') or classname.startswith('__NSSingleObjectArray'):
+            return bool(self.isEqualToArray_(other))
+        return super().__eq__(other)
+
     def __repr__(self):
-        if self.__dict__['objc_class'].__dict__['name'] == '__NSCFString':
+        default = "<ObjCInstance %#x: %s at %s>" % (id(self), self.__dict__['objc_class'].name, text(self.__dict__['ptr'].value))
+        classname = self.__dict__['objc_class'].__dict__['name']
+        if classname == '__NSCFString':
             # Display contents of NSString objects
             from .core_foundation import to_str
             string = to_str(self)
             return "<ObjCInstance %#x: %s (%s) at %s>" % (id(self), self.__dict__['objc_class'].name, string, text(self.__dict__['ptr'].value))
-
-        return "<ObjCInstance %#x: %s at %s>" % (id(self), self.__dict__['objc_class'].name, text(self.__dict__['ptr'].value))
+        elif classname.startswith('__NSArray') or classname.startswith('__NSSingleObjectArray'):
+            out = 'NSArray ['
+            for i in range(self.count - 1):
+                out += repr(self.objectAtIndex_(i)) + ', '
+            if self.count > 0:
+                out += repr(self.objectAtIndex_(self.count - 1))
+            out += ']'
+            return out
+        else:
+            return default
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
