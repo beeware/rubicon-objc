@@ -15,7 +15,15 @@ else:
 
 ######################################################################
 
-objc = cdll.LoadLibrary(util.find_library('objc'))
+def _find_or_error(name):
+    path = util.find_library(name)
+    if path is None:
+        raise ValueError("Library {!r} not found".format(name))
+    else:
+        return path
+
+objc = cdll.LoadLibrary(_find_or_error('objc'))
+Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
 
 class objc_id(c_void_p):
     pass
@@ -1213,6 +1221,103 @@ def objc_rawmethod(f):
 
 ######################################################################
 
+class ObjCInstance(object):
+    """Python wrapper for an Objective-C instance."""
+
+    _cached_objects = {}
+
+    def __new__(cls, object_ptr):
+        """Create a new ObjCInstance or return a previously created one
+        for the given object_ptr which should be an Objective-C id."""
+        # Make sure that object_ptr is wrapped in an objc_id.
+        if not isinstance(object_ptr, objc_id):
+            object_ptr = cast(object_ptr, objc_id)
+
+        # If given a nil pointer, return None.
+        if not object_ptr.value:
+            return None
+
+        # Check if we've already created an python ObjCInstance for this
+        # object_ptr id and if so, then return it.  A single ObjCInstance will
+        # be created for any object pointer when it is first encountered.
+        # This same ObjCInstance will then persist until the object is
+        # deallocated.
+        if object_ptr.value in cls._cached_objects:
+            return cls._cached_objects[object_ptr.value]
+
+        # Otherwise, create a new ObjCInstance.
+        objc_instance = super(ObjCInstance, cls).__new__(cls)
+        objc_instance.__dict__['ptr'] = objc_instance.__dict__['_as_parameter_'] = object_ptr
+        # Determine class of this object.
+        class_ptr = objc.object_getClass(object_ptr)
+        objc_instance.__dict__['objc_class'] = ObjCClass(class_ptr)
+
+        # Store new object in the dictionary of cached objects, keyed
+        # by the (integer) memory address pointed to by the object_ptr.
+        cls._cached_objects[object_ptr.value] = objc_instance
+
+        # Create a DeallocationObserver and associate it with this object.
+        # When the Objective-C object is deallocated, the observer will remove
+        # the ObjCInstance corresponding to the object from the cached objects
+        # dictionary, effectively destroying the ObjCInstance.
+        observer = send_message(send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]), 'initWithObject:', objc_instance, restype=objc_id, argtypes=[objc_id])
+        objc.objc_setAssociatedObject(objc_instance, observer, observer, 0x301)
+
+        # The observer is retained by the object we associate it to.  We release
+        # the observer now so that it will be deallocated when the associated
+        # object is deallocated.
+        send_message(observer, 'release')
+
+        return objc_instance
+    
+    def __str__(self):
+        from . import core_foundation
+        if core_foundation.is_str(self):
+            return core_foundation.to_str(self)
+        else:
+            return self.debugDescription
+
+    def __repr__(self):
+        return "<ObjCInstance %#x: %s at %#x: %s>" % (id(self), self.__dict__['objc_class'].name, self.__dict__['ptr'].value, self.debugDescription)
+
+    def __getattr__(self, name):
+        """Returns a callable method object with the given name."""
+        # Search for named instance method in the class object and if it
+        # exists, return callable object with self as hidden argument.
+        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
+        # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
+        # alive for chained calls like MyClass.alloc().init() where the
+        # object created by alloc() is not assigned to a variable.
+
+        # If there's a property with this name; return the value directly.
+        # If the name ends with _, we can shortcut this step, because it's
+        # clear that we're dealing with a method call.
+        if not name.endswith('_'):
+            method = cache_instance_property_accessor(self.__dict__['objc_class'], name)
+            if method:
+                return ObjCBoundMethod(method, self)()
+
+        method = cache_instance_method(self.__dict__['objc_class'], name)
+        if method:
+            return ObjCBoundMethod(method, self)
+        else:
+            try:
+                return self.__dict__[name]
+            except KeyError:
+                # Otherwise, raise an exception.
+                raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
+
+    def __setattr__(self, name, value):
+        # Convert enums to their underlying values.
+        if isinstance(value, Enum):
+            value = value.value
+        # Set the value of an attribute.
+        method = cache_instance_property_mutator(self.__dict__['objc_class'], name)
+        if method:
+            ObjCBoundMethod(method, self)(value)
+        else:
+            self.__dict__[name] = value
+
 
 class ObjCClass(type):
     """Python wrapper for an Objective-C class."""
@@ -1345,106 +1450,6 @@ class ObjCClass(type):
         method = cache_class_property_mutator(self, name)
         if method:
             ObjCBoundMethod(method, self.__dict__['ptr'])(value)
-        else:
-            self.__dict__[name] = value
-
-
-######################################################################
-
-class ObjCInstance(object):
-    """Python wrapper for an Objective-C instance."""
-
-    _cached_objects = {}
-
-    def __new__(cls, object_ptr):
-        """Create a new ObjCInstance or return a previously created one
-        for the given object_ptr which should be an Objective-C id."""
-        # Make sure that object_ptr is wrapped in an objc_id.
-        if not isinstance(object_ptr, objc_id):
-            object_ptr = cast(object_ptr, objc_id)
-
-        # If given a nil pointer, return None.
-        if not object_ptr.value:
-            return None
-
-        # Check if we've already created an python ObjCInstance for this
-        # object_ptr id and if so, then return it.  A single ObjCInstance will
-        # be created for any object pointer when it is first encountered.
-        # This same ObjCInstance will then persist until the object is
-        # deallocated.
-        if object_ptr.value in cls._cached_objects:
-            return cls._cached_objects[object_ptr.value]
-
-        # Otherwise, create a new ObjCInstance.
-        objc_instance = super(ObjCInstance, cls).__new__(cls)
-        objc_instance.__dict__['ptr'] = objc_instance.__dict__['_as_parameter_'] = object_ptr
-        # Determine class of this object.
-        class_ptr = objc.object_getClass(object_ptr)
-        objc_instance.__dict__['objc_class'] = ObjCClass(class_ptr)
-
-        # Store new object in the dictionary of cached objects, keyed
-        # by the (integer) memory address pointed to by the object_ptr.
-        cls._cached_objects[object_ptr.value] = objc_instance
-
-        # Create a DeallocationObserver and associate it with this object.
-        # When the Objective-C object is deallocated, the observer will remove
-        # the ObjCInstance corresponding to the object from the cached objects
-        # dictionary, effectively destroying the ObjCInstance.
-        observer = send_message(send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]), 'initWithObject:', objc_instance, restype=objc_id, argtypes=[objc_id])
-        objc.objc_setAssociatedObject(objc_instance, observer, observer, 0x301)
-
-        # The observer is retained by the object we associate it to.  We release
-        # the observer now so that it will be deallocated when the associated
-        # object is deallocated.
-        send_message(observer, 'release')
-
-        return objc_instance
-
-    def __str__(self):
-        from . import core_foundation
-        if core_foundation.is_str(self):
-            return core_foundation.to_str(self)
-        else:
-            return self.debugDescription
-
-    def __repr__(self):
-        return "<ObjCInstance %#x: %s at %#x: %s>" % (id(self), self.__dict__['objc_class'].name, self.__dict__['ptr'].value, self.debugDescription)
-
-    def __getattr__(self, name):
-        """Returns a callable method object with the given name."""
-        # Search for named instance method in the class object and if it
-        # exists, return callable object with self as hidden argument.
-        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
-        # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
-        # alive for chained calls like MyClass.alloc().init() where the
-        # object created by alloc() is not assigned to a variable.
-
-        # If there's a property with this name; return the value directly.
-        # If the name ends with _, we can shortcut this step, because it's
-        # clear that we're dealing with a method call.
-        if not name.endswith('_'):
-            method = cache_instance_property_accessor(self.__dict__['objc_class'], name)
-            if method:
-                return ObjCBoundMethod(method, self)()
-
-        method = cache_instance_method(self.__dict__['objc_class'], name)
-        if method:
-            return ObjCBoundMethod(method, self)
-        else:
-            try:
-                return self.__dict__[name]
-            except KeyError:
-                # Otherwise, raise an exception.
-                raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
-
-    def __setattr__(self, name, value):
-        # Convert enums to their underlying values.
-        if isinstance(value, Enum):
-            value = value.value
-        # Set the value of an attribute.
-        method = cache_instance_property_mutator(self.__dict__['objc_class'], name)
-        if method:
-            ObjCBoundMethod(method, self)(value)
         else:
             self.__dict__[name] = value
 
