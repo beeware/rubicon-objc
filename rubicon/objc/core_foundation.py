@@ -84,6 +84,9 @@ def to_str(cfstring):
     if result:
         return buffer.value.decode('utf-8')
 
+def is_str(cfobject):
+    return cf.CFGetTypeID(cfobject) == cf.CFStringGetTypeID()
+
 cf.CFDataCreate.restype = CFDataRef
 cf.CFDataCreate.argtypes = [CFAllocatorRef, POINTER(c_uint8), CFIndex]
 

@@ -15,6 +15,7 @@ import faulthandler
 faulthandler.enable()
 
 from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import core_foundation
 
 
 # Load the test harness library
@@ -511,4 +512,9 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(insets.left, other_insets.left)
         self.assertEqual(insets.bottom, other_insets.bottom)
         self.assertEqual(insets.right, other_insets.right)
+    
+    def test_cfstring_to_str(self):
+        "CFString/NSString instances can be converted to Python str."
+        
+        self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
 

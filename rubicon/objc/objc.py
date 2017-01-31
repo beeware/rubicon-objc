@@ -1298,7 +1298,7 @@ class ObjCClass(type):
         return objc_class
 
     def __repr__(self):
-        return "<ObjCClass: %s at %s>" % (self.__dict__['name'], str(self.__dict__['ptr'].value))
+        return "<ObjCClass: %s at %#x>" % (self.__dict__['name'], self.__dict__['ptr'].value)
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
@@ -1382,14 +1382,15 @@ class ObjCInstance(object):
 
         return objc_instance
 
-    def __repr__(self):
-        if self.__dict__['objc_class'].__dict__['name'] == '__NSCFString':
-            # Display contents of NSString objects
-            from .core_foundation import to_str
-            string = to_str(self)
-            return "<ObjCInstance %#x: %s (%s) at %s>" % (id(self), self.__dict__['objc_class'].name, string, str(self.__dict__['ptr'].value))
+    def __str__(self):
+        from . import core_foundation
+        if core_foundation.is_str(self):
+            return core_foundation.to_str(self)
+        else:
+            return self.debugDescription
 
-        return "<ObjCInstance %#x: %s at %s>" % (id(self), self.__dict__['objc_class'].name, str(self.__dict__['ptr'].value))
+    def __repr__(self):
+        return "<ObjCInstance %#x: %s at %#x: %s>" % (id(self), self.__dict__['objc_class'].name, self.__dict__['ptr'].value, self.debugDescription)
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
