@@ -10,7 +10,6 @@ from .objc import (
 from .core_foundation import at, to_str, to_number, to_value, to_set, to_list
 
 from .types import (
-    text,
     NSInteger, NSUInteger,
     CGFloat,
     NSPointEncoding, NSSizeEncoding, NSRectEncoding, NSRangeEncoding, UIEdgeInsetsEncoding, NSEdgeInsetsEncoding,

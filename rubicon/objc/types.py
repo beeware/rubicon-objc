@@ -30,11 +30,6 @@ def encoding_for_ctype(vartype):
     }
     return typecodes.get(vartype, b'?')
 
-try:
-    text = unicode
-except NameError:
-    text = str
-
 
 # Note CGBase.h located at
 # /System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/Headers/CGBase.h
@@ -166,6 +161,3 @@ class NSRange(Structure):
 
 
 NSZeroPoint = NSPoint(0, 0)
-
-CFTypeID = c_ulong
-CFNumberType = c_uint32
