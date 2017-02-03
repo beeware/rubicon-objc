@@ -818,14 +818,28 @@ class ObjCMethod(object):
             self.func.argtypes = self.argtypes
         return self.func
 
-    def __call__(self, receiver, *args):
+    def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method with the given id and arguments.  You do not need
         to pass in the selector as an argument since it will be automatically
         provided."""
         f = self.get_callable()
-        # Automatically convert Python strings into ObjC strings
-        from .core_foundation import from_value, to_value
-        converted_args = [from_value(arg) for arg in args]
+        
+        if convert_args:
+            from .core_foundation import from_value
+            converted_args = []
+            for argtype, arg in zip(self.argtypes[2:], args):
+                if isinstance(arg, Enum):
+                    # Convert Python enum objects to their values
+                    arg = arg.value
+                
+                if argtype == objc_id:
+                    # Convert Python objects to Core Foundation objects
+                    arg = from_value(arg)
+                
+                converted_args.append(arg)
+        else:
+            converted_args = args
+        
         try:
             result = f(receiver, self.selector, *converted_args)
         except ArgumentError as error:
@@ -833,7 +847,11 @@ class ObjCMethod(object):
             error.args = (error.args[0] + ' (selector = {self.name}, argtypes = {self.argtypes}, encoding = {self.encoding})'.format(self=self),)
             raise
         else:
+            if not convert_result:
+                return result
+            
             # Convert result to python type if it is a instance or class pointer.
+            from .core_foundation import to_value
             if self.restype == objc_id:
                 result = to_value(ObjCInstance(result))
             elif self.restype == Class:
@@ -858,9 +876,9 @@ class ObjCBoundMethod(object):
     def __repr__(self):
         return '<ObjCBoundMethod %s (%s)>' % (self.method.name, self.receiver)
 
-    def __call__(self, *args):
+    def __call__(self, *args, **kwargs):
         """Call the method with the given arguments."""
-        return self.method(self.receiver, *args)
+        return self.method(self.receiver, *args, **kwargs)
 
 ######################################################################
 

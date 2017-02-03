@@ -14,7 +14,7 @@ except:
 import faulthandler
 faulthandler.enable()
 
-from rubicon.objc import ObjCClass, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import ObjCClass, ObjCInstance, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
 from rubicon.objc import core_foundation
 
 
@@ -381,6 +381,14 @@ class RubiconTest(unittest.TestCase):
 
         the_thing = example.thing
         self.assertEqual(the_thing.toString(), "This is thing 2")
+
+    def test_no_convert_return(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+        
+        res = example.toString(convert_result=False)
+        self.assertNotIsInstance(res, ObjCInstance)
+        self.assertEqual(str(ObjCInstance(res)), "This is an ObjC Example object")
 
     def test_duplicate_class_registration(self):
         "If you define a class name twice in the same runtime, you get an error."
