@@ -1147,7 +1147,7 @@ class ObjCInstance(object):
         if not object_ptr.value:
             return None
 
-        # Check if we've already created an python ObjCInstance for this
+        # Check if we've already created a Python ObjCInstance for this
         # object_ptr id and if so, then return it.  A single ObjCInstance will
         # be created for any object pointer when it is first encountered.
         # This same ObjCInstance will then persist until the object is
@@ -1160,7 +1160,7 @@ class ObjCInstance(object):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
-        if _name is not None or _bases is not None or _ns is not None:
+        if issubclass(cls, type):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
@@ -1197,7 +1197,14 @@ class ObjCInstance(object):
             return self.debugDescription
 
     def __repr__(self):
-        return "<ObjCInstance %#x: %s at %#x: %s>" % (id(self), self.__dict__['objc_class'].name, self.__dict__['ptr'].value, self.debugDescription)
+        return "<%s.%s %#x: %s at %#x: %s>" % (
+            type(self).__module__,
+            type(self).__qualname__,
+            id(self),
+            self.objc_class.name,
+            self.__dict__['ptr'].value,
+            self.debugDescription,
+        )
 
     def __getattr__(self, name):
         """Returns a callable method object with the given name."""
@@ -1234,6 +1241,13 @@ class ObjCInstance(object):
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
 
 
+# The inheritance order is important here.
+# type must come after ObjCInstance, so super() refers to ObjCInstance.
+# This allows the ObjCInstance constructor to receive the class pointer
+# as well as the name, bases, attrs arguments.
+# The other way around this would not be possible, because then
+# the type constructor would be called before ObjCInstance's, and there
+# would be no opportunity to pass extra arguments.
 class ObjCClass(ObjCInstance, type):
     """Python wrapper for an Objective-C class."""
 
@@ -1259,10 +1273,16 @@ class ObjCClass(ObjCInstance, type):
                     raise NameError("ObjC Class '%s' couldn't be found." % class_name_or_ptr)
             else:
                 ptr = cast(class_name_or_ptr, Class)
+                if ptr.value is None:
+                    raise ValueError("Cannot create ObjCClass from nil pointer")
+                elif not objc.object_isClass(ptr):
+                    raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
                 name = objc.class_getName(ptr)
                 # "nil" is an ObjC answer confirming the ptr didn't work.
                 if name == b'nil':
                     raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
+                if not issubclass(cls, ObjCMetaClass) and objc.class_isMetaClass(ptr):
+                    return ObjCMetaClass(ptr)
 
         else:
             name, bases, attrs = args
@@ -1274,6 +1294,8 @@ class ObjCClass(ObjCInstance, type):
             if ptr.value is None:
                 # Create the ObjC class description
                 ptr = objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0)
+                if ptr is None:
+                    raise RuntimeError("Class pair allocation failed")
 
                 # Pre-Register all the instance variables
                 for attr, obj in attrs.items():
@@ -1288,20 +1310,19 @@ class ObjCClass(ObjCInstance, type):
             else:
                 raise RuntimeError("ObjC runtime already contains a registered class named '%s'." % name.decode('utf-8'))
 
-        # Check if we've already created a Python object for this class
-        # and if so, return it rather than making a new one.
-        try:
-            self = cls._cached_objects[ptr.value]
-        except KeyError:
-            objc_class_name = name.decode('utf-8')
+        objc_class_name = name.decode('utf-8')
 
-            # Otherwise create a new Python object and then initialize it.
-            self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
-                    'name': objc_class_name,
-                    'instance_methods': {},     # mapping of name -> instance method
-                    'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
-                    'imp_table': {},            # Mapping of name -> Native method references
-                })
+        # Create the class object. If there is already a cached instance for ptr,
+        # it is returned and the additional arguments are ignored.
+        # Logically this can only happen when creating an ObjCClass from an existing
+        # name or pointer, not when creating a new class.
+        # If there is no cached instance for ptr, a new one is created and cached.
+        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+            'name': objc_class_name,
+            'instance_methods': {},     # mapping of name -> instance method
+            'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
+            'imp_table': {},            # Mapping of name -> Native method references
+        })
 
         # Register all the methods, class methods, etc
         for attr, obj in attrs.items():
@@ -1318,7 +1339,31 @@ class ObjCClass(ObjCInstance, type):
         return self
 
     def __repr__(self):
-        return "<ObjCClass: %s at %#x>" % (self.__dict__['name'], self.__dict__['ptr'].value)
+        return "<%s.%s: %s at %#x>" % (
+            type(self).__module__,
+            type(self).__qualname__,
+            self.__dict__['name'],
+            self.__dict__['ptr'].value,
+        )
+
+
+class ObjCMetaClass(ObjCClass):
+    """Python wrapper for an Objective-C metaclass."""
+    
+    def __new__(cls, name_or_ptr):
+        if isinstance(name_or_ptr, (bytes, str)):
+            name = ensure_bytes(name_or_ptr)
+            ptr = objc.objc_getMetaClass(name)
+            if ptr.value is None:
+                raise NameError("Objective-C metaclass {} not found".format(name))
+        else:
+            ptr = cast(name_or_ptr, Class)
+            if ptr.value is None:
+                raise ValueError("Cannot create ObjCMetaClass for nil pointer")
+            elif not objc.object_isClass(ptr) or not objc.class_isMetaClass(ptr):
+                raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
+        
+        return super().__new__(cls, ptr)
 
 
 ######################################################################
