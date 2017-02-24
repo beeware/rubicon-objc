@@ -164,7 +164,7 @@ def to_number(cfnumber):
 
     # NSDecimalNumber reports as a double. So does an NSNumber of type double.
     # In the case of NSDecimalNumber, convert to a Python decimal.
-    if numeric_type == kCFNumberDoubleType and cfnumber.__dict__['objc_class'].name == 'NSDecimalNumber':
+    if numeric_type == kCFNumberDoubleType and cfnumber.objc_class.name == 'NSDecimalNumber':
         return Decimal(cfnumber.stringValue)
 
     # Otherwise, just do the conversion.

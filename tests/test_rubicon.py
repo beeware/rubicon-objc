@@ -14,7 +14,7 @@ except:
 import faulthandler
 faulthandler.enable()
 
-from rubicon.objc import ObjCClass, ObjCInstance, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import ObjCInstance, ObjCClass, ObjCMetaClass, NSObject, objc, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
 from rubicon.objc import core_foundation
 
 
@@ -33,6 +33,115 @@ print("sys.maxsize = " + hex(sys.maxsize))
 
 
 class RubiconTest(unittest.TestCase):
+    def test_class_by_name(self):
+        """An Objective-C class can be looked up by name."""
+        
+        Example = ObjCClass("Example")
+        self.assertEqual(Example.name, "Example")
+    
+    def test_objcclass_caching(self):
+        """ObjCClass instances are cached."""
+        
+        Example1 = ObjCClass("Example")
+        Example2 = ObjCClass("Example")
+        
+        self.assertIs(Example1, Example2)
+    
+    def test_class_by_pointer(self):
+        """An Objective-C class can be created from a pointer."""
+        
+        example_ptr = objc.objc_getClass(b"Example")
+        Example = ObjCClass(example_ptr)
+        self.assertEqual(Example, ObjCClass("Example"))
+
+    def test_nonexistant_class(self):
+        """A NameError is raised if a class doesn't exist."""
+
+        with self.assertRaises(NameError):
+            ObjCClass('DoesNotExist')
+    
+    def test_metaclass_by_name(self):
+        """An Objective-C metaclass can be looked up by name."""
+        
+        Example = ObjCClass("Example")
+        ExampleMeta = ObjCMetaClass("Example")
+        
+        self.assertEqual(ExampleMeta.name, "Example")
+        self.assertEqual(ExampleMeta, Example.objc_class)
+    
+    def test_objcmetaclass_caching(self):
+        """ObjCMetaClass instances are cached."""
+        
+        ExampleMeta1 = ObjCMetaClass("Example")
+        ExampleMeta2 = ObjCMetaClass("Example")
+        
+        self.assertIs(ExampleMeta1, ExampleMeta2)
+    
+    def test_metaclass_by_pointer(self):
+        """An Objective-C metaclass can be created from a pointer."""
+        
+        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        ExampleMeta = ObjCMetaClass(examplemeta_ptr)
+        self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
+
+    def test_nonexistant_metaclass(self):
+        """A NameError is raised if a metaclass doesn't exist."""
+
+        with self.assertRaises(NameError):
+            ObjCMetaClass('DoesNotExist')
+    
+    def test_metametaclass(self):
+        """The class of a metaclass can be looked up."""
+        
+        ExampleMeta = ObjCMetaClass("Example")
+        ExampleMetaMeta = ExampleMeta.objc_class
+        
+        self.assertIsInstance(ExampleMetaMeta, ObjCMetaClass)
+        self.assertEqual(ExampleMetaMeta, NSObject.objc_class)
+    
+    def test_objcinstance_can_produce_objcclass(self):
+        """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
+        
+        example_ptr = objc.objc_getClass(b"Example")
+        Example = ObjCInstance(example_ptr)
+        self.assertEqual(Example, ObjCClass("Example"))
+        self.assertIsInstance(Example, ObjCClass)
+
+    def test_objcinstance_can_produce_objcmetaclass(self):
+        """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
+        
+        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        ExampleMeta = ObjCInstance(examplemeta_ptr)
+        self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
+        self.assertIsInstance(ExampleMeta, ObjCMetaClass)
+    
+    def test_objcclass_can_produce_objcmetaclass(self):
+        """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
+        
+        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        ExampleMeta = ObjCClass(examplemeta_ptr)
+        self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
+        self.assertIsInstance(ExampleMeta, ObjCMetaClass)
+    
+    def test_objcclass_requires_class(self):
+        """ObjCClass only accepts class pointers."""
+        
+        random_obj = NSObject.alloc().init()
+        with self.assertRaises(ValueError):
+            ObjCClass(random_obj.ptr)
+        random_obj.release()
+    
+    def test_objcmetaclass_requires_metaclass(self):
+        """ObjCMetaClass only accepts metaclass pointers."""
+        
+        random_obj = NSObject.alloc().init()
+        with self.assertRaises(ValueError):
+            ObjCMetaClass(random_obj.ptr)
+        random_obj.release()
+        
+        with self.assertRaises(ValueError):
+            ObjCMetaClass(NSObject.ptr)
+    
     def test_field(self):
         "A field on an instance can be accessed and mutated"
 
@@ -126,18 +235,6 @@ class RubiconTest(unittest.TestCase):
 
         # ...at which point it's fair game to be retrieved.
         self.assertEqual(obj1.specialValue, 37)
-
-    def test_non_existent_class(self):
-        "A Name Error is raised if a class doesn't exist."
-
-        # If a class doesn't exist, raise NameError
-        with self.assertRaises(NameError):
-            ObjCClass('DoesNotExist')
-
-        # If you try to create a class directly from a pointer, and
-        # the pointer isn't valid, raise an error.
-        with self.assertRaises(RuntimeError):
-            ObjCClass(0)
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."

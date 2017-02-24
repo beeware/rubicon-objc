@@ -15,7 +15,15 @@ else:
 
 ######################################################################
 
-objc = cdll.LoadLibrary(util.find_library('objc'))
+def _find_or_error(name):
+    path = util.find_library(name)
+    if path is None:
+        raise ValueError("Library {!r} not found".format(name))
+    else:
+        return path
+
+objc = cdll.LoadLibrary(_find_or_error('objc'))
+Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
 
 class objc_id(c_void_p):
     pass
@@ -42,7 +50,7 @@ class SEL(c_void_p):
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({self.name!r})".format(cls=type(self), self=self)
 
-class Class(c_void_p):
+class Class(objc_id):
     pass
 
 class IMP(c_void_p):
@@ -320,6 +328,10 @@ objc.object_copy.argtypes = [objc_id, c_size_t]
 # id object_dispose(id obj)
 objc.object_dispose.restype = objc_id
 objc.object_dispose.argtypes = [objc_id]
+
+# BOOL object_isClass(id obj)
+objc.object_isClass.restype = c_bool
+objc.object_isClass.argtypes = [objc_id]
 
 # Class object_getClass(id object)
 objc.object_getClass.restype = Class
@@ -883,40 +895,23 @@ class ObjCBoundMethod(object):
 ######################################################################
 
 
-def cache_instance_method(self, name):
+def cache_method(cls, name):
     """Returns a python representation of the named instance method,
     either by looking it up in the cached list of methods or by searching
     for and creating a new method object."""
     try:
-        return self.__dict__['instance_methods'][name]
+        return cls.__dict__['instance_methods'][name]
     except KeyError:
         selector = get_selector(name.replace('_', ':'))
-        method = objc.class_getInstanceMethod(self.__dict__['ptr'], selector)
+        method = objc.class_getInstanceMethod(cls, selector)
         if method.value:
             objc_method = ObjCMethod(method)
-            self.__dict__['instance_methods'][name] = objc_method
+            cls.__dict__['instance_methods'][name] = objc_method
             return objc_method
     return None
 
 
-def cache_class_method(self, name):
-    """Returns a python representation of the named class method,
-    either by looking it up in the cached list of methods or by searching
-    for and creating a new method object."""
-    try:
-        return self.__dict__['class_methods'][name]
-    except KeyError:
-        selector = get_selector(name.replace('_', ':'))
-        method = objc.class_getClassMethod(self.__dict__['ptr'], selector)
-
-        if method.value:
-            objc_method = ObjCMethod(method)
-            self.__dict__['class_methods'][name] = objc_method
-            return objc_method
-    return None
-
-
-def cache_instance_property_methods(self, name):
+def cache_property_methods(cls, name):
     """Return the accessor and mutator for the named property.
     """
     if name.endswith('_'):
@@ -926,15 +921,15 @@ def cache_instance_property_methods(self, name):
         methods = None
     else:
         # Check 1: Does the class respond to the property?
-        responds = objc.class_getProperty(self.__dict__['ptr'], name.encode('utf-8'))
+        responds = objc.class_getProperty(cls, name.encode('utf-8'))
 
         # Check 2: Does the class have an instance method to retrieve the given name
         accessor_selector = get_selector(name)
-        accessor = objc.class_getInstanceMethod(self.__dict__['ptr'], accessor_selector)
+        accessor = objc.class_getInstanceMethod(cls, accessor_selector)
 
         # Check 3: Is there a setName: method to set the property with the given name
         mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
-        mutator = objc.class_getInstanceMethod(self.__dict__['ptr'], mutator_selector)
+        mutator = objc.class_getInstanceMethod(cls, mutator_selector)
 
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
@@ -955,93 +950,31 @@ def cache_instance_property_methods(self, name):
     return methods
 
 
-def cache_instance_property_accessor(self, name):
+def cache_property_accessor(cls, name):
     """Returns a python representation of an accessor for the named
     property. Existence of a property is done by looking for the write
     selector (set<Name>:).
     """
     try:
-        methods = self.__dict__['instance_properties'][name]
+        methods = cls.__dict__['instance_properties'][name]
     except KeyError:
-        methods = cache_instance_property_methods(self, name)
-        self.__dict__['instance_properties'][name] = methods
+        methods = cache_property_methods(cls, name)
+        cls.__dict__['instance_properties'][name] = methods
     if methods:
         return methods[0]
     return None
 
 
-def cache_instance_property_mutator(self, name):
+def cache_property_mutator(cls, name):
     """Returns a python representation of an accessor for the named
     property. Existence of a property is done by looking for the write
     selector (set<Name>:).
     """
     try:
-        methods = self.__dict__['instance_properties'][name]
+        methods = cls.__dict__['instance_properties'][name]
     except KeyError:
-        methods = cache_instance_property_methods(self, name)
-        self.__dict__['instance_properties'][name] = methods
-    if methods:
-        return methods[1]
-    return None
-
-
-def cache_class_property_methods(self, name):
-    """Return the accessor and mutator for the named property. Existence
-    of a property is done by looking for the pair of selectors "name" and
-    "set<Name>:". If both exist, we assume this is a static property.
-    """
-    if name.endswith('_'):
-        # If the requested name ends with _, that's a marker that we're
-        # dealing with a method call, not a property, so we can shortcut
-        # the process.
-        methods = None
-    else:
-        accessor_selector = get_selector(name)
-        accessor = objc.class_getClassMethod(self.__dict__['ptr'], accessor_selector)
-        if accessor.value:
-            objc_accessor = ObjCMethod(accessor)
-        else:
-            objc_accessor = None
-
-        mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
-        mutator = objc.class_getClassMethod(self.__dict__['ptr'], mutator_selector)
-        if mutator.value:
-            objc_mutator = ObjCMethod(mutator)
-        else:
-            objc_mutator = None
-
-        if objc_accessor and objc_mutator:
-            methods = (objc_accessor, objc_mutator)
-        else:
-            methods = None
-    return methods
-
-
-def cache_class_property_accessor(self, name):
-    """Returns a python representation of an accessor for the named
-    property. Existence of a property is done by looking for the write
-    selector (set<Name>:).
-    """
-    try:
-        methods = self.__dict__['class_properties'][name]
-    except KeyError:
-        methods = cache_class_property_methods(self, name)
-        self.__dict__['class_properties'][name] = methods
-    if methods:
-        return methods[0]
-    return None
-
-
-def cache_class_property_mutator(self, name):
-    """Returns a python representation of an accessor for the named
-    property. Existence of a property is done by looking for the write
-    selector (set<Name>:).
-    """
-    try:
-        methods = self.__dict__['class_properties'][name]
-    except KeyError:
-        methods = cache_class_property_methods(self, name)
-        self.__dict__['class_properties'][name] = methods
+        methods = cache_property_methods(cls, name)
+        cls.__dict__['instance_properties'][name] = methods
     if methods:
         return methods[1]
     return None
@@ -1082,20 +1015,12 @@ def objc_method(f):
         return result
 
     def register(cls):
-        return add_method(cls.__dict__['ptr'], f.__name__.replace('_', ':'), _objc_method, encoding)
+        return add_method(cls, f.__name__.replace('_', ':'), _objc_method, encoding)
 
     _objc_method.register = register
 
     return _objc_method
 
-
-# def objc_classmethod(encoding):
-#     """Function decorator for class methods."""
-#     # Add encodings for hidden self and cmd arguments.
-#     encoding = ensure_bytes(encoding)
-#     typecodes = parse_type_encoding(encoding)
-#     typecodes.insert(1, b'@:')
-#     encoding = b''.join(typecodes)
 
 def objc_classmethod(f):
     encoding = encoding_from_annotation(f)
@@ -1114,7 +1039,7 @@ def objc_classmethod(f):
         return result
 
     def register(cls):
-        return add_method(cls.__dict__['metaclass'], f.__name__.replace('_', ':'), _objc_classmethod, encoding)
+        return add_method(cls.objc_class, f.__name__.replace('_', ':'), _objc_classmethod, encoding)
 
     _objc_classmethod.register = register
 
@@ -1191,17 +1116,6 @@ class objc_property(object):
         cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name.replace('_', ':'), _objc_setter, setter_encoding)
 
 
-# def objc_rawmethod(encoding):
-#     """Decorator for instance methods without any fancy shenanigans.
-#     The function must have the signature f(self, cmd, *args)
-#     where both self and cmd are just pointers to objc objects.
-#     """
-#     # Add encodings for hidden self and cmd arguments.
-#     encoding = ensure_bytes(encoding)
-#     typecodes = parse_type_encoding(encoding)
-#     typecodes.insert(1, b'@:')
-#     encoding = b''.join(typecodes)
-
 def objc_rawmethod(f):
     encoding = encoding_from_annotation(f, offset=2)
     name = f.__name__.replace('_', ':')
@@ -1213,16 +1127,129 @@ def objc_rawmethod(f):
 
 ######################################################################
 
+class ObjCInstance(object):
+    """Python wrapper for an Objective-C instance."""
 
-class ObjCClass(type):
+    _cached_objects = {}
+
+    @property
+    def objc_class(self):
+        return ObjCClass(objc.object_getClass(self))
+
+    def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
+        """Create a new ObjCInstance or return a previously created one
+        for the given object_ptr which should be an Objective-C id."""
+        # Make sure that object_ptr is wrapped in an objc_id.
+        if not isinstance(object_ptr, objc_id):
+            object_ptr = cast(object_ptr, objc_id)
+
+        # If given a nil pointer, return None.
+        if not object_ptr.value:
+            return None
+
+        # Check if we've already created a Python ObjCInstance for this
+        # object_ptr id and if so, then return it.  A single ObjCInstance will
+        # be created for any object pointer when it is first encountered.
+        # This same ObjCInstance will then persist until the object is
+        # deallocated.
+        if object_ptr.value in cls._cached_objects:
+            return cls._cached_objects[object_ptr.value]
+        
+        # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
+        if not issubclass(cls, ObjCClass) and objc.object_isClass(object_ptr):
+            return ObjCClass(object_ptr)
+
+        # Otherwise, create a new ObjCInstance.
+        if issubclass(cls, type):
+            # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
+            self = super().__new__(cls, _name, _bases, _ns)
+        else:
+            self = super().__new__(cls)
+        super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
+        super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
+
+        # Store new object in the dictionary of cached objects, keyed
+        # by the (integer) memory address pointed to by the object_ptr.
+        cls._cached_objects[object_ptr.value] = self
+
+        # Classes are never deallocated, so they don't need a DeallocationObserver.
+        # This is also necessary to make the definition of DeallocationObserver work - otherwise creating the ObjCClass for DeallocationObserver would try to instantiate a DeallocationObserver itself.
+        if not objc.object_isClass(object_ptr):
+            # Create a DeallocationObserver and associate it with this object.
+            # When the Objective-C object is deallocated, the observer will remove
+            # the ObjCInstance corresponding to the object from the cached objects
+            # dictionary, effectively destroying the ObjCInstance.
+            observer = send_message(send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]), 'initWithObject:', self, restype=objc_id, argtypes=[objc_id])
+            objc.objc_setAssociatedObject(self, observer, observer, 0x301)
+
+            # The observer is retained by the object we associate it to.  We release
+            # the observer now so that it will be deallocated when the associated
+            # object is deallocated.
+            send_message(observer, 'release')
+
+        return self
+    
+    def __str__(self):
+        from . import core_foundation
+        if core_foundation.is_str(self):
+            return core_foundation.to_str(self)
+        else:
+            return self.debugDescription
+
+    def __repr__(self):
+        return "<%s.%s %#x: %s at %#x: %s>" % (
+            type(self).__module__,
+            type(self).__qualname__,
+            id(self),
+            self.objc_class.name,
+            self.__dict__['ptr'].value,
+            self.debugDescription,
+        )
+
+    def __getattr__(self, name):
+        """Returns a callable method object with the given name."""
+        # Search for named instance method in the class object and if it
+        # exists, return callable object with self as hidden argument.
+        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
+        # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
+        # alive for chained calls like MyClass.alloc().init() where the
+        # object created by alloc() is not assigned to a variable.
+
+        # If there's a property with this name; return the value directly.
+        # If the name ends with _, we can shortcut this step, because it's
+        # clear that we're dealing with a method call.
+        if not name.endswith('_'):
+            method = cache_property_accessor(self.objc_class, name)
+            if method:
+                return ObjCBoundMethod(method, self)()
+
+        method = cache_method(self.objc_class, name)
+        if method:
+            return ObjCBoundMethod(method, self)
+        else:
+            raise AttributeError('%s.%s %s has no attribute %s' % (type(self).__module__, type(self).__qualname__, self.objc_class.name, name))
+
+    def __setattr__(self, name, value):
+        # Convert enums to their underlying values.
+        if isinstance(value, Enum):
+            value = value.value
+        # Set the value of an attribute.
+        method = cache_property_mutator(self.objc_class, name)
+        if method:
+            ObjCBoundMethod(method, self)(value)
+        else:
+            super(ObjCInstance, type(self)).__setattr__(self, name, value)
+
+
+# The inheritance order is important here.
+# type must come after ObjCInstance, so super() refers to ObjCInstance.
+# This allows the ObjCInstance constructor to receive the class pointer
+# as well as the name, bases, attrs arguments.
+# The other way around this would not be possible, because then
+# the type constructor would be called before ObjCInstance's, and there
+# would be no opportunity to pass extra arguments.
+class ObjCClass(ObjCInstance, type):
     """Python wrapper for an Objective-C class."""
-
-    # We only create one Python object for each Objective-C class.
-    # Any future calls with the same class will return the previously
-    # created Python object.  Note that these aren't weak references.
-    # After you create an ObjCClass, it will exist until the end of the
-    # program.
-    _registered_classes = {}
 
     def __new__(cls, *args):
         """Create a new ObjCClass instance or return a previously created
@@ -1246,10 +1273,16 @@ class ObjCClass(type):
                     raise NameError("ObjC Class '%s' couldn't be found." % class_name_or_ptr)
             else:
                 ptr = cast(class_name_or_ptr, Class)
+                if ptr.value is None:
+                    raise ValueError("Cannot create ObjCClass from nil pointer")
+                elif not objc.object_isClass(ptr):
+                    raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
                 name = objc.class_getName(ptr)
                 # "nil" is an ObjC answer confirming the ptr didn't work.
                 if name == b'nil':
                     raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
+                if not issubclass(cls, ObjCMetaClass) and objc.class_isMetaClass(ptr):
+                    return ObjCMetaClass(ptr)
 
         else:
             name, bases, attrs = args
@@ -1261,6 +1294,8 @@ class ObjCClass(type):
             if ptr.value is None:
                 # Create the ObjC class description
                 ptr = objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0)
+                if ptr is None:
+                    raise RuntimeError("Class pair allocation failed")
 
                 # Pre-Register all the instance variables
                 for attr, obj in attrs.items():
@@ -1275,178 +1310,60 @@ class ObjCClass(type):
             else:
                 raise RuntimeError("ObjC runtime already contains a registered class named '%s'." % name.decode('utf-8'))
 
-        # Check if we've already created a Python object for this class
-        # and if so, return it rather than making a new one.
-        try:
-            objc_class = cls._registered_classes[name]
-        except KeyError:
+        objc_class_name = name.decode('utf-8')
 
-            # We can get the metaclass only after the class is registered.
-            metaclass = get_metaclass(name)
-            objc_class_name = name.decode('utf-8')
-
-            # Otherwise create a new Python object and then initialize it.
-            objc_class = super(ObjCClass, cls).__new__(cls, objc_class_name, (ObjCInstance,), {
-                    'ptr': ptr,
-                    'metaclass': metaclass,
-                    'name': objc_class_name,
-                    'instance_methods': {},     # mapping of name -> instance method
-                    'class_methods': {},        # mapping of name -> class method
-                    'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
-                    'class_properties': {},     # mapping of name -> (accessor method, mutator method)
-                    'imp_table': {},            # Mapping of name -> Native method references
-                    '_as_parameter_': ptr,      # for ctypes argument passing
-                })
-
-            # Store the new class in dictionary of registered classes.
-            cls._registered_classes[name] = objc_class
+        # Create the class object. If there is already a cached instance for ptr,
+        # it is returned and the additional arguments are ignored.
+        # Logically this can only happen when creating an ObjCClass from an existing
+        # name or pointer, not when creating a new class.
+        # If there is no cached instance for ptr, a new one is created and cached.
+        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+            'name': objc_class_name,
+            'instance_methods': {},     # mapping of name -> instance method
+            'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
+            'imp_table': {},            # Mapping of name -> Native method references
+        })
 
         # Register all the methods, class methods, etc
         for attr, obj in attrs.items():
             try:
-                objc_class.__dict__['imp_table'][attr] = obj.register(objc_class)
+                self.__dict__['imp_table'][attr] = obj.register(self)
             except AttributeError:
                 # The class attribute doesn't have a register method.
                 pass
             try:
-                obj.register_property(attr, objc_class)
+                obj.register_property(attr, self)
             except AttributeError:
                 pass
 
-        return objc_class
+        return self
 
     def __repr__(self):
-        return "<ObjCClass: %s at %#x>" % (self.__dict__['name'], self.__dict__['ptr'].value)
+        return "<%s.%s: %s at %#x>" % (
+            type(self).__module__,
+            type(self).__qualname__,
+            self.__dict__['name'],
+            self.__dict__['ptr'].value,
+        )
 
-    def __getattr__(self, name):
-        """Returns a callable method object with the given name."""
-        # If name refers to a class method, then return a callable object
-        # for the class method with self.__dict__['ptr'] as hidden first parameter.
-        if not name.endswith('_'):
-            method = cache_class_property_accessor(self, name)
-            if method:
-                return ObjCBoundMethod(method, self.__dict__['ptr'])()
 
-        method = cache_class_method(self, name)
-        if method:
-            return ObjCBoundMethod(method, self.__dict__['ptr'])
+class ObjCMetaClass(ObjCClass):
+    """Python wrapper for an Objective-C metaclass."""
+    
+    def __new__(cls, name_or_ptr):
+        if isinstance(name_or_ptr, (bytes, str)):
+            name = ensure_bytes(name_or_ptr)
+            ptr = objc.objc_getMetaClass(name)
+            if ptr.value is None:
+                raise NameError("Objective-C metaclass {} not found".format(name))
         else:
-            try:
-                return self.__dict__[name]
-            except KeyError:
-                # Otherwise, raise an exception.
-                raise AttributeError('ObjCClass %s has no attribute %s' % (self.name, name))
-
-    def __setattr__(self, name, value):
-        # Convert enums to their underlying values.
-        if isinstance(value, Enum):
-            value = value.value
-        # Set the value of an attribute.
-        method = cache_class_property_mutator(self, name)
-        if method:
-            ObjCBoundMethod(method, self.__dict__['ptr'])(value)
-        else:
-            self.__dict__[name] = value
-
-
-######################################################################
-
-class ObjCInstance(object):
-    """Python wrapper for an Objective-C instance."""
-
-    _cached_objects = {}
-
-    def __new__(cls, object_ptr):
-        """Create a new ObjCInstance or return a previously created one
-        for the given object_ptr which should be an Objective-C id."""
-        # Make sure that object_ptr is wrapped in an objc_id.
-        if not isinstance(object_ptr, objc_id):
-            object_ptr = cast(object_ptr, objc_id)
-
-        # If given a nil pointer, return None.
-        if not object_ptr.value:
-            return None
-
-        # Check if we've already created an python ObjCInstance for this
-        # object_ptr id and if so, then return it.  A single ObjCInstance will
-        # be created for any object pointer when it is first encountered.
-        # This same ObjCInstance will then persist until the object is
-        # deallocated.
-        if object_ptr.value in cls._cached_objects:
-            return cls._cached_objects[object_ptr.value]
-
-        # Otherwise, create a new ObjCInstance.
-        objc_instance = super(ObjCInstance, cls).__new__(cls)
-        objc_instance.__dict__['ptr'] = objc_instance.__dict__['_as_parameter_'] = object_ptr
-        # Determine class of this object.
-        class_ptr = objc.object_getClass(object_ptr)
-        objc_instance.__dict__['objc_class'] = ObjCClass(class_ptr)
-
-        # Store new object in the dictionary of cached objects, keyed
-        # by the (integer) memory address pointed to by the object_ptr.
-        cls._cached_objects[object_ptr.value] = objc_instance
-
-        # Create a DeallocationObserver and associate it with this object.
-        # When the Objective-C object is deallocated, the observer will remove
-        # the ObjCInstance corresponding to the object from the cached objects
-        # dictionary, effectively destroying the ObjCInstance.
-        observer = send_message(send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]), 'initWithObject:', objc_instance, restype=objc_id, argtypes=[objc_id])
-        objc.objc_setAssociatedObject(objc_instance, observer, observer, 0x301)
-
-        # The observer is retained by the object we associate it to.  We release
-        # the observer now so that it will be deallocated when the associated
-        # object is deallocated.
-        send_message(observer, 'release')
-
-        return objc_instance
-
-    def __str__(self):
-        from . import core_foundation
-        if core_foundation.is_str(self):
-            return core_foundation.to_str(self)
-        else:
-            return self.debugDescription
-
-    def __repr__(self):
-        return "<ObjCInstance %#x: %s at %#x: %s>" % (id(self), self.__dict__['objc_class'].name, self.__dict__['ptr'].value, self.debugDescription)
-
-    def __getattr__(self, name):
-        """Returns a callable method object with the given name."""
-        # Search for named instance method in the class object and if it
-        # exists, return callable object with self as hidden argument.
-        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
-        # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
-        # alive for chained calls like MyClass.alloc().init() where the
-        # object created by alloc() is not assigned to a variable.
-
-        # If there's a property with this name; return the value directly.
-        # If the name ends with _, we can shortcut this step, because it's
-        # clear that we're dealing with a method call.
-        if not name.endswith('_'):
-            method = cache_instance_property_accessor(self.__dict__['objc_class'], name)
-            if method:
-                return ObjCBoundMethod(method, self)()
-
-        method = cache_instance_method(self.__dict__['objc_class'], name)
-        if method:
-            return ObjCBoundMethod(method, self)
-        else:
-            try:
-                return self.__dict__[name]
-            except KeyError:
-                # Otherwise, raise an exception.
-                raise AttributeError('ObjCInstance %s has no attribute %s' % (self.__dict__['objc_class'].name, name))
-
-    def __setattr__(self, name, value):
-        # Convert enums to their underlying values.
-        if isinstance(value, Enum):
-            value = value.value
-        # Set the value of an attribute.
-        method = cache_instance_property_mutator(self.__dict__['objc_class'], name)
-        if method:
-            ObjCBoundMethod(method, self)(value)
-        else:
-            self.__dict__[name] = value
+            ptr = cast(name_or_ptr, Class)
+            if ptr.value is None:
+                raise ValueError("Cannot create ObjCMetaClass for nil pointer")
+            elif not objc.object_isClass(ptr) or not objc.class_isMetaClass(ptr):
+                raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
+        
+        return super().__new__(cls, ptr)
 
 
 ######################################################################
