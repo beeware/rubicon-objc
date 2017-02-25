@@ -2,6 +2,7 @@ from ctypes import *
 from ctypes import util
 from decimal import Decimal
 from enum import Enum
+import functools
 import math
 import unittest
 
@@ -478,9 +479,6 @@ class RubiconTest(unittest.TestCase):
 
         the_thing = example.thing
         self.assertEqual(the_thing.toString(), "This is thing 2")
-    
-    def test_cfstring_to_str(self):
-        self.assertEqual(str(core_foundation.at("abcdefg")), "abcdefg")
 
     def test_no_convert_return(self):
         Example = ObjCClass("Example")
@@ -605,6 +603,30 @@ class RubiconTest(unittest.TestCase):
         # Assign None to dealloc property and see if method returns expected None
         box.url = None
         self.assertIsNone(box.getSchemeIfPresent())
+
+    def test_class_with_wrapped_methods(self):
+        """An ObjCClass can have wrapped methods."""
+
+        def deco(f):
+            @functools.wraps(f)
+            def _wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+            return _wrapper
+
+        class SimpleMath(NSObject):
+            @objc_method
+            @deco
+            def addOne_(self, num: c_int) -> c_int:
+                return num + 1
+            
+            @objc_classmethod
+            @deco
+            def subtractOne_(cls, num: c_int) -> c_int:
+                return num - 1
+
+        simplemath = SimpleMath.alloc().init()
+        self.assertEqual(simplemath.addOne_(254), 255)
+        self.assertEqual(SimpleMath.subtractOne_(75), 74)
 
     def test_function_NSEdgeInsetsMake(self):
         "Python can invoke NSEdgeInsetsMake to create NSEdgeInsets."
