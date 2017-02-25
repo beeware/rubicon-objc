@@ -478,9 +478,6 @@ class RubiconTest(unittest.TestCase):
 
         the_thing = example.thing
         self.assertEqual(the_thing.toString(), "This is thing 2")
-    
-    def test_cfstring_to_str(self):
-        self.assertEqual(str(core_foundation.at("abcdefg")), "abcdefg")
 
     def test_no_convert_return(self):
         Example = ObjCClass("Example")
