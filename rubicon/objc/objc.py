@@ -1,3 +1,5 @@
+import inspect
+
 from enum import Enum
 
 from ctypes import *
@@ -577,18 +579,13 @@ def send_super(receiver, selName, *args, **kwargs):
 
 
 def encoding_from_annotation(f, offset=1):
-    try:
-        encoding = [f.__annotations__['return'], ObjCInstance, SEL]
-    except KeyError:
-        encoding = [ObjCInstance, ObjCInstance, SEL]
+    argspec = inspect.getfullargspec(inspect.unwrap(f))
 
-    for i in range(offset, f.__code__.co_argcount):
-        varname = f.__code__.co_varnames[i]
-        try:
-            enc = f.__annotations__[varname]
-        except KeyError:
-            enc = ObjCInstance
-        encoding.append(enc)
+    encoding = [argspec.annotations.get('return', ObjCInstance), ObjCInstance, SEL]
+
+    for varname in argspec.args[offset:]:
+        encoding.append(argspec.annotations.get(varname, ObjCInstance))
+
     return encoding
 
 
@@ -1326,15 +1323,11 @@ class ObjCClass(ObjCInstance, type):
 
         # Register all the methods, class methods, etc
         for attr, obj in attrs.items():
-            try:
+            if hasattr(obj, "register"):
                 self.__dict__['imp_table'][attr] = obj.register(self)
-            except AttributeError:
-                # The class attribute doesn't have a register method.
-                pass
-            try:
+
+            if hasattr(obj, "register_property"):
                 obj.register_property(attr, self)
-            except AttributeError:
-                pass
 
         return self
 
