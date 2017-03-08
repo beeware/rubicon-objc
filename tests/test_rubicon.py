@@ -15,7 +15,7 @@ except:
 import faulthandler
 faulthandler.enable()
 
-from rubicon.objc import ObjCInstance, ObjCClass, ObjCMetaClass, NSObject, objc, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import ObjCInstance, ObjCClass, ObjCMetaClass, NSObject, SEL, objc, objc_method, objc_classmethod, objc_property, NSEdgeInsets, NSEdgeInsetsMake, send_message
 from rubicon.objc import core_foundation
 
 
@@ -34,6 +34,13 @@ print("sys.maxsize = " + hex(sys.maxsize))
 
 
 class RubiconTest(unittest.TestCase):
+    def test_sel_by_name(self):
+        self.assertEqual(SEL(b"foobar").name, b"foobar")
+    
+    def test_sel_null(self):
+        with self.assertRaises(ValueError):
+            SEL(None).name
+    
     def test_class_by_name(self):
         """An Objective-C class can be looked up by name."""
         
