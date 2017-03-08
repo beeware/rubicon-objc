@@ -33,6 +33,9 @@ class objc_id(c_void_p):
 class SEL(c_void_p):
     @property
     def name(self):
+        if self.value is None:
+            raise ValueError("Cannot get name of null selector")
+        
         return objc.sel_getName(self)
     
     def __new__(cls, init=None):
@@ -50,7 +53,7 @@ class SEL(c_void_p):
             super().__init__(init)
     
     def __repr__(self):
-        return "{cls.__module__}.{cls.__qualname__}({self.name!r})".format(cls=type(self), self=self)
+        return "{cls.__module__}.{cls.__qualname__}({name!r})".format(cls=type(self), name=None if self.value is None else self.name)
 
 class Class(objc_id):
     pass
