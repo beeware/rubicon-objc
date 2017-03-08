@@ -150,6 +150,22 @@ class RubiconTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             ObjCMetaClass(NSObject.ptr)
     
+    def test_objcclass_superclass(self):
+        Example = ObjCClass("Example")
+        BaseExample = ObjCClass("BaseExample")
+        
+        self.assertEqual(Example.superclass, BaseExample)
+        self.assertEqual(BaseExample.superclass, NSObject)
+        self.assertIsNone(NSObject.superclass)
+    
+    def test_objcmetaclass_superclass(self):
+        Example = ObjCClass("Example")
+        BaseExample = ObjCClass("BaseExample")
+    
+        self.assertEqual(Example.objc_class.superclass, BaseExample.objc_class)
+        self.assertEqual(BaseExample.objc_class.superclass, NSObject.objc_class)
+        self.assertEqual(NSObject.objc_class.superclass, NSObject)
+    
     def test_field(self):
         "A field on an instance can be accessed and mutated"
 

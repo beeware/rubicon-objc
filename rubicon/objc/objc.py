@@ -1251,6 +1251,14 @@ class ObjCInstance(object):
 class ObjCClass(ObjCInstance, type):
     """Python wrapper for an Objective-C class."""
 
+    @property
+    def superclass(self):
+        super_ptr = objc.class_getSuperclass(self)
+        if super_ptr.value is None:
+            return None
+        else:
+            return ObjCClass(super_ptr)
+
     def __new__(cls, *args):
         """Create a new ObjCClass instance or return a previously created
         instance for the given Objective-C class.  The argument may be either
