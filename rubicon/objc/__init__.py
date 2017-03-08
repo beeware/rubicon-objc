@@ -3,6 +3,7 @@ __version__ = '0.2.3'
 from .objc import (
     objc, send_message, send_super,
     get_selector,
+    SEL, objc_id, Class, IMP, Method, Ivar, objc_property_t,
     ObjCInstance, ObjCClass, ObjCMetaClass, NSObject,
     objc_ivar, objc_property, objc_rawmethod, objc_method, objc_classmethod
 )
