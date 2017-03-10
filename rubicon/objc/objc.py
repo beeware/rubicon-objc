@@ -765,8 +765,6 @@ class ObjCMethod(object):
         PyObjectEncoding: py_object
     }
 
-    cfunctype_table = {}
-
     def __init__(self, method):
         """Initialize with an Objective-C Method pointer.  We then determine
         the return type and argument type information of the method."""
