@@ -1016,7 +1016,7 @@ def objc_method(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_table'][name] = add_method(cls, name, _objc_method, encoding)
+        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls, name, _objc_method, encoding)
 
     _objc_method.register = register
 
@@ -1041,7 +1041,7 @@ def objc_classmethod(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_table'][name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
+        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
     _objc_classmethod.register = register
 
@@ -1114,8 +1114,8 @@ class objc_property(object):
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.__dict__['imp_table'][attr] = add_method(cls.__dict__['ptr'], attr, _objc_getter, getter_encoding)
-        cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name, _objc_setter, setter_encoding)
+        cls.__dict__['imp_keep_alive_table'][attr] = add_method(cls.__dict__['ptr'], attr, _objc_getter, getter_encoding)
+        cls.__dict__['imp_keep_alive_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name, _objc_setter, setter_encoding)
 
 
 def objc_rawmethod(f):
@@ -1123,7 +1123,7 @@ def objc_rawmethod(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_table'][name] = add_method(cls, name, f, encoding)
+        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls, name, f, encoding)
     f.register = register
     return f
 
@@ -1326,9 +1326,15 @@ class ObjCClass(ObjCInstance, type):
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
             'name': objc_class_name,
-            'instance_methods': {},     # mapping of name -> instance method
-            'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
-            'imp_table': {},            # Mapping of name -> Native method references
+            # Mapping of name -> instance method
+            'instance_methods': {},
+            # Mapping of name -> (accessor method, mutator method)
+            'instance_properties': {},
+            # Mapping of name -> CFUNCTYPE callback function
+            # This only contains the IMPs of methods created in Python,
+            # which need to be kept from being garbage-collected.
+            # It does not contain any other methods, do not use it for calling methods.
+            'imp_keep_alive_table': {},
         })
 
         # Register all the methods, class methods, etc
