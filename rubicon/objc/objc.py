@@ -1014,8 +1014,9 @@ def objc_method(f):
             result = at(result).ptr.value
         return result
 
-    def register(cls):
-        return add_method(cls, f.__name__.replace('_', ':'), _objc_method, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.__dict__['imp_table'][name] = add_method(cls, name, _objc_method, encoding)
 
     _objc_method.register = register
 
@@ -1038,8 +1039,9 @@ def objc_classmethod(f):
             result = at(result).ptr.value
         return result
 
-    def register(cls):
-        return add_method(cls.objc_class, f.__name__.replace('_', ':'), _objc_classmethod, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.__dict__['imp_table'][name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
     _objc_classmethod.register = register
 
@@ -1055,31 +1057,31 @@ class objc_ivar(object):
     def __init__(self, vartype):
         self.vartype = vartype
 
-    def pre_register(self, ptr, name):
-        return add_ivar(ptr, name, self.vartype)
+    def pre_register(self, ptr, attr):
+        return add_ivar(ptr, attr, self.vartype)
 
 
 class objc_property(object):
     def __init__(self):
         pass
 
-    def register_property(self, name, cls):
-        def getter(self) -> ObjCInstance:
-            return getattr(self, '_' + name, None)
+    def register(self, cls, attr):
+        def getter(_self) -> ObjCInstance:
+            return getattr(_self, '_' + attr, None)
 
-        def setter(self, new):
-            if not hasattr(self, '_' + name):
-                setattr(self, '_' + name, None)
-            if getattr(self, '_' + name) is None:
-                setattr(self, '_' + name, new)
+        def setter(_self, new):
+            if not hasattr(_self, '_' + attr):
+                setattr(_self, '_' + attr, None)
+            if getattr(_self, '_' + attr) is None:
+                setattr(_self, '_' + attr, new)
                 if new is not None:
-                    getattr(self, '_' + name).retain()
+                    getattr(_self, '_' + attr).retain()
             else:
-                if not getattr(self, '_' + name).isEqualTo_(new):
-                    getattr(self, '_' + name).release()
-                    setattr(self, '_' + name, new)
+                if not getattr(_self, '_' + attr).isEqualTo_(new):
+                    getattr(_self, '_' + attr).release()
+                    setattr(_self, '_' + attr, new)
                     if new is not None:
-                        getattr(self, '_' + name).retain()
+                        getattr(_self, '_' + attr).retain()
 
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
@@ -1110,18 +1112,18 @@ class objc_property(object):
                 result = at(result).ptr.value
             return result
 
-        setter_name = 'set' + name[0].upper() + name[1:] + '_'
+        setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.__dict__['imp_table'][name] = add_method(cls.__dict__['ptr'], name, _objc_getter, getter_encoding)
-        cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name.replace('_', ':'), _objc_setter, setter_encoding)
+        cls.__dict__['imp_table'][attr] = add_method(cls.__dict__['ptr'], attr, _objc_getter, getter_encoding)
+        cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name, _objc_setter, setter_encoding)
 
 
 def objc_rawmethod(f):
     encoding = encoding_from_annotation(f, offset=2)
-    name = f.__name__.replace('_', ':')
 
-    def register(cls):
-        return add_method(cls, name, f, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.__dict__['imp_table'][name] = add_method(cls, name, f, encoding)
     f.register = register
     return f
 
@@ -1307,11 +1309,8 @@ class ObjCClass(ObjCInstance, type):
 
                 # Pre-Register all the instance variables
                 for attr, obj in attrs.items():
-                    try:
+                    if hasattr(obj, "pre_register"):
                         obj.pre_register(ptr, attr)
-                    except AttributeError:
-                        # The class attribute doesn't have a pre_register method.
-                        pass
 
                 # Register the ObjC class
                 objc.objc_registerClassPair(ptr)
@@ -1335,10 +1334,7 @@ class ObjCClass(ObjCInstance, type):
         # Register all the methods, class methods, etc
         for attr, obj in attrs.items():
             if hasattr(obj, "register"):
-                self.__dict__['imp_table'][attr] = obj.register(self)
-
-            if hasattr(obj, "register_property"):
-                obj.register_property(attr, self)
+                obj.register(self, attr)
 
         return self
 
