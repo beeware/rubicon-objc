@@ -1332,6 +1332,7 @@ class ObjCClass(ObjCInstance, type):
         # name or pointer, not when creating a new class.
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+            '_class_inited': False,
             'name': objc_class_name,
             'methods_ptr_count': c_uint(0),
             'methods_ptr': None,
@@ -1347,18 +1348,22 @@ class ObjCClass(ObjCInstance, type):
             # It does not contain any other methods, do not use it for calling methods.
             'imp_keep_alive_table': {},
         })
-
-        # Register all the methods, class methods, etc
-        for attr, obj in attrs.items():
-            if hasattr(obj, "register"):
-                obj.register(self, attr)
         
-        # Add all methods to the instance_method_ptrs dict
-        self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
-        for i in range(self.methods_ptr_count.value):
-            method = self.methods_ptr[i]
-            name = objc.method_getName(method).name.decode("utf-8")
-            self.instance_method_ptrs[name] = method
+        if not self._class_inited:
+            self._class_inited = True
+            
+            # Register all the methods, class methods, etc
+            registered_something = False
+            for attr, obj in attrs.items():
+                if hasattr(obj, "register"):
+                    registered_something = True
+                    obj.register(self, attr)
+            
+            self._reload_methods()
+            
+            # If anything was registered, reload the metaclass's methods, because there may be new class methods.
+            if registered_something:
+                self.objc_class._reload_methods()
 
         return self
 
@@ -1372,6 +1377,16 @@ class ObjCClass(ObjCInstance, type):
     
     def __del__(self):
         c.free(self.methods_ptr)
+    
+    def _reload_methods(self):
+        old_methods_ptr = self.methods_ptr
+        self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
+        # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
+        c.free(old_methods_ptr)
+        for i in range(self.methods_ptr_count.value):
+            method = self.methods_ptr[i]
+            name = objc.method_getName(method).name.decode("utf-8")
+            self.instance_method_ptrs[name] = method
 
 
 class ObjCMetaClass(ObjCClass):
