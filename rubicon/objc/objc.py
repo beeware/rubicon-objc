@@ -24,6 +24,7 @@ def _find_or_error(name):
     else:
         return path
 
+c = cdll.LoadLibrary(_find_or_error('c'))
 objc = cdll.LoadLibrary(_find_or_error('objc'))
 Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
 
@@ -71,6 +72,10 @@ class objc_property_t(c_void_p):
     pass
 
 ######################################################################
+
+# void free(void *)
+c.free.restype = None
+c.free.argtypes = [c_void_p]
 
 # BOOL class_addIvar(Class cls, const char *name, size_t size, uint8_t alignment, const char *types)
 objc.class_addIvar.restype = c_bool
@@ -897,16 +902,29 @@ def cache_method(cls, name):
     """Returns a python representation of the named instance method,
     either by looking it up in the cached list of methods or by searching
     for and creating a new method object."""
-    try:
-        return cls.__dict__['instance_methods'][name]
-    except KeyError:
-        selector = get_selector(name.replace('_', ':'))
-        method = objc.class_getInstanceMethod(cls, selector)
-        if method.value:
-            objc_method = ObjCMethod(method)
-            cls.__dict__['instance_methods'][name] = objc_method
-            return objc_method
-    return None
+    
+    supercls = cls
+    objc_method = None
+    while supercls is not None:
+        try:
+            objc_method = supercls.__dict__["instance_methods"][name]
+            break
+        except KeyError:
+            pass
+        
+        try:
+            objc_method = ObjCMethod(supercls.__dict__["instance_method_ptrs"][name])
+            break
+        except KeyError:
+            pass
+        
+        supercls = supercls.superclass
+    
+    if objc_method is None:
+        return None
+    else:
+        cls.__dict__['instance_methods'][name] = objc_method
+        return objc_method
 
 
 def cache_property_methods(cls, name):
@@ -922,27 +940,15 @@ def cache_property_methods(cls, name):
         responds = objc.class_getProperty(cls, name.encode('utf-8'))
 
         # Check 2: Does the class have an instance method to retrieve the given name
-        accessor_selector = get_selector(name)
-        accessor = objc.class_getInstanceMethod(cls, accessor_selector)
+        accessor = cache_method(cls, name)
 
         # Check 3: Is there a setName: method to set the property with the given name
-        mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
-        mutator = objc.class_getInstanceMethod(cls, mutator_selector)
+        mutator = cache_method(cls, 'set' + name[0].title() + name[1:] + ':')
 
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
         if responds or (accessor and mutator):
-            if accessor:
-                objc_accessor = ObjCMethod(accessor)
-            else:
-                objc_accessor = None
-
-            if mutator:
-                objc_mutator = ObjCMethod(mutator)
-            else:
-                objc_mutator = None
-
-            methods = (objc_accessor, objc_mutator)
+            methods = (accessor, mutator)
         else:
             methods = None
     return methods
@@ -1223,7 +1229,7 @@ class ObjCInstance(object):
             if method:
                 return ObjCBoundMethod(method, self)()
 
-        method = cache_method(self.objc_class, name)
+        method = cache_method(self.objc_class, name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
         else:
@@ -1324,6 +1330,8 @@ class ObjCClass(ObjCInstance, type):
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
             'name': objc_class_name,
+            # Mapping of name -> method pointer
+            'instance_method_ptrs': {},
             # Mapping of name -> instance method
             'instance_methods': {},
             # Mapping of name -> (accessor method, mutator method)
@@ -1339,6 +1347,18 @@ class ObjCClass(ObjCInstance, type):
         for attr, obj in attrs.items():
             if hasattr(obj, "register"):
                 obj.register(self, attr)
+        
+        # Add all methods to the instance_method_ptrs dict
+        out_count = c_uint(0)
+        methods_ptr = objc.class_copyMethodList(self, byref(out_count))
+        try:
+            for i in range(out_count.value):
+                # Wrap each pointer into a new Method object owned by ctypes, so they are kept alive after the methods_ptr is freed
+                method = Method(methods_ptr[i].value)
+                name = objc.method_getName(method).name.decode("utf-8")
+                self.instance_method_ptrs[name] = method
+        finally:
+            c.free(methods_ptr)
 
         return self
 
