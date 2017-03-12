@@ -1333,6 +1333,8 @@ class ObjCClass(ObjCInstance, type):
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
             'name': objc_class_name,
+            'methods_ptr_count': c_uint(0),
+            'methods_ptr': None,
             # Mapping of name -> method pointer
             'instance_method_ptrs': {},
             # Mapping of name -> instance method
@@ -1352,16 +1354,11 @@ class ObjCClass(ObjCInstance, type):
                 obj.register(self, attr)
         
         # Add all methods to the instance_method_ptrs dict
-        out_count = c_uint(0)
-        methods_ptr = objc.class_copyMethodList(self, byref(out_count))
-        try:
-            for i in range(out_count.value):
-                # Wrap each pointer into a new Method object owned by ctypes, so they are kept alive after the methods_ptr is freed
-                method = Method(methods_ptr[i].value)
-                name = objc.method_getName(method).name.decode("utf-8")
-                self.instance_method_ptrs[name] = method
-        finally:
-            c.free(methods_ptr)
+        self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
+        for i in range(self.methods_ptr_count.value):
+            method = self.methods_ptr[i]
+            name = objc.method_getName(method).name.decode("utf-8")
+            self.instance_method_ptrs[name] = method
 
         return self
 
@@ -1372,6 +1369,9 @@ class ObjCClass(ObjCInstance, type):
             self.name,
             self.ptr.value,
         )
+    
+    def __del__(self):
+        c.free(self.methods_ptr)
 
 
 class ObjCMetaClass(ObjCClass):
