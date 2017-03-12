@@ -907,13 +907,13 @@ def cache_method(cls, name):
     objc_method = None
     while supercls is not None:
         try:
-            objc_method = supercls.__dict__["instance_methods"][name]
+            objc_method = supercls.instance_methods[name]
             break
         except KeyError:
             pass
         
         try:
-            objc_method = ObjCMethod(supercls.__dict__["instance_method_ptrs"][name])
+            objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
             break
         except KeyError:
             pass
@@ -923,7 +923,7 @@ def cache_method(cls, name):
     if objc_method is None:
         return None
     else:
-        cls.__dict__['instance_methods'][name] = objc_method
+        cls.instance_methods[name] = objc_method
         return objc_method
 
 
@@ -960,10 +960,10 @@ def cache_property_accessor(cls, name):
     selector (set<Name>:).
     """
     try:
-        methods = cls.__dict__['instance_properties'][name]
+        methods = cls.instance_properties[name]
     except KeyError:
         methods = cache_property_methods(cls, name)
-        cls.__dict__['instance_properties'][name] = methods
+        cls.instance_properties[name] = methods
     if methods:
         return methods[0]
     return None
@@ -975,10 +975,10 @@ def cache_property_mutator(cls, name):
     selector (set<Name>:).
     """
     try:
-        methods = cls.__dict__['instance_properties'][name]
+        methods = cls.instance_properties[name]
     except KeyError:
         methods = cache_property_methods(cls, name)
-        cls.__dict__['instance_properties'][name] = methods
+        cls.instance_properties[name] = methods
     if methods:
         return methods[1]
     return None
@@ -1020,7 +1020,7 @@ def objc_method(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls, name, _objc_method, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls, name, _objc_method, encoding)
 
     _objc_method.register = register
 
@@ -1045,7 +1045,7 @@ def objc_classmethod(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
     _objc_classmethod.register = register
 
@@ -1118,8 +1118,8 @@ class objc_property(object):
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.__dict__['imp_keep_alive_table'][attr] = add_method(cls.__dict__['ptr'], attr, _objc_getter, getter_encoding)
-        cls.__dict__['imp_keep_alive_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name, _objc_setter, setter_encoding)
+        cls.imp_keep_alive_table[attr] = add_method(cls.ptr, attr, _objc_getter, getter_encoding)
+        cls.imp_keep_alive_table[setter_name] = add_method(cls.ptr, setter_name, _objc_setter, setter_encoding)
 
 
 def objc_rawmethod(f):
@@ -1127,7 +1127,7 @@ def objc_rawmethod(f):
 
     def register(cls, attr):
         name = attr.replace("_", ":")
-        cls.__dict__['imp_keep_alive_table'][name] = add_method(cls, name, f, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls, name, f, encoding)
     f.register = register
     return f
 
@@ -1208,7 +1208,7 @@ class ObjCInstance(object):
             type(self).__qualname__,
             id(self),
             self.objc_class.name,
-            self.__dict__['ptr'].value,
+            self.ptr.value,
             self.debugDescription,
         )
 
@@ -1216,7 +1216,7 @@ class ObjCInstance(object):
         """Returns a callable method object with the given name."""
         # Search for named instance method in the class object and if it
         # exists, return callable object with self as hidden argument.
-        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
+        # Note: you should give self and not self.ptr as a parameter to
         # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
         # alive for chained calls like MyClass.alloc().init() where the
         # object created by alloc() is not assigned to a variable.
@@ -1236,15 +1236,18 @@ class ObjCInstance(object):
             raise AttributeError('%s.%s %s has no attribute %s' % (type(self).__module__, type(self).__qualname__, self.objc_class.name, name))
 
     def __setattr__(self, name, value):
-        # Convert enums to their underlying values.
-        if isinstance(value, Enum):
-            value = value.value
-        # Set the value of an attribute.
-        method = cache_property_mutator(self.objc_class, name)
-        if method:
-            ObjCBoundMethod(method, self)(value)
-        else:
+        if name in self.__dict__:
+            # For attributes already in __dict__, use the default __setattr__.
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
+        else:
+            method = cache_property_mutator(self.objc_class, name)
+            if method:
+                # Convert enums to their underlying values.
+                if isinstance(value, Enum):
+                    value = value.value
+                ObjCBoundMethod(method, self)(value)
+            else:
+                super(ObjCInstance, type(self)).__setattr__(self, name, value)
 
 
 # The inheritance order is important here.
@@ -1307,7 +1310,7 @@ class ObjCClass(ObjCInstance, type):
             ptr = get_class(name)
             if ptr.value is None:
                 # Create the ObjC class description
-                ptr = objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0)
+                ptr = objc.objc_allocateClassPair(bases[0].ptr, name, 0)
                 if ptr is None:
                     raise RuntimeError("Class pair allocation failed")
 
@@ -1366,8 +1369,8 @@ class ObjCClass(ObjCInstance, type):
         return "<%s.%s: %s at %#x>" % (
             type(self).__module__,
             type(self).__qualname__,
-            self.__dict__['name'],
-            self.__dict__['ptr'].value,
+            self.name,
+            self.ptr.value,
         )
 
 
