@@ -873,6 +873,40 @@ class ObjCMethod(object):
                 result = ObjCClass(result)
             return result
 
+######################################################################
+
+class ObjCPartialMethod(object):
+    _sentinel = object()
+    
+    def __init__(self, name_start):
+        super().__init__()
+        
+        self.name_start = name_start
+        self.methods = {}
+    
+    def __repr__(self):
+        return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(cls=type(self), self=self)
+    
+    def __call__(self, receiver, first_arg=_sentinel, **kwargs):
+        if first_arg is ObjCPartialMethod._sentinel:
+            if kwargs:
+                raise TypeError("Missing first (positional) argument")
+            
+            args = []
+            rest = frozenset()
+        else:
+            args = [first_arg]
+            # Add "" to rest to indicate that the method takes arguments
+            rest = frozenset(kwargs) | frozenset(("",))
+        
+        try:
+            meth, order = self.methods[rest]
+        except KeyError:
+            raise ValueError("No method with selector parts {}".format(set(kwargs)))
+        
+        meth = ObjCMethod(meth)
+        args += [kwargs[name] for name in order]
+        return meth(receiver, *args)
 
 ######################################################################
 
@@ -1229,6 +1263,28 @@ class ObjCInstance(object):
             if method:
                 return ObjCBoundMethod(method, self)()
 
+        # See if there's a partial method starting with the given name,
+        # either on self's class or any of the superclasses.
+        cls = self.objc_class
+        while cls is not None:
+            try:
+                method = cls.partial_methods[name]
+                break
+            except KeyError:
+                cls = cls.superclass
+        else:
+            method = None
+        
+        if method is not None:
+            # If the partial method can only resolve to one method that takes no arguments,
+            # return that method directly, instead of a mostly useless partial method.
+            if set(method.methods) == {frozenset()}:
+                method, _ = method.methods[frozenset()]
+                method = ObjCMethod(method)
+            
+            return ObjCBoundMethod(method, self)
+
+        # See if there's a method whose full name matches the given name.
         method = cache_method(self.objc_class, name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
@@ -1342,6 +1398,8 @@ class ObjCClass(ObjCInstance, type):
             'instance_methods': {},
             # Mapping of name -> (accessor method, mutator method)
             'instance_properties': {},
+            # Mapping of first selector part -> ObjCPartialMethod instances
+            'partial_methods': {},
             # Mapping of name -> CFUNCTYPE callback function
             # This only contains the IMPs of methods created in Python,
             # which need to be kept from being garbage-collected.
@@ -1383,10 +1441,25 @@ class ObjCClass(ObjCInstance, type):
         self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
         # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
         c.free(old_methods_ptr)
+        
         for i in range(self.methods_ptr_count.value):
             method = self.methods_ptr[i]
             name = objc.method_getName(method).name.decode("utf-8")
             self.instance_method_ptrs[name] = method
+
+            first, *rest = name.split(":")
+            # Selectors end in a colon iff the method takes arguments.
+            # Because of this, rest must either be empty (method takes no arguments) or the last element must be an empty string (method takes arguments).
+            assert not rest or rest[-1] == ""
+
+            try:
+                partial = self.partial_methods[first]
+            except KeyError:
+                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+
+            # order is rest without the dummy "" part
+            order = rest[:-1]
+            partial.methods[frozenset(rest)] = (method, order)
 
 
 class ObjCMetaClass(ObjCClass):

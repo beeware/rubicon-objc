@@ -177,4 +177,19 @@ static int _staticIntField = 11;
     return [self.callback reverse:input];
 }
 
++(NSUInteger) overloaded
+{
+    return 0;
+}
+
++(NSUInteger) overloaded:(NSUInteger)arg1
+{
+    return arg1;
+}
+
++(NSUInteger) overloaded:(NSUInteger)arg1 extraArg:(NSUInteger)arg2
+{
+    return arg1 + arg2;
+}
+
 @end
