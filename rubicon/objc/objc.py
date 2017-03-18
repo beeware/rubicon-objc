@@ -754,13 +754,11 @@ class ObjCMethod(object):
         b'd': c_double,
         b'B': c_bool,
         b'v': None,
-        b'Vv': None,
         b'*': c_char_p,
         b'@': objc_id,
+        b'@?': objc_id,
         b'#': Class,
         b':': SEL,
-        b'^v': c_void_p,
-        b'?': c_void_p,
         NSPointEncoding: NSPoint,
         NSSizeEncoding: NSSize,
         NSRectEncoding: NSRect,
@@ -789,34 +787,39 @@ class ObjCMethod(object):
         # Get types for all the arguments.
         try:
             self.argtypes = [self.ctype_for_encoding(t) for t in self.argument_types]
-        except:
+        except ValueError:
             print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
             self.argtypes = None
         # Get types for the return type.
         try:
             self.restype = self.ctype_for_encoding(self.return_type)
-        except:
+        except ValueError:
             print('No restype encoding for %s (%s)' % (self.name, self.return_type))
             self.restype = None
         self.func = None
 
     def ctype_for_encoding(self, encoding):
         """Return ctypes type for an encoded Objective-C type."""
-        if encoding in self.typecodes:
-            return self.typecodes[encoding]
-        elif encoding[0:1] == b'^' and encoding[1:] in self.typecodes:
-            return POINTER(self.typecodes[encoding[1:]])
-        elif encoding[0:1] == b'^' and encoding[1:] in [CGImageEncoding, NSZoneEncoding]:
-            # special cases
-            return c_void_p
-        elif encoding[0:1] == b'r' and encoding[1:] in self.typecodes:
-            # const decorator, don't care
-            return self.typecodes[encoding[1:]]
-        elif encoding[0:2] == b'r^' and encoding[2:] in self.typecodes:
-            # const pointer, also don't care
-            return POINTER(self.typecodes[encoding[2:]])
-        else:
-            raise Exception('unknown encoding for %s: %s' % (self.name, encoding))
+        
+        # Remove qualifiers, as documented in Table 6-2 here:
+        # https://developer.apple.com/library/prerelease/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+        encoding = encoding.lstrip(b"NORVnor")
+        
+        try:
+            # Look up simple type encodings directly
+            return type(self).typecodes[encoding]
+        except KeyError:
+            if encoding[0:1] == b'^':
+                try:
+                    # Try to resolve pointer types recursively
+                    target = self.ctype_for_encoding(encoding[1:])
+                except ValueError:
+                    # For unknown pointer types, fall back to c_void_p (this is not ideal, but at least it works instead of erroring)
+                    return c_void_p
+                else:
+                    return POINTER(target)
+            else:
+                raise ValueError('Unknown encoding: %s' % (encoding,))
 
     def get_prototype(self):
         """Returns a ctypes CFUNCTYPE for the method."""
