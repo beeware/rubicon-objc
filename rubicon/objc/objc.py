@@ -647,7 +647,9 @@ def cfunctype_for_encoding(encoding):
     return cfunctype
 
 
-def typestring_for_encoding(encoding):
+def encoding_for_ctype(ctype):
+    """Return the Objective-C type encoding for the given ctypes type."""
+    
     typecodes = {
         c_char: b'c',
         c_int: b'i',
@@ -679,7 +681,7 @@ def typestring_for_encoding(encoding):
         NSRange: NSRangeEncoding,
         py_object: PyObjectEncoding,
     }
-    return b''.join(typecodes[e] for e in encoding)
+    return typecodes[ctype]
 
 
 def ctype_for_encoding(encoding):
@@ -754,7 +756,7 @@ def add_method(cls, selName, method, encoding):
     assert(encoding[1] is ObjCInstance)  # ensure id self typecode
     assert(encoding[2] == SEL)  # ensure SEL cmd typecode
     selector = get_selector(selName)
-    types = typestring_for_encoding(encoding)
+    types = b"".join(encoding_for_ctype(ctype) for ctype in encoding)
 
     # Check if we've already created a CFUNCTYPE for this encoding.
     # If so, then return the cached CFUNCTYPE.
