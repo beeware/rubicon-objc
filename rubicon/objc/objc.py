@@ -597,9 +597,6 @@ def encoding_from_annotation(f, offset=1):
     return encoding
 
 
-cfunctype_table = {}
-
-
 def type_to_ctype(tp):
     """Convert the given type to a ctypes type.
     This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
@@ -724,13 +721,7 @@ def add_method(cls, selName, method, encoding):
     selector = get_selector(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
-    # Check if we've already created a CFUNCTYPE for this encoding.
-    # If so, then return the cached CFUNCTYPE.
-    try:
-        cfunctype = cfunctype_table[types]
-    except KeyError:
-        cfunctype = cfunctype_table[types] = CFUNCTYPE(*signature)
-
+    cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
     objc.class_addMethod(cls, selector, cast(imp, IMP), types)
     return imp
