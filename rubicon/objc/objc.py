@@ -600,51 +600,22 @@ def encoding_from_annotation(f, offset=1):
 cfunctype_table = {}
 
 
-# Limited to basic types and pointers to basic types.
-# Does not try to handle arrays, arbitrary structs, unions, or bitfields.
-# Assume that encoding is a bytes object and not str.
-def cfunctype_for_encoding(encoding):
-    # Otherwise, create a new CFUNCTYPE for the encoding.
+def type_to_ctype(tp):
+    """Convert the given type to a ctypes type.
+    This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
+    Unknown types (including things that are already ctypes types) are returned unchanged.
+    """
+    
     typecodes = {
-        c_char: c_char,
-        c_int: c_int,
         int: c_int,
-        c_short: c_short,
-        c_long: c_long,
-        c_longlong: c_longlong,
-        c_ubyte: c_ubyte,
-        c_uint: c_uint,
-        c_ushort: c_ushort,
-        c_ulong: c_ulong,
-        c_ulonglong: c_ulonglong,
-        c_float: c_float,
         float: c_float,
-        c_double: c_double,
-        c_bool: c_bool,
         bool: c_bool,
-        None: None,
-        c_char_p: c_char_p,
         str: c_char_p,
+        bytes: c_char_p,
         ObjCInstance: objc_id,
         ObjCClass: Class,
-        SEL: SEL,
-        # function: c_void_p,
-        NSPoint: NSPoint,
-        NSSize: NSSize,
-        NSRect: NSRect,
-        NSRange: NSRange,
-        py_object: py_object
     }
-    argtypes = []
-    for code in encoding:
-        if code in typecodes:
-            argtypes.append(typecodes[code])
-        else:
-            raise Exception('unknown type encoding: %s', code)
-
-    cfunctype = CFUNCTYPE(*argtypes)
-
-    return cfunctype
+    return typecodes.get(tp, tp)
 
 
 def encoding_for_ctype(ctype):
@@ -653,7 +624,6 @@ def encoding_for_ctype(ctype):
     typecodes = {
         c_char: b'c',
         c_int: b'i',
-        int: b'i',
         c_short: b's',
         c_long: b'l',
         c_longlong: b'q',
@@ -663,16 +633,11 @@ def encoding_for_ctype(ctype):
         c_ulong: b'L',
         c_ulonglong: b'Q',
         c_float: b'f',
-        float: b'f',
         c_double: b'd',
         c_bool: b'B',
-        bool: b'B',
         None: b'v',
         c_char_p: b'*',
-        str: b'*',
-        ObjCInstance: b'@',
         objc_id: b'@',
-        ObjCClass: b'#',
         Class: b'#',
         SEL: b':',
         NSPoint: NSPointEncoding,
@@ -753,18 +718,18 @@ def add_method(cls, selName, method, encoding):
     The third type code must be a selector.
     Additional type codes are for types of other arguments if any.
     """
-    assert(encoding[1] is ObjCInstance)  # ensure id self typecode
-    assert(encoding[2] == SEL)  # ensure SEL cmd typecode
+    signature = tuple(type_to_ctype(tp) for tp in encoding)
+    assert signature[1] == objc_id  # ensure id self typecode
+    assert signature[2] == SEL  # ensure SEL cmd typecode
     selector = get_selector(selName)
-    types = b"".join(encoding_for_ctype(ctype) for ctype in encoding)
+    types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
     # Check if we've already created a CFUNCTYPE for this encoding.
     # If so, then return the cached CFUNCTYPE.
     try:
         cfunctype = cfunctype_table[types]
     except KeyError:
-        cfunctype = cfunctype_for_encoding(encoding)
-        cfunctype_table[types] = cfunctype
+        cfunctype = cfunctype_table[types] = CFUNCTYPE(*signature)
 
     imp = cfunctype(method)
     objc.class_addMethod(cls, selector, cast(imp, IMP), types)
@@ -773,7 +738,7 @@ def add_method(cls, selName, method, encoding):
 
 def add_ivar(cls, name, vartype):
     "Add a new instance variable of type vartype to cls."
-    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(vartype))
+    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(type_to_ctype(vartype)))
 
 
 def set_instance_variable(obj, varname, value, vartype):
