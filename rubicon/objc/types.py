@@ -18,8 +18,6 @@ _any_arm = ('ARM' in platform.version())
 __arm64__ = (_any_arm and __LP64__)
 __arm__ = (_any_arm and not __LP64__)
 
-PyObjectEncoding = b'{PyObject=@}'
-
 
 def encoding_for_ctype(vartype):
     typecodes = {
@@ -44,6 +42,7 @@ if __LP64__:
     NSRangeEncoding = b'{_NSRange=QQ}'
     UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
     NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
+    PyObjectEncoding = b'^{_object=q^{_typeobject}}'
 else:
     NSInteger = c_int
     NSUInteger = c_uint
@@ -54,6 +53,7 @@ else:
     NSRangeEncoding = b'{_NSRange=II}'
     UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
     NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
+    PyObjectEncoding = b'^{_object=i^{_typeobject}}'
 
 NSIntegerEncoding = encoding_for_ctype(NSInteger)
 NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
