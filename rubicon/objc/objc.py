@@ -71,6 +71,12 @@ class Ivar(c_void_p):
 class objc_property_t(c_void_p):
     pass
 
+register_preferred_encoding(b':', SEL)
+register_preferred_encoding(b'@', objc_id)
+# @? is the encoding for blocks.
+register_encoding(b'@?', objc_id)
+register_preferred_encoding(b'#', Class)
+
 ######################################################################
 
 # void free(void *)
@@ -596,112 +602,6 @@ def encoding_from_annotation(f, offset=1):
 
     return encoding
 
-
-def type_to_ctype(tp):
-    """Convert the given type to a ctypes type.
-    This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
-    Unknown types (including things that are already ctypes types) are returned unchanged.
-    """
-    
-    typecodes = {
-        int: c_int,
-        float: c_float,
-        bool: c_bool,
-        str: c_char_p,
-        bytes: c_char_p,
-        ObjCInstance: objc_id,
-        ObjCClass: Class,
-    }
-    return typecodes.get(tp, tp)
-
-
-def encoding_for_ctype(ctype):
-    """Return the Objective-C type encoding for the given ctypes type."""
-    
-    typecodes = {
-        c_char: b'c',
-        c_int: b'i',
-        c_short: b's',
-        c_long: b'l',
-        c_longlong: b'q',
-        c_ubyte: b'C',
-        c_uint: b'I',
-        c_ushort: b'S',
-        c_ulong: b'L',
-        c_ulonglong: b'Q',
-        c_float: b'f',
-        c_double: b'd',
-        c_bool: b'B',
-        None: b'v',
-        c_char_p: b'*',
-        objc_id: b'@',
-        Class: b'#',
-        SEL: b':',
-        NSPoint: NSPointEncoding,
-        NSSize: NSSizeEncoding,
-        NSRect: NSRectEncoding,
-        NSRange: NSRangeEncoding,
-        py_object: PyObjectEncoding,
-    }
-    return typecodes[ctype]
-
-
-def ctype_for_encoding(encoding):
-    """Return ctypes type for an encoded Objective-C type."""
-
-    # Note, need to map 'c' to c_byte rather than c_char, because otherwise
-    # ctypes converts the value into a one-character string which is generally
-    # not what we want at all, especially when the 'c' represents a bool var.
-    typecodes = {
-        b'c': c_byte,
-        b'i': c_int,
-        b's': c_short,
-        b'l': c_long,
-        b'q': c_longlong,
-        b'C': c_ubyte,
-        b'I': c_uint,
-        b'S': c_ushort,
-        b'L': c_ulong,
-        b'Q': c_ulonglong,
-        b'f': c_float,
-        b'd': c_double,
-        b'B': c_bool,
-        b'v': None,
-        b'*': c_char_p,
-        b'@': objc_id,
-        b'@?': objc_id,
-        b'#': Class,
-        b':': SEL,
-        NSPointEncoding: NSPoint,
-        NSSizeEncoding: NSSize,
-        NSRectEncoding: NSRect,
-        NSRangeEncoding: NSRange,
-        UIEdgeInsetsEncoding: UIEdgeInsets,
-        NSEdgeInsetsEncoding: NSEdgeInsets,
-        PyObjectEncoding: py_object
-    }
-    
-    # Remove qualifiers, as documented in Table 6-2 here:
-    # https://developer.apple.com/library/prerelease/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
-    encoding = encoding.lstrip(b"NORVnor")
-    
-    try:
-        # Look up simple type encodings directly
-        return typecodes[encoding]
-    except KeyError:
-        if encoding[0:1] == b'^':
-            try:
-                # Try to resolve pointer types recursively
-                target = ctype_for_encoding(encoding[1:])
-            except ValueError:
-                # For unknown pointer types, fall back to c_void_p (this is not ideal, but at least it works instead of erroring)
-                return c_void_p
-            else:
-                return POINTER(target)
-        else:
-            raise ValueError('Unknown encoding: %s' % (encoding,))
-
-
 ######################################################################
 
 def add_method(cls, selName, method, encoding):
@@ -719,7 +619,7 @@ def add_method(cls, selName, method, encoding):
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
     selector = get_selector(selName)
-    types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
+    types = b"".join(ctype_to_encoding(ctype) for ctype in signature)
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
@@ -729,7 +629,7 @@ def add_method(cls, selName, method, encoding):
 
 def add_ivar(cls, name, vartype):
     "Add a new instance variable of type vartype to cls."
-    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(type_to_ctype(vartype)))
+    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), ctype_to_encoding(type_to_ctype(vartype)))
 
 
 def set_instance_variable(obj, varname, value, vartype):
@@ -768,13 +668,13 @@ class ObjCMethod(object):
             self.argument_types.append(buffer.value)
         # Get types for all the arguments.
         try:
-            self.argtypes = [ctype_for_encoding(t) for t in self.argument_types]
+            self.argtypes = [encoding_to_ctype(t) for t in self.argument_types]
         except ValueError:
             print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
             self.argtypes = None
         # Get types for the return type.
         try:
-            self.restype = ctype_for_encoding(self.return_type)
+            self.restype = encoding_to_ctype(self.return_type)
         except ValueError:
             print('No restype encoding for %s (%s)' % (self.name, self.return_type))
             self.restype = None
@@ -1708,6 +1608,9 @@ class ObjCMetaClass(ObjCClass):
                 raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
 
         return super().__new__(cls, ptr)
+
+register_type_to_ctype(ObjCInstance, objc_id)
+register_type_to_ctype(ObjCClass, Class)
 
 
 ######################################################################

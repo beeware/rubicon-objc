@@ -19,14 +19,193 @@ __arm64__ = (_any_arm and __LP64__)
 __arm__ = (_any_arm and not __LP64__)
 
 
-def encoding_for_ctype(vartype):
-    typecodes = {
-        c_char: b'c', c_int: b'i', c_short: b's', c_long: b'l', c_longlong: b'q',
-        c_ubyte: b'C', c_uint: b'I', c_ushort: b'S', c_ulong: b'L', c_ulonglong: b'Q',
-        c_float: b'f', c_double: b'd', c_bool: b'B', c_char_p: b'*', c_void_p: b'@',
-        py_object: PyObjectEncoding
-    }
-    return typecodes.get(vartype, b'?')
+_type_to_ctype_map = {
+    int: c_int,
+    float: c_float,
+    bool: c_bool,
+    # This is not really correct - Python strings are Unicode - but we need to keep this for compatibility.
+    str: c_char_p,
+    bytes: c_char_p,
+}
+
+def type_to_ctype(tp):
+    """Convert the given type to a ctypes type.
+    This conversion is applied to types used in objc_method signatures, objc_ivar types, etc.
+    This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
+    Unregistered types (including things that are already ctypes types) are returned unchanged.
+    """
+    
+    return _type_to_ctype_map.get(tp, tp)
+
+def register_type_to_ctype(tp, ctype):
+    """Register a conversion from a type to a ctypes type."""
+    
+    _type_to_ctype_map[tp] = ctype
+
+def unregister_type_to_ctype(tp):
+    """Unregister a conversion from a type to a ctypes type."""
+    
+    del _type_to_ctype_map[tp]
+
+def get_type_to_ctype_map():
+    """Get a copy of all currently registered type-to-ctype conversions as a mapping."""
+    
+    return dict(_type_to_ctype_map)
+
+_encoding_to_ctype_map = {}
+_ctype_to_encoding_map = {}
+
+def encoding_to_ctype(encoding):
+    """Return ctypes type for an encoded Objective-C type."""
+    
+    # Remove qualifiers, as documented in Table 6-2 here:
+    # https://developer.apple.com/library/prerelease/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+    encoding = encoding.lstrip(b"NORVnor")
+    
+    try:
+        # Look up simple type encodings directly
+        return _encoding_to_ctype_map[encoding]
+    except KeyError:
+        if encoding[0:1] == b'^':
+            try:
+                # Try to resolve pointer types recursively
+                target = encoding_to_ctype(encoding[1:])
+            except ValueError:
+                # For unknown pointer types, fall back to c_void_p (this is not ideal, but at least it works instead of erroring)
+                return c_void_p
+            else:
+                return POINTER(target)
+        else:
+            raise ValueError('Unknown encoding: %s' % (encoding,))
+
+def ctype_to_encoding(ctype):
+    """Return the Objective-C type encoding for the given ctypes type."""
+    
+    try:
+        return _ctype_to_encoding_map[ctype]
+    except KeyError:
+        raise ValueError('No type encoding known for ctype {}'.format(ctype))
+
+def register_preferred_encoding(encoding, ctype):
+    """Register a preferred conversion between an Objective-C type encoding and a ctypes type.
+    This overwrites any existing conversions in each direction.
+    """
+    
+    _encoding_to_ctype_map[encoding] = ctype
+    _ctype_to_encoding_map[ctype] = encoding
+
+def register_encoding(encoding, ctype):
+    """Register an additional conversion between an Objective-C type encoding and a ctypes type.
+    If a conversion already exists in one or both directions, it is not overwritten.
+    """
+    
+    _encoding_to_ctype_map.setdefault(encoding, ctype)
+    _ctype_to_encoding_map.setdefault(ctype, encoding)
+
+def unregister_encoding(encoding):
+    """Unregister the conversion between an Objective-C type encoding and its corresponding ctypes type.
+    
+    Note that this does not remove any conversions in the other direction (from a ctype to this encoding). These conversions may be replaced with register_encoding, or unregistered with unregister_ctype. To remove all ctypes for an encoding, use unregister_encoding_all.
+    If encoding was not registered previously, nothing happens.
+    """
+    
+    _encoding_to_ctype_map.pop(encoding, default=None)
+    
+
+def unregister_encoding_all(encoding):
+    """Unregister all conversions between an Objective-C type encoding and all corresponding ctypes types.
+    All conversions from any ctype to this encoding are removed recursively using unregister_ctype_all.
+    If encoding was not registered previously, nothing happens.
+    """
+    
+    _encoding_to_ctype_map.pop(encoding, default=None)
+    for ct, enc in list(_ctype_to_encoding_map.items()):
+        if enc == encoding:
+            unregister_ctype_all(ct)
+
+def unregister_ctype(ctype):
+    """Unregister the conversion from a ctypes type to an Objective-C type encoding.
+    Note that this does not remove any conversions in the other direction (from an encoding to this ctype). These conversions may be replaced with register_encoding, or unregistered with unregister_encoding. To remove all encodings for a ctype, use unregister_ctype_all.
+    If ctype was not registered previously, nothing happens.
+    """
+    
+    _ctype_to_encoding_map.pop(ctype, default=None)
+
+def unregister_ctype_all(ctype):
+    """Unregister all conversions between a ctypes type and all corresponding Objective-C type encodings.
+    All conversions from any type encoding to this ctype are removed recursively using unregister_encoding_all.
+    If ctype was not registered previously, nothing happens.
+    """
+    
+    _ctype_to_encoding_map.pop(ctype, default=None)
+    for enc, ct in list(_encoding_to_ctype_map.items()):
+        if ct == ctype:
+            unregister_encoding_all(enc)
+
+def get_encoding_to_ctype_map():
+    """Get a copy of all currently registered encoding-to-ctype conversions as a map."""
+    
+    return dict(_encoding_to_ctype_map)
+
+def get_ctype_to_encoding_map():
+    """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
+    
+    return dict(_ctype_to_encoding_map)
+
+# Register all type encoding mappings.
+
+register_preferred_encoding(b'v', None)
+register_preferred_encoding(b'B', c_bool)
+
+# Note, we prefer to map b'c' to c_byte rather than c_char, because otherwise
+# ctypes converts the value into a one-character string which is generally
+# not what we want at all, especially when the b'c' represents a BOOL var.
+register_preferred_encoding(b'c', c_byte)
+register_preferred_encoding(b'C', c_ubyte)
+register_encoding(b'c', c_char)
+
+register_preferred_encoding(b's', c_short)
+register_preferred_encoding(b'S', c_ushort)
+register_preferred_encoding(b'l', c_long)
+register_preferred_encoding(b'L', c_ulong)
+
+# Do not register c_int or c_longlong as preferred.
+# If c_int or c_longlong is the same size as c_long, ctypes makes it an alias for c_long.
+# If we would register c_int and c_longlong as preferred, this could cause c_long to be encoded as b'i' or b'q', instead of b'l'.
+# The same applies to the unsigned versions.
+register_encoding(b'i', c_int)
+register_encoding(b'I', c_uint)
+register_encoding(b'q', c_longlong)
+register_encoding(b'Q', c_ulonglong)
+
+register_preferred_encoding(b'f', c_float)
+register_preferred_encoding(b'd', c_double)
+# As above, c_longdouble may be c_double, so do not make it preferred.
+register_encoding(b'D', c_longdouble)
+
+# c_char encodes the same as c_byte.
+# ctypes converts c_char values to a one-character bytestring, which is usually not the desired behavior, especially since BOOL is c_byte on 32-bit, and truth tests work differently for bytestrings than for numbers.
+# So we do not make this mapping preferred.
+register_encoding(b'c', c_char)
+
+# Strictly speaking, c_char_p is only appropriate for actual C strings (null-terminated pointers to char without explicit signedness).
+# However, all char pointers encode to b'*', regardless of signedness, and they might point to non-null-terminated data.
+# Despite this, we prefer to map b'*' to c_char_p, because its most common use is for C strings.
+register_preferred_encoding(b'*', c_char_p)
+# Register the other char pointers, so they are all correctly mapped to b'*'.
+# The compiler never generates encodings b'^c' or b'^C'.
+register_encoding(b'*', POINTER(c_char))
+register_encoding(b'*', POINTER(c_byte))
+register_encoding(b'*', POINTER(c_ubyte))
+
+# c_wchar encodes the same as c_int, and c_wchar_p the same as POINTER(c_int). wchar_t is rarely used in Objective-C, so we do not make c_wchar or c_wchar_p preferred.
+register_encoding(b'i', c_wchar)
+register_encoding(b'^i', c_wchar_p)
+# Register POINTER(c_int) as preferred so it takes precedence over c_wchar_p.
+# (Other pointer types are resolved automatically by encoding_to_ctype and ctype_to_encoding.)
+register_preferred_encoding(b'^i', POINTER(c_int))
+
+register_preferred_encoding(b'^v', c_void_p)
 
 
 # Note CGBase.h located at
@@ -55,15 +234,23 @@ else:
     NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
     PyObjectEncoding = b'^{_object=i^{_typeobject}}'
 
-NSIntegerEncoding = encoding_for_ctype(NSInteger)
-NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
-CGFloatEncoding = encoding_for_ctype(CGFloat)
+NSIntegerEncoding = ctype_to_encoding(NSInteger)
+NSUIntegerEncoding = ctype_to_encoding(NSUInteger)
+CGFloatEncoding = ctype_to_encoding(CGFloat)
 
 # Special case so that NSImage.initWithCGImage_size_() will work.
 CGImageEncoding = b'{CGImage=}'
 
 NSZoneEncoding = b'{_NSZone=}'
 
+register_preferred_encoding(PyObjectEncoding, py_object)
+
+
+class UnknownPointer(c_void_p):
+    """Placeholder for the b'^?' "unknown pointer" type. Not to be confused with a b'^v' void pointer.
+    Usually a b'^?' is a function pointer, but because the encoding doesn't contain the function signature, you need to manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
+    """
+register_preferred_encoding(b'^?', UnknownPointer)
 
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
 class NSPoint(Structure):
@@ -72,6 +259,7 @@ class NSPoint(Structure):
         ("y", CGFloat)
     ]
 CGPoint = NSPoint
+register_preferred_encoding(NSPointEncoding, NSPoint)
 
 
 class NSSize(Structure):
@@ -80,6 +268,7 @@ class NSSize(Structure):
         ("height", CGFloat)
     ]
 CGSize = NSSize
+register_preferred_encoding(NSSizeEncoding, NSSize)
 
 
 class NSRect(Structure):
@@ -88,6 +277,7 @@ class NSRect(Structure):
         ("size", NSSize)
     ]
 CGRect = NSRect
+register_preferred_encoding(NSRectEncoding, NSRect)
 
 
 def NSMakeSize(w, h):
@@ -114,6 +304,7 @@ class UIEdgeInsets(Structure):
                 ('left', CGFloat),
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
+register_preferred_encoding(UIEdgeInsetsEncoding, UIEdgeInsets)
 
 def UIEdgeInsetsMake(top, left, bottom, right):
     return UIEdgeInsets(top, left, bottom, right)
@@ -127,6 +318,7 @@ class NSEdgeInsets(Structure):
                 ('left', CGFloat),
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
+register_preferred_encoding(NSEdgeInsetsEncoding, NSEdgeInsets)
 
 def NSEdgeInsetsMake(top, left, bottom, right):
     return NSEdgeInsets(top, left, bottom, right)
@@ -158,7 +350,7 @@ class NSRange(Structure):
         ("location", NSUInteger),
         ("length", NSUInteger)
     ]
-
+register_preferred_encoding(NSRangeEncoding, NSRange)
 
 NSZeroPoint = NSPoint(0, 0)
 if sizeof(c_void_p) == 4:
