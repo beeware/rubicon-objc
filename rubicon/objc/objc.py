@@ -940,6 +940,10 @@ def cache_method(cls, name):
     supercls = cls
     objc_method = None
     while supercls is not None:
+        # Load the class's methods if we haven't done so yet.
+        if supercls.methods_ptr is None:
+            supercls._reload_methods()
+        
         try:
             objc_method = supercls.instance_methods[name]
             break
@@ -1267,6 +1271,10 @@ class ObjCInstance(object):
         # either on self's class or any of the superclasses.
         cls = self.objc_class
         while cls is not None:
+            # Load the class's methods if we haven't done so yet.
+            if cls.methods_ptr is None:
+                cls._reload_methods()
+            
             try:
                 method = cls.partial_methods[name]
                 break
@@ -1417,10 +1425,9 @@ class ObjCClass(ObjCInstance, type):
                     registered_something = True
                     obj.register(self, attr)
             
-            self._reload_methods()
-            
-            # If anything was registered, reload the metaclass's methods, because there may be new class methods.
+            # If anything was registered, reload the methods of this class (and the metaclass, because there may be new class methods).
             if registered_something:
+                self._reload_methods()
                 self.objc_class._reload_methods()
 
         return self
