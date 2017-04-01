@@ -4,8 +4,19 @@ import platform
 import struct
 
 __LP64__ = (8*struct.calcsize("P") == 64)
-__i386__ = (platform.machine() == 'i386')
-__x86_64__ = (platform.machine() == 'x86_64')
+
+# platform.machine() indicates the machine's physical architecture,
+# which means that on a 64-bit Intel machine it is always "x86_64",
+# even if Python is built as 32-bit.
+_any_x86 = (platform.machine() in ('i386', 'x86_64'))
+__i386__ = (_any_x86 and not __LP64__)
+__x86_64__ = (_any_x86 and __LP64__)
+
+# On iOS, platform.machine() is a device identifier like "iPhone9,4",
+# but the platform.version() string contains the architecture.
+_any_arm = ('ARM' in platform.version())
+__arm64__ = (_any_arm and __LP64__)
+__arm__ = (_any_arm and not __LP64__)
 
 PyObjectEncoding = b'{PyObject=@}'
 
@@ -19,11 +30,6 @@ def encoding_for_ctype(vartype):
     }
     return typecodes.get(vartype, b'?')
 
-try:
-    text = unicode
-except NameError:
-    text = str
-
 
 # Note CGBase.h located at
 # /System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/Headers/CGBase.h
@@ -36,6 +42,8 @@ if __LP64__:
     NSSizeEncoding = b'{CGSize=dd}'
     NSRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
     NSRangeEncoding = b'{_NSRange=QQ}'
+    UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
+    NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
 else:
     NSInteger = c_int
     NSUInteger = c_uint
@@ -43,7 +51,9 @@ else:
     NSPointEncoding = b'{CGPoint=ff}'
     NSSizeEncoding = b'{CGSize=ff}'
     NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
-    NSRangeEncoding = b'{NSRange=II}'
+    NSRangeEncoding = b'{_NSRange=II}'
+    UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
+    NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
 
 NSIntegerEncoding = encoding_for_ctype(NSInteger)
 NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
@@ -97,6 +107,33 @@ def NSMakePoint(x, y):
 
 CGPointMake = NSMakePoint
 
+
+# iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
+class UIEdgeInsets(Structure):
+    _fields_ = [('top', CGFloat),
+                ('left', CGFloat),
+                ('bottom', CGFloat),
+                ('right', CGFloat)]
+
+def UIEdgeInsetsMake(top, left, bottom, right):
+    return UIEdgeInsets(top, left, bottom, right)
+
+UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+
+
+# macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
+class NSEdgeInsets(Structure):
+    _fields_ = [('top', CGFloat),
+                ('left', CGFloat),
+                ('bottom', CGFloat),
+                ('right', CGFloat)]
+
+def NSEdgeInsetsMake(top, left, bottom, right):
+    return NSEdgeInsets(top, left, bottom, right)
+
+# strangely, there is no NSEdgeInsetsZero, neither in public nor in private API.
+
+
 # NSDate.h
 NSTimeInterval = c_double
 
@@ -124,6 +161,3 @@ class NSRange(Structure):
 
 
 NSZeroPoint = NSPoint(0, 0)
-
-CFTypeID = c_ulong
-CFNumberType = c_uint32

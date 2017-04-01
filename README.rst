@@ -48,7 +48,7 @@ Then, in a Python shell
 
     >>> from ctypes import cdll
     >>> from ctypes import util
-    >>> from rubicon.objc import ObjCClass, objc_method
+    >>> from rubicon.objc import ObjCClass, NSObject, objc_method
 
     # Use ctypes to import a framework into the Python process
     >>> cdll.LoadLibrary(util.find_library('Foundation'))

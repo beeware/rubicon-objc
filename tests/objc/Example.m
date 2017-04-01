@@ -1,7 +1,11 @@
 #import "Example.h"
 #import <stdio.h>
 
-@implementation Example;
+@implementation Example
+
+@synthesize intField = _intField;
+@synthesize thing = _thing;
+@synthesize callback = _callback;
 
 static int _staticIntField = 11;
 
@@ -97,6 +101,22 @@ static int _staticIntField = 11;
     return [width decimalNumberByMultiplyingBy:[height decimalNumberByDividingBy:[NSDecimalNumber decimalNumberWithString:@"2.0"]]];
 }
 
+/* Handling of struct returns of different sizes. */
+-(struct int_sized) intSizedStruct {
+    struct int_sized ret = {"abc"};
+    return ret;
+}
+
+-(struct oddly_sized) oddlySizedStruct {
+    struct oddly_sized ret = {"abcd"};
+    return ret;
+}
+
+-(struct large) largeStruct {
+    struct large ret = {"abcdefghijklmnop"};
+    return ret;
+}
+
 
 /* Handling of object references. */
 -(void) mutateThing: (Thing *) thing
@@ -112,12 +132,12 @@ static int _staticIntField = 11;
 /* String argument/return value handling */
 -(NSString *) toString
 {
-    return [[NSString alloc] initWithFormat:@"This is an ObjC Example object"];
+    return [NSString stringWithFormat:@"This is an ObjC Example object"];
 }
 
 -(NSString *) duplicateString:(NSString *) in
 {
-    return [[NSString alloc] initWithFormat:@"%@%@", in, in];
+    return [NSString stringWithFormat:@"%@%@", in, in];
 }
 
 -(NSString *) smiley

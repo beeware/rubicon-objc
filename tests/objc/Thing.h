@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 
-@interface Thing : NSObject
+@interface Thing : NSObject {
+    NSString *_name;
+}
 
 @property (retain) NSString *name;
 

@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 
-@interface BaseExample : NSObject
+@interface BaseExample : NSObject {
+    int _baseIntField;
+}
 
 @property int baseIntField;
 
