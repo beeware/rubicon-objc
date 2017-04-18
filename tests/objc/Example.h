@@ -67,4 +67,8 @@ struct large {
 -(NSString *) getMessage;
 -(NSString *) reverseIt:(NSString *) input;
 
++(NSUInteger) overloaded;
++(NSUInteger) overloaded:(NSUInteger)arg1;
++(NSUInteger) overloaded:(NSUInteger)arg1 extraArg:(NSUInteger)arg2;
+
 @end

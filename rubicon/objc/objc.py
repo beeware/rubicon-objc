@@ -24,6 +24,7 @@ def _find_or_error(name):
     else:
         return path
 
+c = cdll.LoadLibrary(_find_or_error('c'))
 objc = cdll.LoadLibrary(_find_or_error('objc'))
 Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
 
@@ -33,6 +34,9 @@ class objc_id(c_void_p):
 class SEL(c_void_p):
     @property
     def name(self):
+        if self.value is None:
+            raise ValueError("Cannot get name of null selector")
+        
         return objc.sel_getName(self)
     
     def __new__(cls, init=None):
@@ -50,7 +54,7 @@ class SEL(c_void_p):
             super().__init__(init)
     
     def __repr__(self):
-        return "{cls.__module__}.{cls.__qualname__}({self.name!r})".format(cls=type(self), self=self)
+        return "{cls.__module__}.{cls.__qualname__}({name!r})".format(cls=type(self), name=None if self.value is None else self.name)
 
 class Class(objc_id):
     pass
@@ -68,6 +72,10 @@ class objc_property_t(c_void_p):
     pass
 
 ######################################################################
+
+# void free(void *)
+c.free.restype = None
+c.free.argtypes = [c_void_p]
 
 # BOOL class_addIvar(Class cls, const char *name, size_t size, uint8_t alignment, const char *types)
 objc.class_addIvar.restype = c_bool
@@ -762,8 +770,6 @@ class ObjCMethod(object):
         PyObjectEncoding: py_object
     }
 
-    cfunctype_table = {}
-
     def __init__(self, method):
         """Initialize with an Objective-C Method pointer.  We then determine
         the return type and argument type information of the method."""
@@ -867,6 +873,40 @@ class ObjCMethod(object):
                 result = ObjCClass(result)
             return result
 
+######################################################################
+
+class ObjCPartialMethod(object):
+    _sentinel = object()
+    
+    def __init__(self, name_start):
+        super().__init__()
+        
+        self.name_start = name_start
+        self.methods = {}
+    
+    def __repr__(self):
+        return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(cls=type(self), self=self)
+    
+    def __call__(self, receiver, first_arg=_sentinel, **kwargs):
+        if first_arg is ObjCPartialMethod._sentinel:
+            if kwargs:
+                raise TypeError("Missing first (positional) argument")
+            
+            args = []
+            rest = frozenset()
+        else:
+            args = [first_arg]
+            # Add "" to rest to indicate that the method takes arguments
+            rest = frozenset(kwargs) | frozenset(("",))
+        
+        try:
+            meth, order = self.methods[rest]
+        except KeyError:
+            raise ValueError("No method with selector parts {}".format(set(kwargs)))
+        
+        meth = ObjCMethod(meth)
+        args += [kwargs[name] for name in order]
+        return meth(receiver, *args)
 
 ######################################################################
 
@@ -896,16 +936,33 @@ def cache_method(cls, name):
     """Returns a python representation of the named instance method,
     either by looking it up in the cached list of methods or by searching
     for and creating a new method object."""
-    try:
-        return cls.__dict__['instance_methods'][name]
-    except KeyError:
-        selector = get_selector(name.replace('_', ':'))
-        method = objc.class_getInstanceMethod(cls, selector)
-        if method.value:
-            objc_method = ObjCMethod(method)
-            cls.__dict__['instance_methods'][name] = objc_method
-            return objc_method
-    return None
+    
+    supercls = cls
+    objc_method = None
+    while supercls is not None:
+        # Load the class's methods if we haven't done so yet.
+        if supercls.methods_ptr is None:
+            supercls._reload_methods()
+        
+        try:
+            objc_method = supercls.instance_methods[name]
+            break
+        except KeyError:
+            pass
+        
+        try:
+            objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
+            break
+        except KeyError:
+            pass
+        
+        supercls = supercls.superclass
+    
+    if objc_method is None:
+        return None
+    else:
+        cls.instance_methods[name] = objc_method
+        return objc_method
 
 
 def cache_property_methods(cls, name):
@@ -921,27 +978,15 @@ def cache_property_methods(cls, name):
         responds = objc.class_getProperty(cls, name.encode('utf-8'))
 
         # Check 2: Does the class have an instance method to retrieve the given name
-        accessor_selector = get_selector(name)
-        accessor = objc.class_getInstanceMethod(cls, accessor_selector)
+        accessor = cache_method(cls, name)
 
         # Check 3: Is there a setName: method to set the property with the given name
-        mutator_selector = get_selector('set' + name[0].title() + name[1:] + ':')
-        mutator = objc.class_getInstanceMethod(cls, mutator_selector)
+        mutator = cache_method(cls, 'set' + name[0].title() + name[1:] + ':')
 
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
         if responds or (accessor and mutator):
-            if accessor:
-                objc_accessor = ObjCMethod(accessor)
-            else:
-                objc_accessor = None
-
-            if mutator:
-                objc_mutator = ObjCMethod(mutator)
-            else:
-                objc_mutator = None
-
-            methods = (objc_accessor, objc_mutator)
+            methods = (accessor, mutator)
         else:
             methods = None
     return methods
@@ -953,10 +998,10 @@ def cache_property_accessor(cls, name):
     selector (set<Name>:).
     """
     try:
-        methods = cls.__dict__['instance_properties'][name]
+        methods = cls.instance_properties[name]
     except KeyError:
         methods = cache_property_methods(cls, name)
-        cls.__dict__['instance_properties'][name] = methods
+        cls.instance_properties[name] = methods
     if methods:
         return methods[0]
     return None
@@ -968,10 +1013,10 @@ def cache_property_mutator(cls, name):
     selector (set<Name>:).
     """
     try:
-        methods = cls.__dict__['instance_properties'][name]
+        methods = cls.instance_properties[name]
     except KeyError:
         methods = cache_property_methods(cls, name)
-        cls.__dict__['instance_properties'][name] = methods
+        cls.instance_properties[name] = methods
     if methods:
         return methods[1]
     return None
@@ -1011,8 +1056,9 @@ def objc_method(f):
             result = at(result).ptr.value
         return result
 
-    def register(cls):
-        return add_method(cls, f.__name__.replace('_', ':'), _objc_method, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.imp_keep_alive_table[name] = add_method(cls, name, _objc_method, encoding)
 
     _objc_method.register = register
 
@@ -1035,8 +1081,9 @@ def objc_classmethod(f):
             result = at(result).ptr.value
         return result
 
-    def register(cls):
-        return add_method(cls.objc_class, f.__name__.replace('_', ':'), _objc_classmethod, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
     _objc_classmethod.register = register
 
@@ -1052,31 +1099,31 @@ class objc_ivar(object):
     def __init__(self, vartype):
         self.vartype = vartype
 
-    def pre_register(self, ptr, name):
-        return add_ivar(ptr, name, self.vartype)
+    def pre_register(self, ptr, attr):
+        return add_ivar(ptr, attr, self.vartype)
 
 
 class objc_property(object):
     def __init__(self):
         pass
 
-    def register_property(self, name, cls):
-        def getter(self) -> ObjCInstance:
-            return getattr(self, '_' + name, None)
+    def register(self, cls, attr):
+        def getter(_self) -> ObjCInstance:
+            return getattr(_self, '_' + attr, None)
 
-        def setter(self, new):
-            if not hasattr(self, '_' + name):
-                setattr(self, '_' + name, None)
-            if getattr(self, '_' + name) is None:
-                setattr(self, '_' + name, new)
+        def setter(_self, new):
+            if not hasattr(_self, '_' + attr):
+                setattr(_self, '_' + attr, None)
+            if getattr(_self, '_' + attr) is None:
+                setattr(_self, '_' + attr, new)
                 if new is not None:
-                    getattr(self, '_' + name).retain()
+                    getattr(_self, '_' + attr).retain()
             else:
-                if not getattr(self, '_' + name).isEqualTo_(new):
-                    getattr(self, '_' + name).release()
-                    setattr(self, '_' + name, new)
+                if not getattr(_self, '_' + attr).isEqualTo_(new):
+                    getattr(_self, '_' + attr).release()
+                    setattr(_self, '_' + attr, new)
                     if new is not None:
-                        getattr(self, '_' + name).retain()
+                        getattr(_self, '_' + attr).retain()
 
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
@@ -1107,18 +1154,18 @@ class objc_property(object):
                 result = at(result).ptr.value
             return result
 
-        setter_name = 'set' + name[0].upper() + name[1:] + '_'
+        setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.__dict__['imp_table'][name] = add_method(cls.__dict__['ptr'], name, _objc_getter, getter_encoding)
-        cls.__dict__['imp_table'][setter_name] = add_method(cls.__dict__['ptr'], setter_name.replace('_', ':'), _objc_setter, setter_encoding)
+        cls.imp_keep_alive_table[attr] = add_method(cls.ptr, attr, _objc_getter, getter_encoding)
+        cls.imp_keep_alive_table[setter_name] = add_method(cls.ptr, setter_name, _objc_setter, setter_encoding)
 
 
 def objc_rawmethod(f):
     encoding = encoding_from_annotation(f, offset=2)
-    name = f.__name__.replace('_', ':')
 
-    def register(cls):
-        return add_method(cls, name, f, encoding)
+    def register(cls, attr):
+        name = attr.replace("_", ":")
+        cls.imp_keep_alive_table[name] = add_method(cls, name, f, encoding)
     f.register = register
     return f
 
@@ -1199,7 +1246,7 @@ class ObjCInstance(object):
             type(self).__qualname__,
             id(self),
             self.objc_class.name,
-            self.__dict__['ptr'].value,
+            self.ptr.value,
             self.debugDescription,
         )
 
@@ -1207,7 +1254,7 @@ class ObjCInstance(object):
         """Returns a callable method object with the given name."""
         # Search for named instance method in the class object and if it
         # exists, return callable object with self as hidden argument.
-        # Note: you should give self and not self.__dict__['ptr'] as a parameter to
+        # Note: you should give self and not self.ptr as a parameter to
         # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
         # alive for chained calls like MyClass.alloc().init() where the
         # object created by alloc() is not assigned to a variable.
@@ -1220,22 +1267,51 @@ class ObjCInstance(object):
             if method:
                 return ObjCBoundMethod(method, self)()
 
-        method = cache_method(self.objc_class, name)
+        # See if there's a partial method starting with the given name,
+        # either on self's class or any of the superclasses.
+        cls = self.objc_class
+        while cls is not None:
+            # Load the class's methods if we haven't done so yet.
+            if cls.methods_ptr is None:
+                cls._reload_methods()
+            
+            try:
+                method = cls.partial_methods[name]
+                break
+            except KeyError:
+                cls = cls.superclass
+        else:
+            method = None
+        
+        if method is not None:
+            # If the partial method can only resolve to one method that takes no arguments,
+            # return that method directly, instead of a mostly useless partial method.
+            if set(method.methods) == {frozenset()}:
+                method, _ = method.methods[frozenset()]
+                method = ObjCMethod(method)
+            
+            return ObjCBoundMethod(method, self)
+
+        # See if there's a method whose full name matches the given name.
+        method = cache_method(self.objc_class, name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
         else:
             raise AttributeError('%s.%s %s has no attribute %s' % (type(self).__module__, type(self).__qualname__, self.objc_class.name, name))
 
     def __setattr__(self, name, value):
-        # Convert enums to their underlying values.
-        if isinstance(value, Enum):
-            value = value.value
-        # Set the value of an attribute.
-        method = cache_property_mutator(self.objc_class, name)
-        if method:
-            ObjCBoundMethod(method, self)(value)
-        else:
+        if name in self.__dict__:
+            # For attributes already in __dict__, use the default __setattr__.
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
+        else:
+            method = cache_property_mutator(self.objc_class, name)
+            if method:
+                # Convert enums to their underlying values.
+                if isinstance(value, Enum):
+                    value = value.value
+                ObjCBoundMethod(method, self)(value)
+            else:
+                super(ObjCInstance, type(self)).__setattr__(self, name, value)
 
 
 # The inheritance order is important here.
@@ -1247,6 +1323,14 @@ class ObjCInstance(object):
 # would be no opportunity to pass extra arguments.
 class ObjCClass(ObjCInstance, type):
     """Python wrapper for an Objective-C class."""
+
+    @property
+    def superclass(self):
+        super_ptr = objc.class_getSuperclass(self)
+        if super_ptr.value is None:
+            return None
+        else:
+            return ObjCClass(super_ptr)
 
     def __new__(cls, *args):
         """Create a new ObjCClass instance or return a previously created
@@ -1290,17 +1374,14 @@ class ObjCClass(ObjCInstance, type):
             ptr = get_class(name)
             if ptr.value is None:
                 # Create the ObjC class description
-                ptr = objc.objc_allocateClassPair(bases[0].__dict__['ptr'], name, 0)
+                ptr = objc.objc_allocateClassPair(bases[0].ptr, name, 0)
                 if ptr is None:
                     raise RuntimeError("Class pair allocation failed")
 
                 # Pre-Register all the instance variables
                 for attr, obj in attrs.items():
-                    try:
+                    if hasattr(obj, "pre_register"):
                         obj.pre_register(ptr, attr)
-                    except AttributeError:
-                        # The class attribute doesn't have a pre_register method.
-                        pass
 
                 # Register the ObjC class
                 objc.objc_registerClassPair(ptr)
@@ -1315,19 +1396,39 @@ class ObjCClass(ObjCInstance, type):
         # name or pointer, not when creating a new class.
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+            '_class_inited': False,
             'name': objc_class_name,
-            'instance_methods': {},     # mapping of name -> instance method
-            'instance_properties': {},  # mapping of name -> (accessor method, mutator method)
-            'imp_table': {},            # Mapping of name -> Native method references
+            'methods_ptr_count': c_uint(0),
+            'methods_ptr': None,
+            # Mapping of name -> method pointer
+            'instance_method_ptrs': {},
+            # Mapping of name -> instance method
+            'instance_methods': {},
+            # Mapping of name -> (accessor method, mutator method)
+            'instance_properties': {},
+            # Mapping of first selector part -> ObjCPartialMethod instances
+            'partial_methods': {},
+            # Mapping of name -> CFUNCTYPE callback function
+            # This only contains the IMPs of methods created in Python,
+            # which need to be kept from being garbage-collected.
+            # It does not contain any other methods, do not use it for calling methods.
+            'imp_keep_alive_table': {},
         })
-
-        # Register all the methods, class methods, etc
-        for attr, obj in attrs.items():
-            if hasattr(obj, "register"):
-                self.__dict__['imp_table'][attr] = obj.register(self)
-
-            if hasattr(obj, "register_property"):
-                obj.register_property(attr, self)
+        
+        if not self._class_inited:
+            self._class_inited = True
+            
+            # Register all the methods, class methods, etc
+            registered_something = False
+            for attr, obj in attrs.items():
+                if hasattr(obj, "register"):
+                    registered_something = True
+                    obj.register(self, attr)
+            
+            # If anything was registered, reload the methods of this class (and the metaclass, because there may be new class methods).
+            if registered_something:
+                self._reload_methods()
+                self.objc_class._reload_methods()
 
         return self
 
@@ -1335,9 +1436,37 @@ class ObjCClass(ObjCInstance, type):
         return "<%s.%s: %s at %#x>" % (
             type(self).__module__,
             type(self).__qualname__,
-            self.__dict__['name'],
-            self.__dict__['ptr'].value,
+            self.name,
+            self.ptr.value,
         )
+    
+    def __del__(self):
+        c.free(self.methods_ptr)
+    
+    def _reload_methods(self):
+        old_methods_ptr = self.methods_ptr
+        self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
+        # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
+        c.free(old_methods_ptr)
+        
+        for i in range(self.methods_ptr_count.value):
+            method = self.methods_ptr[i]
+            name = objc.method_getName(method).name.decode("utf-8")
+            self.instance_method_ptrs[name] = method
+
+            first, *rest = name.split(":")
+            # Selectors end in a colon iff the method takes arguments.
+            # Because of this, rest must either be empty (method takes no arguments) or the last element must be an empty string (method takes arguments).
+            assert not rest or rest[-1] == ""
+
+            try:
+                partial = self.partial_methods[first]
+            except KeyError:
+                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+
+            # order is rest without the dummy "" part
+            order = rest[:-1]
+            partial.methods[frozenset(rest)] = (method, order)
 
 
 class ObjCMetaClass(ObjCClass):
