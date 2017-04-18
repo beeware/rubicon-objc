@@ -23,20 +23,20 @@ Rubicon-ObjC
 .. image:: https://badges.gitter.im/pybee/general.svg
     :target: https://gitter.im/pybee/general
 
-Rubicon-ObjC is a bridge between Objective C and Python. It enables you to:
+Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
 
-* Use Python to instantiate objects defined in Objective C,
-* Use Python to invoke methods on objects defined in Objective C, and
-* Subclass and extend Objective C classes in Python.
+* Use Python to instantiate objects defined in Objective-C,
+* Use Python to invoke methods on objects defined in Objective-C, and
+* Subclass and extend Objective-C classes in Python.
 
-It also includes wrappers of the some key data types from the Core Foundation
-framework (e.g., NSString).
+It also includes wrappers of the some key data types from the Foundation
+framework (e.g., ``NSString``).
 
 Quickstart
 ----------
 
-Rubicon uses a combination of `ctypes`, plus Objective-C's own reflection
-APIs, to enable Objective C objects to be referenced in a Python process.
+Rubicon uses a combination of ``ctypes``, plus Objective-C's own reflection
+APIs, to enable Objective-C objects to be referenced in a Python process.
 
 To install Rubicon, use pip::
 
@@ -51,22 +51,22 @@ Then, in a Python shell
     >>> from rubicon.objc import ObjCClass, NSObject, objc_method
 
     # Use ctypes to import a framework into the Python process
-    >>> cdll.LoadLibrary(util.find_library('Foundation'))
+    >>> cdll.LoadLibrary(util.find_library("Foundation"))
 
-    # Wrap an Objective C class contained in the framework
+    # Wrap an Objective-C class contained in the framework
     >>> NSURL = ObjCClass("NSURL")
 
-    # Then instantiate the Objective C class, using the API
-    # that is exposed through Objective C. The Python method name
-    # is the concatenated version of the Objective C method descriptor,
+    # Then instantiate the Objective-C class, using the API
+    # that is exposed through Objective-C. The Python method name
+    # is the concatenated version of the Objective-C method descriptor,
     # with colons replaced with underscores. So, the equivalent of
     # [NSURL URLWithString:@"http://pybee.org"];
     # would be:
     >>> NSURL.URLWithString_("http://pybee.org/")
 
-    # To create a new Objective C class, define a Python class that
+    # To create a new Objective-C class, define a Python class that
     # has the methods you want to define, decorate it to indicate that it
-    # should be exposed to the Objective C runtime, and annotate it to
+    # should be exposed to the Objective-C runtime, and annotate it to
     # describe the type of any arguments that aren't of type ``id``:
     >>> class Handler(NSObject):
     ...     @objc_method
@@ -89,17 +89,17 @@ Testing
 To run the Rubicon test suite:
 
 1. Compile the Rubicon test library. A ``Makefile`` has been provided to make
-this easy. Type::
+   this easy. Type::
 
-    $ make
+       $ make
 
-to compile it.
+   to compile it.
 
-.. admonition:: Cross platform support
+   .. admonition:: Cross platform support
 
-    This Makefile currently only works under OS/X; however, the build commands
-    aren't complicated; it should be fairly easy to reproduce the build on other
-    platforms. Pull requests to make the ``Makefile`` cross-platform are welcome.
+       This Makefile currently only works under OS X; however, the build commands
+       aren't complicated; it should be fairly easy to reproduce the build on other
+       platforms. Pull requests to make the ``Makefile`` cross-platform are welcome.
 
 2. Put the Rubicon support library somewhere that it will be found by dynamic
    library discovery. This means:
@@ -108,17 +108,16 @@ to compile it.
 
    b. Under Linux, put the ``tests/objc`` directory in your ``LD_LIBRARY_PATH``
 
-   c. Under Windows.... something :-)
-
+   c. Under Windows... something :-)
 
 3. Run the test suite::
 
-    $ python setup.py test
+       $ python setup.py test
 
    A ``tox`` configuration has also been provided; to run the tests across all
    supported platforms, run::
 
-    $ tox
+       $ tox
 
 .. Documentation
 .. -------------
@@ -148,6 +147,6 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
 .. _pybee/general: https://gitter.im/pybee/general
 .. _BeeWare Community Code of Conduct: http://pybee.org/community/behavior/
-.. _log them on Github: https://github.com/pybee/rubicon-objc/issues
+.. _log them on GitHub: https://github.com/pybee/rubicon-objc/issues
 .. _fork the code: https://github.com/pybee/rubicon-objc
 .. _submit a pull request: https://github.com/pybee/rubicon-objc/pulls
