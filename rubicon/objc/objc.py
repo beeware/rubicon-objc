@@ -36,9 +36,9 @@ class SEL(c_void_p):
     def name(self):
         if self.value is None:
             raise ValueError("Cannot get name of null selector")
-        
+
         return objc.sel_getName(self)
-    
+
     def __new__(cls, init=None):
         if isinstance(init, (bytes, str)):
             self = objc.sel_registerName(ensure_bytes(init))
@@ -48,11 +48,11 @@ class SEL(c_void_p):
             self = super().__new__(cls, init)
             self._inited = False
             return self
-    
+
     def __init__(self, init=None):
         if not self._inited:
             super().__init__(init)
-    
+
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({name!r})".format(cls=type(self), name=None if self.value is None else self.name)
 
@@ -527,7 +527,7 @@ def send_message(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', [])
-    
+
     # Choose the correct version of objc_msgSend based on return type.
     # Use objc['name'] instead of objc.name to get a new function object
     # that is independent of the one on the objc library.
@@ -570,7 +570,7 @@ def send_super(receiver, selName, *args, **kwargs):
     selector = get_selector(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
-    
+
     send = objc['objc_msgSendSuper']
     send.restype = restype
     if argtypes:
@@ -838,7 +838,7 @@ class ObjCMethod(object):
         to pass in the selector as an argument since it will be automatically
         provided."""
         f = self.get_callable()
-        
+
         if convert_args:
             from .core_foundation import from_value
             converted_args = []
@@ -846,15 +846,15 @@ class ObjCMethod(object):
                 if isinstance(arg, Enum):
                     # Convert Python enum objects to their values
                     arg = arg.value
-                
+
                 if argtype == objc_id:
                     # Convert Python objects to Core Foundation objects
                     arg = from_value(arg)
-                
+
                 converted_args.append(arg)
         else:
             converted_args = args
-        
+
         try:
             result = f(receiver, self.selector, *converted_args)
         except ArgumentError as error:
@@ -864,7 +864,7 @@ class ObjCMethod(object):
         else:
             if not convert_result:
                 return result
-            
+
             # Convert result to python type if it is a instance or class pointer.
             from .core_foundation import to_value
             if self.restype == objc_id:
@@ -877,33 +877,33 @@ class ObjCMethod(object):
 
 class ObjCPartialMethod(object):
     _sentinel = object()
-    
+
     def __init__(self, name_start):
         super().__init__()
-        
+
         self.name_start = name_start
         self.methods = {}
-    
+
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(cls=type(self), self=self)
-    
+
     def __call__(self, receiver, first_arg=_sentinel, **kwargs):
         if first_arg is ObjCPartialMethod._sentinel:
             if kwargs:
                 raise TypeError("Missing first (positional) argument")
-            
+
             args = []
             rest = frozenset()
         else:
             args = [first_arg]
             # Add "" to rest to indicate that the method takes arguments
             rest = frozenset(kwargs) | frozenset(("",))
-        
+
         try:
             meth, order = self.methods[rest]
         except KeyError:
             raise ValueError("No method with selector parts {}".format(set(kwargs)))
-        
+
         meth = ObjCMethod(meth)
         args += [kwargs[name] for name in order]
         return meth(receiver, *args)
@@ -936,28 +936,28 @@ def cache_method(cls, name):
     """Returns a python representation of the named instance method,
     either by looking it up in the cached list of methods or by searching
     for and creating a new method object."""
-    
+
     supercls = cls
     objc_method = None
     while supercls is not None:
         # Load the class's methods if we haven't done so yet.
         if supercls.methods_ptr is None:
             supercls._reload_methods()
-        
+
         try:
             objc_method = supercls.instance_methods[name]
             break
         except KeyError:
             pass
-        
+
         try:
             objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
             break
         except KeyError:
             pass
-        
+
         supercls = supercls.superclass
-    
+
     if objc_method is None:
         return None
     else:
@@ -1198,7 +1198,7 @@ class ObjCInstance(object):
         # deallocated.
         if object_ptr.value in cls._cached_objects:
             return cls._cached_objects[object_ptr.value]
-        
+
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
         if not issubclass(cls, ObjCClass) and objc.object_isClass(object_ptr):
             return ObjCClass(object_ptr)
@@ -1232,7 +1232,7 @@ class ObjCInstance(object):
             send_message(observer, 'release')
 
         return self
-    
+
     def __str__(self):
         from . import core_foundation
         if core_foundation.is_str(self):
@@ -1274,7 +1274,7 @@ class ObjCInstance(object):
             # Load the class's methods if we haven't done so yet.
             if cls.methods_ptr is None:
                 cls._reload_methods()
-            
+
             try:
                 method = cls.partial_methods[name]
                 break
@@ -1282,14 +1282,14 @@ class ObjCInstance(object):
                 cls = cls.superclass
         else:
             method = None
-        
+
         if method is not None:
             # If the partial method can only resolve to one method that takes no arguments,
             # return that method directly, instead of a mostly useless partial method.
             if set(method.methods) == {frozenset()}:
                 method, _ = method.methods[frozenset()]
                 method = ObjCMethod(method)
-            
+
             return ObjCBoundMethod(method, self)
 
         # See if there's a method whose full name matches the given name.
@@ -1414,17 +1414,17 @@ class ObjCClass(ObjCInstance, type):
             # It does not contain any other methods, do not use it for calling methods.
             'imp_keep_alive_table': {},
         })
-        
+
         if not self._class_inited:
             self._class_inited = True
-            
+
             # Register all the methods, class methods, etc
             registered_something = False
             for attr, obj in attrs.items():
                 if hasattr(obj, "register"):
                     registered_something = True
                     obj.register(self, attr)
-            
+
             # If anything was registered, reload the methods of this class (and the metaclass, because there may be new class methods).
             if registered_something:
                 self._reload_methods()
@@ -1439,16 +1439,16 @@ class ObjCClass(ObjCInstance, type):
             self.name,
             self.ptr.value,
         )
-    
+
     def __del__(self):
         c.free(self.methods_ptr)
-    
+
     def _reload_methods(self):
         old_methods_ptr = self.methods_ptr
         self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
         # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
         c.free(old_methods_ptr)
-        
+
         for i in range(self.methods_ptr_count.value):
             method = self.methods_ptr[i]
             name = objc.method_getName(method).name.decode("utf-8")
@@ -1471,7 +1471,7 @@ class ObjCClass(ObjCInstance, type):
 
 class ObjCMetaClass(ObjCClass):
     """Python wrapper for an Objective-C metaclass."""
-    
+
     def __new__(cls, name_or_ptr):
         if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
@@ -1484,7 +1484,7 @@ class ObjCMetaClass(ObjCClass):
                 raise ValueError("Cannot create ObjCMetaClass for nil pointer")
             elif not objc.object_isClass(ptr) or not objc.class_isMetaClass(ptr):
                 raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
-        
+
         return super().__new__(cls, ptr)
 
 
@@ -1513,22 +1513,22 @@ try:
     DeallocationObserver = ObjCClass("DeallocationObserver")
 except NameError:
     class DeallocationObserver(NSObject):
-    
+
         observed_object = objc_ivar(objc_id)
-    
+
         @objc_rawmethod
         def initWithObject_(self, cmd, anObject):
             self = send_super(self, 'init')
             self = self.value
             set_instance_variable(self, 'observed_object', anObject, objc_id)
             return self
-    
+
         @objc_rawmethod
         def dealloc(self, cmd) -> None:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
             send_super(self, 'dealloc')
-    
+
         @objc_rawmethod
         def finalize(self, cmd) -> None:
             # Called instead of dealloc if using garbage collection.

@@ -58,11 +58,24 @@ Then, in a Python shell
 
     # Then instantiate the Objective-C class, using the API
     # that is exposed through Objective-C. The Python method name
-    # is the concatenated version of the Objective-C method descriptor,
-    # with colons replaced with underscores. So, the equivalent of
-    # [NSURL URLWithString:@"http://pybee.org"];
+    # is the Objective-C method descriptor, up to the first colon.
+    # The first argument (if it exists) is passed in as is; subsequent
+    # arguments are passed in as keyword arguments. Properties can be
+    # accessed and modified directly. So, the equivalent of:
+    # NSURL *base = [NSURL URLWithString:@"http://pybee.org"];
+    # NSURL *full = [NSURL URLWithString:@"contributing/" relativeToURL:base];
+    # NSLog(@"absoluteURL = %@", [full absoluteURL]);
     # would be:
-    >>> NSURL.URLWithString_("http://pybee.org/")
+    >>> base = NSURL.URLWithString("http://pybee.org/")
+    >>> full = NSURL.URLWithString("http://pybee.org/", relativeToURL=base)
+    >>> print("absoluteURL = %s" % full.absoluteURL)
+
+    # Sometimes, a method will use have the same keyword argument name twice.
+    # This is legal in Objective-C, but not in Python; in this case, you can
+    # explicitly name a descriptor by replacing colons with underscores:
+    >>> base = NSURL.URLWithString_("http://pybee.org/")
+    >>> full = NSURL.URLWithString_relativeToURL_("http://pybee.org/", base)
+    >>> print("absoluteURL = %s" % full.absoluteURL)
 
     # To create a new Objective-C class, define a Python class that
     # has the methods you want to define, decorate it to indicate that it

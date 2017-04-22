@@ -36,28 +36,28 @@ print("sys.maxsize = " + hex(sys.maxsize))
 class RubiconTest(unittest.TestCase):
     def test_sel_by_name(self):
         self.assertEqual(SEL(b"foobar").name, b"foobar")
-    
+
     def test_sel_null(self):
         with self.assertRaises(ValueError):
             SEL(None).name
-    
+
     def test_class_by_name(self):
         """An Objective-C class can be looked up by name."""
-        
+
         Example = ObjCClass("Example")
         self.assertEqual(Example.name, "Example")
-    
+
     def test_objcclass_caching(self):
         """ObjCClass instances are cached."""
-        
+
         Example1 = ObjCClass("Example")
         Example2 = ObjCClass("Example")
-        
+
         self.assertIs(Example1, Example2)
-    
+
     def test_class_by_pointer(self):
         """An Objective-C class can be created from a pointer."""
-        
+
         example_ptr = objc.objc_getClass(b"Example")
         Example = ObjCClass(example_ptr)
         self.assertEqual(Example, ObjCClass("Example"))
@@ -67,27 +67,27 @@ class RubiconTest(unittest.TestCase):
 
         with self.assertRaises(NameError):
             ObjCClass('DoesNotExist')
-    
+
     def test_metaclass_by_name(self):
         """An Objective-C metaclass can be looked up by name."""
-        
+
         Example = ObjCClass("Example")
         ExampleMeta = ObjCMetaClass("Example")
-        
+
         self.assertEqual(ExampleMeta.name, "Example")
         self.assertEqual(ExampleMeta, Example.objc_class)
-    
+
     def test_objcmetaclass_caching(self):
         """ObjCMetaClass instances are cached."""
-        
+
         ExampleMeta1 = ObjCMetaClass("Example")
         ExampleMeta2 = ObjCMetaClass("Example")
-        
+
         self.assertIs(ExampleMeta1, ExampleMeta2)
-    
+
     def test_metaclass_by_pointer(self):
         """An Objective-C metaclass can be created from a pointer."""
-        
+
         examplemeta_ptr = objc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCMetaClass(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
@@ -97,19 +97,19 @@ class RubiconTest(unittest.TestCase):
 
         with self.assertRaises(NameError):
             ObjCMetaClass('DoesNotExist')
-    
+
     def test_metametaclass(self):
         """The class of a metaclass can be looked up."""
-        
+
         ExampleMeta = ObjCMetaClass("Example")
         ExampleMetaMeta = ExampleMeta.objc_class
-        
+
         self.assertIsInstance(ExampleMetaMeta, ObjCMetaClass)
         self.assertEqual(ExampleMetaMeta, NSObject.objc_class)
-    
+
     def test_objcinstance_can_produce_objcclass(self):
         """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
-        
+
         example_ptr = objc.objc_getClass(b"Example")
         Example = ObjCInstance(example_ptr)
         self.assertEqual(Example, ObjCClass("Example"))
@@ -117,55 +117,55 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_can_produce_objcmetaclass(self):
         """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
-        
+
         examplemeta_ptr = objc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCInstance(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
-    
+
     def test_objcclass_can_produce_objcmetaclass(self):
         """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
-        
+
         examplemeta_ptr = objc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCClass(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
-    
+
     def test_objcclass_requires_class(self):
         """ObjCClass only accepts class pointers."""
-        
+
         random_obj = NSObject.alloc().init()
         with self.assertRaises(ValueError):
             ObjCClass(random_obj.ptr)
         random_obj.release()
-    
+
     def test_objcmetaclass_requires_metaclass(self):
         """ObjCMetaClass only accepts metaclass pointers."""
-        
+
         random_obj = NSObject.alloc().init()
         with self.assertRaises(ValueError):
             ObjCMetaClass(random_obj.ptr)
         random_obj.release()
-        
+
         with self.assertRaises(ValueError):
             ObjCMetaClass(NSObject.ptr)
-    
+
     def test_objcclass_superclass(self):
         Example = ObjCClass("Example")
         BaseExample = ObjCClass("BaseExample")
-        
+
         self.assertEqual(Example.superclass, BaseExample)
         self.assertEqual(BaseExample.superclass, NSObject)
         self.assertIsNone(NSObject.superclass)
-    
+
     def test_objcmetaclass_superclass(self):
         Example = ObjCClass("Example")
         BaseExample = ObjCClass("BaseExample")
-    
+
         self.assertEqual(Example.objc_class.superclass, BaseExample.objc_class)
         self.assertEqual(BaseExample.objc_class.superclass, NSObject.objc_class)
         self.assertEqual(NSObject.objc_class.superclass, NSObject)
-    
+
     def test_field(self):
         "A field on an instance can be accessed and mutated"
 
@@ -442,31 +442,31 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
-    
+
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-        
+
         # FIXME: Overriding the restype like done below is NOT reliable - this code may need to be updated if the method lookup internals change. When #14 is fixed, there should be a better way of setting a custom restype (or it should be set correctly by default).
-        
+
         class struct_int_sized(Structure):
             _fields_ = [("x", c_char * 4)]
 
         method = example.intSizedStruct
         method.method.restype = struct_int_sized
         self.assertEqual(method().x, b"abc")
-        
+
         class struct_oddly_sized(Structure):
             _fields_ = [("x", c_char * 5)]
-        
+
         method = example.oddlySizedStruct
         method.method.restype = struct_oddly_sized
         self.assertEqual(method().x, b"abcd")
-        
+
         class struct_large(Structure):
             _fields_ = [("x", c_char * 17)]
-        
+
         method = example.largeStruct
         method.method.restype = struct_large
         self.assertEqual(method().x, b"abcdefghijklmnop")
@@ -475,21 +475,21 @@ class RubiconTest(unittest.TestCase):
         "Methods returning structs of different sizes by value can be handled when using send_message."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-    
+
         class struct_int_sized(Structure):
             _fields_ = [("x", c_char * 4)]
-    
+
         self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
-    
-    
+
+
         class struct_oddly_sized(Structure):
             _fields_ = [("x", c_char * 5)]
-        
+
         self.assertEqual(send_message(example, "oddlySizedStruct", restype=struct_oddly_sized).x, b"abcd")
-    
+
         class struct_large(Structure):
             _fields_ = [("x", c_char * 17)]
-    
+
         self.assertEqual(send_message(example, "largeStruct", restype=struct_large).x, b"abcdefghijklmnop")
 
     def test_object_return(self):
@@ -508,19 +508,19 @@ class RubiconTest(unittest.TestCase):
     def test_no_convert_return(self):
         Example = ObjCClass("Example")
         example = Example.alloc().init()
-        
+
         res = example.toString(convert_result=False)
         self.assertNotIsInstance(res, ObjCInstance)
         self.assertEqual(str(ObjCInstance(res)), "This is an ObjC Example object")
-    
+
     def test_partial_method_no_args(self):
         Example = ObjCClass("Example")
         self.assertEqual(Example.overloaded(), 0)
-    
+
     def test_partial_method_one_arg(self):
         Example = ObjCClass("Example")
         self.assertEqual(Example.overloaded(42), 42)
-    
+
     def test_partial_method_two_args(self):
         Example = ObjCClass("Example")
         self.assertEqual(Example.overloaded(12, extraArg=34), 12+34)
@@ -659,6 +659,15 @@ class RubiconTest(unittest.TestCase):
         box.url = None
         self.assertIsNone(box.getSchemeIfPresent())
 
+        # Try composing URLs using constructors
+        base = NSURL.URLWithString('https://pybee.org')
+        full = NSURL.URLWithString('contributing/', relativeToURL=base)
+
+        self.assertEqual(
+            "Visit %s for details" % full.absoluteURL,
+            "Visit https://pybee.org/contributing/ for details"
+        )
+
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""
 
@@ -673,7 +682,7 @@ class RubiconTest(unittest.TestCase):
             @deco
             def addOne_(self, num: c_int) -> c_int:
                 return num + 1
-            
+
             @objc_classmethod
             @deco
             def subtractOne_(cls, num: c_int) -> c_int:
@@ -697,9 +706,9 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(insets.left, other_insets.left)
         self.assertEqual(insets.bottom, other_insets.bottom)
         self.assertEqual(insets.right, other_insets.right)
-    
+
     def test_cfstring_to_str(self):
         "CFString/NSString instances can be converted to Python str."
-        
+
         self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
 
