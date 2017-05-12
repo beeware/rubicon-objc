@@ -12,6 +12,15 @@ try:
 except:
     OSX_VERSION = None
 
+# try:
+import subprocess
+print(([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3])
+XCODE_VERSION = int('%d%02d%02d' % tuple(
+    ([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3]
+))
+# except:
+#     XCODE_VERSION = 0
+
 import faulthandler
 faulthandler.enable()
 
@@ -259,6 +268,46 @@ class RubiconTest(unittest.TestCase):
 
         # ...at which point it's fair game to be retrieved.
         self.assertEqual(obj1.specialValue, 37)
+
+    def test_ambiguous_fields_as_methods(self):
+        "A method that is shadowed by a property can be accessed as a method."
+        Example = ObjCClass('Example')
+
+        # A class property can be invoked as a method
+        self.assertEqual(Example.classAmbiguous(), 37)
+
+        # An instance property can be invoked as a method
+        obj1 = Example.alloc().init()
+        self.assertEqual(obj1.ambiguous(), 42)
+
+        # In Sierra, mainBundle was turned into a class property.
+        # It should be accessible as a method
+        NSBundle = ObjCClass('NSBundle')
+        try:
+            NSBundle = ObjCClass('NSBundle')
+            NSBundle.mainBundle()
+        except:
+            self.fail("Properties shadowing methods should be OK.")
+
+    @unittest.skipIf(XCODE_VERSION < 80000, "class properties not supported before XCode 8")
+    def test_ambigous_fields_as_properties(self):
+        "A method that is shadowed by a property can be accessed as a property."
+        Example = ObjCClass('Example')
+
+        # A class property can be accessed
+        self.assertEqual(Example.classAmbiguous, 37)
+
+        # An instance property can be accessed
+        obj1 = Example.alloc().init()
+        self.assertEqual(obj1.ambiguous, 42)
+
+        # In XCode 8, mainBundle was turned into a class property.
+        # It should be accessible as a property
+        try:
+            NSBundle = ObjCClass('NSBundle')
+            NSBundle.mainBundle
+        except:
+            self.fail("Properties shadowing methods should be OK.")
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."

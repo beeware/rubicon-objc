@@ -20,14 +20,21 @@ struct large {
 };
 
 @interface Example : BaseExample {
+
     int _intField;
     Thing *_thing;
     id<Callback> _callback;
+    int _ambiguous;
 }
+
+#if (XCODE_VERSION >= 80000)
+@property (class) int classAmbiguous;
+#endif
 
 @property int intField;
 @property (retain) Thing *thing;
 @property (retain) id<Callback> callback;
+@property (readonly) int ambiguous;
 
 +(int) staticIntField;
 +(void) setStaticIntField: (int) v;
@@ -46,6 +53,9 @@ struct large {
 
 -(void) mutateThing: (Thing *) thing;
 -(Thing *) accessThing;
+
+-(int) ambiguous;
++(int) classAmbiguous;
 
 -(NSString *) toString;
 -(NSString *) duplicateString:(NSString *) in;
