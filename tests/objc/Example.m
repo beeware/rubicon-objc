@@ -133,9 +133,19 @@ static int _staticIntField = 11;
     return self.thing;
 }
 
--(int) ambiguous
+-(int) instanceMethod
 {
     return _ambiguous;
+}
+
+-(int) instanceAmbiguous
+{
+    return _ambiguous;
+}
+
++(int) classMethod
+{
+    return 37;
 }
 
 +(int) classAmbiguous

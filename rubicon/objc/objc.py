@@ -985,7 +985,7 @@ def cache_property_methods(cls, name):
 
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
-        if responds or (accessor and mutator):
+        if responds or (accessor and mutator) or (name in cls.forced_properties):
             methods = (accessor, mutator)
         else:
             methods = None
@@ -1332,7 +1332,7 @@ class ObjCClass(ObjCInstance, type):
         else:
             return ObjCClass(super_ptr)
 
-    def __new__(cls, *args):
+    def __new__(cls, *args, **kwargs):
         """Create a new ObjCClass instance or return a previously created
         instance for the given Objective-C class.  The argument may be either
         the name of the class to retrieve, a pointer to the class, or the
@@ -1406,6 +1406,8 @@ class ObjCClass(ObjCInstance, type):
             'instance_methods': {},
             # Mapping of name -> (accessor method, mutator method)
             'instance_properties': {},
+            # Explicitly declared properties
+            'forced_properties': set(),
             # Mapping of first selector part -> ObjCPartialMethod instances
             'partial_methods': {},
             # Mapping of name -> CFUNCTYPE callback function
@@ -1431,6 +1433,12 @@ class ObjCClass(ObjCInstance, type):
                 self.objc_class._reload_methods()
 
         return self
+
+    def declare_property(self, name):
+        self.forced_properties.add(name)
+
+    def declare_class_property(self, name):
+        self.objc_class.forced_properties.add(name)
 
     def __repr__(self):
         return "<%s.%s: %s at %#x>" % (

@@ -12,19 +12,18 @@ try:
 except:
     OSX_VERSION = None
 
-try:
-    import subprocess
-    XCODE_VERSION = int('%d%02d%02d' % tuple(
-        ([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3]
-    ))
-except:
-    XCODE_VERSION = 0
-
 import faulthandler
 faulthandler.enable()
 
-from rubicon.objc import ObjCInstance, ObjCClass, ObjCMetaClass, NSObject, SEL, objc, objc_method, objc_classmethod, objc_property, NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import (
+    ObjCInstance, ObjCClass, ObjCMetaClass,
+    NSObject, SEL,
+    objc, objc_method, objc_classmethod, objc_property,
+    NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
+    send_message
+)
 from rubicon.objc import core_foundation
+from rubicon.objc.objc import ObjCBoundMethod
 
 
 # Load the test harness library
@@ -268,45 +267,34 @@ class RubiconTest(unittest.TestCase):
         # ...at which point it's fair game to be retrieved.
         self.assertEqual(obj1.specialValue, 37)
 
-    def test_ambiguous_fields_as_methods(self):
-        "A method that is shadowed by a property can be accessed as a method."
+    def test_property_forcing(self):
+        "An instance or property method can be explicitly declared as a property."
         Example = ObjCClass('Example')
+        Example.declare_class_property('classMethod')
+        Example.declare_class_property('classAmbiguous')
+        Example.declare_property('instanceMethod')
+        Example.declare_property('instanceAmbiguous')
 
-        # A class property can be invoked as a method
-        self.assertEqual(Example.classAmbiguous(), 37)
+        # A class method can be turned into a property
+        self.assertEqual(Example.classMethod, 37)
 
-        # An instance property can be invoked as a method
-        obj1 = Example.alloc().init()
-        self.assertEqual(obj1.ambiguous(), 42)
-
-        # In Sierra, mainBundle was turned into a class property.
-        # It should be accessible as a method
-        NSBundle = ObjCClass('NSBundle')
-        try:
-            NSBundle = ObjCClass('NSBundle')
-            NSBundle.mainBundle()
-        except TypeError:
-            self.fail("Properties shadowing methods should be OK.")
-
-    @unittest.skipIf(XCODE_VERSION < 80000, "class properties not supported before XCode 8")
-    def test_ambigous_fields_as_properties(self):
-        "A method that is shadowed by a property can be accessed as a property."
-        Example = ObjCClass('Example')
-
-        # A class property can be accessed
+        # An actual class property can be accessed as a property
         self.assertEqual(Example.classAmbiguous, 37)
 
         # An instance property can be accessed
         obj1 = Example.alloc().init()
-        self.assertEqual(obj1.ambiguous, 42)
 
-        # In XCode 8, mainBundle was turned into a class property.
-        # It should be accessible as a property
-        try:
-            NSBundle = ObjCClass('NSBundle')
-            NSBundle.mainBundle
-        except TypeError:
-            self.fail("Properties shadowing methods should be OK.")
+        # An instance method can be turned into a property
+        self.assertEqual(obj1.instanceMethod, 42)
+
+        # An actual property can be accessed as a property
+        self.assertEqual(obj1.instanceAmbiguous, 42)
+
+        # Practical example: In Sierra, mainBundle was turned into a class property.
+        # Previously, it was a method.
+        NSBundle = ObjCClass('NSBundle')
+        NSBundle.declare_class_property('mainBundle')
+        self.assertFalse(type(NSBundle.mainBundle) == ObjCBoundMethod, 'NSBundle.mainBundle should not be a method')
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."

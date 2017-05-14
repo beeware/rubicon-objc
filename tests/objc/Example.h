@@ -54,7 +54,9 @@ struct large {
 -(void) mutateThing: (Thing *) thing;
 -(Thing *) accessThing;
 
--(int) ambiguous;
+-(int) instanceMethod;
+-(int) instanceAmbiguous;
++(int) classMethod;
 +(int) classAmbiguous;
 
 -(NSString *) toString;
