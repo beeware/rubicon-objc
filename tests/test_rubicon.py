@@ -15,8 +15,15 @@ except:
 import faulthandler
 faulthandler.enable()
 
-from rubicon.objc import ObjCInstance, ObjCClass, ObjCMetaClass, NSObject, SEL, objc, objc_method, objc_classmethod, objc_property, NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake, send_message
+from rubicon.objc import (
+    ObjCInstance, ObjCClass, ObjCMetaClass,
+    NSObject, SEL,
+    objc, objc_method, objc_classmethod, objc_property,
+    NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
+    send_message
+)
 from rubicon.objc import core_foundation
+from rubicon.objc.objc import ObjCBoundMethod
 
 
 # Load the test harness library
@@ -259,6 +266,35 @@ class RubiconTest(unittest.TestCase):
 
         # ...at which point it's fair game to be retrieved.
         self.assertEqual(obj1.specialValue, 37)
+
+    def test_property_forcing(self):
+        "An instance or property method can be explicitly declared as a property."
+        Example = ObjCClass('Example')
+        Example.declare_class_property('classMethod')
+        Example.declare_class_property('classAmbiguous')
+        Example.declare_property('instanceMethod')
+        Example.declare_property('instanceAmbiguous')
+
+        # A class method can be turned into a property
+        self.assertEqual(Example.classMethod, 37)
+
+        # An actual class property can be accessed as a property
+        self.assertEqual(Example.classAmbiguous, 37)
+
+        # An instance property can be accessed
+        obj1 = Example.alloc().init()
+
+        # An instance method can be turned into a property
+        self.assertEqual(obj1.instanceMethod, 42)
+
+        # An actual property can be accessed as a property
+        self.assertEqual(obj1.instanceAmbiguous, 42)
+
+        # Practical example: In Sierra, mainBundle was turned into a class property.
+        # Previously, it was a method.
+        NSBundle = ObjCClass('NSBundle')
+        NSBundle.declare_class_property('mainBundle')
+        self.assertFalse(type(NSBundle.mainBundle) == ObjCBoundMethod, 'NSBundle.mainBundle should not be a method')
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."
@@ -629,7 +665,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(results['int'], 99)
 
     def test_class_properties(self):
-        "A Python class can have ObjC properties with synthezied getters and setters."
+        "A Python class can have ObjC properties with synthesized getters and setters."
 
         NSObject = ObjCClass('NSObject')
         NSURL = ObjCClass('NSURL')

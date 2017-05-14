@@ -6,6 +6,7 @@
 @synthesize intField = _intField;
 @synthesize thing = _thing;
 @synthesize callback = _callback;
+@synthesize ambiguous = _ambiguous;
 
 static int _staticIntField = 11;
 
@@ -45,6 +46,7 @@ static int _staticIntField = 11;
     if (self) {
         [self setIntField:33];
     }
+    _ambiguous = 42;
     return self;
 }
 
@@ -55,6 +57,7 @@ static int _staticIntField = 11;
     if (self) {
         [self setIntField:v];
     }
+    _ambiguous = 42;
     return self;
 }
 
@@ -65,6 +68,7 @@ static int _staticIntField = 11;
     if (self) {
         [self setIntField:v];
     }
+    _ambiguous = 42;
     return self;
 }
 
@@ -127,6 +131,26 @@ static int _staticIntField = 11;
 -(Thing *) accessThing
 {
     return self.thing;
+}
+
+-(int) instanceMethod
+{
+    return _ambiguous;
+}
+
+-(int) instanceAmbiguous
+{
+    return _ambiguous;
+}
+
++(int) classMethod
+{
+    return 37;
+}
+
++(int) classAmbiguous
+{
+    return 37;
 }
 
 /* String argument/return value handling */
