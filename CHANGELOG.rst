@@ -1,20 +1,32 @@
 Changelog
 =========
 
-(next version)
---------------
+0.2.7
+-----
 
-* Added a more compact syntax for calling Objective-C methods, using Python keyword arguments. (The old syntax is still fully supported and will *not* be removed; certain method names even require the old syntax.)
+* (#40) Added the ability to explicitly declare no-attribute methods as
+  properties. This is to enable a workaround when Apple introduces readonly
+  properties as a way to access these methods.
+
+0.2.6
+-----
+
+* Added a more compact syntax for calling Objective-C methods, using Python
+  keyword arguments. (The old syntax is still fully supported and will *not*
+  be removed; certain method names even require the old syntax.)
 * Added a ``superclass`` property to ``ObjCClass``.
 
 0.2.5
 -----
 
 * Added official support for Python 3.6.
-* Added keyword arguments to disable argument and/or return value conversion when calling an Objective-C method.
+* Added keyword arguments to disable argument and/or return value conversion
+  when calling an Objective-C method.
 * Added support for (``NS``/``UI``) ``EdgeInsets`` structs. (Longhanks)
-* Improved ``str`` of Objective-C classes and objects to return the ``debugDescription``, or for ``NSString``\s, the string value.
-* Changed ``ObjCClass`` to extend ``ObjCInstance`` (in addition to ``type``), and added an ``ObjCMetaClass`` class to represent metaclasses.
+* Improved ``str`` of Objective-C classes and objects to return the
+  ``debugDescription``, or for ``NSString``\s, the string value.
+* Changed ``ObjCClass`` to extend ``ObjCInstance`` (in addition to ``type``),
+  and added an ``ObjCMetaClass`` class to represent metaclasses.
 * Fixed some issues on non-x86_64 architectures (i386, ARM32, ARM64).
 * Fixed example code in README. (Dayof)
 * Removed the last of the Python 2 compatibility code.
@@ -22,7 +34,8 @@ Changelog
 0.2.4
 -----
 
-* Added ``objc_property`` function for adding properties to custom Objective-C subclasses. (Longhanks)
+* Added ``objc_property`` function for adding properties to custom Objective-C
+  subclasses. (Longhanks)
 
 0.2.3
 -----
@@ -33,24 +46,31 @@ Changelog
 -----
 
 * Dropped support for Python 3.3.
-* Added conversion of Python ``enum.Enum`` objects to their underlying values when passed to an Objective-C method.
+* Added conversion of Python ``enum.Enum`` objects to their underlying values
+  when passed to an Objective-C method.
 * Added syntax highlighting to example code in README. (stsievert)
 * Fixed the ``setup.py`` shebang line. (uranusjr)
 
 0.2.1
 -----
 
-* Fixed setting of ``ObjCClass``/``ObjCInstance`` attributes that are not Objective-C properties.
+* Fixed setting of ``ObjCClass``/``ObjCInstance`` attributes that are not
+  Objective-C properties.
 
 0.2.0
 -----
 
 * First beta release.
-* Dropped support for Python 2. Python 3 is now required, the minimum tested version is Python 3.3.
-* Added error detection when attempting to create an Objective-C class with a name that is already in use.
-* Added automatic conversion between Python ``decimal.Decimal`` and Objective-C ``NSDecimal`` in method arguments and return values.
+* Dropped support for Python 2. Python 3 is now required, the minimum tested
+  version is Python 3.3.
+* Added error detection when attempting to create an Objective-C class with a
+  name that is already in use.
+* Added automatic conversion between Python ``decimal.Decimal`` and
+  Objective-C ``NSDecimal`` in method arguments and return values.
 * Added PyPy to the list of test platforms.
-* When subclassing Objective-C classes, the return and argument types of methods are now specified using Python type annotation syntax and ``ctypes`` types.
+* When subclassing Objective-C classes, the return and argument types of
+  methods are now specified using Python type annotation syntax and ``ctypes``
+  types.
 * Improved property support.
 
 0.1.3
@@ -67,17 +87,24 @@ Changelog
 0.1.1
 -----
 
-* Objective-C classes can now be subclassed using Python class syntax, by using an ``ObjCClass`` as the superclass.
-* Removed ``ObjCSubclass``, which is made obsolete by the new subclassing syntax.
+* Objective-C classes can now be subclassed using Python class syntax, by
+  using an ``ObjCClass`` as the superclass.
+* Removed ``ObjCSubclass``, which is made obsolete by the new subclassing
+  syntax.
 
 0.1.0
 -----
 
 * Initial alpha release.
-* Objective-C classes and instances can be accessed via ``ObjCClass`` and ``ObjCInstance``.
-* Methods can be called on classes and instances with Python method call syntax.
+* Objective-C classes and instances can be accessed via ``ObjCClass`` and
+  ``ObjCInstance``.
+* Methods can be called on classes and instances with Python method call
+  syntax.
 * Properties can be read and written with Python attribute syntax.
-* Method return and argument types are read automatically from the method type encoding.
-* A small number of commonly used structs are supported as return and argument types.
-* Python strings are automatically converted to and from ``NSString`` when passed to or returned from a method.
+* Method return and argument types are read automatically from the method
+  type encoding.
+* A small number of commonly used structs are supported as return and
+  argument types.
+* Python strings are automatically converted to and from ``NSString`` when
+  passed to or returned from a method.
 * Subclasses of Objective-C classes can be created with ``ObjCSubclass``.
