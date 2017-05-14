@@ -12,14 +12,13 @@ try:
 except:
     OSX_VERSION = None
 
-# try:
-import subprocess
-print(([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3])
-XCODE_VERSION = int('%d%02d%02d' % tuple(
-    ([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3]
-))
-# except:
-#     XCODE_VERSION = 0
+try:
+    import subprocess
+    XCODE_VERSION = int('%d%02d%02d' % tuple(
+        ([int(v) for v in subprocess.getoutput('xcodebuild -version').split('\n')[0].split(' ')[1].split('.')] + [0, 0])[:3]
+    ))
+except:
+    XCODE_VERSION = 0
 
 import faulthandler
 faulthandler.enable()
@@ -286,7 +285,7 @@ class RubiconTest(unittest.TestCase):
         try:
             NSBundle = ObjCClass('NSBundle')
             NSBundle.mainBundle()
-        except:
+        except TypeError:
             self.fail("Properties shadowing methods should be OK.")
 
     @unittest.skipIf(XCODE_VERSION < 80000, "class properties not supported before XCode 8")
@@ -306,7 +305,7 @@ class RubiconTest(unittest.TestCase):
         try:
             NSBundle = ObjCClass('NSBundle')
             NSBundle.mainBundle
-        except:
+        except TypeError:
             self.fail("Properties shadowing methods should be OK.")
 
     def test_non_existent_field(self):
@@ -678,7 +677,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(results['int'], 99)
 
     def test_class_properties(self):
-        "A Python class can have ObjC properties with synthezied getters and setters."
+        "A Python class can have ObjC properties with synthesized getters and setters."
 
         NSObject = ObjCClass('NSObject')
         NSURL = ObjCClass('NSURL')

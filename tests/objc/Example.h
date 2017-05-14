@@ -27,7 +27,7 @@ struct large {
     int _ambiguous;
 }
 
-#if (XCODE_VERSION >= 80000)
+#if __has_extension(objc_class_property)
 @property (class) int classAmbiguous;
 #endif
 
