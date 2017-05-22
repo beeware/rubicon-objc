@@ -142,7 +142,7 @@ def to_number(cfnumber):
     """Convert CFNumber to python int or float."""
     if type(cfnumber) == objc_id:
         cfnumber = ObjCInstance(cfnumber)
-    
+
     numeric_type = cf.CFNumberGetType(cfnumber)
     cfnum_to_ctype = {
         kCFNumberSInt8Type: c_int8,
@@ -225,7 +225,9 @@ def to_value(cftype):
     The convertible CFTypes are taken from the known_cftypes
     dictionary, which may be added to if another library implements
     its own conversion methods."""
-    if not cftype:
+    # Don't use simple boolean testing here since that can trigger a len()
+    # check which will cause NS{,Mutable}{Array,Dict} to explode.
+    if cftype is None:
         return None
     if isinstance(cftype, ObjCInstance):
         cftype = cftype._as_parameter_
@@ -235,7 +237,7 @@ def to_value(cftype):
         ret = convert_function(cftype)
     except KeyError:
         ret = cftype
-    
+
     if type(ret) == objc_id:
         return ObjCInstance(ret)
     elif type(ret) == Class:

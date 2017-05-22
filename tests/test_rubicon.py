@@ -748,3 +748,84 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
 
+    def test_nsarray_acts_like_list(self):
+        nsarray = ObjCClass('NSArray')
+        nsmutablearray = ObjCClass('NSMutableArray')
+
+        py_list = ['one', 'two', 'three']
+
+        mutablearray = nsmutablearray.alloc().init()
+        for element in py_list:
+            mutablearray.addObject(core_foundation.at(element))
+        array = nsarray.arrayWithArray(mutablearray)
+
+        for x in range(len(py_list)):
+            self.assertEqual(array[x], py_list[x])
+            self.assertEqual(mutablearray[x], py_list[x])
+
+        self.assertRaises(IndexError, lambda: array[len(py_list) + 1])
+        self.assertRaises(IndexError, lambda: mutablearray[len(py_list) + 1])
+
+        for e1, e2, expected in zip(array, mutablearray, py_list):
+            self.assertEqual(e1, expected)
+            self.assertEqual(e2, expected)
+
+        mutablearray[3] = 'four'
+        self.assertEqual(mutablearray[3], 'four')
+
+        def doomed():
+            array[3] = 'four'
+        self.assertRaises(TypeError, doomed)
+
+        self.assertEqual(len(array), 3)
+        self.assertEqual(len(mutablearray), 4)
+
+        self.assertTrue('two' in array)
+        self.assertTrue('four' in mutablearray)
+
+    def test_nsdictionary_acts_like_dict(self):
+        nsdict = ObjCClass('NSDictionary')
+        nsmutabledict = ObjCClass('NSMutableDictionary')
+
+        py_dict = {
+            'one': 'ONE',
+            'two': 'TWO',
+            'three': 'THREE',
+        }
+
+        mutabledict = nsmutabledict.alloc().init()
+        for k, v in py_dict.items():
+            mutabledict.setObject_forKey_(v, k)
+        idict = nsdict.dictionaryWithDictionary(mutabledict)
+
+        for k, v in py_dict.items():
+            self.assertEqual(idict[k], v)
+            self.assertEqual(mutabledict[k], v)
+
+        self.assertRaises(KeyError, lambda: idict['NO SUCH KEY'])
+        self.assertRaises(KeyError, lambda: mutabledict['NO SUCH KEY'])
+        self.assertEqual(idict.get('NO SUCH KEY', None), None)
+        self.assertEqual(mutabledict.get('NO SUCH KEY', None), None)
+
+        for k in idict:
+            self.assertEqual(idict[k], py_dict[k])
+        for k in mutabledict:
+            self.assertEqual(mutabledict[k], py_dict[k])
+
+        for k, v in idict.items():
+            self.assertEqual(v, py_dict[k])
+        for k, v in mutabledict.items():
+            self.assertEqual(v, py_dict[k])
+
+        mutabledict['four'] = 'FOUR'
+        self.assertEqual(mutabledict['four'], 'FOUR')
+
+        def doomed():
+            idict['four'] = 'FOUR'
+        self.assertRaises(TypeError, doomed)
+
+        self.assertEqual(len(idict), 3)
+        self.assertEqual(len(mutabledict), 4)
+
+        self.assertTrue('two' in idict)
+        self.assertTrue('four' in mutabledict)

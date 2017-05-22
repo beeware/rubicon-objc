@@ -1180,6 +1180,18 @@ class ObjCInstance(object):
     def objc_class(self):
         return ObjCClass(objc.object_getClass(self))
 
+    @classmethod
+    def _select_mixin(cls, object_ptr):
+        nsarray = objc.objc_getClass(b'NSArray')
+        if send_message(object_ptr, 'isKindOfClass:', nsarray):
+            return ObjCListInstance
+
+        nsdictionary = objc.objc_getClass(b'NSDictionary')
+        if send_message(object_ptr, 'isKindOfClass:', nsdictionary):
+            return ObjCDictInstance
+
+        return cls
+
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
@@ -1208,10 +1220,10 @@ class ObjCInstance(object):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
+            cls = cls._select_mixin(object_ptr)
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
-
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
         cls._cached_objects[object_ptr.value] = self
@@ -1312,6 +1324,65 @@ class ObjCInstance(object):
                 ObjCBoundMethod(method, self)(value)
             else:
                 super(ObjCInstance, type(self)).__setattr__(self, name, value)
+
+
+class ObjCListInstance(ObjCInstance):
+    def __getitem__(self, item):
+        if item >= self.count:
+            raise IndexError('list index out of range')
+        return self.objectAtIndex(item)
+
+    def __setitem__(self, item, value):
+        try:
+            self.insertObject_atIndex_(value, item)
+        except AttributeError:
+            name = self.objc_class.name
+            raise TypeError("'%s' object does not support item assignment" % name)
+
+    def __len__(self):
+        return self.count
+
+    def __iter__(self):
+        for i in range(self.count):
+            yield self.objectAtIndex(i)
+
+    def __contains__(self, item):
+        return self.containsObject_(item)
+
+
+class ObjCDictInstance(ObjCInstance):
+    def __getitem__(self, item):
+        v = self.objectForKey_(item)
+        if v is None:
+            raise KeyError(repr(item))
+        return v
+
+    def __setitem__(self, item, value):
+        try:
+            self.setObject_forKey_(value, item)
+        except AttributeError:
+            name = self.objc_class.name
+            raise TypeError("'%s' object does not support item assignment" % name)
+
+    def __len__(self):
+        return self.count
+
+    def __iter__(self):
+        for key in self.allKeys():
+            yield key
+
+    def __contains__(self, item):
+        return self.objectForKey_(item) is not None
+
+    def get(self, item, default=None):
+        v = self.objectForKey_(item)
+        if v is None:
+            return default
+        return v
+
+    def items(self):
+        for key in self.allKeys():
+            yield key, self.objectForKey_(key)
 
 
 # The inheritance order is important here.
