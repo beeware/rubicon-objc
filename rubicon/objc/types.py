@@ -161,3 +161,8 @@ class NSRange(Structure):
 
 
 NSZeroPoint = NSPoint(0, 0)
+if sizeof(c_void_p) == 4:
+    NSIntegerMax = 0x7fffffff
+elif sizeof(c_void_p) == 8:
+    NSIntegerMax = 0x7fffffffffffffff
+NSNotFound = NSIntegerMax
