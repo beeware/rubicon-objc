@@ -3,6 +3,7 @@ from ctypes import util
 from decimal import Decimal
 from enum import Enum
 import functools
+import itertools
 import math
 import unittest
 
@@ -747,4 +748,421 @@ class RubiconTest(unittest.TestCase):
         "CFString/NSString instances can be converted to Python str."
 
         self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
+
+
+class NSArrayMixinTest(unittest.TestCase):
+    nsarray = ObjCClass('NSArray')
+    nsmutablearray = ObjCClass('NSMutableArray')
+
+    py_list = ['one', 'two', 'three']
+
+    def make_array(self, contents=None):
+        a = self.nsmutablearray.alloc().init()
+        if contents is not None:
+            for value in contents:
+                a.addObject(value)
+
+        return self.nsarray.arrayWithArray(a)
+
+    def test_getitem(self):
+        a = self.make_array(self.py_list)
+
+        for pos, value in enumerate(self.py_list):
+            self.assertEqual(a[pos], value)
+
+        self.assertRaises(IndexError, lambda: a[len(self.py_list) + 10])
+
+    def test_len(self):
+        a = self.make_array(self.py_list)
+
+        self.assertEqual(len(a), len(self.py_list))
+
+    def test_iter(self):
+        a = self.make_array(self.py_list)
+
+        keys = list(self.py_list)
+        for k in a:
+            self.assertTrue(k in keys)
+            keys.remove(k)
+
+        self.assertTrue(len(keys) == 0)
+
+    def test_contains(self):
+        a = self.make_array(self.py_list)
+        for value in self.py_list:
+            self.assertTrue(value in a)
+
+    def test_index(self):
+        a = self.make_array(self.py_list)
+        self.assertEqual(a.index('two'), 1)
+        self.assertRaises(ValueError, lambda: a.index('umpteen'))
+
+    def test_count(self):
+        a = self.make_array(self.py_list)
+        self.assertEqual(a.count('one'), 1)
+
+    def test_copy(self):
+        a = self.make_array(self.py_list)
+        b = a.copy()
+        self.assertEqual(b, a)
+        self.assertEqual(b, self.py_list)
+
+        self.assertRaises(AttributeError, lambda: b.append('four'))
+
+    def test_equivalence(self):
+        a = self.make_array(self.py_list)
+        b = self.make_array(self.py_list)
+
+        self.assertEqual(a, self.py_list)
+        self.assertEqual(b, self.py_list)
+        self.assertEqual(a, b)
+        self.assertEqual(self.py_list, a)
+        self.assertEqual(self.py_list, b)
+        self.assertEqual(b, a)
+
+    def test_slice_access(self):
+        a = self.make_array(self.py_list * 2)
+        self.assertEqual(a[1:4], ['two', 'three', 'one'])
+        self.assertEqual(a[:-2], ['one', 'two', 'three', 'one'])
+        self.assertEqual(a[4:], ['two', 'three'])
+        self.assertEqual(a[1:5:2], ['two', 'one'])
+
+
+class NSMutableArrayMixinTest(NSArrayMixinTest):
+    def make_array(self, contents=None):
+        a = self.nsmutablearray.alloc().init()
+        if contents is not None:
+            for value in contents:
+                a.addObject(value)
+
+        return a
+
+    def test_setitem(self):
+        a = self.make_array(self.py_list)
+
+        a[2] = 'four'
+        self.assertEqual(a[2], 'four')
+
+    def test_del(self):
+        a = self.make_array(self.py_list)
+        del a[0]
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[0], 'two')
+
+    def test_append(self):
+        a = self.make_array()
+        a.append('an item')
+        self.assertTrue('an item' in a)
+
+    def test_extend(self):
+        a = self.make_array()
+        a.extend(['an item', 'another item'])
+        self.assertTrue('an item' in a)
+        self.assertTrue('another item' in a)
+
+    def test_clear(self):
+        a = self.make_array(self.py_list)
+        a.clear()
+        self.assertEqual(len(a), 0)
+
+    def test_count(self):
+        a = self.make_array(self.py_list)
+        self.assertEqual(a.count('one'), 1)
+
+        a.append('one')
+        self.assertEqual(a.count('one'), 2)
+
+    def test_copy(self):
+        a = self.make_array(self.py_list)
+        b = a.copy()
+        self.assertEqual(b, a)
+        self.assertEqual(b, self.py_list)
+
+        b.append('four')
+
+    def test_insert(self):
+        a = self.make_array(self.py_list)
+        a.insert(1, 'four')
+        self.assertEqual(a[0], 'one')
+        self.assertEqual(a[1], 'four')
+        self.assertEqual(a[2], 'two')
+
+    def test_pop(self):
+        a = self.make_array(self.py_list)
+        self.assertEqual(a.pop(), 'three')
+        self.assertEqual(a.pop(0), 'one')
+        self.assertEqual(len(a), 1)
+        self.assertEqual(a[0], 'two')
+
+    def test_remove(self):
+        a = self.make_array(self.py_list)
+        a.remove('three')
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[-1], 'two')
+        self.assertRaises(ValueError, lambda: a.remove('umpteen'))
+
+    def test_slice_assignment1(self):
+        a = self.make_array(self.py_list * 2)
+        a[2:4] = ['four', 'five']
+        print(list(a))
+        self.assertEqual(a, ['one', 'two', 'four', 'five', 'two', 'three'])
+
+    def test_slice_assignment2(self):
+        a = self.make_array(self.py_list * 2)
+        a[::2] = ['four', 'five', 'six']
+        self.assertEqual(a, ['four', 'two', 'five', 'one', 'six', 'three'])
+
+    def test_slice_assignment3(self):
+        a = self.make_array(self.py_list * 2)
+        a[2:4] = ['four']
+        self.assertEqual(a, ['one', 'two', 'four', 'two', 'three'])
+
+    def test_bad_slice_assignment1(self):
+        a = self.make_array(self.py_list * 2)
+
+        def doomed1():
+            a[2:4] = 4
+
+        self.assertRaises(TypeError, doomed1)
+
+    def test_bad_slice_assignment2(self):
+        a = self.make_array(self.py_list * 2)
+
+        def doomed1():
+            a[::2] = [4]
+
+        self.assertRaises(ValueError, doomed1)
+
+    def test_del_slice1(self):
+        a = self.make_array(self.py_list * 2)
+        del a[-2:]
+        self.assertEqual(len(a), 4)
+        self.assertEqual(a[0], 'one')
+        self.assertEqual(a[-1], 'one')
+
+    def test_del_slice2(self):
+        a = self.make_array(self.py_list * 2)
+        del a[::2]
+        self.assertEqual(len(a), 3)
+        self.assertEqual(a[0], 'two')
+        self.assertEqual(a[1], 'one')
+        self.assertEqual(a[2], 'three')
+
+    def test_del_slice3(self):
+        a = self.make_array(self.py_list * 2)
+        del a[::-2]
+        self.assertEqual(len(a), 3)
+        self.assertEqual(a[0], 'one')
+        self.assertEqual(a[1], 'three')
+        self.assertEqual(a[2], 'two')
+
+    def test_reverse(self):
+        a = self.make_array(self.py_list)
+        a.reverse()
+
+        for pos, value in enumerate(reversed(self.py_list)):
+            self.assertEqual(a[pos], value)
+
+
+class NSDictionaryMixinTest(unittest.TestCase):
+    nsdict = ObjCClass('NSDictionary')
+    nsmutabledict = ObjCClass('NSMutableDictionary')
+
+    py_dict = {
+        'one': 'ONE',
+        'two': 'TWO',
+        'three': 'THREE',
+    }
+
+    def make_dictionary(self, contents=None):
+        d = self.nsmutabledict.alloc().init()
+        if contents is not None:
+            for key, value in contents.items():
+                d.setObject_forKey_(value, key)
+
+        return self.nsdict.dictionaryWithDictionary(d)
+
+    def test_getitem(self):
+        d = self.make_dictionary(self.py_dict)
+
+        for key, value in self.py_dict.items():
+            self.assertEqual(d[key], value)
+
+        self.assertRaises(KeyError, lambda: d['NO SUCH KEY'])
+
+    def test_iter(self):
+        d = self.make_dictionary(self.py_dict)
+
+        keys = set(self.py_dict)
+        for k in d:
+            self.assertTrue(k in keys)
+            keys.remove(k)
+
+        self.assertTrue(len(keys) == 0)
+
+    def test_len(self):
+        d = self.make_dictionary(self.py_dict)
+        self.assertEqual(len(d), len(self.py_dict))
+
+    def test_get(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d.get('one'), 'ONE')
+        self.assertEqual(d.get('two', None), 'TWO')
+        self.assertEqual(d.get('four', None), None)
+        self.assertEqual(d.get('five', 5), 5)
+        self.assertEqual(d.get('six', None), None)
+
+    def test_contains(self):
+        d = self.make_dictionary(self.py_dict)
+        for key in self.py_dict:
+            self.assertTrue(key in d)
+
+    def test_copy(self):
+        d = self.make_dictionary(self.py_dict)
+        e = d.copy()
+        self.assertEqual(e, d)
+        self.assertEqual(e, self.py_dict)
+
+        def doomed():
+            e['four'] = 'FOUR'
+        self.assertRaises(TypeError, doomed)
+
+    def test_keys(self):
+        a = self.make_dictionary(self.py_dict)
+        for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):
+            self.assertEqual(k1, k2)
+
+    def test_values(self):
+        a = self.make_dictionary(self.py_dict)
+        for v1, v2 in zip(sorted(a.values()), sorted(self.py_dict.values())):
+            self.assertEqual(v1, v2)
+
+    def test_items(self):
+        d = self.make_dictionary(self.py_dict)
+        for i1, i2 in zip(sorted(d.items()), sorted(self.py_dict.items())):
+            self.assertEqual(i1[0], i2[0])
+            self.assertEqual(i1[1], i2[1])
+
+class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
+    def make_dictionary(self, contents=None):
+        d = self.nsmutabledict.alloc().init()
+        if contents is not None:
+            for key, value in contents.items():
+                d.setObject_forKey_(value, key)
+
+        return d
+
+    def test_setitem(self):
+        d = self.make_dictionary()
+        for key, value in self.py_dict.items():
+            d[key] = value
+
+        for key, value in self.py_dict.items():
+            self.assertEqual(d[key], value)
+
+    def test_del(self):
+        d = self.make_dictionary(self.py_dict)
+        del d['one']
+        self.assertEqual(len(d), 2)
+        self.assertRaises(KeyError, lambda: d['one'])
+
+    def test_clear(self):
+        d = self.make_dictionary(self.py_dict)
+        d.clear()
+        self.assertEqual(len(d), 0)
+
+    def test_copy(self):
+        d = self.make_dictionary(self.py_dict)
+        e = d.copy()
+        self.assertEqual(e, d)
+        self.assertEqual(e, self.py_dict)
+
+        print(repr(e))
+        e['four'] = 'FOUR'
+
+    def test_pop1(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d.pop('one'), 'ONE')
+        self.assertEqual(len(d), 2)
+        self.assertRaises(KeyError, lambda: d['one'])
+
+    def test_pop2(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertRaises(KeyError, lambda: d.pop('four'))
+
+    def test_pop3(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d.pop('four', 4), 4)
+
+    def test_popitem(self):
+        d = self.make_dictionary(self.py_dict)
+
+        keys = set(self.py_dict)
+
+        while len(d) > 0:
+            key, value = d.popitem()
+            self.assertTrue(key in keys)
+            self.assertEqual(value, self.py_dict[key])
+            self.assertTrue(key not in d)
+
+    def test_setdefault1(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d.setdefault('one', 1), 'ONE')
+        self.assertEqual(len(d), len(self.py_dict))
+
+    def test_setdefault2(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertTrue('four' not in d)
+        self.assertEqual(d.setdefault('four', 'FOUR'), 'FOUR')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
+        self.assertEqual(d['four'], 'FOUR')
+
+    def test_setdefault3(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertTrue('four' not in d)
+        self.assertEqual(d.setdefault('four'), None)
+        self.assertEqual(len(d), len(self.py_dict))
+        self.assertRaises(KeyError, lambda: d['four'])
+
+    def test_update1(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d, self.py_dict)
+        d.update({'one': 'two', 'three': 'four', 'four': 'FIVE'})
+        self.assertNotEqual(d, self.py_dict)
+        self.assertEqual(d['one'], 'two')
+        self.assertEqual(d['two'], 'TWO')
+        self.assertEqual(d['three'], 'four')
+        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
+
+    def test_update2(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d, self.py_dict)
+        d.update([('one', 'two'), ('three', 'four'), ('four', 'FIVE')])
+        self.assertNotEqual(d, self.py_dict)
+        self.assertEqual(d['one'], 'two')
+        self.assertEqual(d['two'], 'TWO')
+        self.assertEqual(d['three'], 'four')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
+
+    def test_update3(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d, self.py_dict)
+        d.update(one='two', three='four', four='FIVE')
+        self.assertNotEqual(d, self.py_dict)
+        self.assertEqual(d['one'], 'two')
+        self.assertEqual(d['two'], 'TWO')
+        self.assertEqual(d['three'], 'four')
+        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
 
