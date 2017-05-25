@@ -1106,7 +1106,7 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def test_setdefault1(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.setdefault('one', 1), 'ONE')
+        self.assertEqual(d.setdefault('one', 'default'), 'ONE')
         self.assertEqual(len(d), len(self.py_dict))
 
     def test_setdefault2(self):
