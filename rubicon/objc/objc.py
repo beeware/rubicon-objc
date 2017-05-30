@@ -1,4 +1,5 @@
 import inspect
+import os
 
 from enum import Enum
 
@@ -17,16 +18,34 @@ else:
 
 ######################################################################
 
-def _find_or_error(name):
+_lib_path = ["/usr/lib"]
+_framework_path = ["/System/Library/Frameworks"]
+def _load_or_error(name):
     path = util.find_library(name)
-    if path is None:
-        raise ValueError("Library {!r} not found".format(name))
-    else:
-        return path
+    if path is not None:
+        return CDLL(path)
 
-c = cdll.LoadLibrary(_find_or_error('c'))
-objc = cdll.LoadLibrary(_find_or_error('objc'))
-Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
+    # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library doesn't work and always returns None.
+    # This is because the sandbox hides all system libraries from the filesystem and pretends they don't exist.
+    # However they can still be loaded if the path is known, so we try to load the library from a few known locations.
+    
+    for loc in _lib_path:
+        try:
+            return CDLL(os.path.join(loc, "lib" + name + ".dylib"))
+        except OSError:
+            pass
+    
+    for loc in _framework_path:
+        try:
+            return CDLL(os.path.join(loc, name + ".framework", name))
+        except OSError:
+            pass
+    
+    raise ValueError("Library {!r} not found".format(name))
+
+c = _load_or_error('c')
+objc = _load_or_error('objc')
+Foundation = _load_or_error('Foundation')
 
 class objc_id(c_void_p):
     pass
