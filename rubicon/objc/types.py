@@ -59,7 +59,7 @@ def encoding_to_ctype(encoding):
     """Return ctypes type for an encoded Objective-C type."""
     
     # Remove qualifiers, as documented in Table 6-2 here:
-    # https://developer.apple.com/library/prerelease/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+    # https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
     encoding = encoding.lstrip(b"NORVnor")
     
     try:

@@ -442,7 +442,7 @@ def ensure_bytes(x):
     if isinstance(x, bytes):
         return x
     # "All char * in the runtime API should be considered to have UTF-8 encoding."
-    # https://developer.apple.com/reference/objectivec/1657527-objective_c_runtime?language=objc
+    # https://developer.apple.com/documentation/objectivec/objective_c_runtime?preferredLanguage=occ
     return x.encode('utf-8')
 
 
