@@ -28,9 +28,13 @@ c = cdll.LoadLibrary(_find_or_error('c'))
 objc = cdll.LoadLibrary(_find_or_error('objc'))
 Foundation = cdll.LoadLibrary(_find_or_error('Foundation'))
 
+@with_preferred_encoding(b'@')
+# @? is the encoding for blocks.
+@with_encoding(b'@?')
 class objc_id(c_void_p):
     pass
 
+@with_preferred_encoding(b':')
 class SEL(c_void_p):
     @property
     def name(self):
@@ -56,6 +60,7 @@ class SEL(c_void_p):
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({name!r})".format(cls=type(self), name=None if self.value is None else self.name)
 
+@with_preferred_encoding(b'#')
 class Class(objc_id):
     pass
 
@@ -70,12 +75,6 @@ class Ivar(c_void_p):
 
 class objc_property_t(c_void_p):
     pass
-
-register_preferred_encoding(b':', SEL)
-register_preferred_encoding(b'@', objc_id)
-# @? is the encoding for blocks.
-register_encoding(b'@?', objc_id)
-register_preferred_encoding(b'#', Class)
 
 ######################################################################
 

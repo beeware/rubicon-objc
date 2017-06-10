@@ -92,6 +92,17 @@ def register_preferred_encoding(encoding, ctype):
     _encoding_to_ctype_map[encoding] = ctype
     _ctype_to_encoding_map[ctype] = encoding
 
+def with_preferred_encoding(encoding):
+    """Decorator for registering a preferred conversion between the given encoding and the decorated type.
+    This is equivalent to calling register_preferred_encoding.
+    """
+    
+    def _with_preferred_encoding_decorator(ctype):
+        register_preferred_encoding(encoding, ctype)
+        return ctype
+    
+    return _with_preferred_encoding_decorator
+
 def register_encoding(encoding, ctype):
     """Register an additional conversion between an Objective-C type encoding and a ctypes type.
     If a conversion already exists in one or both directions, it is not overwritten.
@@ -99,6 +110,17 @@ def register_encoding(encoding, ctype):
     
     _encoding_to_ctype_map.setdefault(encoding, ctype)
     _ctype_to_encoding_map.setdefault(ctype, encoding)
+
+def with_encoding(encoding):
+    """Decorator for registering a conversion between the given encoding and the decorated type.
+    This is equivalent to calling register_encoding.
+    """
+    
+    def _with_encoding_decorator(ctype):
+        register_encoding(encoding, ctype)
+        return ctype
+    
+    return _with_encoding_decorator
 
 def unregister_encoding(encoding):
     """Unregister the conversion between an Objective-C type encoding and its corresponding ctypes type.
@@ -244,38 +266,38 @@ NSZoneEncoding = b'{_NSZone=}'
 register_preferred_encoding(PyObjectEncoding, py_object)
 
 
+@with_preferred_encoding(b'^?')
 class UnknownPointer(c_void_p):
     """Placeholder for the b'^?' "unknown pointer" type. Not to be confused with a b'^v' void pointer.
     Usually a b'^?' is a function pointer, but because the encoding doesn't contain the function signature, you need to manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
     """
-register_preferred_encoding(b'^?', UnknownPointer)
 
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
+@with_preferred_encoding(NSPointEncoding)
 class NSPoint(Structure):
     _fields_ = [
         ("x", CGFloat),
         ("y", CGFloat)
     ]
 CGPoint = NSPoint
-register_preferred_encoding(NSPointEncoding, NSPoint)
 
 
+@with_preferred_encoding(NSSizeEncoding)
 class NSSize(Structure):
     _fields_ = [
         ("width", CGFloat),
         ("height", CGFloat)
     ]
 CGSize = NSSize
-register_preferred_encoding(NSSizeEncoding, NSSize)
 
 
+@with_preferred_encoding(NSRectEncoding)
 class NSRect(Structure):
     _fields_ = [
         ("origin", NSPoint),
         ("size", NSSize)
     ]
 CGRect = NSRect
-register_preferred_encoding(NSRectEncoding, NSRect)
 
 
 def NSMakeSize(w, h):
@@ -297,12 +319,12 @@ CGPointMake = NSMakePoint
 
 
 # iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
+@with_preferred_encoding(UIEdgeInsetsEncoding)
 class UIEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
                 ('left', CGFloat),
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
-register_preferred_encoding(UIEdgeInsetsEncoding, UIEdgeInsets)
 
 def UIEdgeInsetsMake(top, left, bottom, right):
     return UIEdgeInsets(top, left, bottom, right)
@@ -311,12 +333,12 @@ UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
 
 
 # macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
+@with_preferred_encoding(NSEdgeInsetsEncoding)
 class NSEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
                 ('left', CGFloat),
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
-register_preferred_encoding(NSEdgeInsetsEncoding, NSEdgeInsets)
 
 def NSEdgeInsetsMake(top, left, bottom, right):
     return NSEdgeInsets(top, left, bottom, right)
@@ -343,12 +365,12 @@ class CFRange(Structure):
 
 
 # NSRange.h  (Note, not defined the same as CFRange)
+@with_preferred_encoding(NSRangeEncoding)
 class NSRange(Structure):
     _fields_ = [
         ("location", NSUInteger),
         ("length", NSUInteger)
     ]
-register_preferred_encoding(NSRangeEncoding, NSRange)
 
 NSZeroPoint = NSPoint(0, 0)
 if sizeof(c_void_p) == 4:
