@@ -21,10 +21,8 @@ __arm__ = (_any_arm and not __LP64__)
 
 _type_to_ctype_map = {
     int: c_int,
-    float: c_float,
+    float: c_double,
     bool: c_bool,
-    # This is not really correct - Python strings are Unicode - but we need to keep this for compatibility.
-    str: c_char_p,
     bytes: c_char_p,
 }
 
