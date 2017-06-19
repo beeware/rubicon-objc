@@ -383,12 +383,12 @@ objc.protocol_conformsToProtocol.restype = c_bool
 objc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
 
 
-class OBJC_METHOD_DESCRIPTION(Structure):
+class objc_method_description(Structure):
     _fields_ = [("name", SEL), ("types", c_char_p)]
 
 # struct objc_method_description *protocol_copyMethodDescriptionList(Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
 # You must free() the returned array.
-objc.protocol_copyMethodDescriptionList.restype = POINTER(OBJC_METHOD_DESCRIPTION)
+objc.protocol_copyMethodDescriptionList.restype = POINTER(objc_method_description)
 objc.protocol_copyMethodDescriptionList.argtypes = [objc_id, c_bool, c_bool, POINTER(c_uint)]
 
 # objc_property_t * protocol_copyPropertyList(Protocol *protocol, unsigned int *outCount)
@@ -400,7 +400,7 @@ objc.protocol_copyProtocolList = POINTER(objc_id)
 objc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
 
 # struct objc_method_description protocol_getMethodDescription(Protocol *p, SEL aSel, BOOL isRequiredMethod, BOOL isInstanceMethod)
-objc.protocol_getMethodDescription.restype = OBJC_METHOD_DESCRIPTION
+objc.protocol_getMethodDescription.restype = objc_method_description
 objc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
 
 # const char *protocol_getName(Protocol *p)
@@ -540,7 +540,7 @@ def send_message(receiver, selName, *args, **kwargs):
     return result
 
 
-class OBJC_SUPER(Structure):
+class objc_super(Structure):
     _fields_ = [('receiver', objc_id), ('super_class', Class)]
 
 
@@ -553,7 +553,7 @@ def send_super(receiver, selName, *args, **kwargs):
     if hasattr(receiver, '_as_parameter_'):
         receiver = receiver._as_parameter_
     superclass = get_superclass_of_object(receiver)
-    super_struct = OBJC_SUPER(receiver, superclass)
+    super_struct = objc_super(receiver, superclass)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
@@ -561,7 +561,7 @@ def send_super(receiver, selName, *args, **kwargs):
     send = objc['objc_msgSendSuper']
     send.restype = restype
     if argtypes:
-        send.argtypes = [POINTER(OBJC_SUPER), SEL] + argtypes
+        send.argtypes = [POINTER(objc_super), SEL] + argtypes
     else:
         send.argtypes = None
     result = send(byref(super_struct), selector, *args)
