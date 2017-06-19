@@ -145,10 +145,6 @@ objc.class_copyPropertyList.argtypes = [Class, POINTER(c_uint)]
 objc.class_copyProtocolList.restype = POINTER(objc_id)
 objc.class_copyProtocolList.argtypes = [Class, POINTER(c_uint)]
 
-# id class_createInstance(Class cls, size_t extraBytes)
-objc.class_createInstance.restype = objc_id
-objc.class_createInstance.argtypes = [Class, c_size_t]
-
 # Method class_getClassMethod(Class aClass, SEL aSelector)
 # Will also search superclass for implementations.
 objc.class_getClassMethod.restype = Method
@@ -178,10 +174,6 @@ objc.class_getIvarLayout.argtypes = [Class]
 # IMP class_getMethodImplementation(Class cls, SEL name)
 objc.class_getMethodImplementation.restype = IMP
 objc.class_getMethodImplementation.argtypes = [Class, SEL]
-
-# IMP class_getMethodImplementation_stret(Class cls, SEL name)
-#objc.class_getMethodImplementation_stret.restype = IMP
-#objc.class_getMethodImplementation_stret.argtypes = [Class, SEL]
 
 # const char * class_getName(Class cls)
 objc.class_getName.restype = c_char_p
@@ -218,10 +210,6 @@ objc.class_respondsToSelector.argtypes = [Class, SEL]
 # void class_setIvarLayout(Class cls, const char *layout)
 objc.class_setIvarLayout.restype = None
 objc.class_setIvarLayout.argtypes = [Class, c_char_p]
-
-# Class class_setSuperclass(Class cls, Class newSuper)
-objc.class_setSuperclass.restype = Class
-objc.class_setSuperclass.argtypes = [Class, Class]
 
 # void class_setVersion(Class theClass, int version)
 objc.class_setVersion.restype = None
@@ -311,11 +299,6 @@ objc.objc_getAssociatedObject.argtypes = [objc_id, c_void_p]
 objc.objc_getClass.restype = Class
 objc.objc_getClass.argtypes = [c_char_p]
 
-# int objc_getClassList(Class *buffer, int bufferLen)
-# Pass None for buffer to obtain just the total number of classes.
-objc.objc_getClassList.restype = c_int
-objc.objc_getClassList.argtypes = [POINTER(Class), c_int]
-
 # Class objc_getMetaClass(const char *name)
 objc.objc_getMetaClass.restype = Class
 objc.objc_getMetaClass.argtypes = [c_char_p]
@@ -355,14 +338,6 @@ objc.objc_setAssociatedObject.argtypes = [objc_id, c_void_p, objc_id, c_int]
 
 ######################################################################
 
-# id object_copy(id obj, size_t size)
-objc.object_copy.restype = objc_id
-objc.object_copy.argtypes = [objc_id, c_size_t]
-
-# id object_dispose(id obj)
-objc.object_dispose.restype = objc_id
-objc.object_dispose.argtypes = [objc_id]
-
 # BOOL object_isClass(id obj)
 objc.object_isClass.restype = c_bool
 objc.object_isClass.argtypes = [objc_id]
@@ -382,10 +357,6 @@ objc.object_getInstanceVariable.argtypes = [objc_id, c_char_p, POINTER(c_void_p)
 # id object_getIvar(id object, Ivar ivar)
 objc.object_getIvar.restype = objc_id
 objc.object_getIvar.argtypes = [objc_id, Ivar]
-
-# Class object_setClass(id object, Class cls)
-objc.object_setClass.restype = Class
-objc.object_setClass.argtypes = [objc_id, Class]
 
 # Ivar object_setInstanceVariable(id obj, const char *name, void *value)
 # Set argtypes based on the data type of the instance variable.
@@ -441,9 +412,6 @@ objc.protocol_getName.argtypes = [objc_id]
 # const char* sel_getName(SEL aSelector)
 objc.sel_getName.restype = c_char_p
 objc.sel_getName.argtypes = [SEL]
-
-# SEL sel_getUid(const char *str)
-# Use sel_registerName instead.
 
 # BOOL sel_isEqual(SEL lhs, SEL rhs)
 objc.sel_isEqual.restype = c_bool
