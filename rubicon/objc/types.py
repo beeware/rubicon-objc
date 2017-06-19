@@ -351,7 +351,7 @@ NSTimeInterval = c_double
 
 CFIndex = c_long
 UniChar = c_ushort
-unichar = c_wchar  # (actually defined as c_ushort in NSString.h, but need ctypes to convert properly)
+unichar = c_ushort
 CGGlyph = c_ushort
 
 
