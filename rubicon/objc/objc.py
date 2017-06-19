@@ -435,11 +435,6 @@ def ensure_bytes(x):
 ######################################################################
 
 
-def get_selector(name):
-    "Return a reference to the selector with the given name."
-    return SEL(name)
-
-
 def get_class(name):
     "Return a reference to the class with the given name."
     return objc.objc_getClass(ensure_bytes(name))
@@ -516,7 +511,7 @@ def send_message(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    selector = get_selector(selName)
+    selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', [])
 
@@ -559,7 +554,7 @@ def send_super(receiver, selName, *args, **kwargs):
         receiver = receiver._as_parameter_
     superclass = get_superclass_of_object(receiver)
     super_struct = OBJC_SUPER(receiver, superclass)
-    selector = get_selector(selName)
+    selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
@@ -604,7 +599,7 @@ def add_method(cls, selName, method, encoding):
     signature = tuple(ctype_for_type(tp) for tp in encoding)
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
-    selector = get_selector(selName)
+    selector = SEL(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
     cfunctype = CFUNCTYPE(*signature)
