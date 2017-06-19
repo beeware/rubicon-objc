@@ -614,11 +614,11 @@ def add_method(cls, selName, method, encoding):
     The third type code must be a selector.
     Additional type codes are for types of other arguments if any.
     """
-    signature = tuple(type_to_ctype(tp) for tp in encoding)
+    signature = tuple(ctype_for_type(tp) for tp in encoding)
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
     selector = get_selector(selName)
-    types = b"".join(ctype_to_encoding(ctype) for ctype in signature)
+    types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
@@ -628,7 +628,7 @@ def add_method(cls, selName, method, encoding):
 
 def add_ivar(cls, name, vartype):
     "Add a new instance variable of type vartype to cls."
-    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), ctype_to_encoding(type_to_ctype(vartype)))
+    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(ctype_for_type(vartype)))
 
 
 def set_instance_variable(obj, varname, value, vartype):
@@ -667,13 +667,13 @@ class ObjCMethod(object):
             self.argument_types.append(buffer.value)
         # Get types for all the arguments.
         try:
-            self.argtypes = [encoding_to_ctype(t) for t in self.argument_types]
+            self.argtypes = [ctype_for_encoding(t) for t in self.argument_types]
         except ValueError:
             print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
             self.argtypes = None
         # Get types for the return type.
         try:
-            self.restype = encoding_to_ctype(self.return_type)
+            self.restype = ctype_for_encoding(self.return_type)
         except ValueError:
             print('No restype encoding for %s (%s)' % (self.name, self.return_type))
             self.restype = None
@@ -1608,8 +1608,8 @@ class ObjCMetaClass(ObjCClass):
 
         return super().__new__(cls, ptr)
 
-register_type_to_ctype(ObjCInstance, objc_id)
-register_type_to_ctype(ObjCClass, Class)
+register_ctype_for_type(ObjCInstance, objc_id)
+register_ctype_for_type(ObjCClass, Class)
 
 
 ######################################################################

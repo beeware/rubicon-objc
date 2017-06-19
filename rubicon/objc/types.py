@@ -19,41 +19,41 @@ __arm64__ = (_any_arm and __LP64__)
 __arm__ = (_any_arm and not __LP64__)
 
 
-_type_to_ctype_map = {
+_ctype_for_type_map = {
     int: c_int,
     float: c_double,
     bool: c_bool,
     bytes: c_char_p,
 }
 
-def type_to_ctype(tp):
-    """Convert the given type to a ctypes type.
+def ctype_for_type(tp):
+    """Look up the ctypes type corresponding to the given type.
     This conversion is applied to types used in objc_method signatures, objc_ivar types, etc.
     This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
     Unregistered types (including things that are already ctypes types) are returned unchanged.
     """
     
-    return _type_to_ctype_map.get(tp, tp)
+    return _ctype_for_type_map.get(tp, tp)
 
-def register_type_to_ctype(tp, ctype):
+def register_ctype_for_type(tp, ctype):
     """Register a conversion from a type to a ctypes type."""
     
-    _type_to_ctype_map[tp] = ctype
+    _ctype_for_type_map[tp] = ctype
 
-def unregister_type_to_ctype(tp):
+def unregister_ctype_for_type(tp):
     """Unregister a conversion from a type to a ctypes type."""
     
-    del _type_to_ctype_map[tp]
+    del _ctype_for_type_map[tp]
 
-def get_type_to_ctype_map():
+def get_ctype_for_type_map():
     """Get a copy of all currently registered type-to-ctype conversions as a mapping."""
     
-    return dict(_type_to_ctype_map)
+    return dict(_ctype_for_type_map)
 
-_encoding_to_ctype_map = {}
-_ctype_to_encoding_map = {}
+_ctype_for_encoding_map = {}
+_encoding_for_ctype_map = {}
 
-def encoding_to_ctype(encoding):
+def ctype_for_encoding(encoding):
     """Return ctypes type for an encoded Objective-C type."""
     
     # Remove qualifiers, as documented in Table 6-2 here:
@@ -62,12 +62,12 @@ def encoding_to_ctype(encoding):
     
     try:
         # Look up simple type encodings directly
-        return _encoding_to_ctype_map[encoding]
+        return _ctype_for_encoding_map[encoding]
     except KeyError:
         if encoding[0:1] == b'^':
             try:
                 # Try to resolve pointer types recursively
-                target = encoding_to_ctype(encoding[1:])
+                target = ctype_for_encoding(encoding[1:])
             except ValueError:
                 # For unknown pointer types, fall back to c_void_p (this is not ideal, but at least it works instead of erroring)
                 return c_void_p
@@ -76,11 +76,11 @@ def encoding_to_ctype(encoding):
         else:
             raise ValueError('Unknown encoding: %s' % (encoding,))
 
-def ctype_to_encoding(ctype):
+def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type."""
     
     try:
-        return _ctype_to_encoding_map[ctype]
+        return _encoding_for_ctype_map[ctype]
     except KeyError:
         raise ValueError('No type encoding known for ctype {}'.format(ctype))
 
@@ -89,8 +89,8 @@ def register_preferred_encoding(encoding, ctype):
     This overwrites any existing conversions in each direction.
     """
     
-    _encoding_to_ctype_map[encoding] = ctype
-    _ctype_to_encoding_map[ctype] = encoding
+    _ctype_for_encoding_map[encoding] = ctype
+    _encoding_for_ctype_map[ctype] = encoding
 
 def with_preferred_encoding(encoding):
     """Decorator for registering a preferred conversion between the given encoding and the decorated type.
@@ -108,8 +108,8 @@ def register_encoding(encoding, ctype):
     If a conversion already exists in one or both directions, it is not overwritten.
     """
     
-    _encoding_to_ctype_map.setdefault(encoding, ctype)
-    _ctype_to_encoding_map.setdefault(ctype, encoding)
+    _ctype_for_encoding_map.setdefault(encoding, ctype)
+    _encoding_for_ctype_map.setdefault(ctype, encoding)
 
 def with_encoding(encoding):
     """Decorator for registering a conversion between the given encoding and the decorated type.
@@ -129,7 +129,7 @@ def unregister_encoding(encoding):
     If encoding was not registered previously, nothing happens.
     """
     
-    _encoding_to_ctype_map.pop(encoding, default=None)
+    _ctype_for_encoding_map.pop(encoding, default=None)
     
 
 def unregister_encoding_all(encoding):
@@ -138,8 +138,8 @@ def unregister_encoding_all(encoding):
     If encoding was not registered previously, nothing happens.
     """
     
-    _encoding_to_ctype_map.pop(encoding, default=None)
-    for ct, enc in list(_ctype_to_encoding_map.items()):
+    _ctype_for_encoding_map.pop(encoding, default=None)
+    for ct, enc in list(_encoding_for_ctype_map.items()):
         if enc == encoding:
             unregister_ctype_all(ct)
 
@@ -149,7 +149,7 @@ def unregister_ctype(ctype):
     If ctype was not registered previously, nothing happens.
     """
     
-    _ctype_to_encoding_map.pop(ctype, default=None)
+    _encoding_for_ctype_map.pop(ctype, default=None)
 
 def unregister_ctype_all(ctype):
     """Unregister all conversions between a ctypes type and all corresponding Objective-C type encodings.
@@ -157,20 +157,20 @@ def unregister_ctype_all(ctype):
     If ctype was not registered previously, nothing happens.
     """
     
-    _ctype_to_encoding_map.pop(ctype, default=None)
-    for enc, ct in list(_encoding_to_ctype_map.items()):
+    _encoding_for_ctype_map.pop(ctype, default=None)
+    for enc, ct in list(_ctype_for_encoding_map.items()):
         if ct == ctype:
             unregister_encoding_all(enc)
 
-def get_encoding_to_ctype_map():
+def get_ctype_for_encoding_map():
     """Get a copy of all currently registered encoding-to-ctype conversions as a map."""
     
-    return dict(_encoding_to_ctype_map)
+    return dict(_ctype_for_encoding_map)
 
-def get_ctype_to_encoding_map():
+def get_encoding_for_ctype_map():
     """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
     
-    return dict(_ctype_to_encoding_map)
+    return dict(_encoding_for_ctype_map)
 
 # Register all type encoding mappings.
 
@@ -222,7 +222,7 @@ register_encoding(b'*', POINTER(c_ubyte))
 register_encoding(b'i', c_wchar)
 register_encoding(b'^i', c_wchar_p)
 # Register POINTER(c_int) as preferred so it takes precedence over c_wchar_p.
-# (Other pointer types are resolved automatically by encoding_to_ctype and ctype_to_encoding.)
+# (Other pointer types are resolved automatically by ctype_for_encoding and encoding_for_ctype.)
 register_preferred_encoding(b'^i', POINTER(c_int))
 
 register_preferred_encoding(b'^v', c_void_p)
@@ -254,9 +254,9 @@ else:
     NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
     PyObjectEncoding = b'^{_object=i^{_typeobject}}'
 
-NSIntegerEncoding = ctype_to_encoding(NSInteger)
-NSUIntegerEncoding = ctype_to_encoding(NSUInteger)
-CGFloatEncoding = ctype_to_encoding(CGFloat)
+NSIntegerEncoding = encoding_for_ctype(NSInteger)
+NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
+CGFloatEncoding = encoding_for_ctype(CGFloat)
 
 # Special case so that NSImage.initWithCGImage_size_() will work.
 CGImageEncoding = b'{CGImage=}'
