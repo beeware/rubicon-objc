@@ -12,7 +12,6 @@ from .core_foundation import at, to_str, to_number, to_value, to_set, to_list
 from .types import (
     NSInteger, NSUInteger,
     CGFloat,
-    NSPointEncoding, NSSizeEncoding, NSRectEncoding, NSRangeEncoding, UIEdgeInsetsEncoding, NSEdgeInsetsEncoding,
     CGPoint, NSPoint,
     CGSize, NSSize,
     CGRect, NSRect,

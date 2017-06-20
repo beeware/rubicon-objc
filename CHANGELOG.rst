@@ -11,6 +11,7 @@ Changelog
 * Fixed the declaration of ``unichar`` (was previously ``c_wchar``, is now ``c_ushort``).
 * Removed the ``get_selector`` function. Use the ``SEL`` constructor instead.
 * Removed some runtime function declarations that are deprecated or unlikely to be useful.
+* Removed the encoding constants. Use ``encoding_for_ctype`` to get the encoding of a type.
 
 0.2.7
 -----
