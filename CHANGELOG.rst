@@ -8,6 +8,9 @@ Changelog
 * Added functions for declaring custom conversions between Objective-C type encodings and ``ctypes`` types.
 * Extended the Objective-C type encoding decoder to support block types as well as arbitrary qualifiers and pointers.
 * Changed the ``PyObjectEncoding`` to match the real definition of ``PyObject *``.
+* Fixed the declaration of ``unichar`` (was previously ``c_wchar``, is now ``c_ushort``).
+* Removed the ``get_selector`` function. Use the ``SEL`` constructor instead.
+* Removed some runtime function declarations that are deprecated or unlikely to be useful.
 
 0.2.7
 -----
