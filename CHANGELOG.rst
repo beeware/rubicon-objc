@@ -1,6 +1,14 @@
 Changelog
 =========
 
+(next version)
+--------------
+
+* Added support for using native Python sequence/mapping syntax with ``NSArray`` and ``NSDictionary``. (jeamland)
+* Added functions for declaring custom conversions between Objective-C type encodings and ``ctypes`` types.
+* Extended the Objective-C type encoding decoder to support block types as well as arbitrary qualifiers and pointers.
+* Changed the ``PyObjectEncoding`` to match the real definition of ``PyObject *``.
+
 0.2.7
 -----
 

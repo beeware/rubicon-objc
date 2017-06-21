@@ -23,7 +23,7 @@ from rubicon.objc import (
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
     send_message
 )
-from rubicon.objc import core_foundation
+from rubicon.objc import core_foundation, types
 from rubicon.objc.objc import ObjCBoundMethod
 
 
@@ -485,28 +485,22 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        # FIXME: Overriding the restype like done below is NOT reliable - this code may need to be updated if the method lookup internals change. When #14 is fixed, there should be a better way of setting a custom restype (or it should be set correctly by default).
-
         class struct_int_sized(Structure):
             _fields_ = [("x", c_char * 4)]
+        types.register_encoding(b'{int_sized=[4c]}', struct_int_sized)
 
-        method = example.intSizedStruct
-        method.method.restype = struct_int_sized
-        self.assertEqual(method().x, b"abc")
-
+        self.assertEqual(example.intSizedStruct().x, b"abc")
         class struct_oddly_sized(Structure):
             _fields_ = [("x", c_char * 5)]
 
-        method = example.oddlySizedStruct
-        method.method.restype = struct_oddly_sized
-        self.assertEqual(method().x, b"abcd")
+        types.register_encoding(b'{oddly_sized=[5c]}', struct_oddly_sized)
+        self.assertEqual(example.oddlySizedStruct().x, b"abcd")
 
         class struct_large(Structure):
             _fields_ = [("x", c_char * 17)]
 
-        method = example.largeStruct
-        method.method.restype = struct_large
-        self.assertEqual(method().x, b"abcdefghijklmnop")
+        types.register_encoding(b'{large=[17c]}', struct_large)
+        self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
 
     def test_struct_return_send(self):
         "Methods returning structs of different sizes by value can be handled when using send_message."
@@ -1112,7 +1106,7 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def test_setdefault1(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.setdefault('one', 1), 'ONE')
+        self.assertEqual(d.setdefault('one', 'default'), 'ONE')
         self.assertEqual(len(d), len(self.py_dict))
 
     def test_setdefault2(self):

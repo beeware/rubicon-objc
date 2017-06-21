@@ -47,9 +47,13 @@ c = _load_or_error('c')
 objc = _load_or_error('objc')
 Foundation = _load_or_error('Foundation')
 
+@with_preferred_encoding(b'@')
+# @? is the encoding for blocks.
+@with_encoding(b'@?')
 class objc_id(c_void_p):
     pass
 
+@with_preferred_encoding(b':')
 class SEL(c_void_p):
     @property
     def name(self):
@@ -75,6 +79,7 @@ class SEL(c_void_p):
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({name!r})".format(cls=type(self), name=None if self.value is None else self.name)
 
+@with_preferred_encoding(b'#')
 class Class(objc_id):
     pass
 
@@ -455,7 +460,7 @@ def ensure_bytes(x):
     if isinstance(x, bytes):
         return x
     # "All char * in the runtime API should be considered to have UTF-8 encoding."
-    # https://developer.apple.com/reference/objectivec/1657527-objective_c_runtime?language=objc
+    # https://developer.apple.com/documentation/objectivec/objective_c_runtime?preferredLanguage=occ
     return x.encode('utf-8')
 
 
@@ -615,92 +620,6 @@ def encoding_from_annotation(f, offset=1):
 
     return encoding
 
-
-cfunctype_table = {}
-
-
-# Limited to basic types and pointers to basic types.
-# Does not try to handle arrays, arbitrary structs, unions, or bitfields.
-# Assume that encoding is a bytes object and not str.
-def cfunctype_for_encoding(encoding):
-    # Otherwise, create a new CFUNCTYPE for the encoding.
-    typecodes = {
-        c_char: c_char,
-        c_int: c_int,
-        int: c_int,
-        c_short: c_short,
-        c_long: c_long,
-        c_longlong: c_longlong,
-        c_ubyte: c_ubyte,
-        c_uint: c_uint,
-        c_ushort: c_ushort,
-        c_ulong: c_ulong,
-        c_ulonglong: c_ulonglong,
-        c_float: c_float,
-        float: c_float,
-        c_double: c_double,
-        c_bool: c_bool,
-        bool: c_bool,
-        None: None,
-        c_char_p: c_char_p,
-        str: c_char_p,
-        ObjCInstance: objc_id,
-        ObjCClass: Class,
-        SEL: SEL,
-        # function: c_void_p,
-        NSPoint: NSPoint,
-        NSSize: NSSize,
-        NSRect: NSRect,
-        NSRange: NSRange,
-        py_object: py_object
-    }
-    argtypes = []
-    for code in encoding:
-        if code in typecodes:
-            argtypes.append(typecodes[code])
-        else:
-            raise Exception('unknown type encoding: %s', code)
-
-    cfunctype = CFUNCTYPE(*argtypes)
-
-    return cfunctype
-
-
-def typestring_for_encoding(encoding):
-    typecodes = {
-        c_char: b'c',
-        c_int: b'i',
-        int: b'i',
-        c_short: b's',
-        c_long: b'l',
-        c_longlong: b'q',
-        c_ubyte: b'C',
-        c_uint: b'I',
-        c_ushort: b'S',
-        c_ulong: b'L',
-        c_ulonglong: b'Q',
-        c_float: b'f',
-        float: b'f',
-        c_double: b'd',
-        c_bool: b'B',
-        bool: b'B',
-        None: b'v',
-        c_char_p: b'*',
-        str: b'*',
-        ObjCInstance: b'@',
-        objc_id: b'@',
-        ObjCClass: b'#',
-        Class: b'#',
-        SEL: b':',
-        NSPoint: NSPointEncoding,
-        NSSize: NSSizeEncoding,
-        NSRect: NSRectEncoding,
-        NSRange: NSRangeEncoding,
-        py_object: PyObjectEncoding,
-    }
-    return b''.join(typecodes[e] for e in encoding)
-
-
 ######################################################################
 
 def add_method(cls, selName, method, encoding):
@@ -714,19 +633,13 @@ def add_method(cls, selName, method, encoding):
     The third type code must be a selector.
     Additional type codes are for types of other arguments if any.
     """
-    assert(encoding[1] is ObjCInstance)  # ensure id self typecode
-    assert(encoding[2] == SEL)  # ensure SEL cmd typecode
+    signature = tuple(ctype_for_type(tp) for tp in encoding)
+    assert signature[1] == objc_id  # ensure id self typecode
+    assert signature[2] == SEL  # ensure SEL cmd typecode
     selector = get_selector(selName)
-    types = typestring_for_encoding(encoding)
+    types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
-    # Check if we've already created a CFUNCTYPE for this encoding.
-    # If so, then return the cached CFUNCTYPE.
-    try:
-        cfunctype = cfunctype_table[types]
-    except KeyError:
-        cfunctype = cfunctype_for_encoding(encoding)
-        cfunctype_table[types] = cfunctype
-
+    cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
     objc.class_addMethod(cls, selector, cast(imp, IMP), types)
     return imp
@@ -734,7 +647,7 @@ def add_method(cls, selName, method, encoding):
 
 def add_ivar(cls, name, vartype):
     "Add a new instance variable of type vartype to cls."
-    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(vartype))
+    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(ctype_for_type(vartype)))
 
 
 def set_instance_variable(obj, varname, value, vartype):
@@ -755,40 +668,6 @@ def get_instance_variable(obj, varname, vartype):
 class ObjCMethod(object):
     """This represents an unbound Objective-C method (really an IMP)."""
 
-    # Note, need to map 'c' to c_byte rather than c_char, because otherwise
-    # ctypes converts the value into a one-character string which is generally
-    # not what we want at all, especially when the 'c' represents a bool var.
-    typecodes = {
-        b'c': c_byte,
-        b'i': c_int,
-        b's': c_short,
-        b'l': c_long,
-        b'q': c_longlong,
-        b'C': c_ubyte,
-        b'I': c_uint,
-        b'S': c_ushort,
-        b'L': c_ulong,
-        b'Q': c_ulonglong,
-        b'f': c_float,
-        b'd': c_double,
-        b'B': c_bool,
-        b'v': None,
-        b'Vv': None,
-        b'*': c_char_p,
-        b'@': objc_id,
-        b'#': Class,
-        b':': SEL,
-        b'^v': c_void_p,
-        b'?': c_void_p,
-        NSPointEncoding: NSPoint,
-        NSSizeEncoding: NSSize,
-        NSRectEncoding: NSRect,
-        NSRangeEncoding: NSRange,
-        UIEdgeInsetsEncoding: UIEdgeInsets,
-        NSEdgeInsetsEncoding: NSEdgeInsets,
-        PyObjectEncoding: py_object
-    }
-
     def __init__(self, method):
         """Initialize with an Objective-C Method pointer.  We then determine
         the return type and argument type information of the method."""
@@ -807,35 +686,17 @@ class ObjCMethod(object):
             self.argument_types.append(buffer.value)
         # Get types for all the arguments.
         try:
-            self.argtypes = [self.ctype_for_encoding(t) for t in self.argument_types]
-        except:
+            self.argtypes = [ctype_for_encoding(t) for t in self.argument_types]
+        except ValueError:
             print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
             self.argtypes = None
         # Get types for the return type.
         try:
-            self.restype = self.ctype_for_encoding(self.return_type)
-        except:
+            self.restype = ctype_for_encoding(self.return_type)
+        except ValueError:
             print('No restype encoding for %s (%s)' % (self.name, self.return_type))
             self.restype = None
         self.func = None
-
-    def ctype_for_encoding(self, encoding):
-        """Return ctypes type for an encoded Objective-C type."""
-        if encoding in self.typecodes:
-            return self.typecodes[encoding]
-        elif encoding[0:1] == b'^' and encoding[1:] in self.typecodes:
-            return POINTER(self.typecodes[encoding[1:]])
-        elif encoding[0:1] == b'^' and encoding[1:] in [CGImageEncoding, NSZoneEncoding]:
-            # special cases
-            return c_void_p
-        elif encoding[0:1] == b'r' and encoding[1:] in self.typecodes:
-            # const decorator, don't care
-            return self.typecodes[encoding[1:]]
-        elif encoding[0:2] == b'r^' and encoding[2:] in self.typecodes:
-            # const pointer, also don't care
-            return POINTER(self.typecodes[encoding[2:]])
-        else:
-            raise Exception('unknown encoding for %s: %s' % (self.name, encoding))
 
     def get_prototype(self):
         """Returns a ctypes CFUNCTYPE for the method."""
@@ -1765,6 +1626,9 @@ class ObjCMetaClass(ObjCClass):
                 raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
 
         return super().__new__(cls, ptr)
+
+register_ctype_for_type(ObjCInstance, objc_id)
+register_ctype_for_type(ObjCClass, Class)
 
 
 ######################################################################
