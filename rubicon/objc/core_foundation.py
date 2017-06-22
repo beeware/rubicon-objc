@@ -4,7 +4,7 @@ from ctypes import *
 from ctypes import util
 from decimal import Decimal
 
-from .objc import ObjCClass, ObjCInstance, send_message, get_class, get_selector, objc, objc_id, SEL, Class
+from .objc import ObjCClass, ObjCInstance, send_message, get_class, objc, objc_id, SEL, Class
 from .types import *
 
 ######################################################################
@@ -189,7 +189,7 @@ class NSDecimalNumber(object):
     def from_decimal(cls, value):
         if cls.objc_class is None:
             cls.objc_class = get_class('NSDecimalNumber')
-            cls.selector = get_selector('decimalNumberWithString:')
+            cls.selector = SEL('decimalNumberWithString:')
             method = objc.class_getClassMethod(cls.objc_class, cls.selector)
             impl = objc.method_getImplementation(method)
             cls.constructor = cast(impl, CFUNCTYPE(objc_id, objc_id, SEL, objc_id))

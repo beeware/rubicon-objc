@@ -235,35 +235,26 @@ if __LP64__:
     NSInteger = c_long
     NSUInteger = c_ulong
     CGFloat = c_double
-    NSPointEncoding = b'{CGPoint=dd}'
-    NSSizeEncoding = b'{CGSize=dd}'
-    NSRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
-    NSRangeEncoding = b'{_NSRange=QQ}'
-    UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
-    NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
-    PyObjectEncoding = b'^{_object=q^{_typeobject}}'
+    _NSPointEncoding = b'{CGPoint=dd}'
+    _NSSizeEncoding = b'{CGSize=dd}'
+    _NSRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
+    _NSRangeEncoding = b'{_NSRange=QQ}'
+    _UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
+    _NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
+    _PyObjectEncoding = b'^{_object=q^{_typeobject}}'
 else:
     NSInteger = c_int
     NSUInteger = c_uint
     CGFloat = c_float
-    NSPointEncoding = b'{CGPoint=ff}'
-    NSSizeEncoding = b'{CGSize=ff}'
-    NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
-    NSRangeEncoding = b'{_NSRange=II}'
-    UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
-    NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
-    PyObjectEncoding = b'^{_object=i^{_typeobject}}'
+    _NSPointEncoding = b'{CGPoint=ff}'
+    _NSSizeEncoding = b'{CGSize=ff}'
+    _NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
+    _NSRangeEncoding = b'{_NSRange=II}'
+    _UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
+    _NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
+    _PyObjectEncoding = b'^{_object=i^{_typeobject}}'
 
-NSIntegerEncoding = encoding_for_ctype(NSInteger)
-NSUIntegerEncoding = encoding_for_ctype(NSUInteger)
-CGFloatEncoding = encoding_for_ctype(CGFloat)
-
-# Special case so that NSImage.initWithCGImage_size_() will work.
-CGImageEncoding = b'{CGImage=}'
-
-NSZoneEncoding = b'{_NSZone=}'
-
-register_preferred_encoding(PyObjectEncoding, py_object)
+register_preferred_encoding(_PyObjectEncoding, py_object)
 
 
 @with_preferred_encoding(b'^?')
@@ -273,7 +264,7 @@ class UnknownPointer(c_void_p):
     """
 
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
-@with_preferred_encoding(NSPointEncoding)
+@with_preferred_encoding(_NSPointEncoding)
 class NSPoint(Structure):
     _fields_ = [
         ("x", CGFloat),
@@ -282,7 +273,7 @@ class NSPoint(Structure):
 CGPoint = NSPoint
 
 
-@with_preferred_encoding(NSSizeEncoding)
+@with_preferred_encoding(_NSSizeEncoding)
 class NSSize(Structure):
     _fields_ = [
         ("width", CGFloat),
@@ -291,7 +282,7 @@ class NSSize(Structure):
 CGSize = NSSize
 
 
-@with_preferred_encoding(NSRectEncoding)
+@with_preferred_encoding(_NSRectEncoding)
 class NSRect(Structure):
     _fields_ = [
         ("origin", NSPoint),
@@ -319,7 +310,7 @@ CGPointMake = NSMakePoint
 
 
 # iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
-@with_preferred_encoding(UIEdgeInsetsEncoding)
+@with_preferred_encoding(_UIEdgeInsetsEncoding)
 class UIEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
                 ('left', CGFloat),
@@ -333,7 +324,7 @@ UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
 
 
 # macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
-@with_preferred_encoding(NSEdgeInsetsEncoding)
+@with_preferred_encoding(_NSEdgeInsetsEncoding)
 class NSEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
                 ('left', CGFloat),
@@ -351,7 +342,7 @@ NSTimeInterval = c_double
 
 CFIndex = c_long
 UniChar = c_ushort
-unichar = c_wchar  # (actually defined as c_ushort in NSString.h, but need ctypes to convert properly)
+unichar = c_ushort
 CGGlyph = c_ushort
 
 
@@ -365,7 +356,7 @@ class CFRange(Structure):
 
 
 # NSRange.h  (Note, not defined the same as CFRange)
-@with_preferred_encoding(NSRangeEncoding)
+@with_preferred_encoding(_NSRangeEncoding)
 class NSRange(Structure):
     _fields_ = [
         ("location", NSUInteger),

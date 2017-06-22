@@ -145,10 +145,6 @@ objc.class_copyPropertyList.argtypes = [Class, POINTER(c_uint)]
 objc.class_copyProtocolList.restype = POINTER(objc_id)
 objc.class_copyProtocolList.argtypes = [Class, POINTER(c_uint)]
 
-# id class_createInstance(Class cls, size_t extraBytes)
-objc.class_createInstance.restype = objc_id
-objc.class_createInstance.argtypes = [Class, c_size_t]
-
 # Method class_getClassMethod(Class aClass, SEL aSelector)
 # Will also search superclass for implementations.
 objc.class_getClassMethod.restype = Method
@@ -178,10 +174,6 @@ objc.class_getIvarLayout.argtypes = [Class]
 # IMP class_getMethodImplementation(Class cls, SEL name)
 objc.class_getMethodImplementation.restype = IMP
 objc.class_getMethodImplementation.argtypes = [Class, SEL]
-
-# IMP class_getMethodImplementation_stret(Class cls, SEL name)
-#objc.class_getMethodImplementation_stret.restype = IMP
-#objc.class_getMethodImplementation_stret.argtypes = [Class, SEL]
 
 # const char * class_getName(Class cls)
 objc.class_getName.restype = c_char_p
@@ -218,10 +210,6 @@ objc.class_respondsToSelector.argtypes = [Class, SEL]
 # void class_setIvarLayout(Class cls, const char *layout)
 objc.class_setIvarLayout.restype = None
 objc.class_setIvarLayout.argtypes = [Class, c_char_p]
-
-# Class class_setSuperclass(Class cls, Class newSuper)
-objc.class_setSuperclass.restype = Class
-objc.class_setSuperclass.argtypes = [Class, Class]
 
 # void class_setVersion(Class theClass, int version)
 objc.class_setVersion.restype = None
@@ -311,11 +299,6 @@ objc.objc_getAssociatedObject.argtypes = [objc_id, c_void_p]
 objc.objc_getClass.restype = Class
 objc.objc_getClass.argtypes = [c_char_p]
 
-# int objc_getClassList(Class *buffer, int bufferLen)
-# Pass None for buffer to obtain just the total number of classes.
-objc.objc_getClassList.restype = c_int
-objc.objc_getClassList.argtypes = [POINTER(Class), c_int]
-
 # Class objc_getMetaClass(const char *name)
 objc.objc_getMetaClass.restype = Class
 objc.objc_getMetaClass.argtypes = [c_char_p]
@@ -355,14 +338,6 @@ objc.objc_setAssociatedObject.argtypes = [objc_id, c_void_p, objc_id, c_int]
 
 ######################################################################
 
-# id object_copy(id obj, size_t size)
-objc.object_copy.restype = objc_id
-objc.object_copy.argtypes = [objc_id, c_size_t]
-
-# id object_dispose(id obj)
-objc.object_dispose.restype = objc_id
-objc.object_dispose.argtypes = [objc_id]
-
 # BOOL object_isClass(id obj)
 objc.object_isClass.restype = c_bool
 objc.object_isClass.argtypes = [objc_id]
@@ -382,10 +357,6 @@ objc.object_getInstanceVariable.argtypes = [objc_id, c_char_p, POINTER(c_void_p)
 # id object_getIvar(id object, Ivar ivar)
 objc.object_getIvar.restype = objc_id
 objc.object_getIvar.argtypes = [objc_id, Ivar]
-
-# Class object_setClass(id object, Class cls)
-objc.object_setClass.restype = Class
-objc.object_setClass.argtypes = [objc_id, Class]
 
 # Ivar object_setInstanceVariable(id obj, const char *name, void *value)
 # Set argtypes based on the data type of the instance variable.
@@ -412,12 +383,12 @@ objc.protocol_conformsToProtocol.restype = c_bool
 objc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
 
 
-class OBJC_METHOD_DESCRIPTION(Structure):
+class objc_method_description(Structure):
     _fields_ = [("name", SEL), ("types", c_char_p)]
 
 # struct objc_method_description *protocol_copyMethodDescriptionList(Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
 # You must free() the returned array.
-objc.protocol_copyMethodDescriptionList.restype = POINTER(OBJC_METHOD_DESCRIPTION)
+objc.protocol_copyMethodDescriptionList.restype = POINTER(objc_method_description)
 objc.protocol_copyMethodDescriptionList.argtypes = [objc_id, c_bool, c_bool, POINTER(c_uint)]
 
 # objc_property_t * protocol_copyPropertyList(Protocol *protocol, unsigned int *outCount)
@@ -429,7 +400,7 @@ objc.protocol_copyProtocolList = POINTER(objc_id)
 objc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
 
 # struct objc_method_description protocol_getMethodDescription(Protocol *p, SEL aSel, BOOL isRequiredMethod, BOOL isInstanceMethod)
-objc.protocol_getMethodDescription.restype = OBJC_METHOD_DESCRIPTION
+objc.protocol_getMethodDescription.restype = objc_method_description
 objc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
 
 # const char *protocol_getName(Protocol *p)
@@ -441,9 +412,6 @@ objc.protocol_getName.argtypes = [objc_id]
 # const char* sel_getName(SEL aSelector)
 objc.sel_getName.restype = c_char_p
 objc.sel_getName.argtypes = [SEL]
-
-# SEL sel_getUid(const char *str)
-# Use sel_registerName instead.
 
 # BOOL sel_isEqual(SEL lhs, SEL rhs)
 objc.sel_isEqual.restype = c_bool
@@ -465,11 +433,6 @@ def ensure_bytes(x):
 
 
 ######################################################################
-
-
-def get_selector(name):
-    "Return a reference to the selector with the given name."
-    return SEL(name)
 
 
 def get_class(name):
@@ -548,7 +511,7 @@ def send_message(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    selector = get_selector(selName)
+    selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', [])
 
@@ -577,7 +540,7 @@ def send_message(receiver, selName, *args, **kwargs):
     return result
 
 
-class OBJC_SUPER(Structure):
+class objc_super(Structure):
     _fields_ = [('receiver', objc_id), ('super_class', Class)]
 
 
@@ -590,15 +553,15 @@ def send_super(receiver, selName, *args, **kwargs):
     if hasattr(receiver, '_as_parameter_'):
         receiver = receiver._as_parameter_
     superclass = get_superclass_of_object(receiver)
-    super_struct = OBJC_SUPER(receiver, superclass)
-    selector = get_selector(selName)
+    super_struct = objc_super(receiver, superclass)
+    selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
     send = objc['objc_msgSendSuper']
     send.restype = restype
     if argtypes:
-        send.argtypes = [POINTER(OBJC_SUPER), SEL] + argtypes
+        send.argtypes = [POINTER(objc_super), SEL] + argtypes
     else:
         send.argtypes = None
     result = send(byref(super_struct), selector, *args)
@@ -636,7 +599,7 @@ def add_method(cls, selName, method, encoding):
     signature = tuple(ctype_for_type(tp) for tp in encoding)
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
-    selector = get_selector(selName)
+    selector = SEL(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
     cfunctype = CFUNCTYPE(*signature)
