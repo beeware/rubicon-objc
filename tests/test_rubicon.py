@@ -479,6 +479,35 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
+    
+    def test_auto_struct_creation(self):
+        "Structs from method signatures are created automatically."
+        Example = ObjCClass('Example')
+        
+        types.unregister_encoding_all(b'{simple=ii}')
+        types.unregister_encoding_all(b'{simple}')
+        types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        types.unregister_encoding_all(b'{complex}')
+        
+        # Look up the method, so the return/argument types are decoded and the structs are registered.
+        Example.doStuffWithStruct_
+        
+        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
+        self.assertEqual(struct_simple, types.ctype_for_encoding(b'{simple}'))
+        
+        simple = struct_simple(123, 456)
+        ret = Example.doStuffWithStruct_(simple)
+        struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        self.assertIsInstance(ret, struct_complex)
+        self.assertEqual(struct_complex, types.ctype_for_encoding(b'{complex}'))
+        self.assertEqual(list(ret.field_0), [1, 2, 3, 4])
+        self.assertEqual(ret.field_1.value, None)
+        self.assertEqual(ret.field_2.field_0, 123)
+        self.assertEqual(ret.field_2.field_1, 456)
+        self.assertEqual(cast(ret.field_3, c_void_p).value, None)
+        self.assertEqual(ret.field_4, 0)
+        self.assertEqual(ret.field_5, 1)
+        self.assertEqual(ret.field_6, 2)
 
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
