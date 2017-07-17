@@ -55,7 +55,8 @@ _encoding_for_ctype_map = {}
 
 def _end_of_encoding(encoding, start):
     """Find the end index of the encoding starting at index start.
-    The encoding is not validated very extensively. There are no guarantees what happens for invalid encodings - an error may be raised, or a bogus end index may be returned.
+    The encoding is not validated very extensively. There are no guarantees what happens for invalid encodings;
+    an error may be raised, or a bogus end index may be returned.
     """
     
     if start < 0 or start >= len(encoding):
