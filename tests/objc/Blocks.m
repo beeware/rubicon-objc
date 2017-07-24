@@ -20,20 +20,20 @@
 
 -(id) initWithDelegate:(BlockDelegate *)delegate
 {
-  self = [super init];
-  if (self) {
-    self.delegate = delegate;
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        self.delegate = delegate;
+    }
+    return self;
 }
 
 -(int) blockExample {
-  BlockDelegate *delegate = self.delegate;
-  NSLog(@"Delegate is: %@", delegate);
+    BlockDelegate *delegate = self.delegate;
+    NSLog(@"Delegate is: %@", delegate);
 
-  [delegate exampleMethod:^(int a, int b){
-    self.value = a + b;
-  }];
-  return self.value;
+    [delegate exampleMethod:^(int a, int b){
+        self.value = a + b;
+    }];
+    return self.value;
 }
 @end
