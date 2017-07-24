@@ -1,4 +1,4 @@
-OBJ_FILES=tests/objc/Thing.o tests/objc/Example.o tests/objc/BaseExample.o
+OBJ_FILES=tests/objc/Thing.o tests/objc/Example.o tests/objc/BaseExample.o tests/objc/Blocks.o
 
 # By default, build a universal i386/x86_64 binary.
 # Modify here (or on the command line) to build for other architecture(s).

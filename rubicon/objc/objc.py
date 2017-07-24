@@ -1644,3 +1644,23 @@ except NameError:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
             send_super(self, 'finalize')
+
+
+class ObjCBlockStruct(Structure):
+    _fields_ = [
+        ('isa', c_void_p),
+        ('flags', c_int),
+        ('reserved', c_int),
+        ('invoke', CFUNCTYPE(c_void_p, c_void_p)),
+    ]
+
+
+class ObjCBlock:
+    def __init__(self, instance, return_type, *arg_types):
+        self.instance = instance
+        self.block = cast(self.instance.ptr, POINTER(ObjCBlockStruct))
+        self.block.contents.invoke.restype = return_type
+        self.block.contents.invoke.argtypes = arg_types
+
+    def __call__(self, *args):
+        return self.block.contents.invoke(self.instance.ptr, *args)

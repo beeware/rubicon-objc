@@ -21,7 +21,7 @@ from rubicon.objc import (
     NSObject, SEL,
     objc, objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message
+    send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
 from rubicon.objc.objc import ObjCBoundMethod
@@ -1160,3 +1160,21 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
+
+class BlockTests(unittest.TestCase):
+    def test_block_property(self):
+        BlockPropertyExample = ObjCClass("BlockPropertyExample")
+        instance = BlockPropertyExample.alloc().init()
+        result = ObjCBlock(instance.blockProperty, c_int, c_int, c_int)(1, 2)
+        self.assertEqual(result, 3)
+
+    def test_block_delegate_method_manual(self):
+        class DelegateManual(NSObject):
+            @objc_method
+            def exampleMethod_(self, block):
+                ObjCBlock(block, c_void_p, c_int, c_int)(2, 3)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateManual.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 5)
