@@ -29,7 +29,6 @@
 
 -(int) blockExample {
     BlockDelegate *delegate = self.delegate;
-    NSLog(@"Delegate is: %@", delegate);
 
     [delegate exampleMethod:^(int a, int b){
         self.value = a + b;
