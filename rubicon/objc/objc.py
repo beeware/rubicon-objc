@@ -48,17 +48,14 @@ c = _load_or_error('c')
 objc = _load_or_error('objc')
 Foundation = _load_or_error('Foundation')
 
-@with_preferred_encoding(b'@')
-# @? is the encoding for blocks.
-@with_encoding(b'@?')
+@with_encoding(b'@')
 class objc_id(c_void_p):
     pass
 
 
 @with_encoding(b'@?')
-class objc_block(objc_id):
-    def __call__(self, *args):
-        return ObjCBlock(self)(*args)
+class objc_block(c_void_p):
+    pass
 
 
 @with_preferred_encoding(b':')
@@ -886,6 +883,8 @@ def convert_method_arguments(encoding, args):
             new_args.append(to_value(ObjCInstance(a)))
         elif e == ObjCClass:
             new_args.append(ObjCClass(a))
+        elif e == objc_block:
+            new_args.append(to_value(ObjCInstance(a)))
         else:
             new_args.append(a)
     return new_args
@@ -1055,6 +1054,7 @@ class ObjCInstance(object):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
         # Make sure that object_ptr is wrapped in an objc_id.
+        is_block = isinstance(object_ptr, objc_block)
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
 
@@ -1079,10 +1079,15 @@ class ObjCInstance(object):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
-            cls = cls._select_mixin(object_ptr)
+            if is_block:
+                cls = ObjCBlockInstance
+            else:
+                cls = cls._select_mixin(object_ptr)
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
+        if is_block:
+            super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
         cls._cached_objects[object_ptr.value] = self
@@ -1750,3 +1755,8 @@ class ObjCBlock:
 
     def __call__(self, *args):
         return self.struct.contents.invoke(self.pointer, *args)
+
+
+class ObjCBlockInstance(ObjCInstance):
+    def __call__(self, *args):
+        return self.block(*args)
