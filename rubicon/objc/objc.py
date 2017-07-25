@@ -1,5 +1,6 @@
 import inspect
 import os
+from collections import deque
 
 from enum import Enum
 
@@ -52,6 +53,13 @@ Foundation = _load_or_error('Foundation')
 @with_encoding(b'@?')
 class objc_id(c_void_p):
     pass
+
+
+@with_encoding(b'@?')
+class objc_block(objc_id):
+    def __call__(self, *args):
+        return ObjCBlock(self)(*args)
+
 
 @with_preferred_encoding(b':')
 class SEL(c_void_p):
@@ -1678,19 +1686,61 @@ def cast_block_descriptor(block):
     return cast(block.struct.contents.descriptor, POINTER(descriptor_struct))
 
 
+AUTO = object()
+_SIGNATURE_CACHE = {}
+
+
+def _strip_nums(siglist):
+    while siglist and siglist[0] in '0123456789':
+        siglist.popleft()
+
+
+def get_signature_types(signature):
+    siglist = deque(signature)
+    _strip_nums(siglist)
+    while siglist:
+        byte = siglist.popleft()
+        if byte == 'v':
+            yield c_void_p
+            _strip_nums(siglist)
+        elif byte == 'i':
+            yield c_int
+            _strip_nums(siglist)
+        else:
+            raise ValueError('Unknown signature byte {!r}'.format(byte))
+
+
+def decode_block_signature(signature):
+    if signature not in _SIGNATURE_CACHE:
+        if '@?' not in signature:
+            raise ValueError('Signature {} does not appear to be block signature'.format(signature))
+        ret, args = signature.split('@?', 1)
+        ret_type = next(get_signature_types(ret))
+        _SIGNATURE_CACHE[signature] = ret_type, tuple(get_signature_types(args))
+    return _SIGNATURE_CACHE[signature]
+
+
 class ObjCBlock:
-    def __init__(self, instance, return_type, *arg_types):
-        self.instance = instance
-        self.struct = cast(self.instance.ptr, POINTER(ObjCBlockStruct))
-        self.struct.contents.invoke.restype = ctype_for_type(return_type)
-        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
+    def __init__(self, pointer, return_type=AUTO, *arg_types):
+        if isinstance(pointer, ObjCInstance):
+            pointer = pointer.ptr
+        self.pointer = pointer
+        self.struct = cast(self.pointer, POINTER(ObjCBlockStruct))
         self.has_helpers = self.struct.contents.flags & (1<<25)
         self.has_signature = self.struct.contents.flags & (1<<30)
         self.descriptor = cast_block_descriptor(self)
         self.signature = self.descriptor.contents.signature.decode('ascii') if self.has_signature else None
+        if return_type is AUTO:
+            if arg_types:
+                raise ValueError('Cannot use arg_types with return_type AUTO')
+            if not self.has_signature:
+                raise ValueError('Cannot use AUTO types for blocks without signatures')
+            return_type, arg_types = decode_block_signature(self.signature)
+        self.struct.contents.invoke.restype = ctype_for_type(return_type)
+        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
 
     def __repr__(self):
-        representation = '<ObjCBlock@{}'.format(hex(addressof(self.instance.ptr)))
+        representation = '<ObjCBlock@{}'.format(hex(addressof(self.pointer)))
         if self.has_helpers:
             representation += ',has_helpers'
         if self.has_signature:
@@ -1699,4 +1749,4 @@ class ObjCBlock:
         return representation
 
     def __call__(self, *args):
-        return self.struct.contents.invoke(self.instance.ptr, *args)
+        return self.struct.contents.invoke(self.pointer, *args)

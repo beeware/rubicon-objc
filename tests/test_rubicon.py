@@ -24,8 +24,7 @@ from rubicon.objc import (
     send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod
-
+from rubicon.objc.objc import ObjCBoundMethod, objc_block
 
 # Load the test harness library
 harnesslib = util.find_library('rubiconharness')
@@ -1195,3 +1194,14 @@ class BlockTests(unittest.TestCase):
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
         result = instance.blockExample()
         self.assertEqual(result, 5)
+
+    def test_block_delegate_auto(self):
+        class DelegateAuto(NSObject):
+            @objc_method
+            def exampleMethod_(self, block: objc_block):
+                block(4, 5)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateAuto.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 9)
