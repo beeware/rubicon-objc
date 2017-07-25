@@ -24,7 +24,11 @@ from rubicon.objc import (
     send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod, objc_block
+from rubicon.objc.objc import (
+    ObjCBoundMethod, objc_block, get_signature_types,
+    objc_id,
+    Class,
+)
 
 # Load the test harness library
 harnesslib = util.find_library('rubiconharness')
@@ -1161,6 +1165,31 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
 
 class BlockTests(unittest.TestCase):
+    def test_signature_decoding_simple(self):
+        def struct(name, *fields):
+            return type(name, (Structure,), {'_fields_': [('f%s' % index, field) for index, field in enumerate(fields)]})
+
+        table = [
+            ('{example=@*i}', [struct('example', objc_id, c_char_p, c_int)]),
+            ('cislqCISLQfdBv*@#:', [c_char, c_int, c_short, c_long, c_longlong, c_ubyte, c_uint, c_ushort, c_ulong, c_ulonglong, c_float, c_double, c_bool, c_void_p, c_char_p, objc_id, Class, SEL]),
+            ('[12i][42L]', [c_int * 12, c_ulonglong * 42]),
+            ('^[42q]', [POINTER(c_long * 42)]),
+            ('@?', [objc_block]),
+        ]
+        def eq(a, b):
+            if issubclass(a, Structure):
+                self.assertTrue(issubclass(b, Structure))
+                self.assertEqual(a.__name__, b.__name__)
+                self.assertEqual(a._fields_, b._fields_)
+            else:
+                self.assertEqual(a, b)
+
+        for signature, expected in table:
+            got = list(get_signature_types(signature))
+            with self.subTest(signature=signature, expected=expected, got=got):
+                for a, b in zip(got, expected):
+                    eq(a, b)
+
     def test_block_property_ctypes(self):
         BlockPropertyExample = ObjCClass("BlockPropertyExample")
         instance = BlockPropertyExample.alloc().init()
@@ -1205,3 +1234,31 @@ class BlockTests(unittest.TestCase):
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
         result = instance.blockExample()
         self.assertEqual(result, 9)
+
+    def test_block_delegate_auto_struct(self):
+        class BlockStruct(Structure):
+            _fields_ = [
+                ('a', c_int),
+                ('b', c_int),
+            ]
+        class DelegateAutoStruct(NSObject):
+            @objc_method
+            def structBlockMethod_(self, block: objc_block) -> int:
+                return block(BlockStruct(42, 43))
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateAutoStruct.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.structBlockExample()
+        self.assertEqual(result, 85)
+
+    def test_block_receiver(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+
+        values = []
+
+        def block(a: int, b: int) -> None:
+            values.append(a + b)
+
+        with self.assertRaises(NotImplementedError):
+            instance.receiverMethod_(block)

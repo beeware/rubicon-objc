@@ -699,6 +699,9 @@ class ObjCMethod(object):
                     # Convert Python objects to Core Foundation objects
                     arg = from_value(arg)
 
+                if argtype == objc_block:
+                    raise NotImplementedError('Passing blocks to objc is not supported yet')
+
                 converted_args.append(arg)
         else:
             converted_args = args
@@ -1669,25 +1672,29 @@ class ObjCBlockStruct(Structure):
     ]
 
 
-def cast_block_descriptor(block):
+def create_block_descriptor_struct(has_helpers, has_signature):
     descriptor_fields = [
         ('reserved', c_ulong),
         ('size', c_ulong),
     ]
-    if block.has_helpers:
+    if has_helpers:
         descriptor_fields.extend([
             ('copy_helper', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
             ('dispose_helper', CFUNCTYPE(c_void_p, c_void_p)),
         ])
-    if block.has_signature:
+    if has_signature:
         descriptor_fields.extend([
             ('signature', c_char_p),
         ])
-    descriptor_struct = type(
+    return type(
         'ObjCBlockDescriptor',
         (Structure, ),
         {'_fields_': descriptor_fields}
     )
+
+
+def cast_block_descriptor(block):
+    descriptor_struct = create_block_descriptor_struct(block.has_helpers, block.has_signature)
     return cast(block.struct.contents.descriptor, POINTER(descriptor_struct))
 
 
@@ -1700,19 +1707,110 @@ def _strip_nums(siglist):
         siglist.popleft()
 
 
+SIMPLE_SIGNATURE_TYPES = {
+    'c': c_char,
+    'i': c_int,
+    's': c_short,
+    'l': c_long,
+    'q': c_longlong,
+    'C': c_ubyte,
+    'I': c_uint,
+    'S': c_ushort,
+    'L': c_ulong,
+    'Q': c_ulonglong,
+    'f': c_float,
+    'd': c_double,
+    'B': c_bool,
+    'v': c_void_p,
+    '*': c_char_p,
+    '#': Class,
+    ':': SEL,
+}
+
+
+class EndStruct(Exception):
+    pass
+
+
+class EndUnion(Exception):
+    pass
+
+
+def get_array_type(siglist):
+    length_string = ''
+    while siglist[0].isdigit():
+        length_string += siglist.popleft()
+    length = int(length_string)
+    element_type = get_next_signature_type(siglist)
+    _strip_nums(siglist)
+    close = siglist.popleft()
+    if close != ']':
+        raise ValueError('Expected array to be closed, got {} instead'.format(close))
+    return element_type * length
+
+
+def _get_struct_or_union_type(siglist, cls, exc, end):
+    name = ''
+    sig_code = siglist.popleft()
+    if sig_code == end:
+        return c_void_p  # used for pointer to pointer to structure/union?
+    while sig_code != '=':
+        name += sig_code
+        sig_code = siglist.popleft()
+    fields = []
+    index = 0
+    while True:
+        try:
+            fields.append(('f%s' % index, get_next_signature_type(siglist)))
+            index += 1
+        except exc:
+            break
+    return type(name, (cls, ), {'_fields_': fields})
+
+
+def get_struct_type(siglist):
+    return _get_struct_or_union_type(siglist, Structure, EndStruct, '}')
+
+
+def get_union_type(siglist):
+    return _get_struct_or_union_type(siglist, Union, EndUnion, ')')
+
+
+#https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+def get_next_signature_type(siglist):
+    sig_code = siglist.popleft()
+    if sig_code in SIMPLE_SIGNATURE_TYPES:
+        return SIMPLE_SIGNATURE_TYPES[sig_code]
+    elif sig_code == '@':
+        if siglist and siglist[0] == '?':
+            siglist.popleft()
+            return objc_block
+        else:
+            return objc_id
+    elif sig_code == '[':
+        return get_array_type(siglist)
+    elif sig_code == '{':
+        return get_struct_type(siglist)
+    elif sig_code == '}':
+        raise EndStruct()
+    elif sig_code == '(':
+        return get_union_type(siglist)
+    elif sig_code == ')':
+        raise EndUnion()
+    elif sig_code == 'b':
+        raise ValueError('Bit fields not supported yet')
+    elif sig_code == '^':
+        return POINTER(get_next_signature_type(siglist))
+    else:
+        raise ValueError('Unknown signature byte {!r}'.format(sig_code))
+
+
 def get_signature_types(signature):
     siglist = deque(signature)
     _strip_nums(siglist)
     while siglist:
-        byte = siglist.popleft()
-        if byte == 'v':
-            yield c_void_p
-            _strip_nums(siglist)
-        elif byte == 'i':
-            yield c_int
-            _strip_nums(siglist)
-        else:
-            raise ValueError('Unknown signature byte {!r}'.format(byte))
+        yield get_next_signature_type(siglist)
+        _strip_nums(siglist)
 
 
 def decode_block_signature(signature):
