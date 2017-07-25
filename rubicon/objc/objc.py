@@ -1644,3 +1644,59 @@ except NameError:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
             send_super(self, 'finalize')
+
+
+class ObjCBlockStruct(Structure):
+    _fields_ = [
+        ('isa', c_void_p),
+        ('flags', c_int),
+        ('reserved', c_int),
+        ('invoke', CFUNCTYPE(c_void_p, c_void_p)),
+        ('descriptor', c_void_p),
+    ]
+
+
+def cast_block_descriptor(block):
+    descriptor_fields = [
+        ('reserved', c_ulong),
+        ('size', c_ulong),
+    ]
+    if block.has_helpers:
+        descriptor_fields.extend([
+            ('copy_helper', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
+            ('dispose_helper', CFUNCTYPE(c_void_p, c_void_p)),
+        ])
+    if block.has_signature:
+        descriptor_fields.extend([
+            ('signature', c_char_p),
+        ])
+    descriptor_struct = type(
+        'ObjCBlockDescriptor',
+        (Structure, ),
+        {'_fields_': descriptor_fields}
+    )
+    return cast(block.struct.contents.descriptor, POINTER(descriptor_struct))
+
+
+class ObjCBlock:
+    def __init__(self, instance, return_type, *arg_types):
+        self.instance = instance
+        self.struct = cast(self.instance.ptr, POINTER(ObjCBlockStruct))
+        self.struct.contents.invoke.restype = ctype_for_type(return_type)
+        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
+        self.has_helpers = self.struct.contents.flags & (1<<25)
+        self.has_signature = self.struct.contents.flags & (1<<30)
+        self.descriptor = cast_block_descriptor(self)
+        self.signature = self.descriptor.contents.signature.decode('ascii') if self.has_signature else None
+
+    def __repr__(self):
+        representation = '<ObjCBlock@{}'.format(hex(addressof(self.instance.ptr)))
+        if self.has_helpers:
+            representation += ',has_helpers'
+        if self.has_signature:
+            representation += ',has_signature:' + self.signature
+        representation += '>'
+        return representation
+
+    def __call__(self, *args):
+        return self.struct.contents.invoke(self.instance.ptr, *args)
