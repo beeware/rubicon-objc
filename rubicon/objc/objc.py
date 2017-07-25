@@ -1682,8 +1682,8 @@ class ObjCBlock:
     def __init__(self, instance, return_type, *arg_types):
         self.instance = instance
         self.struct = cast(self.instance.ptr, POINTER(ObjCBlockStruct))
-        self.struct.contents.invoke.restype = return_type
-        self.struct.contents.invoke.argtypes = (objc_id, ) + arg_types
+        self.struct.contents.invoke.restype = ctype_for_type(return_type)
+        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
         self.has_helpers = self.struct.contents.flags & (1<<25)
         self.has_signature = self.struct.contents.flags & (1<<30)
         self.descriptor = cast_block_descriptor(self)

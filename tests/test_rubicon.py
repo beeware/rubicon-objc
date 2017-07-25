@@ -1162,19 +1162,36 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
 
 class BlockTests(unittest.TestCase):
-    def test_block_property(self):
+    def test_block_property_ctypes(self):
         BlockPropertyExample = ObjCClass("BlockPropertyExample")
         instance = BlockPropertyExample.alloc().init()
         result = ObjCBlock(instance.blockProperty, c_int, c_int, c_int)(1, 2)
         self.assertEqual(result, 3)
 
-    def test_block_delegate_method_manual(self):
-        class DelegateManual(NSObject):
+    def test_block_property_pytypes(self):
+        BlockPropertyExample = ObjCClass("BlockPropertyExample")
+        instance = BlockPropertyExample.alloc().init()
+        result = ObjCBlock(instance.blockProperty, int, int, int)(1, 2)
+        self.assertEqual(result, 3)
+
+    def test_block_delegate_method_manual_ctypes(self):
+        class DelegateManualC(NSObject):
             @objc_method
             def exampleMethod_(self, block):
                 ObjCBlock(block, c_void_p, c_int, c_int)(2, 3)
         BlockObjectExample = ObjCClass("BlockObjectExample")
-        delegate = DelegateManual.alloc().init()
+        delegate = DelegateManualC.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 5)
+
+    def test_block_delegate_method_manual_pytypes(self):
+        class DelegateManualPY(NSObject):
+            @objc_method
+            def exampleMethod_(self, block):
+                ObjCBlock(block, None, int, int)(2, 3)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateManualPY.alloc().init()
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
         result = instance.blockExample()
         self.assertEqual(result, 5)
