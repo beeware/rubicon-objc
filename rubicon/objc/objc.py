@@ -1,3 +1,4 @@
+import collections.abc
 import inspect
 import os
 
@@ -693,6 +694,8 @@ class ObjCMethod(object):
                 if argtype == objc_id:
                     # Convert Python objects to Core Foundation objects
                     arg = from_value(arg)
+                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
+                    arg = compound_value_for_sequence(arg, argtype)
 
                 converted_args.append(arg)
         else:

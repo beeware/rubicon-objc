@@ -501,6 +501,16 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(ret.field_5, 1)
         self.assertEqual(ret.field_6, 2)
 
+    def test_sequence_arg_to_struct(self):
+        "Sequence arguments are converted to structures."
+        Example = ObjCClass('Example')
+        
+        ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None, 0, 0, 0))
+        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
+        self.assertIsInstance(ret, struct_simple)
+        self.assertEqual(ret.field_0, 987)
+        self.assertEqual(ret.field_1, 654)
+
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
         Example = ObjCClass('Example')

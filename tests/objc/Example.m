@@ -229,4 +229,9 @@ static int _staticIntField = 11;
     };
 }
 
++(struct simple) extractSimpleStruct:(struct complex)complex
+{
+    return complex.s;
+}
+
 @end
