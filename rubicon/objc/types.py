@@ -53,6 +53,173 @@ def get_ctype_for_type_map():
 _ctype_for_encoding_map = {}
 _encoding_for_ctype_map = {}
 
+def _end_of_encoding(encoding, start):
+    """Find the end index of the encoding starting at index start.
+    The encoding is not validated very extensively. There are no guarantees what happens for invalid encodings;
+    an error may be raised, or a bogus end index may be returned.
+    """
+    
+    if start < 0 or start >= len(encoding):
+        raise ValueError('Start index {} not in range({})'.format(start, len(encoding)))
+    
+    paren_depth = 0
+    
+    i = start
+    while i < len(encoding):
+        c = encoding[i:i+1]
+        if paren_depth > 0:
+            if c in b')]}>':
+                # Closing parentheses of some type.
+                paren_depth -= 1
+                if paren_depth == 0:
+                    # Final closing parenthesis, end of this encoding.
+                    return i+1
+            else:
+                # Some other character, do nothing because we are in parentheses.
+                i += 1
+        elif c in b'*:#?BCDILQSTcdfilqstv':
+            # Encodings with exactly one character.
+            return i+1
+        elif c in b'^ANORVjnor':
+            # Simple prefix (qualifier, pointer, etc.), skip it but count it towards the length.
+            i += 1
+        elif c in b'([{<':
+            # Opening parenthesis of some type, wait for a corresponding closing paren.
+            # This doesn't check that the parenthesis *types* match (only the *number* of closing parens has to match).
+            paren_depth += 1
+        elif c == b'@':
+            if encoding[i+1:i+3] == b'?<':
+                # Encoding @?<...> (block with signature).
+                # Skip the @? and continue at the < which is treated as an opening paren.
+                i += 2
+            elif encoding[i+1:i+2] == b'?':
+                # Encoding @? (block).
+                return i+2
+            elif encoding[i+1:i+2] == b'"':
+                # Encoding @"..." (object pointer with class name).
+                return encoding.index(b'"', i+2)+1
+            else:
+                # Encoding @ (untyped object pointer).
+                return i+1
+        elif c == b'b':
+            # Bit field, followed by one or more digits.
+            for j in range(i+1, len(encoding)):
+                if encoding[j] not in b'0123456789':
+                    # Found a non-digit, stop here.
+                    return j
+            # Reached end of string without finding a non-digit, stop.
+            return len(encoding)
+        else:
+            raise ValueError('Unknown encoding {} at index {}: {}'.format(c, i, encoding))
+    
+    if paren_depth > 0:
+        raise ValueError('Incomplete encoding, missing {} closing parentheses: {}'.format(paren_depth, encoding))
+    else:
+        raise ValueError('Incomplete encoding, reached end of string too early: {}'.format(encoding))
+
+def _create_structish_type_for_encoding(encoding, *, base):
+    """Create a structish type from the given encoding. ("structish" = "structure or union")
+    The base kwarg controls which base class is used. It should be either ctypes.Structure or ctypes.Union.
+    """
+    
+    # Split name and fields.
+    begin = encoding[0:1]
+    end = encoding[-1:len(encoding)]
+    name, eq, fields = encoding[1:-1].partition(b'=')
+    
+    if not eq:
+        # If the fields are not present, we can't create a meaningful structish.
+        # We also know that there is no known structish with this name,
+        # because in that case that structish would have been found by ctype_for_encoding.
+        # So we pretend that this structish is a void (None).
+        # This causes pointers to it to become void pointers.
+        return None
+    
+    if name == b'?':
+        # Anonymous structish, has no name.
+        name = None
+
+    # Create the subclass. The _fields_ are not set yet, this is done later.
+    # The structish is already registered here, so that pointers to this structish type in itself are typed correctly.
+    py_name = '_Anonymous' if name is None else name.decode('utf-8')
+    structish_type = type(py_name, (base,), {})
+    # Register the structish for its own encoding, so the same type is used in the future.
+    register_encoding(encoding, structish_type)
+    if name is not None:
+        # If not anonymous, also register for the corresponding name-only encoding.
+        register_encoding(begin + name + end, structish_type)
+    
+    # Convert the field encodings to a sequence of tuples, as needed for the _fields_ attribute.
+    ctypes_fields = []
+    start = 0 # Start of the next field.
+    i = 0 # Field counter, used when naming unnamed fields.
+    while start < len(fields):
+        if fields[start:start+1] == b'"':
+            # If a name is present, use it.
+            field_name_end = fields.index(b'"', start+2)
+            field_name = fields[start+1:field_name_end].decode('utf-8')
+            start = field_name_end+1
+        else:
+            # If no name is present, make one based on the field index.
+            field_name = 'field_{}'.format(i)
+        end = _end_of_encoding(fields, start)
+        field_encoding = fields[start:end]
+        if field_encoding.startswith(b'b'):
+            # Bit field, extract the number of bits.
+            bit_field_size = int(field_encoding[1:])
+            ctypes_fields.append((field_name, c_uint, bit_field_size))
+        else:
+            # Regular field, decode the encoding normally.
+            field_type = ctype_for_encoding(field_encoding)
+            ctypes_fields.append((field_name, field_type))
+        start = end
+        i += 1
+    
+    structish_type._fields_ = ctypes_fields
+    
+    return structish_type
+
+def _ctype_for_unknown_encoding(encoding):
+    if encoding.startswith(b'^'):
+        # Resolve pointer types recursively.
+        pointer_type = POINTER(ctype_for_encoding(encoding[1:]))
+        register_encoding(encoding, pointer_type)
+        return pointer_type
+    elif encoding.startswith(b'[') and encoding.endswith(b']'):
+        # Resolve array types recursively.
+        for i, c in enumerate(encoding[1:], start=1):
+            if c not in b'0123456789':
+                break
+        assert i != 1
+        array_length = int(encoding[1:i].decode('utf-8'))
+        array_type = ctype_for_encoding(encoding[i:-1]) * array_length
+        register_encoding(encoding, array_type)
+        return array_type
+    elif encoding.startswith(b'{') and encoding.endswith(b'}'):
+        # Create ctypes.Structure subclasses for unknown structures.
+        return _create_structish_type_for_encoding(encoding, base=Structure)
+    elif encoding.startswith(b'(') and encoding.endswith(b')'):
+        # Create ctypes.Union subclasses for unknown unions.
+        return _create_structish_type_for_encoding(encoding, base=Union)
+    elif encoding.startswith(b'@?<') and encoding.endswith(b'>'):
+        # Ignore block signature encoding if present.
+        return ctype_for_encoding(b'@?')
+    elif encoding.startswith(b'@"') and encoding.endswith(b'"'):
+        # Ignore object pointer class names if present.
+        return ctype_for_encoding(b'@')
+    elif encoding.startswith(b'b'):
+        raise ValueError('A bit field encoding cannot appear outside a structure: %s' % (encoding,))
+    elif encoding.startswith(b'?'):
+        raise ValueError('An unknown encoding cannot appear outside of a pointer: %s' % (encoding,))
+    elif encoding.startswith(b'T') or encoding.startswith(b't'):
+        raise ValueError('128-bit integers are not supported by ctypes: %s' % (encoding,))
+    elif encoding.startswith(b'j'):
+        raise ValueError('Complex numbers are not supported by ctypes: %s' % (encoding,))
+    elif encoding.startswith(b'A'):
+        raise ValueError('Atomic types are not supported by ctypes: %s' % (encoding,))
+    else:
+        raise ValueError('Unknown encoding: %s' % (encoding,))
+
 def ctype_for_encoding(encoding):
     """Return ctypes type for an encoded Objective-C type."""
     
@@ -61,20 +228,10 @@ def ctype_for_encoding(encoding):
     encoding = encoding.lstrip(b"NORVnor")
     
     try:
-        # Look up simple type encodings directly
+        # Look up known type encodings directly.
         return _ctype_for_encoding_map[encoding]
     except KeyError:
-        if encoding[0:1] == b'^':
-            try:
-                # Try to resolve pointer types recursively
-                target = ctype_for_encoding(encoding[1:])
-            except ValueError:
-                # For unknown pointer types, fall back to c_void_p (this is not ideal, but at least it works instead of erroring)
-                return c_void_p
-            else:
-                return POINTER(target)
-        else:
-            raise ValueError('Unknown encoding: %s' % (encoding,))
+        return _ctype_for_unknown_encoding(encoding)
 
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type."""
@@ -129,7 +286,7 @@ def unregister_encoding(encoding):
     If encoding was not registered previously, nothing happens.
     """
     
-    _ctype_for_encoding_map.pop(encoding, default=None)
+    _ctype_for_encoding_map.pop(encoding, None)
     
 
 def unregister_encoding_all(encoding):
@@ -138,7 +295,7 @@ def unregister_encoding_all(encoding):
     If encoding was not registered previously, nothing happens.
     """
     
-    _ctype_for_encoding_map.pop(encoding, default=None)
+    _ctype_for_encoding_map.pop(encoding, None)
     for ct, enc in list(_encoding_for_ctype_map.items()):
         if enc == encoding:
             unregister_ctype_all(ct)
@@ -226,6 +383,11 @@ register_encoding(b'^i', c_wchar_p)
 register_preferred_encoding(b'^i', POINTER(c_int))
 
 register_preferred_encoding(b'^v', c_void_p)
+
+# Anonymous structs/unions with unknown fields can't be decoded meaningfully,
+# so we treat pointers to them like void pointers.
+register_encoding(b'^{?}', c_void_p)
+register_encoding(b'^(?)', c_void_p)
 
 
 # Note CGBase.h located at

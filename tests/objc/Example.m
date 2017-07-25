@@ -216,4 +216,17 @@ static int _staticIntField = 11;
     return arg1 + arg2;
 }
 
++(struct complex) doStuffWithStruct:(struct simple)simple
+{
+    return (struct complex){
+        .things = {1, 2, 3, 4},
+        .callback = NULL,
+        .s = simple,
+        .next = NULL,
+        .bitfield0 = 0,
+        .bitfield1 = 1,
+        .bitfield2 = 2,
+    };
+}
+
 @end
