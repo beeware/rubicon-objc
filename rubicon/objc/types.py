@@ -1,5 +1,6 @@
 from ctypes import *
 
+import collections.abc
 import platform
 import struct
 
@@ -328,6 +329,49 @@ def get_encoding_for_ctype_map():
     """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
     
     return dict(_encoding_for_ctype_map)
+
+def struct_for_sequence(seq, struct_type):
+    if len(seq) != len(struct_type._fields_):
+        raise ValueError(
+            'Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, but a sequence of length {seq_len} was given'
+            .format(tp=struct_type, fields_len=len(struct_type._fields_), seq_len=len(seq))
+        )
+    
+    values = []
+    for value, (field_name, field_type, *_) in zip(seq, struct_type._fields_):
+        if issubclass(field_type, (Structure, Array)) and isinstance(value, collections.abc.Iterable):
+            values.append(compound_value_for_sequence(value, field_type))
+        else:
+            values.append(value)
+    
+    return struct_type(*values)
+
+def array_for_sequence(seq, array_type):
+    if len(seq) != array_type._length_:
+        raise ValueError(
+            'Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, but a sequence of length {seq_len} was given'
+            .format(tp=array_type, array_len=array_type._length_, seq_len=len(seq))
+        )
+    
+    if issubclass(array_type._type_, (Structure, Array)):
+        values = []
+        for value in seq:
+            if isinstance(value, collections.abc.Iterable):
+                values.append(compound_value_for_sequence(value, array_type._type_))
+            else:
+                values.append(value)
+    else:
+        values = seq
+    
+    return array_type(*values)
+
+def compound_value_for_sequence(seq, tp):
+    if issubclass(tp, Structure):
+        return struct_for_sequence(seq, tp)
+    elif issubclass(tp, Array):
+        return array_for_sequence(seq, tp)
+    else:
+        raise TypeError("Don't know how to convert a sequence to a {tp.__module__}.{tp.__qualname__}".format(tp=tp))
 
 # Register all type encoding mappings.
 
