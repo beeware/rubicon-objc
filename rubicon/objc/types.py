@@ -68,26 +68,25 @@ def _end_of_encoding(encoding, start):
     i = start
     while i < len(encoding):
         c = encoding[i:i+1]
-        if paren_depth > 0:
+        if c in b'([{<':
+            # Opening parenthesis of some type, wait for a corresponding closing paren.
+            # This doesn't check that the parenthesis *types* match (only the *number* of closing parens has to match).
+            paren_depth += 1
+            i += 1
+        elif paren_depth > 0:
             if c in b')]}>':
                 # Closing parentheses of some type.
                 paren_depth -= 1
-                if paren_depth == 0:
-                    # Final closing parenthesis, end of this encoding.
-                    return i+1
-            else:
-                # Some other character, do nothing because we are in parentheses.
-                i += 1
+            i += 1
+            if paren_depth == 0:
+                # Final closing parenthesis, end of this encoding.
+                return i
         elif c in b'*:#?BCDILQSTcdfilqstv':
             # Encodings with exactly one character.
             return i+1
         elif c in b'^ANORVjnor':
             # Simple prefix (qualifier, pointer, etc.), skip it but count it towards the length.
             i += 1
-        elif c in b'([{<':
-            # Opening parenthesis of some type, wait for a corresponding closing paren.
-            # This doesn't check that the parenthesis *types* match (only the *number* of closing parens has to match).
-            paren_depth += 1
         elif c == b'@':
             if encoding[i+1:i+3] == b'?<':
                 # Encoding @?<...> (block with signature).
@@ -329,6 +328,33 @@ def get_encoding_for_ctype_map():
     """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
     
     return dict(_encoding_for_ctype_map)
+
+def split_method_encoding(encoding):
+    """Split a method signature encoding into a sequence of type encodings.
+    
+    The first type encoding represents the return type, all remaining type encodings represent the argument types.
+    
+    If there are any numbers after a type encoding, they are ignored. On PowerPC, these numbers indicated each
+    argument/return value's offset on the stack. These numbers are meaningless on modern architectures.
+    """
+    
+    encodings = []
+    start = 0
+    while start < len(encoding):
+        # Find the end of the current encoding
+        end = _end_of_encoding(encoding, start)
+        encodings.append(encoding[start:end])
+        start = end
+        # Skip the legacy stack offsets
+        while start < len(encoding) and encoding[start] in b"0123456789":
+            start += 1
+    
+    return encodings
+
+def ctypes_for_method_encoding(encoding):
+    """Convert a method signature encoding into a sequence of ctypes types."""
+    
+    return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
 def struct_for_sequence(seq, struct_type):
     if len(seq) != len(struct_type._fields_):
