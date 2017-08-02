@@ -6,6 +6,7 @@ Changelog
 
 * Added support for using native Python sequence/mapping syntax with ``NSArray`` and ``NSDictionary``. (jeamland)
 * Added functions for declaring custom conversions between Objective-C type encodings and ``ctypes`` types.
+* Added functions for splitting and decoding Objective-C method signature encodings.
 * Added automatic conversion of Python sequences to C arrays or structures in method arguments.
 * Extended the Objective-C type encoding decoder to support block types, bit fields (in structures), typed object pointers, and arbitrary qualifiers. If unknown pointer, array, struct or union types are encountered, they are created and registered on the fly.
 * Changed the ``PyObjectEncoding`` to match the real definition of ``PyObject *``.
