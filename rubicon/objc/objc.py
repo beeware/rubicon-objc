@@ -1,6 +1,7 @@
 import collections.abc
 import inspect
 import os
+from collections import deque
 
 from enum import Enum
 
@@ -48,11 +49,15 @@ c = _load_or_error('c')
 objc = _load_or_error('objc')
 Foundation = _load_or_error('Foundation')
 
-@with_preferred_encoding(b'@')
-# @? is the encoding for blocks.
-@with_encoding(b'@?')
+@with_encoding(b'@')
 class objc_id(c_void_p):
     pass
+
+
+@with_encoding(b'@?')
+class objc_block(c_void_p):
+    pass
+
 
 @with_preferred_encoding(b':')
 class SEL(c_void_p):
@@ -654,6 +659,9 @@ class ObjCMethod(object):
                 elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
                     arg = compound_value_for_sequence(arg, argtype)
 
+                if argtype == objc_block:
+                    raise NotImplementedError('Passing blocks to objc is not supported yet')
+
                 converted_args.append(arg)
         else:
             converted_args = args
@@ -838,6 +846,8 @@ def convert_method_arguments(encoding, args):
             new_args.append(to_value(ObjCInstance(a)))
         elif e == ObjCClass:
             new_args.append(ObjCClass(a))
+        elif e == objc_block:
+            new_args.append(to_value(ObjCInstance(a)))
         else:
             new_args.append(a)
     return new_args
@@ -1007,6 +1017,7 @@ class ObjCInstance(object):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
         # Make sure that object_ptr is wrapped in an objc_id.
+        is_block = isinstance(object_ptr, objc_block)
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
 
@@ -1031,10 +1042,15 @@ class ObjCInstance(object):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
-            cls = cls._select_mixin(object_ptr)
+            if is_block:
+                cls = ObjCBlockInstance
+            else:
+                cls = cls._select_mixin(object_ptr)
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
+        if is_block:
+            super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
         cls._cached_objects[object_ptr.value] = self
@@ -1604,3 +1620,79 @@ except NameError:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
             send_super(self, 'finalize')
+
+
+class ObjCBlockStruct(Structure):
+    _fields_ = [
+        ('isa', c_void_p),
+        ('flags', c_int),
+        ('reserved', c_int),
+        ('invoke', CFUNCTYPE(c_void_p, c_void_p)),
+        ('descriptor', c_void_p),
+    ]
+
+
+def create_block_descriptor_struct(has_helpers, has_signature):
+    descriptor_fields = [
+        ('reserved', c_ulong),
+        ('size', c_ulong),
+    ]
+    if has_helpers:
+        descriptor_fields.extend([
+            ('copy_helper', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
+            ('dispose_helper', CFUNCTYPE(c_void_p, c_void_p)),
+        ])
+    if has_signature:
+        descriptor_fields.extend([
+            ('signature', c_char_p),
+        ])
+    return type(
+        'ObjCBlockDescriptor',
+        (Structure, ),
+        {'_fields_': descriptor_fields}
+    )
+
+
+def cast_block_descriptor(block):
+    descriptor_struct = create_block_descriptor_struct(block.has_helpers, block.has_signature)
+    return cast(block.struct.contents.descriptor, POINTER(descriptor_struct))
+
+
+AUTO = object()
+
+
+class ObjCBlock:
+    def __init__(self, pointer, return_type=AUTO, *arg_types):
+        if isinstance(pointer, ObjCInstance):
+            pointer = pointer.ptr
+        self.pointer = pointer
+        self.struct = cast(self.pointer, POINTER(ObjCBlockStruct))
+        self.has_helpers = self.struct.contents.flags & (1<<25)
+        self.has_signature = self.struct.contents.flags & (1<<30)
+        self.descriptor = cast_block_descriptor(self)
+        self.signature = self.descriptor.contents.signature if self.has_signature else None
+        if return_type is AUTO:
+            if arg_types:
+                raise ValueError('Cannot use arg_types with return_type AUTO')
+            if not self.has_signature:
+                raise ValueError('Cannot use AUTO types for blocks without signatures')
+            return_type, *arg_types = ctypes_for_method_encoding(self.signature)
+        self.struct.contents.invoke.restype = ctype_for_type(return_type)
+        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
+
+    def __repr__(self):
+        representation = '<ObjCBlock@{}'.format(hex(addressof(self.pointer)))
+        if self.has_helpers:
+            representation += ',has_helpers'
+        if self.has_signature:
+            representation += ',has_signature:' + self.signature
+        representation += '>'
+        return representation
+
+    def __call__(self, *args):
+        return self.struct.contents.invoke(self.pointer, *args)
+
+
+class ObjCBlockInstance(ObjCInstance):
+    def __call__(self, *args):
+        return self.block(*args)

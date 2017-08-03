@@ -20,10 +20,10 @@ from rubicon.objc import (
     NSObject, SEL,
     objc, objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message
+    send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod
+from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class
 
 
 # Load the test harness library
@@ -1193,3 +1193,77 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
+
+class BlockTests(unittest.TestCase):
+    def test_block_property_ctypes(self):
+        BlockPropertyExample = ObjCClass("BlockPropertyExample")
+        instance = BlockPropertyExample.alloc().init()
+        result = ObjCBlock(instance.blockProperty, c_int, c_int, c_int)(1, 2)
+        self.assertEqual(result, 3)
+
+    def test_block_property_pytypes(self):
+        BlockPropertyExample = ObjCClass("BlockPropertyExample")
+        instance = BlockPropertyExample.alloc().init()
+        result = ObjCBlock(instance.blockProperty, int, int, int)(1, 2)
+        self.assertEqual(result, 3)
+
+    def test_block_delegate_method_manual_ctypes(self):
+        class DelegateManualC(NSObject):
+            @objc_method
+            def exampleMethod_(self, block):
+                ObjCBlock(block, c_void_p, c_int, c_int)(2, 3)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateManualC.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 5)
+
+    def test_block_delegate_method_manual_pytypes(self):
+        class DelegateManualPY(NSObject):
+            @objc_method
+            def exampleMethod_(self, block):
+                ObjCBlock(block, None, int, int)(2, 3)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateManualPY.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 5)
+
+    def test_block_delegate_auto(self):
+        class DelegateAuto(NSObject):
+            @objc_method
+            def exampleMethod_(self, block: objc_block):
+                block(4, 5)
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateAuto.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.blockExample()
+        self.assertEqual(result, 9)
+
+    def test_block_delegate_auto_struct(self):
+        class BlockStruct(Structure):
+            _fields_ = [
+                ('a', c_int),
+                ('b', c_int),
+            ]
+        class DelegateAutoStruct(NSObject):
+            @objc_method
+            def structBlockMethod_(self, block: objc_block) -> int:
+                return block(BlockStruct(42, 43))
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = DelegateAutoStruct.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.structBlockExample()
+        self.assertEqual(result, 85)
+
+    def test_block_receiver(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+
+        values = []
+
+        def block(a: int, b: int) -> None:
+            values.append(a + b)
+
+        with self.assertRaises(NotImplementedError):
+            instance.receiverMethod_(block)
