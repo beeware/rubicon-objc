@@ -3,14 +3,13 @@ from ctypes import util
 from decimal import Decimal
 from enum import Enum
 import functools
-import itertools
 import math
 import unittest
 
 try:
     import platform
     OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
-except:
+except Exception:
     OSX_VERSION = None
 
 import faulthandler
@@ -35,13 +34,6 @@ harnesslib = util.find_library('rubiconharness')
 if harnesslib is None:
     raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
 cdll.LoadLibrary(harnesslib)
-
-import sys
-import platform
-print("sys.platform = " + repr(sys.platform))
-print("platform.machine() = " + repr(platform.machine()))
-print("platform.version() = " + repr(platform.version()))
-print("sys.maxsize = " + hex(sys.maxsize))
 
 
 class RubiconTest(unittest.TestCase):
@@ -482,6 +474,45 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
+    
+    def test_auto_struct_creation(self):
+        "Structs from method signatures are created automatically."
+        Example = ObjCClass('Example')
+        
+        types.unregister_encoding_all(b'{simple=ii}')
+        types.unregister_encoding_all(b'{simple}')
+        types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        types.unregister_encoding_all(b'{complex}')
+        
+        # Look up the method, so the return/argument types are decoded and the structs are registered.
+        Example.doStuffWithStruct_
+        
+        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
+        self.assertEqual(struct_simple, types.ctype_for_encoding(b'{simple}'))
+        
+        simple = struct_simple(123, 456)
+        ret = Example.doStuffWithStruct_(simple)
+        struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        self.assertIsInstance(ret, struct_complex)
+        self.assertEqual(struct_complex, types.ctype_for_encoding(b'{complex}'))
+        self.assertEqual(list(ret.field_0), [1, 2, 3, 4])
+        self.assertEqual(ret.field_1.value, None)
+        self.assertEqual(ret.field_2.field_0, 123)
+        self.assertEqual(ret.field_2.field_1, 456)
+        self.assertEqual(cast(ret.field_3, c_void_p).value, None)
+        self.assertEqual(ret.field_4, 0)
+        self.assertEqual(ret.field_5, 1)
+        self.assertEqual(ret.field_6, 2)
+
+    def test_sequence_arg_to_struct(self):
+        "Sequence arguments are converted to structures."
+        Example = ObjCClass('Example')
+        
+        ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None, 0, 0, 0))
+        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
+        self.assertIsInstance(ret, struct_simple)
+        self.assertEqual(ret.field_0, 987)
+        self.assertEqual(ret.field_1, 654)
 
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
@@ -767,7 +798,8 @@ class NSArrayMixinTest(unittest.TestCase):
         for pos, value in enumerate(self.py_list):
             self.assertEqual(a[pos], value)
 
-        self.assertRaises(IndexError, lambda: a[len(self.py_list) + 10])
+        with self.assertRaises(IndexError):
+            a[len(self.py_list) + 10]
 
     def test_len(self):
         a = self.make_array(self.py_list)
@@ -792,7 +824,8 @@ class NSArrayMixinTest(unittest.TestCase):
     def test_index(self):
         a = self.make_array(self.py_list)
         self.assertEqual(a.index('two'), 1)
-        self.assertRaises(ValueError, lambda: a.index('umpteen'))
+        with self.assertRaises(ValueError):
+            a.index('umpteen')
 
     def test_count(self):
         a = self.make_array(self.py_list)
@@ -804,7 +837,8 @@ class NSArrayMixinTest(unittest.TestCase):
         self.assertEqual(b, a)
         self.assertEqual(b, self.py_list)
 
-        self.assertRaises(AttributeError, lambda: b.append('four'))
+        with self.assertRaises(AttributeError):
+            b.append('four')
 
     def test_equivalence(self):
         a = self.make_array(self.py_list)
@@ -896,12 +930,12 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
         a.remove('three')
         self.assertEqual(len(a), 2)
         self.assertEqual(a[-1], 'two')
-        self.assertRaises(ValueError, lambda: a.remove('umpteen'))
+        with self.assertRaises(ValueError):
+            a.remove('umpteen')
 
     def test_slice_assignment1(self):
         a = self.make_array(self.py_list * 2)
         a[2:4] = ['four', 'five']
-        print(list(a))
         self.assertEqual(a, ['one', 'two', 'four', 'five', 'two', 'three'])
 
     def test_slice_assignment2(self):
@@ -917,18 +951,14 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
     def test_bad_slice_assignment1(self):
         a = self.make_array(self.py_list * 2)
 
-        def doomed1():
+        with self.assertRaises(TypeError):
             a[2:4] = 4
-
-        self.assertRaises(TypeError, doomed1)
 
     def test_bad_slice_assignment2(self):
         a = self.make_array(self.py_list * 2)
 
-        def doomed1():
+        with self.assertRaises(ValueError):
             a[::2] = [4]
-
-        self.assertRaises(ValueError, doomed1)
 
     def test_del_slice1(self):
         a = self.make_array(self.py_list * 2)
@@ -985,7 +1015,8 @@ class NSDictionaryMixinTest(unittest.TestCase):
         for key, value in self.py_dict.items():
             self.assertEqual(d[key], value)
 
-        self.assertRaises(KeyError, lambda: d['NO SUCH KEY'])
+        with self.assertRaises(KeyError):
+            d['NO SUCH KEY']
 
     def test_iter(self):
         d = self.make_dictionary(self.py_dict)
@@ -1021,9 +1052,8 @@ class NSDictionaryMixinTest(unittest.TestCase):
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
 
-        def doomed():
+        with self.assertRaises(TypeError):
             e['four'] = 'FOUR'
-        self.assertRaises(TypeError, doomed)
 
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
@@ -1062,7 +1092,8 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         d = self.make_dictionary(self.py_dict)
         del d['one']
         self.assertEqual(len(d), 2)
-        self.assertRaises(KeyError, lambda: d['one'])
+        with self.assertRaises(KeyError):
+            d['one']
 
     def test_clear(self):
         d = self.make_dictionary(self.py_dict)
@@ -1075,7 +1106,6 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
 
-        print(repr(e))
         e['four'] = 'FOUR'
 
     def test_pop1(self):
@@ -1083,12 +1113,14 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
         self.assertEqual(d.pop('one'), 'ONE')
         self.assertEqual(len(d), 2)
-        self.assertRaises(KeyError, lambda: d['one'])
+        with self.assertRaises(KeyError):
+            d['one']
 
     def test_pop2(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertRaises(KeyError, lambda: d.pop('four'))
+        with self.assertRaises(KeyError):
+            d.pop('four')
 
     def test_pop3(self):
         d = self.make_dictionary(self.py_dict)
@@ -1126,7 +1158,8 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertTrue('four' not in d)
         self.assertEqual(d.setdefault('four'), None)
         self.assertEqual(len(d), len(self.py_dict))
-        self.assertRaises(KeyError, lambda: d['four'])
+        with self.assertRaises(KeyError):
+            d['four']
 
     def test_update1(self):
         d = self.make_dictionary(self.py_dict)

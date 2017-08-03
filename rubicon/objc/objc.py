@@ -1,3 +1,4 @@
+import collections.abc
 import inspect
 import os
 from collections import deque
@@ -240,24 +241,9 @@ objc.ivar_getTypeEncoding.argtypes = [Ivar]
 
 ######################################################################
 
-# char * method_copyArgumentType(Method method, unsigned int index)
-# You must free() the returned string.
-objc.method_copyArgumentType.restype = c_char_p
-objc.method_copyArgumentType.argtypes = [Method, c_uint]
-
-# char * method_copyReturnType(Method method)
-# You must free() the returned string.
-objc.method_copyReturnType.restype = c_char_p
-objc.method_copyReturnType.argtypes = [Method]
-
 # void method_exchangeImplementations(Method m1, Method m2)
 objc.method_exchangeImplementations.restype = None
 objc.method_exchangeImplementations.argtypes = [Method, Method]
-
-# void method_getArgumentType(Method method, unsigned int index, char *dst, size_t dst_len)
-# Functionally similar to strncpy(dst, parameter_type, dst_len).
-objc.method_getArgumentType.restype = None
-objc.method_getArgumentType.argtypes = [Method, c_uint, c_char_p, c_size_t]
 
 # IMP method_getImplementation(Method method)
 objc.method_getImplementation.restype = IMP
@@ -266,15 +252,6 @@ objc.method_getImplementation.argtypes = [Method]
 # SEL method_getName(Method method)
 objc.method_getName.restype = SEL
 objc.method_getName.argtypes = [Method]
-
-# unsigned method_getNumberOfArguments(Method method)
-objc.method_getNumberOfArguments.restype = c_uint
-objc.method_getNumberOfArguments.argtypes = [Method]
-
-# void method_getReturnType(Method method, char *dst, size_t dst_len)
-# Functionally similar to strncpy(dst, return_type, dst_len)
-objc.method_getReturnType.restype = None
-objc.method_getReturnType.argtypes = [Method, c_char_p, c_size_t]
 
 # const char * method_getTypeEncoding(Method method)
 objc.method_getTypeEncoding.restype = c_char_p
@@ -643,27 +620,8 @@ class ObjCMethod(object):
         self.name = self.selector.name
         self.pyname = self.name.replace(b':', b'_')
         self.encoding = objc.method_getTypeEncoding(method)
-        self.return_type = objc.method_copyReturnType(method)
-        self.nargs = objc.method_getNumberOfArguments(method)
+        self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
         self.imp = objc.method_getImplementation(method)
-        self.argument_types = []
-
-        for i in range(self.nargs):
-            buffer = c_buffer(512)
-            objc.method_getArgumentType(method, i, buffer, len(buffer))
-            self.argument_types.append(buffer.value)
-        # Get types for all the arguments.
-        try:
-            self.argtypes = [ctype_for_encoding(t) for t in self.argument_types]
-        except ValueError:
-            print('No argtypes encoding for %s (%s)' % (self.name, self.argument_types))
-            self.argtypes = None
-        # Get types for the return type.
-        try:
-            self.restype = ctype_for_encoding(self.return_type)
-        except ValueError:
-            print('No restype encoding for %s (%s)' % (self.name, self.return_type))
-            self.restype = None
         self.func = None
 
     def get_prototype(self):
@@ -698,6 +656,8 @@ class ObjCMethod(object):
                 if argtype == objc_id:
                     # Convert Python objects to Core Foundation objects
                     arg = from_value(arg)
+                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
+                    arg = compound_value_for_sequence(arg, argtype)
 
                 if argtype == objc_block:
                     raise NotImplementedError('Passing blocks to objc is not supported yet')

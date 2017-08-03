@@ -4,6 +4,21 @@
 #import "Thing.h"
 #import "Callback.h"
 
+struct simple {
+	int foo;
+	int bar;
+};
+
+struct complex {
+	short things[4];
+	void (*callback)(void);
+	struct simple s;
+	struct complex *next;
+	unsigned int bitfield0:8;
+	unsigned int bitfield1:16;
+	unsigned int bitfield2:8;
+};
+
 /* objc_msgSend on i386, x86_64, ARM64; objc_msgSend_stret on ARM32. */
 struct int_sized {
     char data[4];
@@ -82,5 +97,7 @@ struct large {
 +(NSUInteger) overloaded;
 +(NSUInteger) overloaded:(NSUInteger)arg1;
 +(NSUInteger) overloaded:(NSUInteger)arg1 extraArg:(NSUInteger)arg2;
+
++(struct complex) doStuffWithStruct:(struct simple)simple;
 
 @end
