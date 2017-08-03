@@ -1659,128 +1659,6 @@ def cast_block_descriptor(block):
 
 
 AUTO = object()
-_SIGNATURE_CACHE = {}
-
-
-def _strip_nums(siglist):
-    while siglist and siglist[0] in '0123456789':
-        siglist.popleft()
-
-
-SIMPLE_SIGNATURE_TYPES = {
-    'c': c_char,
-    'i': c_int,
-    's': c_short,
-    'l': c_long,
-    'q': c_longlong,
-    'C': c_ubyte,
-    'I': c_uint,
-    'S': c_ushort,
-    'L': c_ulong,
-    'Q': c_ulonglong,
-    'f': c_float,
-    'd': c_double,
-    'B': c_bool,
-    'v': c_void_p,
-    '*': c_char_p,
-    '#': Class,
-    ':': SEL,
-}
-
-
-class EndStruct(Exception):
-    pass
-
-
-class EndUnion(Exception):
-    pass
-
-
-def get_array_type(siglist):
-    length_string = ''
-    while siglist[0].isdigit():
-        length_string += siglist.popleft()
-    length = int(length_string)
-    element_type = get_next_signature_type(siglist)
-    _strip_nums(siglist)
-    close = siglist.popleft()
-    if close != ']':
-        raise ValueError('Expected array to be closed, got {} instead'.format(close))
-    return element_type * length
-
-
-def _get_struct_or_union_type(siglist, cls, exc, end):
-    name = ''
-    sig_code = siglist.popleft()
-    if sig_code == end:
-        return c_void_p  # used for pointer to pointer to structure/union?
-    while sig_code != '=':
-        name += sig_code
-        sig_code = siglist.popleft()
-    fields = []
-    index = 0
-    while True:
-        try:
-            fields.append(('f%s' % index, get_next_signature_type(siglist)))
-            index += 1
-        except exc:
-            break
-    return type(name, (cls, ), {'_fields_': fields})
-
-
-def get_struct_type(siglist):
-    return _get_struct_or_union_type(siglist, Structure, EndStruct, '}')
-
-
-def get_union_type(siglist):
-    return _get_struct_or_union_type(siglist, Union, EndUnion, ')')
-
-
-#https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
-def get_next_signature_type(siglist):
-    sig_code = siglist.popleft()
-    if sig_code in SIMPLE_SIGNATURE_TYPES:
-        return SIMPLE_SIGNATURE_TYPES[sig_code]
-    elif sig_code == '@':
-        if siglist and siglist[0] == '?':
-            siglist.popleft()
-            return objc_block
-        else:
-            return objc_id
-    elif sig_code == '[':
-        return get_array_type(siglist)
-    elif sig_code == '{':
-        return get_struct_type(siglist)
-    elif sig_code == '}':
-        raise EndStruct()
-    elif sig_code == '(':
-        return get_union_type(siglist)
-    elif sig_code == ')':
-        raise EndUnion()
-    elif sig_code == 'b':
-        raise ValueError('Bit fields not supported yet')
-    elif sig_code == '^':
-        return POINTER(get_next_signature_type(siglist))
-    else:
-        raise ValueError('Unknown signature byte {!r}'.format(sig_code))
-
-
-def get_signature_types(signature):
-    siglist = deque(signature)
-    _strip_nums(siglist)
-    while siglist:
-        yield get_next_signature_type(siglist)
-        _strip_nums(siglist)
-
-
-def decode_block_signature(signature):
-    if signature not in _SIGNATURE_CACHE:
-        if '@?' not in signature:
-            raise ValueError('Signature {} does not appear to be block signature'.format(signature))
-        ret, args = signature.split('@?', 1)
-        ret_type = next(get_signature_types(ret))
-        _SIGNATURE_CACHE[signature] = ret_type, tuple(get_signature_types(args))
-    return _SIGNATURE_CACHE[signature]
 
 
 class ObjCBlock:
@@ -1792,13 +1670,13 @@ class ObjCBlock:
         self.has_helpers = self.struct.contents.flags & (1<<25)
         self.has_signature = self.struct.contents.flags & (1<<30)
         self.descriptor = cast_block_descriptor(self)
-        self.signature = self.descriptor.contents.signature.decode('ascii') if self.has_signature else None
+        self.signature = self.descriptor.contents.signature if self.has_signature else None
         if return_type is AUTO:
             if arg_types:
                 raise ValueError('Cannot use arg_types with return_type AUTO')
             if not self.has_signature:
                 raise ValueError('Cannot use AUTO types for blocks without signatures')
-            return_type, arg_types = decode_block_signature(self.signature)
+            return_type, *arg_types = ctypes_for_method_encoding(self.signature)
         self.struct.contents.invoke.restype = ctype_for_type(return_type)
         self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
 

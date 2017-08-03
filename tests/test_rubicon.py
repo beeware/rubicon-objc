@@ -23,11 +23,8 @@ from rubicon.objc import (
     send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import (
-    ObjCBoundMethod, objc_block, get_signature_types,
-    objc_id,
-    Class,
-)
+from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class
+
 
 # Load the test harness library
 harnesslib = util.find_library('rubiconharness')
@@ -1198,31 +1195,6 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
 
 class BlockTests(unittest.TestCase):
-    def test_signature_decoding_simple(self):
-        def struct(name, *fields):
-            return type(name, (Structure,), {'_fields_': [('f%s' % index, field) for index, field in enumerate(fields)]})
-
-        table = [
-            ('{example=@*i}', [struct('example', objc_id, c_char_p, c_int)]),
-            ('cislqCISLQfdBv*@#:', [c_char, c_int, c_short, c_long, c_longlong, c_ubyte, c_uint, c_ushort, c_ulong, c_ulonglong, c_float, c_double, c_bool, c_void_p, c_char_p, objc_id, Class, SEL]),
-            ('[12i][42L]', [c_int * 12, c_ulonglong * 42]),
-            ('^[42q]', [POINTER(c_long * 42)]),
-            ('@?', [objc_block]),
-        ]
-        def eq(a, b):
-            if issubclass(a, Structure):
-                self.assertTrue(issubclass(b, Structure))
-                self.assertEqual(a.__name__, b.__name__)
-                self.assertEqual(a._fields_, b._fields_)
-            else:
-                self.assertEqual(a, b)
-
-        for signature, expected in table:
-            got = list(get_signature_types(signature))
-            with self.subTest(signature=signature, expected=expected, got=got):
-                for a, b in zip(got, expected):
-                    eq(a, b)
-
     def test_block_property_ctypes(self):
         BlockPropertyExample = ObjCClass("BlockPropertyExample")
         instance = BlockPropertyExample.alloc().init()
