@@ -1,8 +1,8 @@
 Changelog
 =========
 
-(next version)
---------------
+0.2.8
+-----
 
 * Added support for using native Python sequence/mapping syntax with ``NSArray`` and ``NSDictionary``. (jeamland)
 * Added functions for declaring custom conversions between Objective-C type encodings and ``ctypes`` types.
