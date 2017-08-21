@@ -54,3 +54,12 @@
 }
 
 @end
+
+@implementation BlockRoundTrip
+
+- (int (^)(int, int)) roundTrip:(int (^)(int, int))blockArgument
+{
+    return blockArgument;
+}
+
+@end

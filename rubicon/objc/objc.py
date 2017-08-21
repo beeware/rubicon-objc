@@ -660,7 +660,11 @@ class ObjCMethod(object):
                     arg = compound_value_for_sequence(arg, argtype)
 
                 if argtype == objc_block:
-                    raise NotImplementedError('Passing blocks to objc is not supported yet')
+                    if isinstance(arg, Block):
+                        arg = arg.block
+                    else:
+                        arg = Block(arg).block
+
 
                 converted_args.append(arg)
         else:
@@ -678,7 +682,7 @@ class ObjCMethod(object):
 
             # Convert result to python type if it is a instance or class pointer.
             from .core_foundation import to_value
-            if self.restype == objc_id:
+            if self.restype in {objc_id, objc_block}:
                 result = to_value(ObjCInstance(result))
             elif self.restype == Class:
                 result = ObjCClass(result)
@@ -1034,7 +1038,7 @@ class ObjCInstance(object):
             return cls._cached_objects[object_ptr.value]
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not issubclass(cls, ObjCClass) and objc.object_isClass(object_ptr):
+        if not is_block and not issubclass(cls, ObjCClass) and objc.object_isClass(object_ptr):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
@@ -1632,6 +1636,24 @@ class ObjCBlockStruct(Structure):
     ]
 
 
+class BlockDescriptor(Structure):
+    _fields_ = [
+        ('reserved', c_ulong),
+        ('size', c_ulong),
+        ('signature', c_char_p),
+    ]
+
+
+class BlockLiteral(Structure):
+    _fields_ = [
+        ('isa', c_void_p),
+        ('flags', c_int),
+        ('reserved', c_int),
+        ('invoke', c_void_p),
+        ('descriptor', c_void_p)
+    ]
+
+
 def create_block_descriptor_struct(has_helpers, has_signature):
     descriptor_fields = [
         ('reserved', c_ulong),
@@ -1661,14 +1683,22 @@ def cast_block_descriptor(block):
 AUTO = object()
 
 
+class BlockConsts:
+    HAS_COPY_DISPOSE = 1 << 25
+    HAS_CTOR = 1 << 26
+    IS_GLOBAL = 1 << 28
+    HAS_STRET = 1 << 29
+    HAS_SIGNATURE = 1 << 30
+
+
 class ObjCBlock:
     def __init__(self, pointer, return_type=AUTO, *arg_types):
         if isinstance(pointer, ObjCInstance):
             pointer = pointer.ptr
         self.pointer = pointer
         self.struct = cast(self.pointer, POINTER(ObjCBlockStruct))
-        self.has_helpers = self.struct.contents.flags & (1<<25)
-        self.has_signature = self.struct.contents.flags & (1<<30)
+        self.has_helpers = self.struct.contents.flags & BlockConsts.HAS_COPY_DISPOSE
+        self.has_signature = self.struct.contents.flags & BlockConsts.HAS_SIGNATURE
         self.descriptor = cast_block_descriptor(self)
         self.signature = self.descriptor.contents.signature if self.has_signature else None
         if return_type is AUTO:
@@ -1696,3 +1726,62 @@ class ObjCBlock:
 class ObjCBlockInstance(ObjCInstance):
     def __call__(self, *args):
         return self.block(*args)
+
+
+_NSConcreteGlobalBlock = ObjCClass("__NSGlobalBlock__")
+
+
+NOTHING = object()
+
+
+class Block:
+    def __init__(self, func, restype=NOTHING, *arg_types):
+        if not callable(func):
+            raise TypeError('Blocks must be callable')
+
+        self.func = func
+
+        argspec = inspect.getfullargspec(inspect.unwrap(func))
+
+        if restype is NOTHING:
+            try:
+                restype = argspec.annotations['return']
+            except KeyError:
+                raise ValueError(
+                    'Block callables must be fully annotated or an explicit '
+                    'return type must be specified.'
+                )
+
+        if not arg_types:
+            try:
+                arg_types = list(argspec.annotations[varname] for varname in argspec.args)
+            except KeyError:
+                raise ValueError(
+                    'Block callables must be fully annotated or explicit '
+                    'argument types must be specified.'
+                )
+        signature = tuple(ctype_for_type(tp) for tp in arg_types)
+
+        restype = ctype_for_type(restype)
+
+        self.cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
+
+        self.literal = BlockLiteral()
+        self.literal.isa = _NSConcreteGlobalBlock.ptr
+        self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE
+        self.literal.reserved = 0
+        self.cfunc = self.cfunc_type(self.wrapper)
+        self.literal.invoke = cast(self.cfunc, c_void_p)
+        self.descriptor = BlockDescriptor()
+        self.descriptor.reserved = 0
+        self.descriptor.size = sizeof(BlockLiteral)
+
+        encoding_for_ctype(restype)
+        self.descriptor.signature = encoding_for_ctype(restype) + b'@?' + b''.join(
+            encoding_for_ctype(arg) for arg in signature
+        )
+        self.literal.descriptor = cast(byref(self.descriptor), c_void_p)
+        self.block = cast(byref(self.literal), objc_block)
+
+    def wrapper(self, instance, *args):
+        return self.func(*args)

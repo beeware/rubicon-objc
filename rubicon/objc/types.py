@@ -20,6 +20,9 @@ __arm64__ = (_any_arm and __LP64__)
 __arm__ = (_any_arm and not __LP64__)
 
 
+POINTER_TYPE = type(POINTER(c_void_p))
+
+
 _ctype_for_type_map = {
     int: c_int,
     float: c_double,
@@ -235,7 +238,8 @@ def ctype_for_encoding(encoding):
 
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type."""
-    
+    if isinstance(ctype, POINTER_TYPE):
+        return b'^' + encoding_for_ctype(ctype._type_)
     try:
         return _encoding_for_ctype_map[ctype]
     except KeyError:

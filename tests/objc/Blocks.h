@@ -27,3 +27,8 @@ typedef struct
 @interface BlockReceiverExample : NSObject
 - (void)receiverMethod:(void (^)(int, int))blockArgument;
 @end
+
+
+@interface BlockRoundTrip : NSObject
+- (int (^)(int, int))roundTrip:(int (^)(int, int))blockArgument;
+@end
