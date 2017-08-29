@@ -23,8 +23,7 @@ from rubicon.objc import (
     send_message, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class
-
+from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class, Block
 
 # Load the test harness library
 harnesslib = util.find_library('rubiconharness')
@@ -1264,6 +1263,42 @@ class BlockTests(unittest.TestCase):
 
         def block(a: int, b: int) -> None:
             values.append(a + b)
+        instance.receiverMethod_(block)
 
-        with self.assertRaises(NotImplementedError):
+        self.assertEqual(values, [27])
+
+    def test_block_receiver_unannotated(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+
+        def block(a, b):
+            return a + b
+        with self.assertRaises(ValueError):
             instance.receiverMethod_(block)
+
+    def test_block_receiver_lambda(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+        with self.assertRaises(ValueError):
+            instance.receiverMethod_(lambda a, b: a + b)
+
+    def test_block_receiver_explicit(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+
+        values = []
+
+        block = Block(lambda a, b: values.append(a + b), None, int, int)
+        instance.receiverMethod_(block)
+
+        self.assertEqual(values, [27])
+
+    def test_block_round_trip(self):
+        BlockRoundTrip = ObjCClass("BlockRoundTrip")
+        instance = BlockRoundTrip.alloc().init()
+
+        def block(a: int, b: int) -> int:
+            return a + b
+
+        returned_block = instance.roundTrip_(block)
+        self.assertEqual(returned_block(8, 9), 17)

@@ -235,11 +235,13 @@ def ctype_for_encoding(encoding):
 
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type."""
-    
     try:
         return _encoding_for_ctype_map[ctype]
     except KeyError:
-        raise ValueError('No type encoding known for ctype {}'.format(ctype))
+        try:
+            return b'^' + encoding_for_ctype(ctype._type_)
+        except KeyError:
+            raise ValueError('No type encoding known for ctype {}'.format(ctype))
 
 def register_preferred_encoding(encoding, ctype):
     """Register a preferred conversion between an Objective-C type encoding and a ctypes type.
