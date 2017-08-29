@@ -1728,7 +1728,7 @@ class ObjCBlockInstance(ObjCInstance):
         return self.block(*args)
 
 
-_NSConcreteGlobalBlock = ObjCClass("__NSGlobalBlock__")
+_NSConcreteGlobalBlock = (c_void_p * 32).in_dll(c, "_NSConcreteGlobalBlock")
 
 
 NOTHING = object()
@@ -1767,7 +1767,7 @@ class Block:
         self.cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
 
         self.literal = BlockLiteral()
-        self.literal.isa = _NSConcreteGlobalBlock.ptr
+        self.literal.isa = addressof(_NSConcreteGlobalBlock)
         self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE
         self.literal.reserved = 0
         self.cfunc = self.cfunc_type(self.wrapper)
@@ -1776,7 +1776,6 @@ class Block:
         self.descriptor.reserved = 0
         self.descriptor.size = sizeof(BlockLiteral)
 
-        encoding_for_ctype(restype)
         self.descriptor.signature = encoding_for_ctype(restype) + b'@?' + b''.join(
             encoding_for_ctype(arg) for arg in signature
         )
