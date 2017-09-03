@@ -1,10 +1,17 @@
 Changelog
 =========
 
+(next version)
+--------------
+
+* Added support for creating Objective-C blocks from Python callables. (ojii)
+* Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
+
 0.2.8
 -----
 
 * Added support for using native Python sequence/mapping syntax with ``NSArray`` and ``NSDictionary``. (jeamland)
+* Added support for calling Objective-C blocks in Python. (ojii)
 * Added functions for declaring custom conversions between Objective-C type encodings and ``ctypes`` types.
 * Added functions for splitting and decoding Objective-C method signature encodings.
 * Added automatic conversion of Python sequences to C arrays or structures in method arguments.
