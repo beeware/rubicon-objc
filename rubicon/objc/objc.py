@@ -1017,12 +1017,6 @@ class ObjCInstance(object):
 
         return cls
 
-    @classmethod
-    def in_dll(cls, dll, name):
-        """Create an ObjCInstance from a global pointer variable in a DLL."""
-
-        return cls(objc_id.in_dll(dll, name))
-
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
@@ -1630,6 +1624,12 @@ except NameError:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
             send_super(self, 'finalize')
+
+
+def objc_const(dll, name):
+    """Create an ObjCInstance from a global pointer variable in a DLL."""
+
+    return ObjCInstance(objc_id.in_dll(dll, name))
 
 
 class ObjCBlockStruct(Structure):

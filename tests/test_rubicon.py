@@ -20,7 +20,7 @@ from rubicon.objc import (
     NSObject, SEL,
     objc, objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message, ObjCBlock
+    send_message, objc_const, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
 from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class, Block
@@ -773,10 +773,10 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
 
-    def test_objcinstance_in_dll(self):
-        "ObjCInstance.in_dll works."
+    def test_objc_const(self):
+        "objc_const works."
         
-        string_const = ObjCInstance.in_dll(rubiconharness, "SomeGlobalStringConstant")
+        string_const = objc_const(rubiconharness, "SomeGlobalStringConstant")
         self.assertEqual(str(string_const), "Some global string constant")
 
 
