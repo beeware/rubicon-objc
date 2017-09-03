@@ -43,7 +43,7 @@ struct large {
 }
 
 #if __has_extension(objc_class_property)
-@property (class) int classAmbiguous;
+@property (class, readonly) int classAmbiguous;
 #endif
 
 @property int intField;

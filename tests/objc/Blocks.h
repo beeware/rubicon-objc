@@ -1,6 +1,9 @@
 #import <Foundation/Foundation.h>
 
-@interface BlockPropertyExample : NSObject
+@interface BlockPropertyExample : NSObject {
+    int (^_blockProperty)(int, int);
+}
+
 @property (copy) int (^blockProperty)(int, int);
 @end
 
@@ -15,9 +18,13 @@ typedef struct
 - (int)structBlockMethod:(int (^)(blockStruct))blockArgument;
 @end
 
-@interface BlockObjectExample : NSObject
+@interface BlockObjectExample : NSObject {
+    int _value;
+    BlockDelegate *_delegate;
+}
+
 @property int value;
-@property BlockDelegate *delegate;
+@property (retain) BlockDelegate *delegate;
 - (id)initWithDelegate:(BlockDelegate *)delegate;
 - (int)blockExample;
 - (int)structBlockExample;
