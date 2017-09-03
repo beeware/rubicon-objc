@@ -1,6 +1,8 @@
 #import "Example.h"
 #import <stdio.h>
 
+NSString *const SomeGlobalStringConstant = @"Some global string constant";
+
 @implementation Example
 
 @synthesize intField = _intField;

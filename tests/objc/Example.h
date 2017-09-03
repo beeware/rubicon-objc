@@ -34,6 +34,8 @@ struct large {
     char data[17];
 };
 
+extern NSString *const SomeGlobalStringConstant;
+
 @interface Example : BaseExample {
 
     int _intField;
