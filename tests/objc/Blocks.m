@@ -2,6 +2,8 @@
 
 @implementation BlockPropertyExample
 
+@synthesize blockProperty = _blockProperty;
+
 -(id) init
 {
     self = [super init];
@@ -17,6 +19,9 @@
 @end
 
 @implementation BlockObjectExample
+
+@synthesize value = _value;
+@synthesize delegate = _delegate;
 
 -(id) initWithDelegate:(BlockDelegate *)delegate
 {
