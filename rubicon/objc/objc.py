@@ -1626,6 +1626,12 @@ except NameError:
             send_super(self, 'finalize')
 
 
+def objc_const(dll, name):
+    """Create an ObjCInstance from a global pointer variable in a DLL."""
+
+    return ObjCInstance(objc_id.in_dll(dll, name))
+
+
 class ObjCBlockStruct(Structure):
     _fields_ = [
         ('isa', c_void_p),

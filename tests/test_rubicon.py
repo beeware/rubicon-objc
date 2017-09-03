@@ -20,16 +20,16 @@ from rubicon.objc import (
     NSObject, SEL,
     objc, objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message, ObjCBlock
+    send_message, objc_const, ObjCBlock
 )
 from rubicon.objc import core_foundation, types
 from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class, Block
 
 # Load the test harness library
-harnesslib = util.find_library('rubiconharness')
-if harnesslib is None:
+rubiconharness_name = util.find_library('rubiconharness')
+if rubiconharness_name is None:
     raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-cdll.LoadLibrary(harnesslib)
+rubiconharness = CDLL(rubiconharness_name)
 
 
 class RubiconTest(unittest.TestCase):
@@ -772,6 +772,12 @@ class RubiconTest(unittest.TestCase):
         "CFString/NSString instances can be converted to Python str."
 
         self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
+
+    def test_objc_const(self):
+        "objc_const works."
+        
+        string_const = objc_const(rubiconharness, "SomeGlobalStringConstant")
+        self.assertEqual(str(string_const), "Some global string constant")
 
 
 class NSArrayMixinTest(unittest.TestCase):
