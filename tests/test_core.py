@@ -1,7 +1,7 @@
-from ctypes import *
-from ctypes import util
+from ctypes import util, CDLL, c_char, c_int, c_float, c_double, c_void_p, cast, byref, create_string_buffer, Structure
 from decimal import Decimal
 from enum import Enum
+import faulthandler
 import functools
 import math
 import unittest
@@ -12,24 +12,23 @@ try:
 except Exception:
     OSX_VERSION = None
 
-import faulthandler
-faulthandler.enable()
-
 from rubicon.objc import (
     ObjCInstance, ObjCClass, ObjCMetaClass,
     NSObject, SEL,
     objc, objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message, objc_const, ObjCBlock
+    send_message, objc_const
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod, objc_block, objc_id, Class, Block
+from rubicon.objc.objc import ObjCBoundMethod
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
 if rubiconharness_name is None:
     raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
 rubiconharness = CDLL(rubiconharness_name)
+
+faulthandler.enable()
 
 
 class RubiconTest(unittest.TestCase):
@@ -458,7 +457,14 @@ class RubiconTest(unittest.TestCase):
         "A method with a double argument can be handled by send_message."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
-        self.assertAlmostEqual(send_message(example, "areaOfCircle:", 1.5, restype=c_double, argtypes=[c_double]), 1.5 * math.pi, 5)
+        self.assertAlmostEqual(
+            send_message(
+                example, "areaOfCircle:", 1.5,
+                restype=c_double,
+                argtypes=[c_double]
+            ),
+            1.5 * math.pi, 5
+        )
 
     @unittest.skipIf(OSX_VERSION and OSX_VERSION < (10, 10),
                      "Property handling doesn't work on OS X 10.9 (Mavericks) and earlier")
@@ -470,22 +476,22 @@ class RubiconTest(unittest.TestCase):
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
         self.assertEqual(result, Decimal('6.0'))
         self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
-    
+
     def test_auto_struct_creation(self):
         "Structs from method signatures are created automatically."
         Example = ObjCClass('Example')
-        
+
         types.unregister_encoding_all(b'{simple=ii}')
         types.unregister_encoding_all(b'{simple}')
         types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
         types.unregister_encoding_all(b'{complex}')
-        
+
         # Look up the method, so the return/argument types are decoded and the structs are registered.
         Example.doStuffWithStruct_
-        
+
         struct_simple = types.ctype_for_encoding(b'{simple=ii}')
         self.assertEqual(struct_simple, types.ctype_for_encoding(b'{simple}'))
-        
+
         simple = struct_simple(123, 456)
         ret = Example.doStuffWithStruct_(simple)
         struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
@@ -503,7 +509,7 @@ class RubiconTest(unittest.TestCase):
     def test_sequence_arg_to_struct(self):
         "Sequence arguments are converted to structures."
         Example = ObjCClass('Example')
-        
+
         ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None, 0, 0, 0))
         struct_simple = types.ctype_for_encoding(b'{simple=ii}')
         self.assertIsInstance(ret, struct_simple)
@@ -520,6 +526,7 @@ class RubiconTest(unittest.TestCase):
         types.register_encoding(b'{int_sized=[4c]}', struct_int_sized)
 
         self.assertEqual(example.intSizedStruct().x, b"abc")
+
         class struct_oddly_sized(Structure):
             _fields_ = [("x", c_char * 5)]
 
@@ -541,7 +548,6 @@ class RubiconTest(unittest.TestCase):
             _fields_ = [("x", c_char * 4)]
 
         self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
-
 
         class struct_oddly_sized(Structure):
             _fields_ = [("x", c_char * 5)]
@@ -597,7 +603,7 @@ class RubiconTest(unittest.TestCase):
             buf,
             maxLength=32,
             usedLength=byref(usedLength),
-            encoding=4, # NSUTF8StringEncoding
+            encoding=4,  # NSUTF8StringEncoding
             options=0,
             range=NSRange(0, 7),
             remainingRange=byref(remaining),
@@ -616,7 +622,7 @@ class RubiconTest(unittest.TestCase):
         # Second definition will raise an error.
         # Without protection, this is a segfault.
         with self.assertRaises(RuntimeError):
-            class MyClass(NSObject):
+            class MyClass(NSObject):  # NOQA
                 pass
 
     def test_interface(self):
@@ -775,536 +781,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objc_const(self):
         "objc_const works."
-        
+
         string_const = objc_const(rubiconharness, "SomeGlobalStringConstant")
         self.assertEqual(str(string_const), "Some global string constant")
-
-
-class NSArrayMixinTest(unittest.TestCase):
-    nsarray = ObjCClass('NSArray')
-    nsmutablearray = ObjCClass('NSMutableArray')
-
-    py_list = ['one', 'two', 'three']
-
-    def make_array(self, contents=None):
-        a = self.nsmutablearray.alloc().init()
-        if contents is not None:
-            for value in contents:
-                a.addObject(value)
-
-        return self.nsarray.arrayWithArray(a)
-
-    def test_getitem(self):
-        a = self.make_array(self.py_list)
-
-        for pos, value in enumerate(self.py_list):
-            self.assertEqual(a[pos], value)
-
-        with self.assertRaises(IndexError):
-            a[len(self.py_list) + 10]
-
-    def test_len(self):
-        a = self.make_array(self.py_list)
-
-        self.assertEqual(len(a), len(self.py_list))
-
-    def test_iter(self):
-        a = self.make_array(self.py_list)
-
-        keys = list(self.py_list)
-        for k in a:
-            self.assertTrue(k in keys)
-            keys.remove(k)
-
-        self.assertTrue(len(keys) == 0)
-
-    def test_contains(self):
-        a = self.make_array(self.py_list)
-        for value in self.py_list:
-            self.assertTrue(value in a)
-
-    def test_index(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.index('two'), 1)
-        with self.assertRaises(ValueError):
-            a.index('umpteen')
-
-    def test_count(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.count('one'), 1)
-
-    def test_copy(self):
-        a = self.make_array(self.py_list)
-        b = a.copy()
-        self.assertEqual(b, a)
-        self.assertEqual(b, self.py_list)
-
-        with self.assertRaises(AttributeError):
-            b.append('four')
-
-    def test_equivalence(self):
-        a = self.make_array(self.py_list)
-        b = self.make_array(self.py_list)
-
-        self.assertEqual(a, self.py_list)
-        self.assertEqual(b, self.py_list)
-        self.assertEqual(a, b)
-        self.assertEqual(self.py_list, a)
-        self.assertEqual(self.py_list, b)
-        self.assertEqual(b, a)
-
-    def test_slice_access(self):
-        a = self.make_array(self.py_list * 2)
-        self.assertEqual(a[1:4], ['two', 'three', 'one'])
-        self.assertEqual(a[:-2], ['one', 'two', 'three', 'one'])
-        self.assertEqual(a[4:], ['two', 'three'])
-        self.assertEqual(a[1:5:2], ['two', 'one'])
-
-
-class NSMutableArrayMixinTest(NSArrayMixinTest):
-    def make_array(self, contents=None):
-        a = self.nsmutablearray.alloc().init()
-        if contents is not None:
-            for value in contents:
-                a.addObject(value)
-
-        return a
-
-    def test_setitem(self):
-        a = self.make_array(self.py_list)
-
-        a[2] = 'four'
-        self.assertEqual(a[2], 'four')
-
-    def test_del(self):
-        a = self.make_array(self.py_list)
-        del a[0]
-        self.assertEqual(len(a), 2)
-        self.assertEqual(a[0], 'two')
-
-    def test_append(self):
-        a = self.make_array()
-        a.append('an item')
-        self.assertTrue('an item' in a)
-
-    def test_extend(self):
-        a = self.make_array()
-        a.extend(['an item', 'another item'])
-        self.assertTrue('an item' in a)
-        self.assertTrue('another item' in a)
-
-    def test_clear(self):
-        a = self.make_array(self.py_list)
-        a.clear()
-        self.assertEqual(len(a), 0)
-
-    def test_count(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.count('one'), 1)
-
-        a.append('one')
-        self.assertEqual(a.count('one'), 2)
-
-    def test_copy(self):
-        a = self.make_array(self.py_list)
-        b = a.copy()
-        self.assertEqual(b, a)
-        self.assertEqual(b, self.py_list)
-
-        b.append('four')
-
-    def test_insert(self):
-        a = self.make_array(self.py_list)
-        a.insert(1, 'four')
-        self.assertEqual(a[0], 'one')
-        self.assertEqual(a[1], 'four')
-        self.assertEqual(a[2], 'two')
-
-    def test_pop(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.pop(), 'three')
-        self.assertEqual(a.pop(0), 'one')
-        self.assertEqual(len(a), 1)
-        self.assertEqual(a[0], 'two')
-
-    def test_remove(self):
-        a = self.make_array(self.py_list)
-        a.remove('three')
-        self.assertEqual(len(a), 2)
-        self.assertEqual(a[-1], 'two')
-        with self.assertRaises(ValueError):
-            a.remove('umpteen')
-
-    def test_slice_assignment1(self):
-        a = self.make_array(self.py_list * 2)
-        a[2:4] = ['four', 'five']
-        self.assertEqual(a, ['one', 'two', 'four', 'five', 'two', 'three'])
-
-    def test_slice_assignment2(self):
-        a = self.make_array(self.py_list * 2)
-        a[::2] = ['four', 'five', 'six']
-        self.assertEqual(a, ['four', 'two', 'five', 'one', 'six', 'three'])
-
-    def test_slice_assignment3(self):
-        a = self.make_array(self.py_list * 2)
-        a[2:4] = ['four']
-        self.assertEqual(a, ['one', 'two', 'four', 'two', 'three'])
-
-    def test_bad_slice_assignment1(self):
-        a = self.make_array(self.py_list * 2)
-
-        with self.assertRaises(TypeError):
-            a[2:4] = 4
-
-    def test_bad_slice_assignment2(self):
-        a = self.make_array(self.py_list * 2)
-
-        with self.assertRaises(ValueError):
-            a[::2] = [4]
-
-    def test_del_slice1(self):
-        a = self.make_array(self.py_list * 2)
-        del a[-2:]
-        self.assertEqual(len(a), 4)
-        self.assertEqual(a[0], 'one')
-        self.assertEqual(a[-1], 'one')
-
-    def test_del_slice2(self):
-        a = self.make_array(self.py_list * 2)
-        del a[::2]
-        self.assertEqual(len(a), 3)
-        self.assertEqual(a[0], 'two')
-        self.assertEqual(a[1], 'one')
-        self.assertEqual(a[2], 'three')
-
-    def test_del_slice3(self):
-        a = self.make_array(self.py_list * 2)
-        del a[::-2]
-        self.assertEqual(len(a), 3)
-        self.assertEqual(a[0], 'one')
-        self.assertEqual(a[1], 'three')
-        self.assertEqual(a[2], 'two')
-
-    def test_reverse(self):
-        a = self.make_array(self.py_list)
-        a.reverse()
-
-        for pos, value in enumerate(reversed(self.py_list)):
-            self.assertEqual(a[pos], value)
-
-
-class NSDictionaryMixinTest(unittest.TestCase):
-    nsdict = ObjCClass('NSDictionary')
-    nsmutabledict = ObjCClass('NSMutableDictionary')
-
-    py_dict = {
-        'one': 'ONE',
-        'two': 'TWO',
-        'three': 'THREE',
-    }
-
-    def make_dictionary(self, contents=None):
-        d = self.nsmutabledict.alloc().init()
-        if contents is not None:
-            for key, value in contents.items():
-                d.setObject_forKey_(value, key)
-
-        return self.nsdict.dictionaryWithDictionary(d)
-
-    def test_getitem(self):
-        d = self.make_dictionary(self.py_dict)
-
-        for key, value in self.py_dict.items():
-            self.assertEqual(d[key], value)
-
-        with self.assertRaises(KeyError):
-            d['NO SUCH KEY']
-
-    def test_iter(self):
-        d = self.make_dictionary(self.py_dict)
-
-        keys = set(self.py_dict)
-        for k in d:
-            self.assertTrue(k in keys)
-            keys.remove(k)
-
-        self.assertTrue(len(keys) == 0)
-
-    def test_len(self):
-        d = self.make_dictionary(self.py_dict)
-        self.assertEqual(len(d), len(self.py_dict))
-
-    def test_get(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d.get('one'), 'ONE')
-        self.assertEqual(d.get('two', None), 'TWO')
-        self.assertEqual(d.get('four', None), None)
-        self.assertEqual(d.get('five', 5), 5)
-        self.assertEqual(d.get('six', None), None)
-
-    def test_contains(self):
-        d = self.make_dictionary(self.py_dict)
-        for key in self.py_dict:
-            self.assertTrue(key in d)
-
-    def test_copy(self):
-        d = self.make_dictionary(self.py_dict)
-        e = d.copy()
-        self.assertEqual(e, d)
-        self.assertEqual(e, self.py_dict)
-
-        with self.assertRaises(TypeError):
-            e['four'] = 'FOUR'
-
-    def test_keys(self):
-        a = self.make_dictionary(self.py_dict)
-        for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):
-            self.assertEqual(k1, k2)
-
-    def test_values(self):
-        a = self.make_dictionary(self.py_dict)
-        for v1, v2 in zip(sorted(a.values()), sorted(self.py_dict.values())):
-            self.assertEqual(v1, v2)
-
-    def test_items(self):
-        d = self.make_dictionary(self.py_dict)
-        for i1, i2 in zip(sorted(d.items()), sorted(self.py_dict.items())):
-            self.assertEqual(i1[0], i2[0])
-            self.assertEqual(i1[1], i2[1])
-
-class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
-    def make_dictionary(self, contents=None):
-        d = self.nsmutabledict.alloc().init()
-        if contents is not None:
-            for key, value in contents.items():
-                d.setObject_forKey_(value, key)
-
-        return d
-
-    def test_setitem(self):
-        d = self.make_dictionary()
-        for key, value in self.py_dict.items():
-            d[key] = value
-
-        for key, value in self.py_dict.items():
-            self.assertEqual(d[key], value)
-
-    def test_del(self):
-        d = self.make_dictionary(self.py_dict)
-        del d['one']
-        self.assertEqual(len(d), 2)
-        with self.assertRaises(KeyError):
-            d['one']
-
-    def test_clear(self):
-        d = self.make_dictionary(self.py_dict)
-        d.clear()
-        self.assertEqual(len(d), 0)
-
-    def test_copy(self):
-        d = self.make_dictionary(self.py_dict)
-        e = d.copy()
-        self.assertEqual(e, d)
-        self.assertEqual(e, self.py_dict)
-
-        e['four'] = 'FOUR'
-
-    def test_pop1(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d.pop('one'), 'ONE')
-        self.assertEqual(len(d), 2)
-        with self.assertRaises(KeyError):
-            d['one']
-
-    def test_pop2(self):
-        d = self.make_dictionary(self.py_dict)
-
-        with self.assertRaises(KeyError):
-            d.pop('four')
-
-    def test_pop3(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d.pop('four', 4), 4)
-
-    def test_popitem(self):
-        d = self.make_dictionary(self.py_dict)
-
-        keys = set(self.py_dict)
-
-        while len(d) > 0:
-            key, value = d.popitem()
-            self.assertTrue(key in keys)
-            self.assertEqual(value, self.py_dict[key])
-            self.assertTrue(key not in d)
-
-    def test_setdefault1(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d.setdefault('one', 'default'), 'ONE')
-        self.assertEqual(len(d), len(self.py_dict))
-
-    def test_setdefault2(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertTrue('four' not in d)
-        self.assertEqual(d.setdefault('four', 'FOUR'), 'FOUR')
-        self.assertEqual(len(d), len(self.py_dict) + 1)
-        self.assertEqual(d['four'], 'FOUR')
-
-    def test_setdefault3(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertTrue('four' not in d)
-        self.assertEqual(d.setdefault('four'), None)
-        self.assertEqual(len(d), len(self.py_dict))
-        with self.assertRaises(KeyError):
-            d['four']
-
-    def test_update1(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d, self.py_dict)
-        d.update({'one': 'two', 'three': 'four', 'four': 'FIVE'})
-        self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(d['four'], 'FIVE')
-        self.assertEqual(len(d), len(self.py_dict) + 1)
-
-    def test_update2(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d, self.py_dict)
-        d.update([('one', 'two'), ('three', 'four'), ('four', 'FIVE')])
-        self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(len(d), len(self.py_dict) + 1)
-
-    def test_update3(self):
-        d = self.make_dictionary(self.py_dict)
-
-        self.assertEqual(d, self.py_dict)
-        d.update(one='two', three='four', four='FIVE')
-        self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(d['four'], 'FIVE')
-        self.assertEqual(len(d), len(self.py_dict) + 1)
-
-
-class BlockTests(unittest.TestCase):
-    def test_block_property_ctypes(self):
-        BlockPropertyExample = ObjCClass("BlockPropertyExample")
-        instance = BlockPropertyExample.alloc().init()
-        result = ObjCBlock(instance.blockProperty, c_int, c_int, c_int)(1, 2)
-        self.assertEqual(result, 3)
-
-    def test_block_property_pytypes(self):
-        BlockPropertyExample = ObjCClass("BlockPropertyExample")
-        instance = BlockPropertyExample.alloc().init()
-        result = ObjCBlock(instance.blockProperty, int, int, int)(1, 2)
-        self.assertEqual(result, 3)
-
-    def test_block_delegate_method_manual_ctypes(self):
-        class DelegateManualC(NSObject):
-            @objc_method
-            def exampleMethod_(self, block):
-                ObjCBlock(block, c_void_p, c_int, c_int)(2, 3)
-        BlockObjectExample = ObjCClass("BlockObjectExample")
-        delegate = DelegateManualC.alloc().init()
-        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
-        result = instance.blockExample()
-        self.assertEqual(result, 5)
-
-    def test_block_delegate_method_manual_pytypes(self):
-        class DelegateManualPY(NSObject):
-            @objc_method
-            def exampleMethod_(self, block):
-                ObjCBlock(block, None, int, int)(2, 3)
-        BlockObjectExample = ObjCClass("BlockObjectExample")
-        delegate = DelegateManualPY.alloc().init()
-        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
-        result = instance.blockExample()
-        self.assertEqual(result, 5)
-
-    def test_block_delegate_auto(self):
-        class DelegateAuto(NSObject):
-            @objc_method
-            def exampleMethod_(self, block: objc_block):
-                block(4, 5)
-        BlockObjectExample = ObjCClass("BlockObjectExample")
-        delegate = DelegateAuto.alloc().init()
-        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
-        result = instance.blockExample()
-        self.assertEqual(result, 9)
-
-    def test_block_delegate_auto_struct(self):
-        class BlockStruct(Structure):
-            _fields_ = [
-                ('a', c_int),
-                ('b', c_int),
-            ]
-        class DelegateAutoStruct(NSObject):
-            @objc_method
-            def structBlockMethod_(self, block: objc_block) -> int:
-                return block(BlockStruct(42, 43))
-        BlockObjectExample = ObjCClass("BlockObjectExample")
-        delegate = DelegateAutoStruct.alloc().init()
-        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
-        result = instance.structBlockExample()
-        self.assertEqual(result, 85)
-
-    def test_block_receiver(self):
-        BlockReceiverExample = ObjCClass("BlockReceiverExample")
-        instance = BlockReceiverExample.alloc().init()
-
-        values = []
-
-        def block(a: int, b: int) -> None:
-            values.append(a + b)
-        instance.receiverMethod_(block)
-
-        self.assertEqual(values, [27])
-
-    def test_block_receiver_unannotated(self):
-        BlockReceiverExample = ObjCClass("BlockReceiverExample")
-        instance = BlockReceiverExample.alloc().init()
-
-        def block(a, b):
-            return a + b
-        with self.assertRaises(ValueError):
-            instance.receiverMethod_(block)
-
-    def test_block_receiver_lambda(self):
-        BlockReceiverExample = ObjCClass("BlockReceiverExample")
-        instance = BlockReceiverExample.alloc().init()
-        with self.assertRaises(ValueError):
-            instance.receiverMethod_(lambda a, b: a + b)
-
-    def test_block_receiver_explicit(self):
-        BlockReceiverExample = ObjCClass("BlockReceiverExample")
-        instance = BlockReceiverExample.alloc().init()
-
-        values = []
-
-        block = Block(lambda a, b: values.append(a + b), None, int, int)
-        instance.receiverMethod_(block)
-
-        self.assertEqual(values, [27])
-
-    def test_block_round_trip(self):
-        BlockRoundTrip = ObjCClass("BlockRoundTrip")
-        instance = BlockRoundTrip.alloc().init()
-
-        def block(a: int, b: int) -> int:
-            return a + b
-
-        returned_block = instance.roundTrip_(block)
-        self.assertEqual(returned_block(8, 9), 17)
