@@ -4,6 +4,7 @@ Changelog
 (next version)
 --------------
 
+* Corrected support to storing strings and other objects as properties on Python-define Objective-C classes.
 * Added support for creating Objective-C blocks from Python callables. (ojii)
 * Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
 

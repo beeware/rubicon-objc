@@ -705,6 +705,7 @@ class RubiconTest(unittest.TestCase):
 
             # takes no type: All properties are pointers
             url = objc_property()
+            data = objc_property()
 
             @objc_method
             def getSchemeIfPresent(self):
@@ -734,6 +735,18 @@ class RubiconTest(unittest.TestCase):
             "Visit %s for details" % full.absoluteURL,
             "Visit https://pybee.org/contributing/ for details"
         )
+
+        # ObjC type conversions are performed on property assignment.
+        box.data = "Jabberwock"
+        self.assertEqual(box.data, "Jabberwock")
+
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+        box.data = example
+        self.assertEqual(box.data, example)
+
+        box.data = None
+        self.assertIsNone(box.data)
 
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""
