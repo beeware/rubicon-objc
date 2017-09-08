@@ -7,6 +7,8 @@ NSString *const SomeGlobalStringConstant = @"Some global string constant";
 
 @synthesize intField = _intField;
 @synthesize thing = _thing;
+@synthesize array = _array;
+@synthesize dict = _dict;
 @synthesize callback = _callback;
 @synthesize ambiguous = _ambiguous;
 
@@ -234,6 +236,16 @@ static int _staticIntField = 11;
 +(struct simple) extractSimpleStruct:(struct complex)complex
 {
     return complex.s;
+}
+
+-(id) processDictionary:(NSDictionary *) dict
+{
+    return [dict objectForKey:@"data"];
+}
+
+-(id) processArray:(NSArray *) array
+{
+    return [array objectAtIndex:1];
 }
 
 @end

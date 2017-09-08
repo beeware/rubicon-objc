@@ -9,7 +9,8 @@ except Exception:
     OSX_VERSION = None
 
 
-from rubicon.objc import ObjCClass
+from rubicon.objc import ObjCClass, NSDictionary, NSMutableDictionary
+from rubicon.objc.objc import ObjCDictInstance, ObjCMutableDictInstance
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
@@ -21,9 +22,6 @@ faulthandler.enable()
 
 
 class NSDictionaryMixinTest(unittest.TestCase):
-    nsdict = ObjCClass('NSDictionary')
-    nsmutabledict = ObjCClass('NSMutableDictionary')
-
     py_dict = {
         'one': 'ONE',
         'two': 'TWO',
@@ -31,12 +29,12 @@ class NSDictionaryMixinTest(unittest.TestCase):
     }
 
     def make_dictionary(self, contents=None):
-        d = self.nsmutabledict.alloc().init()
+        d = NSMutableDictionary.alloc().init()
         if contents is not None:
             for key, value in contents.items():
                 d.setObject_forKey_(value, key)
 
-        return self.nsdict.dictionaryWithDictionary(d)
+        return NSDictionary.dictionaryWithDictionary(d)
 
     def test_getitem(self):
         d = self.make_dictionary(self.py_dict)
@@ -100,10 +98,38 @@ class NSDictionaryMixinTest(unittest.TestCase):
             self.assertEqual(i1[0], i2[0])
             self.assertEqual(i1[1], i2[1])
 
+    def test_argument(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        d = self.make_dictionary(self.py_dict)
+        # Call a method with an NSDictionary instance
+        self.assertIsNone(example.processDictionary(d))
+        # Call the same method with the raw Python dictionary
+        self.assertIsNone(example.processDictionary(self.py_dict))
+
+        raw = {'data': 'stuff', 'other': 'gadgets'}
+        d = self.make_dictionary(raw)
+        # Call a method with an NSDictionary instance
+        self.assertEqual(example.processDictionary(d), 'stuff')
+        # Call the same method with the raw Python dictionary
+        self.assertEqual(example.processDictionary(raw), 'stuff')
+
+    def test_property(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        d = self.make_dictionary(self.py_dict)
+        example.dict = d
+
+        self.assertEqual(example.dict, self.py_dict)
+        self.assertTrue(isinstance(example.dict, ObjCDictInstance))
+        self.assertEqual(example.dict['one'], 'ONE')
+
 
 class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def make_dictionary(self, contents=None):
-        d = self.nsmutabledict.alloc().init()
+        d = NSMutableDictionary.alloc().init()
         if contents is not None:
             for key, value in contents.items():
                 d.setObject_forKey_(value, key)
@@ -225,3 +251,31 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['three'], 'four')
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
+
+    def test_argument(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        d = self.make_dictionary(self.py_dict)
+        # Call a method with an NSDictionary instance
+        self.assertIsNone(example.processDictionary(d))
+        # Call the same method with the raw Python dictionary
+        self.assertIsNone(example.processDictionary(self.py_dict))
+
+        raw = {'data': 'stuff', 'other': 'gadgets'}
+        d = self.make_dictionary(raw)
+        # Call a method with an NSDictionary instance
+        self.assertEqual(example.processDictionary(d), 'stuff')
+        # Call the same method with the raw Python dictionary
+        self.assertEqual(example.processDictionary(raw), 'stuff')
+
+    def test_property(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        d = self.make_dictionary(self.py_dict)
+        example.dict = d
+
+        self.assertEqual(example.dict, self.py_dict)
+        self.assertTrue(isinstance(example.dict, ObjCDictInstance))
+        self.assertEqual(example.dict['one'], 'ONE')
