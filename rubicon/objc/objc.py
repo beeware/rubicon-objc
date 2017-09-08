@@ -945,7 +945,7 @@ class objc_property(object):
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
 
-        def _objc_getter(objc_self, objc_cmd, *args):
+        def _objc_getter(objc_self, objc_cmd):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
             result = getter(py_self)
@@ -957,10 +957,10 @@ class objc_property(object):
                 result = at(result).ptr.value
             return result
 
-        def _objc_setter(objc_self, objc_cmd, *args):
+        def _objc_setter(objc_self, objc_cmd, name):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            setter(py_self, ObjCInstance(args[0]))
+            setter(py_self, ObjCInstance(name))
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
