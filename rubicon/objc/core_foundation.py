@@ -218,15 +218,13 @@ def from_value(value):
         return NSDecimalNumber.from_decimal(value)
     elif isinstance(value, dict):
         dikt = NSMutableDictionary.alloc().init()
-        if value is not None:
-            for k, v in value.items():
-                dikt.setObject_forKey_(v, k)
+        for k, v in value.items():
+            dikt.setObject_forKey_(v, k)
         return dikt
     elif isinstance(value, list):
         array = NSMutableArray.alloc().init()
-        if value is not None:
-            for v in value:
-                array.addObject(v)
+        for v in value:
+            array.addObject(v)
         return array
     else:
         return value
