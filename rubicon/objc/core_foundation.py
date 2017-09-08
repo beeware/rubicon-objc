@@ -1,11 +1,16 @@
+from ctypes import (
+    CFUNCTYPE, POINTER, byref, c_bool, c_buffer, c_byte, c_char_p, c_double,
+    c_float, c_int, c_int8, c_int16, c_int32, c_int64, c_long, c_longlong,
+    c_short, c_uint8, c_uint32, c_ulong, c_void_p, cast, cdll, util,
+)
+from decimal import Decimal
 from enum import Enum
 
-from ctypes import *
-from ctypes import util
-from decimal import Decimal
-
-from .runtime import ObjCClass, ObjCInstance, send_message, get_class, libobjc, objc_id, SEL, Class
-from .types import *
+from .runtime import (
+    SEL, Class, ObjCClass, ObjCInstance, get_class, libobjc, objc_id,
+    send_message,
+)
+from .types import CFIndex, CFRange, CGFloat
 
 ######################################################################
 
@@ -84,8 +89,10 @@ def to_str(cfstring):
     if result:
         return buffer.value.decode('utf-8')
 
+
 def is_str(cfobject):
     return cf.CFGetTypeID(cfobject) == cf.CFStringGetTypeID()
+
 
 cf.CFDataCreate.restype = CFDataRef
 cf.CFDataCreate.argtypes = [CFAllocatorRef, POINTER(c_uint8), CFIndex]
@@ -262,6 +269,7 @@ def to_value(cftype):
     else:
         return ret
 
+
 cf.CFSetGetCount.restype = CFIndex
 cf.CFSetGetCount.argtypes = [CFSetRef]
 
@@ -275,6 +283,7 @@ def to_set(cfset):
     buffer = (c_void_p * count)()
     cf.CFSetGetValues(cfset, buffer)
     return {to_value(cast(buffer[i], objc_id)) for i in range(count)}
+
 
 cf.CFArrayGetCount.restype = CFIndex
 cf.CFArrayGetCount.argtypes = [CFArrayRef]
@@ -290,6 +299,7 @@ def to_list(cfarray):
         to_value(cast(cf.CFArrayGetValueAtIndex(cfarray, i), objc_id))
         for i in range(count)
     ]
+
 
 kCFRunLoopDefaultMode = CFStringRef.in_dll(cf, 'kCFRunLoopDefaultMode')
 

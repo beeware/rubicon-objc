@@ -1,6 +1,9 @@
-from ctypes import util, CDLL
 import faulthandler
 import unittest
+from ctypes import CDLL, util
+
+from rubicon.objc import NSDictionary, NSMutableDictionary, ObjCClass
+from rubicon.objc.runtime import ObjCDictInstance
 
 try:
     import platform
@@ -8,9 +11,6 @@ try:
 except Exception:
     OSX_VERSION = None
 
-
-from rubicon.objc import ObjCClass, NSDictionary, NSMutableDictionary
-from rubicon.objc.runtime import ObjCDictInstance, ObjCMutableDictInstance
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')

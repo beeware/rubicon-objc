@@ -1,8 +1,12 @@
-from ctypes import *
-
 import collections.abc
 import platform
 import struct
+from ctypes import (
+    POINTER, Array, Structure, Union, c_bool, c_byte, c_char, c_char_p,
+    c_double, c_float, c_int, c_long, c_longdouble, c_longlong, c_short,
+    c_ubyte, c_uint, c_ulong, c_ulonglong, c_ushort, c_void_p, c_wchar,
+    c_wchar_p, py_object, sizeof,
+)
 
 __LP64__ = (8*struct.calcsize("P") == 64)
 
@@ -27,6 +31,7 @@ _ctype_for_type_map = {
     bytes: c_char_p,
 }
 
+
 def ctype_for_type(tp):
     """Look up the ctypes type corresponding to the given type.
     This conversion is applied to types used in objc_method signatures, objc_ivar types, etc.
@@ -36,23 +41,28 @@ def ctype_for_type(tp):
 
     return _ctype_for_type_map.get(tp, tp)
 
+
 def register_ctype_for_type(tp, ctype):
     """Register a conversion from a type to a ctypes type."""
 
     _ctype_for_type_map[tp] = ctype
+
 
 def unregister_ctype_for_type(tp):
     """Unregister a conversion from a type to a ctypes type."""
 
     del _ctype_for_type_map[tp]
 
+
 def get_ctype_for_type_map():
     """Get a copy of all currently registered type-to-ctype conversions as a mapping."""
 
     return dict(_ctype_for_type_map)
 
+
 _ctype_for_encoding_map = {}
 _encoding_for_ctype_map = {}
+
 
 def _end_of_encoding(encoding, start):
     """Find the end index of the encoding starting at index start.
@@ -117,6 +127,7 @@ def _end_of_encoding(encoding, start):
     else:
         raise ValueError('Incomplete encoding, reached end of string too early: {}'.format(encoding))
 
+
 def _create_structish_type_for_encoding(encoding, *, base):
     """Create a structish type from the given encoding. ("structish" = "structure or union")
     The base kwarg controls which base class is used. It should be either ctypes.Structure or ctypes.Union.
@@ -151,8 +162,8 @@ def _create_structish_type_for_encoding(encoding, *, base):
 
     # Convert the field encodings to a sequence of tuples, as needed for the _fields_ attribute.
     ctypes_fields = []
-    start = 0 # Start of the next field.
-    i = 0 # Field counter, used when naming unnamed fields.
+    start = 0  # Start of the next field.
+    i = 0  # Field counter, used when naming unnamed fields.
     while start < len(fields):
         if fields[start:start+1] == b'"':
             # If a name is present, use it.
@@ -178,6 +189,7 @@ def _create_structish_type_for_encoding(encoding, *, base):
     structish_type._fields_ = ctypes_fields
 
     return structish_type
+
 
 def _ctype_for_unknown_encoding(encoding):
     if encoding.startswith(b'^'):
@@ -220,6 +232,7 @@ def _ctype_for_unknown_encoding(encoding):
     else:
         raise ValueError('Unknown encoding: %s' % (encoding,))
 
+
 def ctype_for_encoding(encoding):
     """Return ctypes type for an encoded Objective-C type."""
 
@@ -233,6 +246,7 @@ def ctype_for_encoding(encoding):
     except KeyError:
         return _ctype_for_unknown_encoding(encoding)
 
+
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type."""
     try:
@@ -243,6 +257,7 @@ def encoding_for_ctype(ctype):
         except KeyError:
             raise ValueError('No type encoding known for ctype {}'.format(ctype))
 
+
 def register_preferred_encoding(encoding, ctype):
     """Register a preferred conversion between an Objective-C type encoding and a ctypes type.
     This overwrites any existing conversions in each direction.
@@ -250,6 +265,7 @@ def register_preferred_encoding(encoding, ctype):
 
     _ctype_for_encoding_map[encoding] = ctype
     _encoding_for_ctype_map[ctype] = encoding
+
 
 def with_preferred_encoding(encoding):
     """Decorator for registering a preferred conversion between the given encoding and the decorated type.
@@ -262,6 +278,7 @@ def with_preferred_encoding(encoding):
 
     return _with_preferred_encoding_decorator
 
+
 def register_encoding(encoding, ctype):
     """Register an additional conversion between an Objective-C type encoding and a ctypes type.
     If a conversion already exists in one or both directions, it is not overwritten.
@@ -269,6 +286,7 @@ def register_encoding(encoding, ctype):
 
     _ctype_for_encoding_map.setdefault(encoding, ctype)
     _encoding_for_ctype_map.setdefault(ctype, encoding)
+
 
 def with_encoding(encoding):
     """Decorator for registering a conversion between the given encoding and the decorated type.
@@ -281,10 +299,15 @@ def with_encoding(encoding):
 
     return _with_encoding_decorator
 
+
 def unregister_encoding(encoding):
     """Unregister the conversion between an Objective-C type encoding and its corresponding ctypes type.
 
-    Note that this does not remove any conversions in the other direction (from a ctype to this encoding). These conversions may be replaced with register_encoding, or unregistered with unregister_ctype. To remove all ctypes for an encoding, use unregister_encoding_all.
+    Note that this does not remove any conversions in the other direction
+    (from a ctype to this encoding). These conversions may be replaced with
+    register_encoding, or unregistered with unregister_ctype. To remove all
+    ctypes for an encoding, use unregister_encoding_all.
+
     If encoding was not registered previously, nothing happens.
     """
 
@@ -293,7 +316,10 @@ def unregister_encoding(encoding):
 
 def unregister_encoding_all(encoding):
     """Unregister all conversions between an Objective-C type encoding and all corresponding ctypes types.
-    All conversions from any ctype to this encoding are removed recursively using unregister_ctype_all.
+
+    All conversions from any ctype to this encoding are removed recursively
+    using unregister_ctype_all.
+
     If encoding was not registered previously, nothing happens.
     """
 
@@ -302,13 +328,20 @@ def unregister_encoding_all(encoding):
         if enc == encoding:
             unregister_ctype_all(ct)
 
+
 def unregister_ctype(ctype):
     """Unregister the conversion from a ctypes type to an Objective-C type encoding.
-    Note that this does not remove any conversions in the other direction (from an encoding to this ctype). These conversions may be replaced with register_encoding, or unregistered with unregister_encoding. To remove all encodings for a ctype, use unregister_ctype_all.
+
+    Note that this does not remove any conversions in the other direction
+    (from an encoding to this ctype). These conversions may be replaced with
+    register_encoding, or unregistered with unregister_encoding. To remove all
+    encodings for a ctype, use unregister_ctype_all.
+
     If ctype was not registered previously, nothing happens.
     """
 
     _encoding_for_ctype_map.pop(ctype, default=None)
+
 
 def unregister_ctype_all(ctype):
     """Unregister all conversions between a ctypes type and all corresponding Objective-C type encodings.
@@ -321,15 +354,18 @@ def unregister_ctype_all(ctype):
         if ct == ctype:
             unregister_encoding_all(enc)
 
+
 def get_ctype_for_encoding_map():
     """Get a copy of all currently registered encoding-to-ctype conversions as a map."""
 
     return dict(_ctype_for_encoding_map)
 
+
 def get_encoding_for_ctype_map():
     """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
 
     return dict(_encoding_for_ctype_map)
+
 
 def split_method_encoding(encoding):
     """Split a method signature encoding into a sequence of type encodings.
@@ -353,15 +389,18 @@ def split_method_encoding(encoding):
 
     return encodings
 
+
 def ctypes_for_method_encoding(encoding):
     """Convert a method signature encoding into a sequence of ctypes types."""
 
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
+
 def struct_for_sequence(seq, struct_type):
     if len(seq) != len(struct_type._fields_):
         raise ValueError(
-            'Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, but a sequence of length {seq_len} was given'
+            'Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, '
+            'but a sequence of length {seq_len} was given'
             .format(tp=struct_type, fields_len=len(struct_type._fields_), seq_len=len(seq))
         )
 
@@ -374,10 +413,12 @@ def struct_for_sequence(seq, struct_type):
 
     return struct_type(*values)
 
+
 def array_for_sequence(seq, array_type):
     if len(seq) != array_type._length_:
         raise ValueError(
-            'Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, but a sequence of length {seq_len} was given'
+            'Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, '
+            'but a sequence of length {seq_len} was given'
             .format(tp=array_type, array_len=array_type._length_, seq_len=len(seq))
         )
 
@@ -393,6 +434,7 @@ def array_for_sequence(seq, array_type):
 
     return array_type(*values)
 
+
 def compound_value_for_sequence(seq, tp):
     if issubclass(tp, Structure):
         return struct_for_sequence(seq, tp)
@@ -400,6 +442,7 @@ def compound_value_for_sequence(seq, tp):
         return array_for_sequence(seq, tp)
     else:
         raise TypeError("Don't know how to convert a sequence to a {tp.__module__}.{tp.__qualname__}".format(tp=tp))
+
 
 # Register all type encoding mappings.
 
@@ -419,8 +462,9 @@ register_preferred_encoding(b'l', c_long)
 register_preferred_encoding(b'L', c_ulong)
 
 # Do not register c_int or c_longlong as preferred.
-# If c_int or c_longlong is the same size as c_long, ctypes makes it an alias for c_long.
-# If we would register c_int and c_longlong as preferred, this could cause c_long to be encoded as b'i' or b'q', instead of b'l'.
+# If c_int or c_longlong is the same size as c_long, ctypes makes it an alias
+# for c_long. If we would register c_int and c_longlong as preferred, this
+# could cause c_long to be encoded as b'i' or b'q', instead of b'l'.
 # The same applies to the unsigned versions.
 register_encoding(b'i', c_int)
 register_encoding(b'I', c_uint)
@@ -433,13 +477,18 @@ register_preferred_encoding(b'd', c_double)
 register_encoding(b'D', c_longdouble)
 
 # c_char encodes the same as c_byte.
-# ctypes converts c_char values to a one-character bytestring, which is usually not the desired behavior, especially since BOOL is c_byte on 32-bit, and truth tests work differently for bytestrings than for numbers.
+# ctypes converts c_char values to a one-character bytestring, which is
+# usually not the desired behavior, especially since BOOL is c_byte on
+# 32-bit, and truth tests work differently for bytestrings than for numbers.
 # So we do not make this mapping preferred.
 register_encoding(b'c', c_char)
 
-# Strictly speaking, c_char_p is only appropriate for actual C strings (null-terminated pointers to char without explicit signedness).
-# However, all char pointers encode to b'*', regardless of signedness, and they might point to non-null-terminated data.
-# Despite this, we prefer to map b'*' to c_char_p, because its most common use is for C strings.
+# Strictly speaking, c_char_p is only appropriate for actual C strings
+# (null-terminated pointers to char without explicit signedness).
+# However, all char pointers encode to b'*', regardless of signedness, and
+# they might point to non-null-terminated data.
+# Despite this, we prefer to map b'*' to c_char_p, because its most common
+# use is for C strings.
 register_preferred_encoding(b'*', c_char_p)
 # Register the other char pointers, so they are all correctly mapped to b'*'.
 # The compiler never generates encodings b'^c' or b'^C'.
@@ -447,11 +496,14 @@ register_encoding(b'*', POINTER(c_char))
 register_encoding(b'*', POINTER(c_byte))
 register_encoding(b'*', POINTER(c_ubyte))
 
-# c_wchar encodes the same as c_int, and c_wchar_p the same as POINTER(c_int). wchar_t is rarely used in Objective-C, so we do not make c_wchar or c_wchar_p preferred.
+# c_wchar encodes the same as c_int, and c_wchar_p the same as POINTER(c_int).
+# wchar_t is rarely used in Objective-C, so we do not make c_wchar or
+# c_wchar_p preferred.
 register_encoding(b'i', c_wchar)
 register_encoding(b'^i', c_wchar_p)
 # Register POINTER(c_int) as preferred so it takes precedence over c_wchar_p.
-# (Other pointer types are resolved automatically by ctype_for_encoding and encoding_for_ctype.)
+# (Other pointer types are resolved automatically by ctype_for_encoding and
+# encoding_for_ctype.)
 register_preferred_encoding(b'^i', POINTER(c_int))
 
 register_preferred_encoding(b'^v', c_void_p)
@@ -493,9 +545,13 @@ register_preferred_encoding(_PyObjectEncoding, py_object)
 
 @with_preferred_encoding(b'^?')
 class UnknownPointer(c_void_p):
-    """Placeholder for the b'^?' "unknown pointer" type. Not to be confused with a b'^v' void pointer.
-    Usually a b'^?' is a function pointer, but because the encoding doesn't contain the function signature, you need to manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
+    """Placeholder for the b'^?' "unknown pointer" type. Not to be confused
+    with a b'^v' void pointer. Usually a b'^?' is a function pointer, but
+    because the encoding doesn't contain the function signature, you need to
+    manually create a CFUNCTYPE with the proper types, and cast this pointer
+    to it.
     """
+
 
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
 @with_preferred_encoding(_NSPointEncoding)
@@ -504,6 +560,8 @@ class NSPoint(Structure):
         ("x", CGFloat),
         ("y", CGFloat)
     ]
+
+
 CGPoint = NSPoint
 
 
@@ -513,6 +571,8 @@ class NSSize(Structure):
         ("width", CGFloat),
         ("height", CGFloat)
     ]
+
+
 CGSize = NSSize
 
 
@@ -522,11 +582,14 @@ class NSRect(Structure):
         ("origin", NSPoint),
         ("size", NSSize)
     ]
+
+
 CGRect = NSRect
 
 
 def NSMakeSize(w, h):
     return NSSize(w, h)
+
 
 CGSizeMake = NSMakeSize
 
@@ -534,11 +597,13 @@ CGSizeMake = NSMakeSize
 def NSMakeRect(x, y, w, h):
     return NSRect(NSPoint(x, y), NSSize(w, h))
 
+
 CGRectMake = NSMakeRect
 
 
 def NSMakePoint(x, y):
     return NSPoint(x, y)
+
 
 CGPointMake = NSMakePoint
 
@@ -551,8 +616,10 @@ class UIEdgeInsets(Structure):
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
 
+
 def UIEdgeInsetsMake(top, left, bottom, right):
     return UIEdgeInsets(top, left, bottom, right)
+
 
 UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
 
@@ -564,6 +631,7 @@ class NSEdgeInsets(Structure):
                 ('left', CGFloat),
                 ('bottom', CGFloat),
                 ('right', CGFloat)]
+
 
 def NSEdgeInsetsMake(top, left, bottom, right):
     return NSEdgeInsets(top, left, bottom, right)
@@ -597,7 +665,10 @@ class NSRange(Structure):
         ("length", NSUInteger)
     ]
 
+
 NSZeroPoint = NSPoint(0, 0)
+
+
 if sizeof(c_void_p) == 4:
     NSIntegerMax = 0x7fffffff
 elif sizeof(c_void_p) == 8:

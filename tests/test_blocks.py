@@ -1,6 +1,9 @@
-from ctypes import util, CDLL, c_int, c_void_p, Structure
 import faulthandler
 import unittest
+from ctypes import CDLL, Structure, c_int, c_void_p, util
+
+from rubicon.objc import NSObject, ObjCBlock, ObjCClass, objc_method
+from rubicon.objc.runtime import Block, objc_block
 
 try:
     import platform
@@ -8,8 +11,6 @@ try:
 except Exception:
     OSX_VERSION = None
 
-from rubicon.objc import ObjCClass, NSObject, objc_method, ObjCBlock
-from rubicon.objc.runtime import objc_block, Block
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')

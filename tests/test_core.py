@@ -1,10 +1,20 @@
-from ctypes import util, CDLL, c_char, c_int, c_float, c_double, c_void_p, cast, byref, create_string_buffer, Structure
-from decimal import Decimal
-from enum import Enum
 import faulthandler
 import functools
 import math
 import unittest
+from ctypes import (
+    CDLL, Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast,
+    create_string_buffer, util,
+)
+from decimal import Decimal
+from enum import Enum
+
+from rubicon.objc import (
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSRange, NSUInteger,
+    ObjCClass, ObjCInstance, ObjCMetaClass, core_foundation, objc_classmethod,
+    objc_const, objc_method, objc_property, send_message, types,
+)
+from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
 try:
     import platform
@@ -12,15 +22,6 @@ try:
 except Exception:
     OSX_VERSION = None
 
-from rubicon.objc import (
-    ObjCInstance, ObjCClass, ObjCMetaClass,
-    NSObject, SEL,
-    objc_method, objc_classmethod, objc_property,
-    NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
-    send_message, objc_const
-)
-from rubicon.objc import core_foundation, types
-from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
