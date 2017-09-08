@@ -40,6 +40,8 @@ extern NSString *const SomeGlobalStringConstant;
 
     int _intField;
     Thing *_thing;
+    NSArray *_array;
+    NSDictionary *_dict;
     id<Callback> _callback;
     int _ambiguous;
 }
@@ -50,6 +52,8 @@ extern NSString *const SomeGlobalStringConstant;
 
 @property int intField;
 @property (retain) Thing *thing;
+@property (retain) NSArray *array;
+@property (retain) NSDictionary *dict;
 @property (retain) id<Callback> callback;
 @property (readonly) int ambiguous;
 
@@ -101,5 +105,8 @@ extern NSString *const SomeGlobalStringConstant;
 +(NSUInteger) overloaded:(NSUInteger)arg1 extraArg:(NSUInteger)arg2;
 
 +(struct complex) doStuffWithStruct:(struct simple)simple;
+
+-(id) processDictionary:(NSDictionary *) dict;
+-(id) processArray:(NSArray *) dict;
 
 @end

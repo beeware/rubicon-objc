@@ -30,19 +30,19 @@ def _load_or_error(name):
     # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library doesn't work and always returns None.
     # This is because the sandbox hides all system libraries from the filesystem and pretends they don't exist.
     # However they can still be loaded if the path is known, so we try to load the library from a few known locations.
-    
+
     for loc in _lib_path:
         try:
             return CDLL(os.path.join(loc, "lib" + name + ".dylib"))
         except OSError:
             pass
-    
+
     for loc in _framework_path:
         try:
             return CDLL(os.path.join(loc, name + ".framework", name))
         except OSError:
             pass
-    
+
     raise ValueError("Library {!r} not found".format(name))
 
 c = _load_or_error('c')
@@ -934,7 +934,7 @@ class objc_property(object):
             if getattr(_self, '_' + attr) is None:
                 setattr(_self, '_' + attr, new)
                 if new is not None:
-                    getattr(_self, '_' + attr).retain()
+                    new.retain()
             else:
                 if not getattr(_self, '_' + attr).isEqualTo_(new):
                     getattr(_self, '_' + attr).release()
@@ -945,11 +945,10 @@ class objc_property(object):
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
 
-        def _objc_getter(objc_self, objc_cmd, *args):
+        def _objc_getter(objc_self, objc_cmd):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            args = convert_method_arguments(getter_encoding, args)
-            result = getter(py_self, *args)
+            result = getter(py_self)
             if isinstance(result, ObjCClass):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
@@ -958,18 +957,10 @@ class objc_property(object):
                 result = at(result).ptr.value
             return result
 
-        def _objc_setter(objc_self, objc_cmd, *args):
+        def _objc_setter(objc_self, objc_cmd, name):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            args = convert_method_arguments(setter_encoding, args)
-            result = setter(py_self, *args)
-            if isinstance(result, ObjCClass):
-                result = result.ptr.value
-            elif isinstance(result, ObjCInstance):
-                result = result.ptr.value
-            elif isinstance(result, str):
-                result = at(result).ptr.value
-            return result
+            setter(py_self, ObjCInstance(name))
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 

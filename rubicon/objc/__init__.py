@@ -8,7 +8,10 @@ from .objc import (
     objc_const, ObjCBlock, Block
 )
 
-from .core_foundation import at, to_str, to_number, to_value, to_set, to_list
+from .core_foundation import (
+    at, to_str, to_number, to_value, to_set, to_list,
+    NSArray, NSMutableArray, NSDictionary, NSMutableDictionary
+)
 
 from .types import (
     NSInteger, NSUInteger,

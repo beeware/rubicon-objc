@@ -33,22 +33,22 @@ def ctype_for_type(tp):
     This translates Python built-in types and rubicon.objc classes to their ctypes equivalents.
     Unregistered types (including things that are already ctypes types) are returned unchanged.
     """
-    
+
     return _ctype_for_type_map.get(tp, tp)
 
 def register_ctype_for_type(tp, ctype):
     """Register a conversion from a type to a ctypes type."""
-    
+
     _ctype_for_type_map[tp] = ctype
 
 def unregister_ctype_for_type(tp):
     """Unregister a conversion from a type to a ctypes type."""
-    
+
     del _ctype_for_type_map[tp]
 
 def get_ctype_for_type_map():
     """Get a copy of all currently registered type-to-ctype conversions as a mapping."""
-    
+
     return dict(_ctype_for_type_map)
 
 _ctype_for_encoding_map = {}
@@ -59,12 +59,12 @@ def _end_of_encoding(encoding, start):
     The encoding is not validated very extensively. There are no guarantees what happens for invalid encodings;
     an error may be raised, or a bogus end index may be returned.
     """
-    
+
     if start < 0 or start >= len(encoding):
         raise ValueError('Start index {} not in range({})'.format(start, len(encoding)))
-    
+
     paren_depth = 0
-    
+
     i = start
     while i < len(encoding):
         c = encoding[i:i+1]
@@ -111,7 +111,7 @@ def _end_of_encoding(encoding, start):
             return len(encoding)
         else:
             raise ValueError('Unknown encoding {} at index {}: {}'.format(c, i, encoding))
-    
+
     if paren_depth > 0:
         raise ValueError('Incomplete encoding, missing {} closing parentheses: {}'.format(paren_depth, encoding))
     else:
@@ -121,12 +121,12 @@ def _create_structish_type_for_encoding(encoding, *, base):
     """Create a structish type from the given encoding. ("structish" = "structure or union")
     The base kwarg controls which base class is used. It should be either ctypes.Structure or ctypes.Union.
     """
-    
+
     # Split name and fields.
     begin = encoding[0:1]
     end = encoding[-1:len(encoding)]
     name, eq, fields = encoding[1:-1].partition(b'=')
-    
+
     if not eq:
         # If the fields are not present, we can't create a meaningful structish.
         # We also know that there is no known structish with this name,
@@ -134,7 +134,7 @@ def _create_structish_type_for_encoding(encoding, *, base):
         # So we pretend that this structish is a void (None).
         # This causes pointers to it to become void pointers.
         return None
-    
+
     if name == b'?':
         # Anonymous structish, has no name.
         name = None
@@ -148,7 +148,7 @@ def _create_structish_type_for_encoding(encoding, *, base):
     if name is not None:
         # If not anonymous, also register for the corresponding name-only encoding.
         register_encoding(begin + name + end, structish_type)
-    
+
     # Convert the field encodings to a sequence of tuples, as needed for the _fields_ attribute.
     ctypes_fields = []
     start = 0 # Start of the next field.
@@ -174,9 +174,9 @@ def _create_structish_type_for_encoding(encoding, *, base):
             ctypes_fields.append((field_name, field_type))
         start = end
         i += 1
-    
+
     structish_type._fields_ = ctypes_fields
-    
+
     return structish_type
 
 def _ctype_for_unknown_encoding(encoding):
@@ -222,11 +222,11 @@ def _ctype_for_unknown_encoding(encoding):
 
 def ctype_for_encoding(encoding):
     """Return ctypes type for an encoded Objective-C type."""
-    
+
     # Remove qualifiers, as documented in Table 6-2 here:
     # https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
     encoding = encoding.lstrip(b"NORVnor")
-    
+
     try:
         # Look up known type encodings directly.
         return _ctype_for_encoding_map[encoding]
@@ -247,7 +247,7 @@ def register_preferred_encoding(encoding, ctype):
     """Register a preferred conversion between an Objective-C type encoding and a ctypes type.
     This overwrites any existing conversions in each direction.
     """
-    
+
     _ctype_for_encoding_map[encoding] = ctype
     _encoding_for_ctype_map[ctype] = encoding
 
@@ -255,18 +255,18 @@ def with_preferred_encoding(encoding):
     """Decorator for registering a preferred conversion between the given encoding and the decorated type.
     This is equivalent to calling register_preferred_encoding.
     """
-    
+
     def _with_preferred_encoding_decorator(ctype):
         register_preferred_encoding(encoding, ctype)
         return ctype
-    
+
     return _with_preferred_encoding_decorator
 
 def register_encoding(encoding, ctype):
     """Register an additional conversion between an Objective-C type encoding and a ctypes type.
     If a conversion already exists in one or both directions, it is not overwritten.
     """
-    
+
     _ctype_for_encoding_map.setdefault(encoding, ctype)
     _encoding_for_ctype_map.setdefault(ctype, encoding)
 
@@ -274,29 +274,29 @@ def with_encoding(encoding):
     """Decorator for registering a conversion between the given encoding and the decorated type.
     This is equivalent to calling register_encoding.
     """
-    
+
     def _with_encoding_decorator(ctype):
         register_encoding(encoding, ctype)
         return ctype
-    
+
     return _with_encoding_decorator
 
 def unregister_encoding(encoding):
     """Unregister the conversion between an Objective-C type encoding and its corresponding ctypes type.
-    
+
     Note that this does not remove any conversions in the other direction (from a ctype to this encoding). These conversions may be replaced with register_encoding, or unregistered with unregister_ctype. To remove all ctypes for an encoding, use unregister_encoding_all.
     If encoding was not registered previously, nothing happens.
     """
-    
+
     _ctype_for_encoding_map.pop(encoding, None)
-    
+
 
 def unregister_encoding_all(encoding):
     """Unregister all conversions between an Objective-C type encoding and all corresponding ctypes types.
     All conversions from any ctype to this encoding are removed recursively using unregister_ctype_all.
     If encoding was not registered previously, nothing happens.
     """
-    
+
     _ctype_for_encoding_map.pop(encoding, None)
     for ct, enc in list(_encoding_for_ctype_map.items()):
         if enc == encoding:
@@ -307,7 +307,7 @@ def unregister_ctype(ctype):
     Note that this does not remove any conversions in the other direction (from an encoding to this ctype). These conversions may be replaced with register_encoding, or unregistered with unregister_encoding. To remove all encodings for a ctype, use unregister_ctype_all.
     If ctype was not registered previously, nothing happens.
     """
-    
+
     _encoding_for_ctype_map.pop(ctype, default=None)
 
 def unregister_ctype_all(ctype):
@@ -315,7 +315,7 @@ def unregister_ctype_all(ctype):
     All conversions from any type encoding to this ctype are removed recursively using unregister_encoding_all.
     If ctype was not registered previously, nothing happens.
     """
-    
+
     _encoding_for_ctype_map.pop(ctype, default=None)
     for enc, ct in list(_ctype_for_encoding_map.items()):
         if ct == ctype:
@@ -323,23 +323,23 @@ def unregister_ctype_all(ctype):
 
 def get_ctype_for_encoding_map():
     """Get a copy of all currently registered encoding-to-ctype conversions as a map."""
-    
+
     return dict(_ctype_for_encoding_map)
 
 def get_encoding_for_ctype_map():
     """Get a copy of all currently registered ctype-to-encoding conversions as a map."""
-    
+
     return dict(_encoding_for_ctype_map)
 
 def split_method_encoding(encoding):
     """Split a method signature encoding into a sequence of type encodings.
-    
+
     The first type encoding represents the return type, all remaining type encodings represent the argument types.
-    
+
     If there are any numbers after a type encoding, they are ignored. On PowerPC, these numbers indicated each
     argument/return value's offset on the stack. These numbers are meaningless on modern architectures.
     """
-    
+
     encodings = []
     start = 0
     while start < len(encoding):
@@ -350,12 +350,12 @@ def split_method_encoding(encoding):
         # Skip the legacy stack offsets
         while start < len(encoding) and encoding[start] in b"0123456789":
             start += 1
-    
+
     return encodings
 
 def ctypes_for_method_encoding(encoding):
     """Convert a method signature encoding into a sequence of ctypes types."""
-    
+
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
 def struct_for_sequence(seq, struct_type):
@@ -364,14 +364,14 @@ def struct_for_sequence(seq, struct_type):
             'Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, but a sequence of length {seq_len} was given'
             .format(tp=struct_type, fields_len=len(struct_type._fields_), seq_len=len(seq))
         )
-    
+
     values = []
     for value, (field_name, field_type, *_) in zip(seq, struct_type._fields_):
         if issubclass(field_type, (Structure, Array)) and isinstance(value, collections.abc.Iterable):
             values.append(compound_value_for_sequence(value, field_type))
         else:
             values.append(value)
-    
+
     return struct_type(*values)
 
 def array_for_sequence(seq, array_type):
@@ -380,7 +380,7 @@ def array_for_sequence(seq, array_type):
             'Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, but a sequence of length {seq_len} was given'
             .format(tp=array_type, array_len=array_type._length_, seq_len=len(seq))
         )
-    
+
     if issubclass(array_type._type_, (Structure, Array)):
         values = []
         for value in seq:
@@ -390,7 +390,7 @@ def array_for_sequence(seq, array_type):
                 values.append(value)
     else:
         values = seq
-    
+
     return array_type(*values)
 
 def compound_value_for_sequence(seq, tp):

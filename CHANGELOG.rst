@@ -4,6 +4,8 @@ Changelog
 (next version)
 --------------
 
+* Added support for passing Python lists as Objective-C NSArray arguments, and Python dicts as Objective-C NSDictionary arguments.
+* Corrected support to storing strings and other objects as properties on Python-defined Objective-C classes.
 * Added support for creating Objective-C blocks from Python callables. (ojii)
 * Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
 

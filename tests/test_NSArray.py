@@ -9,7 +9,8 @@ except Exception:
     OSX_VERSION = None
 
 
-from rubicon.objc import ObjCClass
+from rubicon.objc import ObjCClass, NSArray, NSMutableArray
+from rubicon.objc.objc import ObjCListInstance, ObjCMutableListInstance
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
@@ -21,18 +22,15 @@ faulthandler.enable()
 
 
 class NSArrayMixinTest(unittest.TestCase):
-    nsarray = ObjCClass('NSArray')
-    nsmutablearray = ObjCClass('NSMutableArray')
-
     py_list = ['one', 'two', 'three']
 
     def make_array(self, contents=None):
-        a = self.nsmutablearray.alloc().init()
+        a = NSMutableArray.alloc().init()
         if contents is not None:
             for value in contents:
                 a.addObject(value)
 
-        return self.nsarray.arrayWithArray(a)
+        return NSArray.arrayWithArray(a)
 
     def test_getitem(self):
         a = self.make_array(self.py_list)
@@ -100,10 +98,31 @@ class NSArrayMixinTest(unittest.TestCase):
         self.assertEqual(a[4:], ['two', 'three'])
         self.assertEqual(a[1:5:2], ['two', 'one'])
 
+    def test_argument(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        a = self.make_array(self.py_list)
+        # Call a method with an NSArray instance
+        self.assertEqual(example.processArray(a), 'two')
+        # Call the same method with the Python list
+        self.assertEqual(example.processArray(self.py_list), 'two')
+
+    def test_property(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        a = self.make_array(self.py_list)
+        example.array = a
+
+        self.assertEqual(example.array, self.py_list)
+        self.assertTrue(isinstance(example.array, ObjCListInstance))
+        self.assertEqual(example.array[1], 'two')
+
 
 class NSMutableArrayMixinTest(NSArrayMixinTest):
     def make_array(self, contents=None):
-        a = self.nsmutablearray.alloc().init()
+        a = NSMutableArray.alloc().init()
         if contents is not None:
             for value in contents:
                 a.addObject(value)
@@ -231,3 +250,24 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
 
         for pos, value in enumerate(reversed(self.py_list)):
             self.assertEqual(a[pos], value)
+
+    def test_argument(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        a = self.make_array(self.py_list)
+        # Call a method with an NSArray instance
+        self.assertEqual(example.processArray(a), 'two')
+        # Call the same method with the Python list
+        self.assertEqual(example.processArray(self.py_list), 'two')
+
+    def test_property(self):
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+
+        a = self.make_array(self.py_list)
+        example.array = a
+
+        self.assertEqual(example.array, self.py_list)
+        self.assertTrue(isinstance(example.array, ObjCListInstance))
+        self.assertEqual(example.array[1], 'two')
