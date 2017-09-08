@@ -948,7 +948,7 @@ class objc_property(object):
         def _objc_getter(objc_self, objc_cmd, *args):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            result = getter(py_self, *[ObjCInstance(a) for a in args])
+            result = getter(py_self)
             if isinstance(result, ObjCClass):
                 result = result.ptr.value
             elif isinstance(result, ObjCInstance):
@@ -960,7 +960,7 @@ class objc_property(object):
         def _objc_setter(objc_self, objc_cmd, *args):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            setter(py_self, *[ObjCInstance(a) for a in args])
+            setter(py_self, ObjCInstance(args[0]))
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
