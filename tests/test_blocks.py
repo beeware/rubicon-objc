@@ -9,7 +9,7 @@ except Exception:
     OSX_VERSION = None
 
 from rubicon.objc import ObjCClass, NSObject, objc_method, ObjCBlock
-from rubicon.objc.objc import objc_block, Block
+from rubicon.objc.runtime import objc_block, Block
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')

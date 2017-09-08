@@ -10,7 +10,7 @@ except Exception:
 
 
 from rubicon.objc import ObjCClass, NSArray, NSMutableArray
-from rubicon.objc.objc import ObjCListInstance, ObjCMutableListInstance
+from rubicon.objc.runtime import ObjCListInstance, ObjCMutableListInstance
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')

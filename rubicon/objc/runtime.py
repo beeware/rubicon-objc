@@ -45,8 +45,8 @@ def _load_or_error(name):
 
     raise ValueError("Library {!r} not found".format(name))
 
-c = _load_or_error('c')
-objc = _load_or_error('objc')
+libc = _load_or_error('c')
+libobjc = _load_or_error('objc')
 Foundation = _load_or_error('Foundation')
 
 @with_encoding(b'@')
@@ -66,11 +66,11 @@ class SEL(c_void_p):
         if self.value is None:
             raise ValueError("Cannot get name of null selector")
 
-        return objc.sel_getName(self)
+        return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
         if isinstance(init, (bytes, str)):
-            self = objc.sel_registerName(ensure_bytes(init))
+            self = libobjc.sel_registerName(ensure_bytes(init))
             self._inited = True
             return self
         else:
@@ -104,190 +104,190 @@ class objc_property_t(c_void_p):
 ######################################################################
 
 # void free(void *)
-c.free.restype = None
-c.free.argtypes = [c_void_p]
+libc.free.restype = None
+libc.free.argtypes = [c_void_p]
 
 # BOOL class_addIvar(Class cls, const char *name, size_t size, uint8_t alignment, const char *types)
-objc.class_addIvar.restype = c_bool
-objc.class_addIvar.argtypes = [Class, c_char_p, c_size_t, c_uint8, c_char_p]
+libobjc.class_addIvar.restype = c_bool
+libobjc.class_addIvar.argtypes = [Class, c_char_p, c_size_t, c_uint8, c_char_p]
 
 # BOOL class_addMethod(Class cls, SEL name, IMP imp, const char *types)
-objc.class_addMethod.restype = c_bool
-objc.class_addMethod.argtypes = [Class, SEL, IMP, c_char_p]
+libobjc.class_addMethod.restype = c_bool
+libobjc.class_addMethod.argtypes = [Class, SEL, IMP, c_char_p]
 
 # BOOL class_addProtocol(Class cls, Protocol *protocol)
-objc.class_addProtocol.restype = c_bool
-objc.class_addProtocol.argtypes = [Class, objc_id]
+libobjc.class_addProtocol.restype = c_bool
+libobjc.class_addProtocol.argtypes = [Class, objc_id]
 
 # BOOL class_conformsToProtocol(Class cls, Protocol *protocol)
-objc.class_conformsToProtocol.restype = c_bool
-objc.class_conformsToProtocol.argtypes = [Class, objc_id]
+libobjc.class_conformsToProtocol.restype = c_bool
+libobjc.class_conformsToProtocol.argtypes = [Class, objc_id]
 
 # Ivar * class_copyIvarList(Class cls, unsigned int *outCount)
 # Returns an array of pointers of type Ivar describing instance variables.
 # The array has *outCount pointers followed by a NULL terminator.
 # You must free() the returned array.
-objc.class_copyIvarList.restype = POINTER(Ivar)
-objc.class_copyIvarList.argtypes = [Class, POINTER(c_uint)]
+libobjc.class_copyIvarList.restype = POINTER(Ivar)
+libobjc.class_copyIvarList.argtypes = [Class, POINTER(c_uint)]
 
 # Method * class_copyMethodList(Class cls, unsigned int *outCount)
 # Returns an array of pointers of type Method describing instance methods.
 # The array has *outCount pointers followed by a NULL terminator.
 # You must free() the returned array.
-objc.class_copyMethodList.restype = POINTER(Method)
-objc.class_copyMethodList.argtypes = [Class, POINTER(c_uint)]
+libobjc.class_copyMethodList.restype = POINTER(Method)
+libobjc.class_copyMethodList.argtypes = [Class, POINTER(c_uint)]
 
 # objc_property_t * class_copyPropertyList(Class cls, unsigned int *outCount)
 # Returns an array of pointers of type objc_property_t describing properties.
 # The array has *outCount pointers followed by a NULL terminator.
 # You must free() the returned array.
-objc.class_copyPropertyList.restype = POINTER(objc_property_t)
-objc.class_copyPropertyList.argtypes = [Class, POINTER(c_uint)]
+libobjc.class_copyPropertyList.restype = POINTER(objc_property_t)
+libobjc.class_copyPropertyList.argtypes = [Class, POINTER(c_uint)]
 
 # Protocol ** class_copyProtocolList(Class cls, unsigned int *outCount)
 # Returns an array of pointers of type Protocol* describing protocols.
 # The array has *outCount pointers followed by a NULL terminator.
 # You must free() the returned array.
-objc.class_copyProtocolList.restype = POINTER(objc_id)
-objc.class_copyProtocolList.argtypes = [Class, POINTER(c_uint)]
+libobjc.class_copyProtocolList.restype = POINTER(objc_id)
+libobjc.class_copyProtocolList.argtypes = [Class, POINTER(c_uint)]
 
 # Method class_getClassMethod(Class aClass, SEL aSelector)
 # Will also search superclass for implementations.
-objc.class_getClassMethod.restype = Method
-objc.class_getClassMethod.argtypes = [Class, SEL]
+libobjc.class_getClassMethod.restype = Method
+libobjc.class_getClassMethod.argtypes = [Class, SEL]
 
 # Ivar class_getClassVariable(Class cls, const char* name)
-objc.class_getClassVariable.restype = Ivar
-objc.class_getClassVariable.argtypes = [Class, c_char_p]
+libobjc.class_getClassVariable.restype = Ivar
+libobjc.class_getClassVariable.argtypes = [Class, c_char_p]
 
 # Method class_getInstanceMethod(Class aClass, SEL aSelector)
 # Will also search superclass for implementations.
-objc.class_getInstanceMethod.restype = Method
-objc.class_getInstanceMethod.argtypes = [Class, SEL]
+libobjc.class_getInstanceMethod.restype = Method
+libobjc.class_getInstanceMethod.argtypes = [Class, SEL]
 
 # size_t class_getInstanceSize(Class cls)
-objc.class_getInstanceSize.restype = c_size_t
-objc.class_getInstanceSize.argtypes = [Class]
+libobjc.class_getInstanceSize.restype = c_size_t
+libobjc.class_getInstanceSize.argtypes = [Class]
 
 # Ivar class_getInstanceVariable(Class cls, const char* name)
-objc.class_getInstanceVariable.restype = Ivar
-objc.class_getInstanceVariable.argtypes = [Class, c_char_p]
+libobjc.class_getInstanceVariable.restype = Ivar
+libobjc.class_getInstanceVariable.argtypes = [Class, c_char_p]
 
 # const char *class_getIvarLayout(Class cls)
-objc.class_getIvarLayout.restype = c_char_p
-objc.class_getIvarLayout.argtypes = [Class]
+libobjc.class_getIvarLayout.restype = c_char_p
+libobjc.class_getIvarLayout.argtypes = [Class]
 
 # IMP class_getMethodImplementation(Class cls, SEL name)
-objc.class_getMethodImplementation.restype = IMP
-objc.class_getMethodImplementation.argtypes = [Class, SEL]
+libobjc.class_getMethodImplementation.restype = IMP
+libobjc.class_getMethodImplementation.argtypes = [Class, SEL]
 
 # const char * class_getName(Class cls)
-objc.class_getName.restype = c_char_p
-objc.class_getName.argtypes = [Class]
+libobjc.class_getName.restype = c_char_p
+libobjc.class_getName.argtypes = [Class]
 
 # objc_property_t class_getProperty(Class cls, const char *name)
-objc.class_getProperty.restype = objc_property_t
-objc.class_getProperty.argtypes = [Class, c_char_p]
+libobjc.class_getProperty.restype = objc_property_t
+libobjc.class_getProperty.argtypes = [Class, c_char_p]
 
 # Class class_getSuperclass(Class cls)
-objc.class_getSuperclass.restype = Class
-objc.class_getSuperclass.argtypes = [Class]
+libobjc.class_getSuperclass.restype = Class
+libobjc.class_getSuperclass.argtypes = [Class]
 
 # int class_getVersion(Class theClass)
-objc.class_getVersion.restype = c_int
-objc.class_getVersion.argtypes = [Class]
+libobjc.class_getVersion.restype = c_int
+libobjc.class_getVersion.argtypes = [Class]
 
 # const char *class_getWeakIvarLayout(Class cls)
-objc.class_getWeakIvarLayout.restype = c_char_p
-objc.class_getWeakIvarLayout.argtypes = [Class]
+libobjc.class_getWeakIvarLayout.restype = c_char_p
+libobjc.class_getWeakIvarLayout.argtypes = [Class]
 
 # BOOL class_isMetaClass(Class cls)
-objc.class_isMetaClass.restype = c_bool
-objc.class_isMetaClass.argtypes = [Class]
+libobjc.class_isMetaClass.restype = c_bool
+libobjc.class_isMetaClass.argtypes = [Class]
 
 # IMP class_replaceMethod(Class cls, SEL name, IMP imp, const char *types)
-objc.class_replaceMethod.restype = IMP
-objc.class_replaceMethod.argtypes = [Class, SEL, Ivar, c_char_p]
+libobjc.class_replaceMethod.restype = IMP
+libobjc.class_replaceMethod.argtypes = [Class, SEL, Ivar, c_char_p]
 
 # BOOL class_respondsToSelector(Class cls, SEL sel)
-objc.class_respondsToSelector.restype = c_bool
-objc.class_respondsToSelector.argtypes = [Class, SEL]
+libobjc.class_respondsToSelector.restype = c_bool
+libobjc.class_respondsToSelector.argtypes = [Class, SEL]
 
 # void class_setIvarLayout(Class cls, const char *layout)
-objc.class_setIvarLayout.restype = None
-objc.class_setIvarLayout.argtypes = [Class, c_char_p]
+libobjc.class_setIvarLayout.restype = None
+libobjc.class_setIvarLayout.argtypes = [Class, c_char_p]
 
 # void class_setVersion(Class theClass, int version)
-objc.class_setVersion.restype = None
-objc.class_setVersion.argtypes = [Class, c_int]
+libobjc.class_setVersion.restype = None
+libobjc.class_setVersion.argtypes = [Class, c_int]
 
 # void class_setWeakIvarLayout(Class cls, const char *layout)
-objc.class_setWeakIvarLayout.restype = None
-objc.class_setWeakIvarLayout.argtypes = [Class, c_char_p]
+libobjc.class_setWeakIvarLayout.restype = None
+libobjc.class_setWeakIvarLayout.argtypes = [Class, c_char_p]
 
 ######################################################################
 
 # const char * ivar_getName(Ivar ivar)
-objc.ivar_getName.restype = c_char_p
-objc.ivar_getName.argtypes = [Ivar]
+libobjc.ivar_getName.restype = c_char_p
+libobjc.ivar_getName.argtypes = [Ivar]
 
 # ptrdiff_t ivar_getOffset(Ivar ivar)
-objc.ivar_getOffset.restype = c_ptrdiff_t
-objc.ivar_getOffset.argtypes = [Ivar]
+libobjc.ivar_getOffset.restype = c_ptrdiff_t
+libobjc.ivar_getOffset.argtypes = [Ivar]
 
 # const char * ivar_getTypeEncoding(Ivar ivar)
-objc.ivar_getTypeEncoding.restype = c_char_p
-objc.ivar_getTypeEncoding.argtypes = [Ivar]
+libobjc.ivar_getTypeEncoding.restype = c_char_p
+libobjc.ivar_getTypeEncoding.argtypes = [Ivar]
 
 ######################################################################
 
 # void method_exchangeImplementations(Method m1, Method m2)
-objc.method_exchangeImplementations.restype = None
-objc.method_exchangeImplementations.argtypes = [Method, Method]
+libobjc.method_exchangeImplementations.restype = None
+libobjc.method_exchangeImplementations.argtypes = [Method, Method]
 
 # IMP method_getImplementation(Method method)
-objc.method_getImplementation.restype = IMP
-objc.method_getImplementation.argtypes = [Method]
+libobjc.method_getImplementation.restype = IMP
+libobjc.method_getImplementation.argtypes = [Method]
 
 # SEL method_getName(Method method)
-objc.method_getName.restype = SEL
-objc.method_getName.argtypes = [Method]
+libobjc.method_getName.restype = SEL
+libobjc.method_getName.argtypes = [Method]
 
 # const char * method_getTypeEncoding(Method method)
-objc.method_getTypeEncoding.restype = c_char_p
-objc.method_getTypeEncoding.argtypes = [Method]
+libobjc.method_getTypeEncoding.restype = c_char_p
+libobjc.method_getTypeEncoding.argtypes = [Method]
 
 # IMP method_setImplementation(Method method, IMP imp)
-objc.method_setImplementation.restype = IMP
-objc.method_setImplementation.argtypes = [Method, IMP]
+libobjc.method_setImplementation.restype = IMP
+libobjc.method_setImplementation.argtypes = [Method, IMP]
 
 ######################################################################
 
 # Class objc_allocateClassPair(Class superclass, const char *name, size_t extraBytes)
-objc.objc_allocateClassPair.restype = Class
-objc.objc_allocateClassPair.argtypes = [Class, c_char_p, c_size_t]
+libobjc.objc_allocateClassPair.restype = Class
+libobjc.objc_allocateClassPair.argtypes = [Class, c_char_p, c_size_t]
 
 # Protocol **objc_copyProtocolList(unsigned int *outCount)
 # Returns an array of *outcount pointers followed by NULL terminator.
 # You must free() the array.
-objc.objc_copyProtocolList.restype = POINTER(objc_id)
-objc.objc_copyProtocolList.argtypes = [POINTER(c_int)]
+libobjc.objc_copyProtocolList.restype = POINTER(objc_id)
+libobjc.objc_copyProtocolList.argtypes = [POINTER(c_int)]
 
 # id objc_getAssociatedObject(id object, void *key)
-objc.objc_getAssociatedObject.restype = objc_id
-objc.objc_getAssociatedObject.argtypes = [objc_id, c_void_p]
+libobjc.objc_getAssociatedObject.restype = objc_id
+libobjc.objc_getAssociatedObject.argtypes = [objc_id, c_void_p]
 
 # Class objc_getClass(const char *name)
-objc.objc_getClass.restype = Class
-objc.objc_getClass.argtypes = [c_char_p]
+libobjc.objc_getClass.restype = Class
+libobjc.objc_getClass.argtypes = [c_char_p]
 
 # Class objc_getMetaClass(const char *name)
-objc.objc_getMetaClass.restype = Class
-objc.objc_getMetaClass.argtypes = [c_char_p]
+libobjc.objc_getMetaClass.restype = Class
+libobjc.objc_getMetaClass.argtypes = [c_char_p]
 
 # Protocol *objc_getProtocol(const char *name)
-objc.objc_getProtocol.restype = objc_id
-objc.objc_getProtocol.argtypes = [c_char_p]
+libobjc.objc_getProtocol.restype = objc_id
+libobjc.objc_getProtocol.argtypes = [c_char_p]
 
 # You should set return and argument types depending on context.
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
@@ -296,73 +296,73 @@ objc.objc_getProtocol.argtypes = [c_char_p]
 # The _stret variants only exist on x86-based architectures and ARM32.
 if __i386__ or __x86_64__ or __arm__:
     # void objc_msgSendSuper_stret(struct objc_super *super, SEL op, ...)
-    objc.objc_msgSendSuper_stret.restype = None
+    libobjc.objc_msgSendSuper_stret.restype = None
 
     # void objc_msgSend_stret(void * stretAddr, id theReceiver, SEL theSelector,  ...)
-    objc.objc_msgSend_stret.restype = None
+    libobjc.objc_msgSend_stret.restype = None
 
 # The _fpret variant only exists on x86-based architectures.
 if __i386__ or __x86_64__:
     # double objc_msgSend_fpret(id self, SEL op, ...)
-    objc.objc_msgSend_fpret.restype = c_double
+    libobjc.objc_msgSend_fpret.restype = c_double
 
 # void objc_registerClassPair(Class cls)
-objc.objc_registerClassPair.restype = None
-objc.objc_registerClassPair.argtypes = [Class]
+libobjc.objc_registerClassPair.restype = None
+libobjc.objc_registerClassPair.argtypes = [Class]
 
 # void objc_removeAssociatedObjects(id object)
-objc.objc_removeAssociatedObjects.restype = None
-objc.objc_removeAssociatedObjects.argtypes = [objc_id]
+libobjc.objc_removeAssociatedObjects.restype = None
+libobjc.objc_removeAssociatedObjects.argtypes = [objc_id]
 
 # void objc_setAssociatedObject(id object, void *key, id value, objc_AssociationPolicy policy)
-objc.objc_setAssociatedObject.restype = None
-objc.objc_setAssociatedObject.argtypes = [objc_id, c_void_p, objc_id, c_int]
+libobjc.objc_setAssociatedObject.restype = None
+libobjc.objc_setAssociatedObject.argtypes = [objc_id, c_void_p, objc_id, c_int]
 
 ######################################################################
 
 # BOOL object_isClass(id obj)
-objc.object_isClass.restype = c_bool
-objc.object_isClass.argtypes = [objc_id]
+libobjc.object_isClass.restype = c_bool
+libobjc.object_isClass.argtypes = [objc_id]
 
 # Class object_getClass(id object)
-objc.object_getClass.restype = Class
-objc.object_getClass.argtypes = [objc_id]
+libobjc.object_getClass.restype = Class
+libobjc.object_getClass.argtypes = [objc_id]
 
 # const char *object_getClassName(id obj)
-objc.object_getClassName.restype = c_char_p
-objc.object_getClassName.argtypes = [objc_id]
+libobjc.object_getClassName.restype = c_char_p
+libobjc.object_getClassName.argtypes = [objc_id]
 
 # Ivar object_getInstanceVariable(id obj, const char *name, void **outValue)
-objc.object_getInstanceVariable.restype = Ivar
-objc.object_getInstanceVariable.argtypes = [objc_id, c_char_p, POINTER(c_void_p)]
+libobjc.object_getInstanceVariable.restype = Ivar
+libobjc.object_getInstanceVariable.argtypes = [objc_id, c_char_p, POINTER(c_void_p)]
 
 # id object_getIvar(id object, Ivar ivar)
-objc.object_getIvar.restype = objc_id
-objc.object_getIvar.argtypes = [objc_id, Ivar]
+libobjc.object_getIvar.restype = objc_id
+libobjc.object_getIvar.argtypes = [objc_id, Ivar]
 
 # Ivar object_setInstanceVariable(id obj, const char *name, void *value)
 # Set argtypes based on the data type of the instance variable.
-objc.object_setInstanceVariable.restype = Ivar
+libobjc.object_setInstanceVariable.restype = Ivar
 
 # void object_setIvar(id object, Ivar ivar, id value)
-objc.object_setIvar.restype = None
-objc.object_setIvar.argtypes = [objc_id, Ivar, objc_id]
+libobjc.object_setIvar.restype = None
+libobjc.object_setIvar.argtypes = [objc_id, Ivar, objc_id]
 
 ######################################################################
 
 # const char *property_getAttributes(objc_property_t property)
-objc.property_getAttributes.restype = c_char_p
-objc.property_getAttributes.argtypes = [objc_property_t]
+libobjc.property_getAttributes.restype = c_char_p
+libobjc.property_getAttributes.argtypes = [objc_property_t]
 
 # const char *property_getName(objc_property_t property)
-objc.property_getName.restype = c_char_p
-objc.property_getName.argtypes = [objc_property_t]
+libobjc.property_getName.restype = c_char_p
+libobjc.property_getName.argtypes = [objc_property_t]
 
 ######################################################################
 
 # BOOL protocol_conformsToProtocol(Protocol *proto, Protocol *other)
-objc.protocol_conformsToProtocol.restype = c_bool
-objc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
+libobjc.protocol_conformsToProtocol.restype = c_bool
+libobjc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
 
 
 class objc_method_description(Structure):
@@ -370,38 +370,38 @@ class objc_method_description(Structure):
 
 # struct objc_method_description *protocol_copyMethodDescriptionList(Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
 # You must free() the returned array.
-objc.protocol_copyMethodDescriptionList.restype = POINTER(objc_method_description)
-objc.protocol_copyMethodDescriptionList.argtypes = [objc_id, c_bool, c_bool, POINTER(c_uint)]
+libobjc.protocol_copyMethodDescriptionList.restype = POINTER(objc_method_description)
+libobjc.protocol_copyMethodDescriptionList.argtypes = [objc_id, c_bool, c_bool, POINTER(c_uint)]
 
 # objc_property_t * protocol_copyPropertyList(Protocol *protocol, unsigned int *outCount)
-objc.protocol_copyPropertyList.restype = POINTER(objc_property_t)
-objc.protocol_copyPropertyList.argtypes = [objc_id, POINTER(c_uint)]
+libobjc.protocol_copyPropertyList.restype = POINTER(objc_property_t)
+libobjc.protocol_copyPropertyList.argtypes = [objc_id, POINTER(c_uint)]
 
 # Protocol **protocol_copyProtocolList(Protocol *proto, unsigned int *outCount)
-objc.protocol_copyProtocolList = POINTER(objc_id)
-objc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
+libobjc.protocol_copyProtocolList = POINTER(objc_id)
+libobjc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
 
 # struct objc_method_description protocol_getMethodDescription(Protocol *p, SEL aSel, BOOL isRequiredMethod, BOOL isInstanceMethod)
-objc.protocol_getMethodDescription.restype = objc_method_description
-objc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
+libobjc.protocol_getMethodDescription.restype = objc_method_description
+libobjc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
 
 # const char *protocol_getName(Protocol *p)
-objc.protocol_getName.restype = c_char_p
-objc.protocol_getName.argtypes = [objc_id]
+libobjc.protocol_getName.restype = c_char_p
+libobjc.protocol_getName.argtypes = [objc_id]
 
 ######################################################################
 
 # const char* sel_getName(SEL aSelector)
-objc.sel_getName.restype = c_char_p
-objc.sel_getName.argtypes = [SEL]
+libobjc.sel_getName.restype = c_char_p
+libobjc.sel_getName.argtypes = [SEL]
 
 # BOOL sel_isEqual(SEL lhs, SEL rhs)
-objc.sel_isEqual.restype = c_bool
-objc.sel_isEqual.argtypes = [SEL, SEL]
+libobjc.sel_isEqual.restype = c_bool
+libobjc.sel_isEqual.argtypes = [SEL, SEL]
 
 # SEL sel_registerName(const char *str)
-objc.sel_registerName.restype = SEL
-objc.sel_registerName.argtypes = [c_char_p]
+libobjc.sel_registerName.restype = SEL
+libobjc.sel_registerName.argtypes = [c_char_p]
 
 
 ######################################################################
@@ -419,18 +419,18 @@ def ensure_bytes(x):
 
 def get_class(name):
     "Return a reference to the class with the given name."
-    return objc.objc_getClass(ensure_bytes(name))
+    return libobjc.objc_getClass(ensure_bytes(name))
 
 
 def get_metaclass(name):
     "Return a reference to the metaclass for the given name."
-    return objc.objc_getMetaClass(ensure_bytes(name))
+    return libobjc.objc_getMetaClass(ensure_bytes(name))
 
 
 def get_superclass_of_object(obj):
     "Return a reference to the superclass of the given object."
-    cls = objc.object_getClass(obj)
-    return objc.class_getSuperclass(cls)
+    cls = libobjc.object_getClass(obj)
+    return libobjc.class_getSuperclass(cls)
 
 
 # http://www.sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
@@ -498,22 +498,22 @@ def send_message(receiver, selName, *args, **kwargs):
     argtypes = kwargs.get('argtypes', [])
 
     # Choose the correct version of objc_msgSend based on return type.
-    # Use objc['name'] instead of objc.name to get a new function object
+    # Use libobjc['name'] instead of libobjc.name to get a new function object
     # that is independent of the one on the objc library.
     # This way multiple threads sending messages don't overwrite
     # each other's function signatures.
     if should_use_fpret(restype):
-        send = objc['objc_msgSend_fpret']
+        send = libobjc['objc_msgSend_fpret']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
         result = send(receiver, selector, *args)
     elif should_use_stret(restype):
-        send = objc['objc_msgSend_stret']
+        send = libobjc['objc_msgSend_stret']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
         result = send(receiver, selector, *args)
     else:
-        send = objc['objc_msgSend']
+        send = libobjc['objc_msgSend']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
         result = send(receiver, selector, *args)
@@ -540,7 +540,7 @@ def send_super(receiver, selName, *args, **kwargs):
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
-    send = objc['objc_msgSendSuper']
+    send = libobjc['objc_msgSendSuper']
     send.restype = restype
     if argtypes:
         send.argtypes = [POINTER(objc_super), SEL] + argtypes
@@ -586,25 +586,25 @@ def add_method(cls, selName, method, encoding):
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
-    objc.class_addMethod(cls, selector, cast(imp, IMP), types)
+    libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
     return imp
 
 
 def add_ivar(cls, name, vartype):
     "Add a new instance variable of type vartype to cls."
-    return objc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(ctype_for_type(vartype)))
+    return libobjc.class_addIvar(cls, ensure_bytes(name), sizeof(vartype), alignment(vartype), encoding_for_ctype(ctype_for_type(vartype)))
 
 
 def set_instance_variable(obj, varname, value, vartype):
     "Do the equivalent of `obj.varname = value`, where value is of type vartype."
-    objc.object_setInstanceVariable.argtypes = [objc_id, c_char_p, vartype]
-    objc.object_setInstanceVariable(obj, ensure_bytes(varname), value)
+    libobjc.object_setInstanceVariable.argtypes = [objc_id, c_char_p, vartype]
+    libobjc.object_setInstanceVariable(obj, ensure_bytes(varname), value)
 
 
 def get_instance_variable(obj, varname, vartype):
     "Return the value of `obj.varname`, where the value is of type vartype."
     variable = vartype()
-    objc.object_getInstanceVariable(obj, ensure_bytes(varname), byref(variable))
+    libobjc.object_getInstanceVariable(obj, ensure_bytes(varname), byref(variable))
     return variable.value
 
 
@@ -616,12 +616,12 @@ class ObjCMethod(object):
     def __init__(self, method):
         """Initialize with an Objective-C Method pointer.  We then determine
         the return type and argument type information of the method."""
-        self.selector = objc.method_getName(method)
+        self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
         self.pyname = self.name.replace(b':', b'_')
-        self.encoding = objc.method_getTypeEncoding(method)
+        self.encoding = libobjc.method_getTypeEncoding(method)
         self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
-        self.imp = objc.method_getImplementation(method)
+        self.imp = libobjc.method_getImplementation(method)
         self.func = None
 
     def get_prototype(self):
@@ -790,7 +790,7 @@ def cache_property_methods(cls, name):
         methods = None
     else:
         # Check 1: Does the class respond to the property?
-        responds = objc.class_getProperty(cls, name.encode('utf-8'))
+        responds = libobjc.class_getProperty(cls, name.encode('utf-8'))
 
         # Check 2: Does the class have an instance method to retrieve the given name
         accessor = cache_method(cls, name)
@@ -986,23 +986,23 @@ class ObjCInstance(object):
 
     @property
     def objc_class(self):
-        return ObjCClass(objc.object_getClass(self))
+        return ObjCClass(libobjc.object_getClass(self))
 
     @classmethod
     def _select_mixin(cls, object_ptr):
-        nsmutablearray = objc.objc_getClass(b'NSMutableArray')
+        nsmutablearray = libobjc.objc_getClass(b'NSMutableArray')
         if send_message(object_ptr, 'isKindOfClass:', nsmutablearray):
             return ObjCMutableListInstance
 
-        nsarray = objc.objc_getClass(b'NSArray')
+        nsarray = libobjc.objc_getClass(b'NSArray')
         if send_message(object_ptr, 'isKindOfClass:', nsarray):
             return ObjCListInstance
 
-        nsmutabledictionary = objc.objc_getClass(b'NSMutableDictionary')
+        nsmutabledictionary = libobjc.objc_getClass(b'NSMutableDictionary')
         if send_message(object_ptr, 'isKindOfClass:', nsmutabledictionary):
             return ObjCMutableDictInstance
 
-        nsdictionary = objc.objc_getClass(b'NSDictionary')
+        nsdictionary = libobjc.objc_getClass(b'NSDictionary')
         if send_message(object_ptr, 'isKindOfClass:', nsdictionary):
             return ObjCDictInstance
 
@@ -1029,7 +1029,7 @@ class ObjCInstance(object):
             return cls._cached_objects[object_ptr.value]
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not is_block and not issubclass(cls, ObjCClass) and objc.object_isClass(object_ptr):
+        if not is_block and not issubclass(cls, ObjCClass) and libobjc.object_isClass(object_ptr):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
@@ -1052,13 +1052,13 @@ class ObjCInstance(object):
 
         # Classes are never deallocated, so they don't need a DeallocationObserver.
         # This is also necessary to make the definition of DeallocationObserver work - otherwise creating the ObjCClass for DeallocationObserver would try to instantiate a DeallocationObserver itself.
-        if not objc.object_isClass(object_ptr):
+        if not libobjc.object_isClass(object_ptr):
             # Create a DeallocationObserver and associate it with this object.
             # When the Objective-C object is deallocated, the observer will remove
             # the ObjCInstance corresponding to the object from the cached objects
             # dictionary, effectively destroying the ObjCInstance.
             observer = send_message(send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]), 'initWithObject:', self, restype=objc_id, argtypes=[objc_id])
-            objc.objc_setAssociatedObject(self, observer, observer, 0x301)
+            libobjc.objc_setAssociatedObject(self, observer, observer, 0x301)
 
             # The observer is retained by the object we associate it to.  We release
             # the observer now so that it will be deallocated when the associated
@@ -1392,7 +1392,7 @@ class ObjCClass(ObjCInstance, type):
 
     @property
     def superclass(self):
-        super_ptr = objc.class_getSuperclass(self)
+        super_ptr = libobjc.class_getSuperclass(self)
         if super_ptr.value is None:
             return None
         else:
@@ -1422,13 +1422,13 @@ class ObjCClass(ObjCInstance, type):
                 ptr = cast(class_name_or_ptr, Class)
                 if ptr.value is None:
                     raise ValueError("Cannot create ObjCClass from nil pointer")
-                elif not objc.object_isClass(ptr):
+                elif not libobjc.object_isClass(ptr):
                     raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
-                name = objc.class_getName(ptr)
+                name = libobjc.class_getName(ptr)
                 # "nil" is an ObjC answer confirming the ptr didn't work.
                 if name == b'nil':
                     raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
-                if not issubclass(cls, ObjCMetaClass) and objc.class_isMetaClass(ptr):
+                if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
                     return ObjCMetaClass(ptr)
 
         else:
@@ -1440,7 +1440,7 @@ class ObjCClass(ObjCInstance, type):
             ptr = get_class(name)
             if ptr.value is None:
                 # Create the ObjC class description
-                ptr = objc.objc_allocateClassPair(bases[0].ptr, name, 0)
+                ptr = libobjc.objc_allocateClassPair(bases[0].ptr, name, 0)
                 if ptr is None:
                     raise RuntimeError("Class pair allocation failed")
 
@@ -1450,7 +1450,7 @@ class ObjCClass(ObjCInstance, type):
                         obj.pre_register(ptr, attr)
 
                 # Register the ObjC class
-                objc.objc_registerClassPair(ptr)
+                libobjc.objc_registerClassPair(ptr)
             else:
                 raise RuntimeError("ObjC runtime already contains a registered class named '%s'." % name.decode('utf-8'))
 
@@ -1515,17 +1515,17 @@ class ObjCClass(ObjCInstance, type):
         )
 
     def __del__(self):
-        c.free(self.methods_ptr)
+        libc.free(self.methods_ptr)
 
     def _reload_methods(self):
         old_methods_ptr = self.methods_ptr
-        self.methods_ptr = objc.class_copyMethodList(self, byref(self.methods_ptr_count))
+        self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
         # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
-        c.free(old_methods_ptr)
+        libc.free(old_methods_ptr)
 
         for i in range(self.methods_ptr_count.value):
             method = self.methods_ptr[i]
-            name = objc.method_getName(method).name.decode("utf-8")
+            name = libobjc.method_getName(method).name.decode("utf-8")
             self.instance_method_ptrs[name] = method
 
             first, *rest = name.split(":")
@@ -1549,14 +1549,14 @@ class ObjCMetaClass(ObjCClass):
     def __new__(cls, name_or_ptr):
         if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
-            ptr = objc.objc_getMetaClass(name)
+            ptr = libobjc.objc_getMetaClass(name)
             if ptr.value is None:
                 raise NameError("Objective-C metaclass {} not found".format(name))
         else:
             ptr = cast(name_or_ptr, Class)
             if ptr.value is None:
                 raise ValueError("Cannot create ObjCMetaClass for nil pointer")
-            elif not objc.object_isClass(ptr) or not objc.class_isMetaClass(ptr):
+            elif not libobjc.object_isClass(ptr) or not libobjc.class_isMetaClass(ptr):
                 raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
 
         return super().__new__(cls, ptr)
@@ -1725,7 +1725,7 @@ class ObjCBlockInstance(ObjCInstance):
         return self.block(*args)
 
 
-_NSConcreteGlobalBlock = (c_void_p * 32).in_dll(c, "_NSConcreteGlobalBlock")
+_NSConcreteGlobalBlock = (c_void_p * 32).in_dll(libc, "_NSConcreteGlobalBlock")
 
 
 NOTHING = object()

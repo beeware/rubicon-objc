@@ -15,12 +15,12 @@ except Exception:
 from rubicon.objc import (
     ObjCInstance, ObjCClass, ObjCMetaClass,
     NSObject, SEL,
-    objc, objc_method, objc_classmethod, objc_property,
+    objc_method, objc_classmethod, objc_property,
     NSUInteger, NSRange, NSEdgeInsets, NSEdgeInsetsMake,
     send_message, objc_const
 )
 from rubicon.objc import core_foundation, types
-from rubicon.objc.objc import ObjCBoundMethod
+from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
@@ -56,7 +56,7 @@ class RubiconTest(unittest.TestCase):
     def test_class_by_pointer(self):
         """An Objective-C class can be created from a pointer."""
 
-        example_ptr = objc.objc_getClass(b"Example")
+        example_ptr = libobjc.objc_getClass(b"Example")
         Example = ObjCClass(example_ptr)
         self.assertEqual(Example, ObjCClass("Example"))
 
@@ -86,7 +86,7 @@ class RubiconTest(unittest.TestCase):
     def test_metaclass_by_pointer(self):
         """An Objective-C metaclass can be created from a pointer."""
 
-        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCMetaClass(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
 
@@ -108,7 +108,7 @@ class RubiconTest(unittest.TestCase):
     def test_objcinstance_can_produce_objcclass(self):
         """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
 
-        example_ptr = objc.objc_getClass(b"Example")
+        example_ptr = libobjc.objc_getClass(b"Example")
         Example = ObjCInstance(example_ptr)
         self.assertEqual(Example, ObjCClass("Example"))
         self.assertIsInstance(Example, ObjCClass)
@@ -116,7 +116,7 @@ class RubiconTest(unittest.TestCase):
     def test_objcinstance_can_produce_objcmetaclass(self):
         """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
 
-        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCInstance(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
@@ -124,7 +124,7 @@ class RubiconTest(unittest.TestCase):
     def test_objcclass_can_produce_objcmetaclass(self):
         """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
 
-        examplemeta_ptr = objc.objc_getMetaClass(b"Example")
+        examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCClass(examplemeta_ptr)
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)

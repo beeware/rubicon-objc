@@ -10,7 +10,7 @@ except Exception:
 
 
 from rubicon.objc import ObjCClass, NSDictionary, NSMutableDictionary
-from rubicon.objc.objc import ObjCDictInstance, ObjCMutableDictInstance
+from rubicon.objc.runtime import ObjCDictInstance, ObjCMutableDictInstance
 
 # Load the test harness library
 rubiconharness_name = util.find_library('rubiconharness')
