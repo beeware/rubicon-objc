@@ -268,31 +268,3 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['three'], 'four')
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
-
-    def test_argument(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        d = self.make_dictionary(self.py_dict)
-        # Call a method with an NSDictionary instance
-        self.assertIsNone(example.processDictionary(d))
-        # Call the same method with the raw Python dictionary
-        self.assertIsNone(example.processDictionary(self.py_dict))
-
-        raw = {'data': 'stuff', 'other': 'gadgets'}
-        d = self.make_dictionary(raw)
-        # Call a method with an NSDictionary instance
-        self.assertEqual(example.processDictionary(d), 'stuff')
-        # Call the same method with the raw Python dictionary
-        self.assertEqual(example.processDictionary(raw), 'stuff')
-
-    def test_property(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        d = self.make_dictionary(self.py_dict)
-        example.dict = d
-
-        self.assertEqual(example.dict, self.py_dict)
-        self.assertTrue(isinstance(example.dict, ObjCDictInstance))
-        self.assertEqual(example.dict['one'], 'ONE')

@@ -261,24 +261,3 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
 
         for pos, value in enumerate(reversed(self.py_list)):
             self.assertEqual(a[pos], value)
-
-    def test_argument(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        a = self.make_array(self.py_list)
-        # Call a method with an NSArray instance
-        self.assertEqual(example.processArray(a), 'two')
-        # Call the same method with the Python list
-        self.assertEqual(example.processArray(self.py_list), 'two')
-
-    def test_property(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        a = self.make_array(self.py_list)
-        example.array = a
-
-        self.assertEqual(example.array, self.py_list)
-        self.assertTrue(isinstance(example.array, ObjCListInstance))
-        self.assertEqual(example.array[1], 'two')
