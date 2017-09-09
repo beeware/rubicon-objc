@@ -27,6 +27,7 @@ class NSDictionaryMixinTest(unittest.TestCase):
         'two': 'TWO',
         'three': 'THREE',
     }
+    name = 'NSDictionary'
 
     def make_dictionary(self, contents=None):
         d = NSMutableDictionary.alloc().init()
@@ -35,6 +36,20 @@ class NSDictionaryMixinTest(unittest.TestCase):
                 d.setObject_forKey_(value, key)
 
         return NSDictionary.dictionaryWithDictionary(d)
+
+    def test_repr(self):
+        a = self.make_dictionary({'one': 'ONE', 'two': 'TWO'})
+        self.assertTrue(repr(a) in [
+                "%s{'one': 'ONE', 'two': 'TWO'}" % self.name,
+                "%s{'two': 'TWO', 'one': 'ONE'}" % self.name,
+            ])
+
+    def test_str(self):
+        a = self.make_dictionary({'one': 'ONE', 'two': 'TWO'})
+        self.assertTrue(str(a) in [
+                "{'one': 'ONE', 'two': 'TWO'}",
+                "{'two': 'TWO', 'one': 'ONE'}",
+            ])
 
     def test_getitem(self):
         d = self.make_dictionary(self.py_dict)
@@ -128,6 +143,8 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
 
 class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
+    name = 'NSMutableDictionary'
+
     def make_dictionary(self, contents=None):
         d = NSMutableDictionary.alloc().init()
         if contents is not None:

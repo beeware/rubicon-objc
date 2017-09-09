@@ -1230,6 +1230,12 @@ class ObjCListInstance(ObjCInstance):
     def copy(self):
         return self.objc_class.arrayWithArray_(self)
 
+    def __repr__(self):
+        return 'NSArray[%s]' % ', '.join(repr(item) for item in self)
+
+    def __str__(self):
+        return '[%s]' % ', '.join(repr(item) for item in self)
+
 
 class ObjCMutableListInstance(ObjCListInstance):
     def _slice_to_range_params(self, s):
@@ -1293,6 +1299,9 @@ class ObjCMutableListInstance(ObjCListInstance):
 
         self.removeObjectAtIndex_(item)
 
+    def __repr__(self):
+        return 'NSMutableArray[%s]' % ', '.join(repr(item) for item in self)
+
     def append(self, value):
         self.addObject_(value)
 
@@ -1348,6 +1357,16 @@ class ObjCDictInstance(ObjCInstance):
 
         return True
 
+    def __repr__(self):
+        return 'NSDictionary{%s}' % ', '.join(
+            '%s: %s' % (repr(k), repr(v)) for k, v in self.items()
+        )
+
+    def __str__(self):
+        return '{%s}' % ', '.join(
+            '%s: %s' % (repr(k), repr(v)) for k, v in self.items()
+        )
+
     def get(self, item, default=None):
         v = self.objectForKey_(item)
         if v is None:
@@ -1379,6 +1398,11 @@ class ObjCMutableDictInstance(ObjCDictInstance):
             raise KeyError(item)
 
         self.removeObjectForKey_(item)
+
+    def __repr__(self):
+        return 'NSMutableDictionary{%s}' % ', '.join(
+            '%s: %s' % (repr(k), repr(v)) for k, v in self.items()
+        )
 
     def clear(self):
         self.removeAllObjects()
