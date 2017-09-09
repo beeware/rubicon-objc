@@ -56,7 +56,6 @@ static int _staticBaseIntField = 1;
     return self;
 }
 
-
 -(int) accessBaseIntField
 {
     return self.baseIntField;

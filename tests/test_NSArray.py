@@ -2,7 +2,9 @@ import faulthandler
 import unittest
 from ctypes import CDLL, util
 
-from rubicon.objc import NSArray, NSMutableArray, ObjCClass
+from rubicon.objc import (
+    NSArray, NSMutableArray, NSObject, ObjCClass, objc_method, objc_property,
+)
 from rubicon.objc.runtime import ObjCListInstance
 
 try:
@@ -261,3 +263,123 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
 
         for pos, value in enumerate(reversed(self.py_list)):
             self.assertEqual(a[pos], value)
+
+
+class PythonObjectTest(unittest.TestCase):
+    def test_primitive_list_attribute(self):
+        class PrimitiveListAttrContainer(NSObject):
+            @objc_method
+            def init(self):
+                self.data = [1, 2, 3]
+                return self
+
+            @objc_method
+            def initWithList_(self, data):
+                self.data = data
+                return self
+
+        obj1 = PrimitiveListAttrContainer.alloc().init()
+        self.assertEqual(obj1.data, [1, 2, 3])
+        self.assertTrue(isinstance(obj1.data, list))
+
+        # If it's set through a method call, it becomes an objc instance
+        obj2 = PrimitiveListAttrContainer.alloc().initWithList_([4, 5, 6])
+        self.assertEqual(obj2.data, [4, 5, 6])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+        # If it's set by direct attribute access, it becomes a Python object.
+        obj2.data = [7, 8, 9]
+        self.assertEqual(obj2.data, [7, 8, 9])
+        self.assertTrue(isinstance(obj2.data, list))
+
+    def test_primitive_list_property(self):
+        class PrimitiveListContainer(NSObject):
+            data = objc_property()
+
+            @objc_method
+            def init(self):
+                self.data = [1, 2, 3]
+                return self
+
+            @objc_method
+            def initWithList_(self, data):
+                self.data = data
+                return self
+
+        obj1 = PrimitiveListContainer.alloc().init()
+        self.assertEqual(obj1.data, [1, 2, 3])
+        self.assertTrue(isinstance(obj1.data, ObjCListInstance))
+
+        obj2 = PrimitiveListContainer.alloc().initWithList_([4, 5, 6])
+        self.assertEqual(obj2.data, [4, 5, 6])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+        obj2.data = [7, 8, 9]
+        self.assertEqual(obj2.data, [7, 8, 9])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+    def test_object_list_attribute(self):
+        class ObjectListAttrContainer(NSObject):
+            @objc_method
+            def init(self):
+                self.data = ['x1', 'y2', 'z3']
+                return self
+
+            @objc_method
+            def initWithList_(self, data):
+                self.data = data
+                return self
+
+        obj1 = ObjectListAttrContainer.alloc().init()
+        self.assertEqual(obj1.data, ['x1', 'y2', 'z3'])
+        self.assertTrue(isinstance(obj1.data, list))
+
+        # If it's set through a method call, it becomes an objc instance
+        obj2 = ObjectListAttrContainer.alloc().initWithList_(['a4', 'b5', 'c6'])
+        self.assertEqual(obj2.data, ['a4', 'b5', 'c6'])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+        # If it's set by direct attribute access, it becomes a Python object.
+        obj2.data = ['i7', 'j8', 'k9']
+        self.assertEqual(obj2.data, ['i7', 'j8', 'k9'])
+        self.assertTrue(isinstance(obj2.data, list))
+
+    def test_object_list_property(self):
+        class ObjectListContainer(NSObject):
+            data = objc_property()
+
+            @objc_method
+            def init(self):
+                self.data = ['x1', 'y2', 'z3']
+                return self
+
+            @objc_method
+            def initWithList_(self, data):
+                self.data = data
+                return self
+
+        obj1 = ObjectListContainer.alloc().init()
+        self.assertEqual(obj1.data, ['x1', 'y2', 'z3'])
+        self.assertTrue(isinstance(obj1.data, ObjCListInstance))
+
+        obj2 = ObjectListContainer.alloc().initWithList_(['a4', 'b5', 'c6'])
+        self.assertEqual(obj2.data, ['a4', 'b5', 'c6'])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+        obj2.data = ['i7', 'j8', 'k9']
+        self.assertEqual(obj2.data, ['i7', 'j8', 'k9'])
+        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+
+    def test_multitype_list_property(self):
+        class MultitypeListContainer(NSObject):
+            data = objc_property()
+
+        Example = ObjCClass('Example')
+        example = Example.alloc().init()
+
+        # All types can be stored in a list.
+        obj = MultitypeListContainer.alloc().init()
+
+        obj.data = [4, True, 'Hello', example]
+        self.assertEqual(obj.data, [4, True, 'Hello', example])
+        self.assertTrue(isinstance(obj.data, ObjCListInstance))

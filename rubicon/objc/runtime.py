@@ -1348,11 +1348,10 @@ class ObjCDictInstance(ObjCInstance):
         return self.objectForKey_(item) is not None
 
     def __eq__(self, other):
-        if self.keys() != other.keys():
+        if set(self.keys()) != set(other.keys()):
             return False
-
-        for k in self:
-            if self[k] != other[k]:
+        for item in self:
+            if self[item] != other[item]:
                 return False
 
         return True
