@@ -32,110 +32,29 @@ Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
 It also includes wrappers of the some key data types from the Foundation
 framework (e.g., ``NSString``).
 
-Quickstart
+Tutorial
+--------
+
+Want to jump in and get started? We have a `hands-on tutorial for beginners <>`__.
+
+How-to guides
+-------------
+
+Looking for guidance on how to solve a specific problems? We have `how-to
+guides and recipes <>`__ for common problems and tasks, including how to
+contribute.
+
+
+Reference
+---------
+
+Just want the raw technical details? Here's our `Technical reference <>`__.
+
+Background
 ----------
 
-Rubicon uses a combination of ``ctypes``, plus Objective-C's own reflection
-APIs, to enable Objective-C objects to be referenced in a Python process.
+Looking for explanations and discussion of key topics and concepts? Our `background <>`__ guides may help.
 
-To install Rubicon, use pip::
-
-    $ pip install rubicon-objc
-
-Then, in a Python shell
-
-.. code-block:: python
-
-    >>> from ctypes import cdll
-    >>> from ctypes import util
-    >>> from rubicon.objc import ObjCClass, NSObject, objc_method
-
-    # Use ctypes to import a framework into the Python process
-    >>> cdll.LoadLibrary(util.find_library("Foundation"))
-
-    # Wrap an Objective-C class contained in the framework
-    >>> NSURL = ObjCClass("NSURL")
-
-    # Then instantiate the Objective-C class, using the API
-    # that is exposed through Objective-C. The Python method name
-    # is the Objective-C method descriptor, up to the first colon.
-    # The first argument (if it exists) is passed in as is; subsequent
-    # arguments are passed in as keyword arguments. Properties can be
-    # accessed and modified directly. So, the equivalent of:
-    # NSURL *base = [NSURL URLWithString:@"http://pybee.org"];
-    # NSURL *full = [NSURL URLWithString:@"contributing/" relativeToURL:base];
-    # NSLog(@"absoluteURL = %@", [full absoluteURL]);
-    # would be:
-    >>> base = NSURL.URLWithString("http://pybee.org/")
-    >>> full = NSURL.URLWithString("http://pybee.org/", relativeToURL=base)
-    >>> print("absoluteURL = %s" % full.absoluteURL)
-
-    # Sometimes, a method will use have the same keyword argument name twice.
-    # This is legal in Objective-C, but not in Python; in this case, you can
-    # explicitly name a descriptor by replacing colons with underscores:
-    >>> base = NSURL.URLWithString_("http://pybee.org/")
-    >>> full = NSURL.URLWithString_relativeToURL_("http://pybee.org/", base)
-    >>> print("absoluteURL = %s" % full.absoluteURL)
-
-    # To create a new Objective-C class, define a Python class that
-    # has the methods you want to define, decorate it to indicate that it
-    # should be exposed to the Objective-C runtime, and annotate it to
-    # describe the type of any arguments that aren't of type ``id``:
-    >>> class Handler(NSObject):
-    ...     @objc_method
-    ...     def initWithValue_(self, v: int):
-    ...         self.value = v
-    ...         return self
-    ...
-    ...     @objc_method
-    ...     def pokeWithValue_(self, v: int) -> None:
-    ...         print("Poking with", v)
-    ...         print("Internal value is", self.value)
-
-    # Then use the class:
-    >>> my_handler = Handler.alloc().initWithValue_(42)
-    >>> my_handler.pokeWithValue_(37)
-
-Testing
--------
-
-To run the Rubicon test suite:
-
-1. Compile the Rubicon test library. A ``Makefile`` has been provided to make
-   this easy. Type::
-
-       $ make
-
-   to compile it.
-
-   .. admonition:: Cross platform support
-
-       This Makefile currently only works under OS X; however, the build commands
-       aren't complicated; it should be fairly easy to reproduce the build on other
-       platforms. Pull requests to make the ``Makefile`` cross-platform are welcome.
-
-2. Put the Rubicon support library somewhere that it will be found by dynamic
-   library discovery. This means:
-
-   a. Under OS X, put the ``tests/objc`` directory in your ``DYLD_LIBRARY_PATH``
-
-   b. Under Linux, put the ``tests/objc`` directory in your ``LD_LIBRARY_PATH``
-
-   c. Under Windows... something :-)
-
-3. Run the test suite::
-
-       $ python setup.py test
-
-   A ``tox`` configuration has also been provided; to run the tests across all
-   supported platforms, run::
-
-       $ tox
-
-.. Documentation
-.. -------------
-
-.. Full documentation for Rubicon can be found on `Read The Docs`_.
 
 Community
 ---------
