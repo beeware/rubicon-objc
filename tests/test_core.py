@@ -623,7 +623,7 @@ class RubiconTest(unittest.TestCase):
         # Second definition will raise an error.
         # Without protection, this is a segfault.
         with self.assertRaises(RuntimeError):
-            class MyClass(NSObject):  # NOQA
+            class MyClass(NSObject):  # noqa: F811
                 pass
 
     def test_interface(self):
