@@ -21,3 +21,4 @@ install:
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
   - python3 setup.py test
+  - tox -e flake8
