@@ -1,6 +1,8 @@
 os: osx
 matrix:
   include:
+  # OSX 10.9 Mavericks
+  - osx_image: xcode6.2
   # OSX 10.10 Yosemite
   - osx_image: xcode6.4
   # OSX 10.11 El Capitan
@@ -8,6 +10,7 @@ matrix:
   - osx_image: xcode8
   # macOS 10.12 Sierra
   - osx_image: xcode8.3
+  - osx_image: xcode9
 language: generic
 install:
 - brew install python3
