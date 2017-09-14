@@ -1,6 +1,8 @@
 os: osx
 matrix:
   include:
+  # OSX 10.8 Mountain Lion
+  - osx_image: xcode5
   # OSX 10.9 Mavericks
   - osx_image: xcode6.2
   # OSX 10.10 Yosemite
