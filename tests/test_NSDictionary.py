@@ -79,9 +79,6 @@ class NSDictionaryMixinTest(unittest.TestCase):
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
 
-        with self.assertRaises(TypeError):
-            e['four'] = 'FOUR'
-
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
         for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):

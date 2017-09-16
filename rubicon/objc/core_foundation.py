@@ -68,7 +68,8 @@ cf.CFAttributedStringCreate.argtypes = [CFAllocatorRef, CFStringRef, CFDictionar
 # Core Foundation type to Python type conversion functions
 def CFSTR(string):
     return ObjCInstance(cf.CFStringCreateWithCString(
-            None, string.encode('utf-8'), kCFStringEncodingUTF8))
+        None, string.encode('utf-8'), kCFStringEncodingUTF8,
+    ))
 
 
 # Other possible names for this method:
