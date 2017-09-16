@@ -25,6 +25,7 @@ faulthandler.enable()
 
 class NSArrayMixinTest(unittest.TestCase):
     py_list = ['one', 'two', 'three']
+
     def make_array(self, contents=None):
         a = NSMutableArray.alloc().init()
         if contents is not None:
