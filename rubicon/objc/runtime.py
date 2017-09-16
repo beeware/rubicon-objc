@@ -336,13 +336,21 @@ libobjc.objc_setAssociatedObject.argtypes = [objc_id, c_void_p, objc_id, c_int]
 
 ######################################################################
 
-# BOOL object_isClass(id obj)
-libobjc.object_isClass.restype = c_bool
-libobjc.object_isClass.argtypes = [objc_id]
-
 # Class object_getClass(id object)
 libobjc.object_getClass.restype = Class
 libobjc.object_getClass.argtypes = [objc_id]
+
+# object_isClass exists as a native function only since OS X 10.10 and iOS 8.
+# If unavailable, we emulate it: an object is a class iff its class is a metaclass.
+try:
+    object_isClass = libobjc.object_isClass
+except AttributeError:
+    def object_isClass(obj):
+        return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
+else:
+    # BOOL object_isClass(id obj)
+    object_isClass.restype = c_bool
+    object_isClass.argtypes = [objc_id]
 
 # const char *object_getClassName(id obj)
 libobjc.object_getClassName.restype = c_char_p
@@ -1057,7 +1065,7 @@ class ObjCInstance(object):
             return cls._cached_objects[object_ptr.value]
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not is_block and not issubclass(cls, ObjCClass) and libobjc.object_isClass(object_ptr):
+        if not is_block and not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
@@ -1082,7 +1090,7 @@ class ObjCInstance(object):
         # This is also necessary to make the definition of DeallocationObserver work -
         # otherwise creating the ObjCClass for DeallocationObserver would try to
         # instantiate a DeallocationObserver itself.
-        if not libobjc.object_isClass(object_ptr):
+        if not object_isClass(object_ptr):
             # Create a DeallocationObserver and associate it with this object.
             # When the Objective-C object is deallocated, the observer will remove
             # the ObjCInstance corresponding to the object from the cached objects
@@ -1364,7 +1372,7 @@ class ObjCDictInstance(ObjCInstance):
             yield key, self.objectForKey_(key)
 
     def copy(self):
-        return self.objc_class.dictionaryWithDictionary_(self)
+        return ObjCClass('NSMutableDictionary').dictionaryWithDictionary_(self)
 
 
 class ObjCMutableDictInstance(ObjCDictInstance):
@@ -1459,7 +1467,7 @@ class ObjCClass(ObjCInstance, type):
                 ptr = cast(class_name_or_ptr, Class)
                 if ptr.value is None:
                     raise ValueError("Cannot create ObjCClass from nil pointer")
-                elif not libobjc.object_isClass(ptr):
+                elif not object_isClass(ptr):
                     raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
                 name = libobjc.class_getName(ptr)
                 # "nil" is an ObjC answer confirming the ptr didn't work.
@@ -1597,7 +1605,7 @@ class ObjCMetaClass(ObjCClass):
             ptr = cast(name_or_ptr, Class)
             if ptr.value is None:
                 raise ValueError("Cannot create ObjCMetaClass for nil pointer")
-            elif not libobjc.object_isClass(ptr) or not libobjc.class_isMetaClass(ptr):
+            elif not object_isClass(ptr) or not libobjc.class_isMetaClass(ptr):
                 raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
 
         return super().__new__(cls, ptr)
