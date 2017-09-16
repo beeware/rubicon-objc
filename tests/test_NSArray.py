@@ -25,8 +25,6 @@ faulthandler.enable()
 
 class NSArrayMixinTest(unittest.TestCase):
     py_list = ['one', 'two', 'three']
-    name = 'NSArray'
-
     def make_array(self, contents=None):
         a = NSMutableArray.alloc().init()
         if contents is not None:
@@ -34,14 +32,6 @@ class NSArrayMixinTest(unittest.TestCase):
                 a.addObject(value)
 
         return NSArray.arrayWithArray(a)
-
-    def test_repr(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(repr(a), "%s['one', 'two', 'three']" % self.name)
-
-    def test_str(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(str(a), "['one', 'two', 'three']")
 
     def test_getitem(self):
         a = self.make_array(self.py_list)
@@ -132,8 +122,6 @@ class NSArrayMixinTest(unittest.TestCase):
 
 
 class NSMutableArrayMixinTest(NSArrayMixinTest):
-    name = 'NSMutableArray'
-
     def make_array(self, contents=None):
         a = NSMutableArray.alloc().init()
         if contents is not None:
