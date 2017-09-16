@@ -614,8 +614,6 @@ class RubiconTest(unittest.TestCase):
     def test_duplicate_class_registration(self):
         "If you define a class name twice in the same runtime, you get an error."
 
-        NSObject = ObjCClass('NSObject')
-
         # First definition should work.
         class MyClass(NSObject):
             pass
@@ -630,8 +628,6 @@ class RubiconTest(unittest.TestCase):
         "An ObjC protocol implementation can be defined in Python."
 
         results = {}
-
-        NSObject = ObjCClass('NSObject')
 
         class Handler(NSObject):
             @objc_method
@@ -699,7 +695,6 @@ class RubiconTest(unittest.TestCase):
     def test_class_properties(self):
         "A Python class can have ObjC properties with synthesized getters and setters."
 
-        NSObject = ObjCClass('NSObject')
         NSURL = ObjCClass('NSURL')
 
         class URLBox(NSObject):

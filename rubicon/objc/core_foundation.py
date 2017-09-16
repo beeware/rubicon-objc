@@ -16,7 +16,7 @@ from .types import CFIndex, CFRange, CGFloat
 
 # CORE FOUNDATION
 
-cf = cdll.LoadLibrary(util.find_library('CoreFoundation'))
+libcf = cdll.LoadLibrary(util.find_library('CoreFoundation'))
 
 CFTypeID = c_ulong
 
@@ -40,34 +40,34 @@ CFStringRef = objc_id
 CFStringEncoding = c_uint32
 kCFStringEncodingUTF8 = 0x08000100
 
-cf.CFGetTypeID.restype = CFTypeID
-cf.CFGetTypeID.argtypes = [CFTypeRef]
+libcf.CFGetTypeID.restype = CFTypeID
+libcf.CFGetTypeID.argtypes = [CFTypeRef]
 
-cf.CFRelease.restype = None
-cf.CFRelease.argtypes = [CFTypeRef]
+libcf.CFRelease.restype = None
+libcf.CFRelease.argtypes = [CFTypeRef]
 
-cf.CFStringCreateWithCString.restype = CFStringRef
-cf.CFStringCreateWithCString.argtypes = [CFAllocatorRef, c_char_p, CFStringEncoding]
+libcf.CFStringCreateWithCString.restype = CFStringRef
+libcf.CFStringCreateWithCString.argtypes = [CFAllocatorRef, c_char_p, CFStringEncoding]
 
-cf.CFStringGetLength.restype = CFIndex
-cf.CFStringGetLength.argtypes = [CFStringRef]
+libcf.CFStringGetLength.restype = CFIndex
+libcf.CFStringGetLength.argtypes = [CFStringRef]
 
-cf.CFStringGetMaximumSizeForEncoding.restype = CFIndex
-cf.CFStringGetMaximumSizeForEncoding.argtypes = [CFIndex, CFStringEncoding]
+libcf.CFStringGetMaximumSizeForEncoding.restype = CFIndex
+libcf.CFStringGetMaximumSizeForEncoding.argtypes = [CFIndex, CFStringEncoding]
 
-cf.CFStringGetCString.restype = c_bool
-cf.CFStringGetCString.argtypes = [CFStringRef, c_char_p, CFIndex, CFStringEncoding]
+libcf.CFStringGetCString.restype = c_bool
+libcf.CFStringGetCString.argtypes = [CFStringRef, c_char_p, CFIndex, CFStringEncoding]
 
-cf.CFStringGetTypeID.restype = CFTypeID
-cf.CFStringGetTypeID.argtypes = []
+libcf.CFStringGetTypeID.restype = CFTypeID
+libcf.CFStringGetTypeID.argtypes = []
 
-cf.CFAttributedStringCreate.restype = CFAttributedStringRef
-cf.CFAttributedStringCreate.argtypes = [CFAllocatorRef, CFStringRef, CFDictionaryRef]
+libcf.CFAttributedStringCreate.restype = CFAttributedStringRef
+libcf.CFAttributedStringCreate.argtypes = [CFAllocatorRef, CFStringRef, CFDictionaryRef]
 
 
 # Core Foundation type to Python type conversion functions
 def CFSTR(string):
-    return ObjCInstance(cf.CFStringCreateWithCString(
+    return ObjCInstance(libcf.CFStringCreateWithCString(
         None, string.encode('utf-8'), kCFStringEncodingUTF8,
     ))
 
@@ -83,35 +83,35 @@ def at(string):
 
 
 def to_str(cfstring):
-    length = cf.CFStringGetLength(cfstring)
-    size = cf.CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8)
+    length = libcf.CFStringGetLength(cfstring)
+    size = libcf.CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8)
     buffer = c_buffer(size + 1)
-    result = cf.CFStringGetCString(cfstring, buffer, len(buffer), kCFStringEncodingUTF8)
+    result = libcf.CFStringGetCString(cfstring, buffer, len(buffer), kCFStringEncodingUTF8)
     if result:
         return buffer.value.decode('utf-8')
 
 
 def is_str(cfobject):
-    return cf.CFGetTypeID(cfobject) == cf.CFStringGetTypeID()
+    return libcf.CFGetTypeID(cfobject) == libcf.CFStringGetTypeID()
 
 
-cf.CFDataCreate.restype = CFDataRef
-cf.CFDataCreate.argtypes = [CFAllocatorRef, POINTER(c_uint8), CFIndex]
+libcf.CFDataCreate.restype = CFDataRef
+libcf.CFDataCreate.argtypes = [CFAllocatorRef, POINTER(c_uint8), CFIndex]
 
-cf.CFDataGetBytes.restype = None
-cf.CFDataGetBytes.argtypes = [CFDataRef, CFRange, POINTER(c_uint8)]
+libcf.CFDataGetBytes.restype = None
+libcf.CFDataGetBytes.argtypes = [CFDataRef, CFRange, POINTER(c_uint8)]
 
-cf.CFDataGetLength.restype = CFIndex
-cf.CFDataGetLength.argtypes = [CFDataRef]
+libcf.CFDataGetLength.restype = CFIndex
+libcf.CFDataGetLength.argtypes = [CFDataRef]
 
-cf.CFDictionaryGetValue.restype = c_void_p
-cf.CFDictionaryGetValue.argtypes = [CFDictionaryRef, c_void_p]
+libcf.CFDictionaryGetValue.restype = c_void_p
+libcf.CFDictionaryGetValue.argtypes = [CFDictionaryRef, c_void_p]
 
-cf.CFDictionaryCreateMutable.restype = c_void_p
-cf.CFDictionaryCreateMutable.argtypes = [CFAllocatorRef, CFIndex, c_void_p, c_void_p]
+libcf.CFDictionaryCreateMutable.restype = c_void_p
+libcf.CFDictionaryCreateMutable.argtypes = [CFAllocatorRef, CFIndex, c_void_p, c_void_p]
 
-cf.CFDictionaryAddValue.restype = None
-cf.CFDictionaryAddValue.argtypes = [CFMutableDictionaryRef, c_void_p, c_void_p]
+libcf.CFDictionaryAddValue.restype = None
+libcf.CFDictionaryAddValue.argtypes = [CFMutableDictionaryRef, c_void_p, c_void_p]
 
 # CFNumber.h
 CFNumberType = c_uint32
@@ -133,17 +133,17 @@ kCFNumberNSIntegerType = 15
 kCFNumberCGFloatType = 16
 kCFNumberMaxType = 16
 
-cf.CFNumberCreate.restype = CFNumberRef
-cf.CFNumberCreate.argtypes = [CFAllocatorRef, CFNumberType, c_void_p]
+libcf.CFNumberCreate.restype = CFNumberRef
+libcf.CFNumberCreate.argtypes = [CFAllocatorRef, CFNumberType, c_void_p]
 
-cf.CFNumberGetType.restype = CFNumberType
-cf.CFNumberGetType.argtypes = [CFNumberRef]
+libcf.CFNumberGetType.restype = CFNumberType
+libcf.CFNumberGetType.argtypes = [CFNumberRef]
 
-cf.CFNumberGetValue.restype = c_bool
-cf.CFNumberGetValue.argtypes = [CFNumberRef, CFNumberType, c_void_p]
+libcf.CFNumberGetValue.restype = c_bool
+libcf.CFNumberGetValue.argtypes = [CFNumberRef, CFNumberType, c_void_p]
 
-cf.CFNumberGetTypeID.restype = CFTypeID
-cf.CFNumberGetTypeID.argtypes = []
+libcf.CFNumberGetTypeID.restype = CFTypeID
+libcf.CFNumberGetTypeID.argtypes = []
 
 
 def to_number(cfnumber):
@@ -151,7 +151,7 @@ def to_number(cfnumber):
     if type(cfnumber) == objc_id:
         cfnumber = ObjCInstance(cfnumber)
 
-    numeric_type = cf.CFNumberGetType(cfnumber)
+    numeric_type = libcf.CFNumberGetType(cfnumber)
     cfnum_to_ctype = {
         kCFNumberSInt8Type: c_int8,
         kCFNumberSInt16Type: c_int16,
@@ -179,10 +179,18 @@ def to_number(cfnumber):
     try:
         t = cfnum_to_ctype[numeric_type]
         result = t()
-        if cf.CFNumberGetValue(cfnumber, numeric_type, byref(result)):
+        if libcf.CFNumberGetValue(cfnumber, numeric_type, byref(result)):
             return result.value
     except KeyError:
         raise Exception('to_number: unhandled CFNumber type %d' % numeric_type)
+
+
+def to_bool(cfbool):
+    """Convert CFBoolean to python bool."""
+    if type(cfbool) == objc_id:
+        cfbool = ObjCInstance(cfbool)
+
+    return bool(libcf.CFBooleanGetValue(cfbool))
 
 
 # We need to be able to create raw NSDecimalNumber objects; if we use an
@@ -211,6 +219,8 @@ NSMutableArray = ObjCClass('NSMutableArray')
 NSDictionary = ObjCClass('NSDictionary')
 NSMutableDictionary = ObjCClass('NSMutableDictionary')
 
+NSNumber = ObjCClass('NSNumber')
+
 
 def from_value(value):
     """Convert a Python type into an equivalent CFType type.
@@ -234,14 +244,23 @@ def from_value(value):
         for v in value:
             array.addObject(v)
         return array
+    # Need to use raw message passing here to make sure Rubicon doesn't
+    # convert the NSNumber back into Python objects.
+    elif isinstance(value, bool):
+        return cast(send_message(NSNumber, 'numberWithBool:', value), objc_id)
+    elif isinstance(value, int):
+        return cast(send_message(NSNumber, 'numberWithLong:', value), objc_id)
+    elif isinstance(value, float):
+        return cast(send_message(NSNumber, 'numberWithDouble:', value), objc_id)
     else:
         return value
 
 
 # Dictionary of cftypes matched to the method converting them to python values.
 known_cftypes = {
-    cf.CFStringGetTypeID(): to_str,
-    cf.CFNumberGetTypeID(): to_number
+    libcf.CFStringGetTypeID(): to_str,
+    libcf.CFNumberGetTypeID(): to_number,
+    libcf.CFBooleanGetTypeID(): to_bool,
 }
 
 
@@ -256,7 +275,7 @@ def to_value(cftype):
         return None
     if isinstance(cftype, ObjCInstance):
         cftype = cftype._as_parameter_
-    typeID = cf.CFGetTypeID(cftype)
+    typeID = libcf.CFGetTypeID(cftype)
     try:
         convert_function = known_cftypes[typeID]
         ret = convert_function(cftype)
@@ -271,41 +290,41 @@ def to_value(cftype):
         return ret
 
 
-cf.CFSetGetCount.restype = CFIndex
-cf.CFSetGetCount.argtypes = [CFSetRef]
+libcf.CFSetGetCount.restype = CFIndex
+libcf.CFSetGetCount.argtypes = [CFSetRef]
 
-cf.CFSetGetValues.restype = None
-cf.CFSetGetValues.argtypes = [CFSetRef, POINTER(c_void_p)]
+libcf.CFSetGetValues.restype = None
+libcf.CFSetGetValues.argtypes = [CFSetRef, POINTER(c_void_p)]
 
 
 def to_set(cfset):
     """Convert CFSet to python set."""
-    count = cf.CFSetGetCount(cfset)
+    count = libcf.CFSetGetCount(cfset)
     buffer = (c_void_p * count)()
-    cf.CFSetGetValues(cfset, buffer)
+    libcf.CFSetGetValues(cfset, buffer)
     return {to_value(cast(buffer[i], objc_id)) for i in range(count)}
 
 
-cf.CFArrayGetCount.restype = CFIndex
-cf.CFArrayGetCount.argtypes = [CFArrayRef]
+libcf.CFArrayGetCount.restype = CFIndex
+libcf.CFArrayGetCount.argtypes = [CFArrayRef]
 
-cf.CFArrayGetValueAtIndex.restype = c_void_p
-cf.CFArrayGetValueAtIndex.argtypes = [CFArrayRef, CFIndex]
+libcf.CFArrayGetValueAtIndex.restype = c_void_p
+libcf.CFArrayGetValueAtIndex.argtypes = [CFArrayRef, CFIndex]
 
 
 def to_list(cfarray):
     """Convert CFArray to python list."""
-    count = cf.CFArrayGetCount(cfarray)
+    count = libcf.CFArrayGetCount(cfarray)
     return [
-        to_value(cast(cf.CFArrayGetValueAtIndex(cfarray, i), objc_id))
+        to_value(cast(libcf.CFArrayGetValueAtIndex(cfarray, i), objc_id))
         for i in range(count)
     ]
 
 
-kCFRunLoopDefaultMode = CFStringRef.in_dll(cf, 'kCFRunLoopDefaultMode')
+kCFRunLoopDefaultMode = CFStringRef.in_dll(libcf, 'kCFRunLoopDefaultMode')
 
-cf.CFRunLoopGetCurrent.restype = CFRunLoopRef
-cf.CFRunLoopGetCurrent.argtypes = []
+libcf.CFRunLoopGetCurrent.restype = CFRunLoopRef
+libcf.CFRunLoopGetCurrent.argtypes = []
 
-cf.CFRunLoopGetMain.restype = CFRunLoopRef
-cf.CFRunLoopGetMain.argtypes = []
+libcf.CFRunLoopGetMain.restype = CFRunLoopRef
+libcf.CFRunLoopGetMain.argtypes = []
