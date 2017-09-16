@@ -1373,7 +1373,7 @@ class ObjCDictInstance(ObjCInstance):
             yield key, self.objectForKey_(key)
 
     def copy(self):
-        return self.objc_class.dictionaryWithDictionary_(self)
+        return ObjCClass('NSMutableDictionary').dictionaryWithDictionary_(self)
 
 
 class ObjCMutableDictInstance(ObjCDictInstance):
