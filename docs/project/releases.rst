@@ -4,6 +4,8 @@ Release History
 (next version)
 --------------
 
+* Improved handling of boolean types.
+* Added support for using primitives as object values (e.g, as the key/value in an NSDictonary).
 * Added support for passing Python lists as Objective-C NSArray arguments, and Python dicts as Objective-C NSDictionary arguments.
 * Corrected support to storing strings and other objects as properties on Python-defined Objective-C classes.
 * Added support for creating Objective-C blocks from Python callables. (ojii)

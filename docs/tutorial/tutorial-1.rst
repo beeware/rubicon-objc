@@ -33,7 +33,7 @@ handle to the `NSURL` class:
 
 This gives us an `NSURL` class in Python which is transparently bridged to the
 `NSURL` class in the Objective-C runtime. Any method or property described in
-`Apple's documentation on NSURL <>`__  can be accessed over this bridge.
+`Apple's documentation on NSURL <https://developer.apple.com/reference/foundation/nsurl?language=objc>`__  can be accessed over this bridge.
 
 Let's create an instance of an `NSURL` object. The `NSURL` documentation
 describes a static constructor `+URLWithString:`; we can invoke this

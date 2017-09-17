@@ -2,7 +2,10 @@ import faulthandler
 import unittest
 from ctypes import CDLL, util
 
-from rubicon.objc import NSDictionary, NSMutableDictionary, ObjCClass
+from rubicon.objc import (
+    NSDictionary, NSMutableDictionary, NSObject, ObjCClass, objc_method,
+    objc_property,
+)
 from rubicon.objc.runtime import ObjCDictInstance
 
 try:
@@ -78,9 +81,6 @@ class NSDictionaryMixinTest(unittest.TestCase):
         e = d.copy()
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
-
-        with self.assertRaises(TypeError):
-            e['four'] = 'FOUR'
 
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
@@ -252,30 +252,118 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
-    def test_argument(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
 
-        d = self.make_dictionary(self.py_dict)
-        # Call a method with an NSDictionary instance
-        self.assertIsNone(example.processDictionary(d))
-        # Call the same method with the raw Python dictionary
-        self.assertIsNone(example.processDictionary(self.py_dict))
+class PythonObjectTest(unittest.TestCase):
+    def test_primitive_dict_attribute(self):
+        class PrimitiveDictAttrContainer(NSObject):
+            @objc_method
+            def init(self):
+                self.data = {1: 2, 2: 4, 3: 6}
+                return self
 
-        raw = {'data': 'stuff', 'other': 'gadgets'}
-        d = self.make_dictionary(raw)
-        # Call a method with an NSDictionary instance
-        self.assertEqual(example.processDictionary(d), 'stuff')
-        # Call the same method with the raw Python dictionary
-        self.assertEqual(example.processDictionary(raw), 'stuff')
+            @objc_method
+            def initWithDict_(self, data):
+                self.data = data
+                return self
 
-    def test_property(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
+        obj1 = PrimitiveDictAttrContainer.alloc().init()
+        self.assertEqual(obj1.data, {1: 2, 2: 4, 3: 6})
+        self.assertTrue(isinstance(obj1.data, dict))
 
-        d = self.make_dictionary(self.py_dict)
-        example.dict = d
+        # If it's set through a method call, it becomes an objc instance
+        obj2 = PrimitiveDictAttrContainer.alloc().initWithDict_({4: 8, 5: 10, 6: 12})
+        self.assertEqual(obj2.data, {4: 8, 5: 10, 6: 12})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
 
-        self.assertEqual(example.dict, self.py_dict)
-        self.assertTrue(isinstance(example.dict, ObjCDictInstance))
-        self.assertEqual(example.dict['one'], 'ONE')
+        # If it's set by direct attribute access, it becomes a Python object.
+        obj2.data = {7: 14, 8: 16, 9: 18}
+        self.assertEqual(obj2.data, {7: 14, 8: 16, 9: 18})
+        self.assertTrue(isinstance(obj2.data, dict))
+
+    def test_primitive_dict_property(self):
+        class PrimitiveDictContainer(NSObject):
+            data = objc_property()
+
+            @objc_method
+            def init(self):
+                self.data = {1: 2, 2: 4, 3: 6}
+                return self
+
+            @objc_method
+            def initWithDict_(self, data):
+                self.data = data
+                return self
+
+        obj1 = PrimitiveDictContainer.alloc().init()
+        self.assertEqual(obj1.data, {1: 2, 2: 4, 3: 6})
+        self.assertTrue(isinstance(obj1.data, ObjCDictInstance))
+
+        obj2 = PrimitiveDictContainer.alloc().initWithDict_({4: 8, 5: 10, 6: 12})
+        self.assertEqual(obj2.data, {4: 8, 5: 10, 6: 12})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
+
+        obj2.data = {7: 14, 8: 16, 9: 18}
+        self.assertEqual(obj2.data, {7: 14, 8: 16, 9: 18})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
+
+    def test_object_dict_attribute(self):
+        class ObjectDictAttrContainer(NSObject):
+            @objc_method
+            def init(self):
+                self.data = {'x': 'x1', 'y': 'y2', 'z': 'z3'}
+                return self
+
+            @objc_method
+            def initWithDict_(self, data):
+                self.data = data
+                return self
+
+        obj1 = ObjectDictAttrContainer.alloc().init()
+        self.assertEqual(obj1.data, {'x': 'x1', 'y': 'y2', 'z': 'z3'})
+        self.assertTrue(isinstance(obj1.data, dict))
+
+        # If it's set through a method call, it becomes an objc instance
+        obj2 = ObjectDictAttrContainer.alloc().initWithDict_({'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        self.assertEqual(obj2.data, {'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
+
+        # If it's set by direct attribute access, it becomes a Python object.
+        obj2.data = {'i': 'i7', 'j': 'j8', 'k': 'k9'}
+        self.assertEqual(obj2.data, {'i': 'i7', 'j': 'j8', 'k': 'k9'})
+        self.assertTrue(isinstance(obj2.data, dict))
+
+    def test_object_dict_property(self):
+        class ObjectDictContainer(NSObject):
+            data = objc_property()
+
+            @objc_method
+            def init(self):
+                self.data = {'x': 'x1', 'y': 'y2', 'z': 'z3'}
+                return self
+
+            @objc_method
+            def initWithDict_(self, data):
+                self.data = data
+                return self
+
+        obj1 = ObjectDictContainer.alloc().init()
+        self.assertEqual(obj1.data, {'x': 'x1', 'y': 'y2', 'z': 'z3'})
+        self.assertTrue(isinstance(obj1.data, ObjCDictInstance))
+
+        obj2 = ObjectDictContainer.alloc().initWithDict_({'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        self.assertEqual(obj2.data, {'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
+
+        obj2.data = {'i': 'i7', 'j': 'j8', 'k': 'k9'}
+        self.assertEqual(obj2.data, {'i': 'i7', 'j': 'j8', 'k': 'k9'})
+        self.assertTrue(isinstance(obj2.data, ObjCDictInstance))
+
+    def test_multitype_dict_property(self):
+        class MultitypeDictContainer(NSObject):
+            data = objc_property()
+
+        # All types can be stored in a dict.
+        obj = MultitypeDictContainer.alloc().init()
+        obj.data = {4: 16, True: False, 'Hello': 'Goodbye'}
+        self.assertEqual(obj.data, {4: 16, True: False, 'Hello': 'Goodbye'})
+        self.assertTrue(isinstance(obj.data, ObjCDictInstance))
