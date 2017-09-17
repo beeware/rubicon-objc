@@ -1,12 +1,17 @@
-=======================
-You're just not my type
-=======================
+==========================================================
+You're just not my type: Using Objective-C types in Python
+==========================================================
 
-We've already seen some of examples of places where Objective-C requires you to provide extra information about the type of arguments. Lets look at this a bit more.
+Objective-C is a strong, static typed language. Every variable has a specific type, and that type cannot change over time. If a function declares that it accepts an integer, then it must receive a variable that is declared as an integer, or an expression that results in an integer.
+
+Python, on the other hand, is strong, but *dynamically* typed language. Every variable has a specific type, but that type can be modified or interpreted in other ways. When a function accepts an argument, Python will allow you to pass *any* variable, of *any* type.
+
+So, if you want to bridge between Objective-C and Python, you need to be able to provide static typing information so that Python can work out how to convert a variable of arbitrary type into a specific type matching Objective-C's expectations.
+
+To do this, we use Python 3's type annotation. Here's how.
 
 Primitives
 ----------
-
 
 bool    8 bit integer
 int     64 bit integer

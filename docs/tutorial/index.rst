@@ -10,7 +10,6 @@ Tutorials
 
    tutorial-1
    tutorial-2
-   tutorial-3
 
 
 Tutorial 1 - Your first bridge
@@ -22,8 +21,3 @@ Tutorial 2 - Writing your own class
 ===================================
 
 In :doc:`tutorial-2`, you will write a Python class, and expose it to the Objective-C runtime.
-
-Tutorial 3 - You're just not my type
-====================================
-
-In :doc:`tutorial-3`, you will see how Rubicon transforms Python primitive types into Objective-C.

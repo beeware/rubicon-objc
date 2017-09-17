@@ -9,4 +9,5 @@ How-to Guides
    :glob:
 
    Get started <get-started>
+   Mapping Python types to Objective-C <type-mapping>
    Contribute to Toga <contribute>

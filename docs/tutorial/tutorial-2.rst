@@ -125,6 +125,4 @@ invoking them over that bridge.
 Next steps
 ----------
 
-In our examples so far, we've seen examples of how Rubicon will convert Python
-primitive types into Objective-C types. In the :doc:`next tutorial <tutorial-3>`,
-we'll dig into more detail on these conversions.
+???
