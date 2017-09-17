@@ -44,7 +44,7 @@ This code has several interesting implementation details:
       the "long form" way of invoking methods discussed in :doc:`tutorial-1`.
 
     * The `v` argument on `initWithValue_()` uses a Python 3 type annotation
-      to declare it's type. Objective C is a language with static typing, so
+      to declare it's type. Objective-C is a language with static typing, so
       any methods defined in Python must provide this typing information.
       Any argument that isn't annotated is assumed to be of type `id` - that is,
       a pointer to an Objective-C object.

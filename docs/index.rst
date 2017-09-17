@@ -26,10 +26,11 @@
 
 
 ===================
-Rubicon Objective C
+Rubicon Objective-C
 ===================
 
-Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
+Rubicon Objective-C is a bridge between Objective-C and Python. It enables you
+to:
 
 * Use Python to instantiate objects defined in Objective-C,
 * Use Python to invoke methods on objects defined in Objective-C, and

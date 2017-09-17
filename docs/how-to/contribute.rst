@@ -25,7 +25,7 @@ start coding::
     $ pip install -e .
 
 In order to test the capabilities of Rubicon, the test suite contains
-an Objective C library with some known classes. To run the test suite,
+an Objective-C library with some known classes. To run the test suite,
 you'll need to compile this library::
 
     $ make

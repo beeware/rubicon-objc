@@ -159,7 +159,7 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 spelling:
-	. $(VENV); $(SPHINXBUILD) -b spelling . _build/spelling
+	$(SPHINXBUILD) -b spelling . _build/spelling
 	@echo
 	@echo "Check finished. Wrong words can be found in " \
 		"build/spelling/output.txt."

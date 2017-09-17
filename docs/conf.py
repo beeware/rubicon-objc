@@ -252,7 +252,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'rubicon', u'Rubicon Documentation',
-   u'Russell Keith-Magee', 'Rubicon', 'A bridge between an Objective C runtime environment and Python.',
+   u'Russell Keith-Magee', 'Rubicon', 'A bridge between an Objective-C runtime environment and Python.',
    'Miscellaneous'),
 ]
 
