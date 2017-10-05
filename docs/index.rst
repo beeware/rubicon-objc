@@ -48,27 +48,18 @@ Table of contents
 
 .. rst-class:: column column2
 
-
 :ref:`Tutorial <tutorial>`
 --------------------------
 
 Get started with a hands-on introduction for beginners
 
-.. rst-class:: column column2
 
+.. rst-class:: column column2
 
 :ref:`How-to guides <how-to>`
 -----------------------------
 
 Guides and recipes for common problems and tasks, including how to contribute
-
-.. rst-class:: column column2
-
-
-:ref:`Reference <reference>`
-----------------------------
-
-Technical reference - commands, modules, classes, methods
 
 
 .. rst-class:: column column2
@@ -77,6 +68,14 @@ Technical reference - commands, modules, classes, methods
 ------------------------------
 
 Explanation and discussion of key topics and concepts
+
+
+.. rst-class:: column column2
+
+:ref:`Reference <reference>`
+----------------------------
+
+Technical reference - commands, modules, classes, methods
 
 
 .. rst-class:: clearfix row
