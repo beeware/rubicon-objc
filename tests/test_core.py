@@ -11,7 +11,7 @@ from enum import Enum
 
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSRange, NSUInteger,
-    ObjCClass, ObjCInstance, ObjCMetaClass, core_foundation, objc_classmethod,
+    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation, objc_classmethod,
     objc_const, objc_method, objc_property, send_message, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
@@ -106,6 +106,33 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(ExampleMetaMeta, ObjCMetaClass)
         self.assertEqual(ExampleMetaMeta, NSObject.objc_class)
 
+    def test_protocol_by_name(self):
+        """An Objective-C protocol can be looked up by name."""
+
+        ExampleProtocol = ObjCProtocol('ExampleProtocol')
+        self.assertEqual(ExampleProtocol.name, 'ExampleProtocol')
+
+    def test_protocol_caching(self):
+        """ObjCProtocol instances are cached."""
+
+        ExampleProtocol1 = ObjCProtocol('ExampleProtocol')
+        ExampleProtocol2 = ObjCProtocol('ExampleProtocol')
+
+        self.assertIs(ExampleProtocol1, ExampleProtocol2)
+
+    def test_protocol_by_pointer(self):
+        """An Objective-C protocol can be created from a pointer."""
+
+        example_protocol_ptr = libobjc.objc_getProtocol(b'ExampleProtocol')
+        ExampleProtocol = ObjCProtocol(example_protocol_ptr)
+        self.assertEqual(ExampleProtocol, ObjCProtocol('ExampleProtocol'))
+
+    def test_nonexistant_protocol(self):
+        """A NameError is raised if a protocol doesn't exist."""
+
+        with self.assertRaises(NameError):
+            ObjCProtocol('DoesNotExist')
+
     def test_objcinstance_can_produce_objcclass(self):
         """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
 
@@ -130,6 +157,14 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(ExampleMeta, ObjCMetaClass("Example"))
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
 
+    def test_objcinstance_can_produce_objcprotocol(self):
+        """Creating an ObjCInstance for a protocol pointer gives an ObjCProtocol."""
+
+        example_protocol_ptr = libobjc.objc_getProtocol(b'ExampleProtocol')
+        ExampleProtocol = ObjCInstance(example_protocol_ptr)
+        self.assertEqual(ExampleProtocol, ObjCProtocol('ExampleProtocol'))
+        self.assertIsInstance(ExampleProtocol, ObjCProtocol)
+
     def test_objcclass_requires_class(self):
         """ObjCClass only accepts class pointers."""
 
@@ -149,7 +184,17 @@ class RubiconTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             ObjCMetaClass(NSObject.ptr)
 
+    def test_objcprotocol_requires_protocol(self):
+        """ObjCProtocol only accepts protocol pointers."""
+
+        random_obj = NSObject.alloc().init()
+        with self.assertRaises(ValueError):
+            ObjCProtocol(random_obj.ptr)
+        random_obj.release()
+
     def test_objcclass_superclass(self):
+        """An ObjCClass's superclass can be looked up."""
+
         Example = ObjCClass("Example")
         BaseExample = ObjCClass("BaseExample")
 
@@ -158,12 +203,32 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(NSObject.superclass)
 
     def test_objcmetaclass_superclass(self):
+        """An ObjCMetaClass's superclass can be looked up."""
+
         Example = ObjCClass("Example")
         BaseExample = ObjCClass("BaseExample")
 
         self.assertEqual(Example.objc_class.superclass, BaseExample.objc_class)
         self.assertEqual(BaseExample.objc_class.superclass, NSObject.objc_class)
         self.assertEqual(NSObject.objc_class.superclass, NSObject)
+
+    def test_objcclass_protocols(self):
+        """An ObjCClass's protocols can be looked up."""
+
+        BaseExample = ObjCClass('BaseExample')
+        ExampleProtocol = ObjCProtocol('ExampleProtocol')
+        DerivedProtocol = ObjCProtocol('DerivedProtocol')
+
+        self.assertEqual(BaseExample.protocols, (ExampleProtocol, DerivedProtocol))
+
+    def test_objcprotocol_protocols(self):
+        """An ObjCProtocol's protocols can be looked up."""
+
+        DerivedProtocol = ObjCProtocol('DerivedProtocol')
+        BaseProtocolOne = ObjCProtocol('BaseProtocolOne')
+        BaseProtocolTwo = ObjCProtocol('BaseProtocolTwo')
+
+        self.assertEqual(DerivedProtocol.protocols, (BaseProtocolOne, BaseProtocolTwo))
 
     def test_field(self):
         "A field on an instance can be accessed and mutated"

@@ -40,6 +40,7 @@ __all__ = [
     'ObjCMutableDictInstance',
     'ObjCMutableListInstance',
     'ObjCPartialMethod',
+    'ObjCProtocol',
     'SEL',
     'add_ivar',
     'add_method',
@@ -466,7 +467,7 @@ libobjc.protocol_copyPropertyList.restype = POINTER(objc_property_t)
 libobjc.protocol_copyPropertyList.argtypes = [objc_id, POINTER(c_uint)]
 
 # Protocol **protocol_copyProtocolList(Protocol *proto, unsigned int *outCount)
-libobjc.protocol_copyProtocolList = POINTER(objc_id)
+libobjc.protocol_copyProtocolList.restype = POINTER(objc_id)
 libobjc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
 
 # struct objc_method_description protocol_getMethodDescription(
@@ -1104,6 +1105,10 @@ class ObjCInstance(object):
         if send_message(object_ptr, 'isKindOfClass:', nsdictionary):
             return ObjCDictInstance
 
+        protocol = libobjc.objc_getClass(b'Protocol')
+        if send_message(object_ptr, 'isKindOfClass:', protocol, restype=c_bool, argtypes=[c_void_p]):
+            return ObjCProtocol
+
         return cls
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
@@ -1499,11 +1504,21 @@ class ObjCClass(ObjCInstance, type):
 
     @property
     def superclass(self):
+        """The superclass of this class, or None if this is a root class (such as NSObject)."""
+
         super_ptr = libobjc.class_getSuperclass(self)
         if super_ptr.value is None:
             return None
         else:
             return ObjCClass(super_ptr)
+
+    @property
+    def protocols(self):
+        """The protocols adopted by this class."""
+
+        out_count = c_uint()
+        protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
+        return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
     def __new__(cls, *args, **kwargs):
         """Create a new ObjCClass instance or return a previously created
@@ -1893,3 +1908,51 @@ class Block:
 
     def wrapper(self, instance, *args):
         return self.func(*args)
+
+
+Protocol = ObjCClass('Protocol')
+
+
+class ObjCProtocol(ObjCInstance):
+    """Python wrapper for an Objective-C protocol."""
+
+    @property
+    def name(self):
+        """The name of this protocol."""
+
+        return libobjc.protocol_getName(self).decode('utf-8')
+
+    @property
+    def protocols(self):
+        """The superprotocols of this protocol."""
+
+        out_count = c_uint()
+        protocols_ptr = libobjc.protocol_copyProtocolList(self, byref(out_count))
+        return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
+
+    def __new__(cls, name_or_ptr, bases=None, ns=None):
+        if bases is not None or ns is not None:
+            raise NotImplementedError('Creating Objective-C protocols from Python is not yet supported')
+
+        if isinstance(name_or_ptr, (bytes, str)):
+            name = ensure_bytes(name_or_ptr)
+            ptr = libobjc.objc_getProtocol(name)
+            if ptr.value is None:
+                raise NameError('Objective-C protocol {} not found'.format(name))
+        else:
+            ptr = cast(name_or_ptr, objc_id)
+            if ptr.value is None:
+                raise ValueError('Cannot create ObjCProtocol for nil pointer')
+            elif not send_message(ptr, 'isKindOfClass:', Protocol, restype=c_bool, argtypes=[objc_id]):
+                raise ValueError('Pointer {} ({:#x}) does not refer to a protocol'.format(ptr, ptr.value))
+
+        return super().__new__(cls, ptr)
+
+    def __repr__(self):
+        return '<{cls.__module__}.{cls.__qualname__}: {self.name} at {self.ptr.value:#x}>'.format(
+            cls=type(self), self=self)
+
+
+# Need to use a different name to avoid conflict with the NSObject class.
+# NSObjectProtocol is also the name that Swift uses when importing the NSObject protocol.
+NSObjectProtocol = ObjCProtocol('NSObject')

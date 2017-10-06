@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 
-@interface BaseExample : NSObject {
+#import "Protocols.h"
+
+@interface BaseExample : NSObject <ExampleProtocol, DerivedProtocol> {
     int _baseIntField;
 }
 
