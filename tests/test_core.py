@@ -10,7 +10,7 @@ from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSRange, NSUInteger,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSObjectProtocol, NSRange, NSUInteger,
     ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation, objc_classmethod,
     objc_const, objc_method, objc_property, send_message, types,
 )
@@ -692,9 +692,10 @@ class RubiconTest(unittest.TestCase):
     def test_interface(self):
         "An ObjC protocol implementation can be defined in Python."
 
+        Callback = ObjCProtocol('Callback')
         results = {}
 
-        class Handler(NSObject):
+        class Handler(NSObject, protocols=[Callback]):
             @objc_method
             def initWithValue_(self, value: int):
                 self.value = value
@@ -722,6 +723,9 @@ class RubiconTest(unittest.TestCase):
             def fiddle_(cls, value: int) -> None:
                 results['string'] = "Fiddled with it"
                 results['int'] = value
+
+        # Check that the protocol is adopted.
+        self.assertSequenceEqual(Handler.protocols, (Callback,))
 
         # Create two handler instances so we can check the right one
         # is being invoked.
@@ -756,6 +760,13 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(results['string'], 'Fiddled with it')
         self.assertEqual(results['int'], 99)
+
+    def test_no_duplicate_protocols(self):
+        """An Objective-C class cannot adopt a protocol more than once."""
+
+        with self.assertRaises(ValueError):
+            class DuplicateProtocol(NSObject, protocols=[NSObjectProtocol, NSObjectProtocol]):
+                pass
 
     def test_class_properties(self):
         "A Python class can have ObjC properties with synthesized getters and setters."
