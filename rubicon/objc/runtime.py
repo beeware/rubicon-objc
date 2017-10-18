@@ -437,6 +437,14 @@ libobjc.object_setIvar.argtypes = [objc_id, Ivar, objc_id]
 
 ######################################################################
 
+
+class objc_property_attribute_t(Structure):
+    _fields_ = [
+        ('name', c_char_p),
+        ('value', c_char_p),
+    ]
+
+
 # const char *property_getAttributes(objc_property_t property)
 libobjc.property_getAttributes.restype = c_char_p
 libobjc.property_getAttributes.argtypes = [objc_property_t]
@@ -445,16 +453,41 @@ libobjc.property_getAttributes.argtypes = [objc_property_t]
 libobjc.property_getName.restype = c_char_p
 libobjc.property_getName.argtypes = [objc_property_t]
 
+# objc_property_attribute_t *property_copyAttributeList(objc_property_t property, unsigned int *outCount)
+libobjc.property_copyAttributeList.restype = POINTER(objc_property_attribute_t)
+libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
+
 ######################################################################
+
+
+class objc_method_description(Structure):
+    _fields_ = [
+        ('name', SEL),
+        ('types', c_char_p),
+    ]
+
+
+# void protocol_addMethodDescription(Protocol *proto, SEL name, const char *types,
+#     BOOL isRequiredMethod, BOOL isInstanceMethod)
+libobjc.protocol_addMethodDescription.restype = None
+libobjc.protocol_addMethodDescription.argtypes = [objc_id, SEL, c_char_p, c_bool, c_bool]
+
+# void protocol_addProtocol(Protocol *proto, Protocol *addition)
+libobjc.protocol_addProtocol.restype = None
+libobjc.protocol_addProtocol.argtypes = [objc_id, objc_id]
+
+# void protocol_addProperty(Protocol *proto, const char *name, const objc_property_attribute_t *attributes,
+#     unsigned int attributeCount, BOOL isRequiredProperty, BOOL isInstanceProperty)
+libobjc.protocol_addProperty.restype = None
+libobjc.protocol_addProperty.argtypes = [objc_id, c_char_p, POINTER(objc_property_attribute_t), c_uint, c_bool, c_bool]
+
+# Protocol *objc_allocateProtocol(const char *name)
+libobjc.objc_allocateProtocol.restype = objc_id
+libobjc.objc_allocateProtocol.argtypes = [c_char_p]
 
 # BOOL protocol_conformsToProtocol(Protocol *proto, Protocol *other)
 libobjc.protocol_conformsToProtocol.restype = c_bool
 libobjc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
-
-
-class objc_method_description(Structure):
-    _fields_ = [("name", SEL), ("types", c_char_p)]
-
 
 # struct objc_method_description *protocol_copyMethodDescriptionList(
 #     Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
@@ -478,6 +511,10 @@ libobjc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
 # const char *protocol_getName(Protocol *p)
 libobjc.protocol_getName.restype = c_char_p
 libobjc.protocol_getName.argtypes = [objc_id]
+
+# void objc_registerProtocol(Protocol *proto)
+libobjc.objc_registerProtocol.restype = None
+libobjc.objc_registerProtocol.argtypes = [objc_id]
 
 ######################################################################
 
@@ -976,7 +1013,13 @@ def objc_method(f):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls, name, _objc_method, encoding)
 
+    def protocol_register(proto, attr):
+        name = attr.replace('_', ':')
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, True)
+
     _objc_method.register = register
+    _objc_method.protocol_register = protocol_register
 
     return _objc_method
 
@@ -1001,7 +1044,13 @@ def objc_classmethod(f):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
+    def protocol_register(proto, attr):
+        name = attr.replace('_', ':')
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, False)
+
     _objc_classmethod.register = register
+    _objc_classmethod.protocol_register = protocol_register
 
     return _objc_classmethod
 
@@ -1017,6 +1066,9 @@ class objc_ivar(object):
 
     def pre_register(self, ptr, attr):
         return add_ivar(ptr, attr, self.vartype)
+
+    def protocol_register(self, proto, attr):
+        raise TypeError('Objective-C protocols cannot have ivars')
 
 
 class objc_property(object):
@@ -1065,6 +1117,13 @@ class objc_property(object):
         cls.imp_keep_alive_table[attr] = add_method(cls.ptr, attr, _objc_getter, getter_encoding)
         cls.imp_keep_alive_table[setter_name] = add_method(cls.ptr, setter_name, _objc_setter, setter_encoding)
 
+    def protocol_register(self, proto, attr):
+        attrs = (objc_property_attribute_t * 2)(
+            objc_property_attribute_t(b'T', b'@'),  # Type: id
+            objc_property_attribute_t(b'&', b''),  # retain
+        )
+        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, 2, True, True)
+
 
 def objc_rawmethod(f):
     encoding = encoding_from_annotation(f, offset=2)
@@ -1072,7 +1131,13 @@ def objc_rawmethod(f):
     def register(cls, attr):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls, name, f, encoding)
+
+    def protocol_register(proto, attr):
+        raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
+
     f.register = register
+    f.protocol_register = protocol_register
+
     return f
 
 
@@ -1752,20 +1817,52 @@ class ObjCProtocol(ObjCInstance):
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
     def __new__(cls, name_or_ptr, bases=None, ns=None):
-        if bases is not None or ns is not None:
-            raise NotImplementedError('Creating Objective-C protocols from Python is not yet supported')
+        if (bases is None) ^ (ns is None):
+            raise TypeError('ObjCProtocol arguments 2 and 3 must be given together')
 
-        if isinstance(name_or_ptr, (bytes, str)):
-            name = ensure_bytes(name_or_ptr)
-            ptr = libobjc.objc_getProtocol(name)
-            if ptr.value is None:
-                raise NameError('Objective-C protocol {} not found'.format(name))
+        if bases is None and ns is None:
+            if isinstance(name_or_ptr, (bytes, str)):
+                name = ensure_bytes(name_or_ptr)
+                ptr = libobjc.objc_getProtocol(name)
+                if ptr.value is None:
+                    raise NameError('Objective-C protocol {} not found'.format(name))
+            else:
+                ptr = cast(name_or_ptr, objc_id)
+                if ptr.value is None:
+                    raise ValueError('Cannot create ObjCProtocol for nil pointer')
+                elif not send_message(ptr, 'isKindOfClass:', Protocol, restype=c_bool, argtypes=[objc_id]):
+                    raise ValueError('Pointer {} ({:#x}) does not refer to a protocol'.format(ptr, ptr.value))
         else:
-            ptr = cast(name_or_ptr, objc_id)
-            if ptr.value is None:
-                raise ValueError('Cannot create ObjCProtocol for nil pointer')
-            elif not send_message(ptr, 'isKindOfClass:', Protocol, restype=c_bool, argtypes=[objc_id]):
-                raise ValueError('Pointer {} ({:#x}) does not refer to a protocol'.format(ptr, ptr.value))
+            name = ensure_bytes(name_or_ptr)
+
+            if libobjc.objc_getProtocol(name).value is not None:
+                raise RuntimeError('An Objective-C protocol named {!r} already exists'.format(name))
+
+            # Check that all bases are protocols.
+            for base in bases:
+                if not isinstance(base, ObjCProtocol):
+                    raise TypeError(
+                        'An Objective-C protocol can only extend ObjCProtocol objects, '
+                        'not {cls.__module__}.{cls.__qualname__}'
+                        .format(cls=type(base))
+                    )
+
+            # Allocate the protocol object.
+            ptr = libobjc.objc_allocateProtocol(name)
+            if ptr is None:
+                raise RuntimeError('Protocol allocation failed')
+
+            # Adopt all the protocols.
+            for proto in bases:
+                libobjc.protocol_addProtocol(ptr, proto)
+
+            # Register all methods and properties.
+            for attr, obj in ns.items():
+                if hasattr(obj, 'protocol_register'):
+                    obj.protocol_register(ptr, attr)
+
+            # Register the protocol object
+            libobjc.objc_registerProtocol(ptr)
 
         return super().__new__(cls, ptr)
 

@@ -844,6 +844,44 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(simplemath.addOne_(254), 255)
         self.assertEqual(SimpleMath.subtractOne_(75), 74)
 
+    def test_protocol_def_empty(self):
+        """An empty ObjCProtocol can be defined."""
+
+        class EmptyProtocol(metaclass=ObjCProtocol):
+            pass
+
+    def test_protocol_def_methods(self):
+        """An ObjCProtocol with method definitions can be defined."""
+
+        class ProtocolWithSomeMethods(metaclass=ObjCProtocol):
+            @objc_classmethod
+            def class_method(self, param) -> c_int:
+                pass
+
+            @objc_method
+            def instance_method(self, param) -> c_int:
+                pass
+
+        # TODO Test that the methods are actually defined
+
+    def test_protocol_def_property(self):
+        """An ObjCProtocol with a property definition can be defined."""
+
+        class ProtocolWithAProperty(metaclass=ObjCProtocol):
+            prop = objc_property()
+
+        # TODO Test that the property is actually defined
+
+    def test_protocol_def_extends(self):
+        """An ObjCProtocol that extends other protocols can be defined."""
+
+        ExampleProtocol = ObjCProtocol('ExampleProtocol')
+
+        class ProtocolExtendsProtocols(NSObjectProtocol, ExampleProtocol):
+            pass
+
+        self.assertSequenceEqual(ProtocolExtendsProtocols.protocols, [NSObjectProtocol, ExampleProtocol])
+
     def test_function_NSEdgeInsetsMake(self):
         "Python can invoke NSEdgeInsetsMake to create NSEdgeInsets."
 
