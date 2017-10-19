@@ -1585,6 +1585,77 @@ class ObjCClass(ObjCInstance, type):
         protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
+    def _new_from_name(cls, name):
+        name = ensure_bytes(name)
+        ptr = get_class(name)
+        if ptr.value is None:
+            raise NameError("ObjC Class '%s' couldn't be found." % name)
+
+        return ptr, name
+
+    def _new_from_ptr(cls, ptr):
+        ptr = cast(ptr, Class)
+        if ptr.value is None:
+            raise ValueError("Cannot create ObjCClass from nil pointer")
+        elif not object_isClass(ptr):
+            raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
+        name = libobjc.class_getName(ptr)
+        # "nil" is an ObjC answer confirming the ptr didn't work.
+        if name == b'nil':
+            raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % ptr)
+
+        return ptr, name
+
+    def _new_from_class_statement(cls, name, bases, attrs, *, protocols):
+        name = ensure_bytes(name)
+
+        if get_class(name).value is not None:
+            raise RuntimeError('An Objective-C class named {!r} already exists'.format(name))
+
+        try:
+            (superclass,) = bases
+        except ValueError:
+            raise ValueError('An Objective-C class must have exactly one base class, not {}'.format(len(bases)))
+
+        # Check that the superclass is an ObjCClass.
+        if not isinstance(superclass, ObjCClass):
+            raise TypeError(
+                'The superclass of an Objective-C class must be an ObjCClass, '
+                'not a {cls.__module__}.{cls.__qualname__}'
+                .format(cls=type(superclass))
+            )
+
+        # Check that all protocols are ObjCProtocols, and that there are no duplicates.
+        for proto in protocols:
+            if not isinstance(proto, ObjCProtocol):
+                raise TypeError(
+                    'The protocols list of an Objective-C class must contain ObjCProtocol objects, '
+                    'not {cls.__module__}.{cls.__qualname__}'
+                    .format(cls=type(proto))
+                )
+            elif protocols.count(proto) > 1:
+                raise ValueError('Protocol {} is adopted more than once'.format(proto.name))
+
+        # Create the ObjC class description
+        ptr = libobjc.objc_allocateClassPair(superclass, name, 0)
+        if ptr is None:
+            raise RuntimeError('Class pair allocation failed')
+
+        # Adopt all the protocols.
+        for proto in protocols:
+            if not libobjc.class_addProtocol(ptr, proto):
+                raise RuntimeError('Failed to adopt protocol {}'.format(proto.name))
+
+        # Pre-Register all the instance variables
+        for attr, obj in attrs.items():
+            if hasattr(obj, 'pre_register'):
+                obj.pre_register(ptr, attr)
+
+        # Register the ObjC class
+        libobjc.objc_registerClassPair(ptr)
+
+        return ptr, name, attrs
+
     def __new__(cls, name_or_ptr, bases=None, attrs=None, *, protocols=()):
         """Create a new ObjCClass instance or return a previously created instance for the given Objective-C class.
 
@@ -1608,74 +1679,16 @@ class ObjCClass(ObjCInstance, type):
             if protocols:
                 raise ValueError('protocols kwarg is not allowed for the single-argument form of ObjCClass')
 
-            # Determine name and ptr values from passed in argument.
             attrs = {}
 
             if isinstance(name_or_ptr, (bytes, str)):
-                name = ensure_bytes(name_or_ptr)
-                ptr = get_class(name)
-                if ptr.value is None:
-                    raise NameError("ObjC Class '%s' couldn't be found." % name_or_ptr)
+                ptr, name = cls._new_from_name(cls, name_or_ptr)
             else:
-                ptr = cast(name_or_ptr, Class)
-                if ptr.value is None:
-                    raise ValueError("Cannot create ObjCClass from nil pointer")
-                elif not object_isClass(ptr):
-                    raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
-                name = libobjc.class_getName(ptr)
-                # "nil" is an ObjC answer confirming the ptr didn't work.
-                if name == b'nil':
-                    raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % name_or_ptr)
+                ptr, name = cls._new_from_ptr(cls, name_or_ptr)
                 if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
                     return ObjCMetaClass(ptr)
-
         else:
-            name = ensure_bytes(name_or_ptr)
-
-            if get_class(name).value is not None:
-                raise RuntimeError('An Objective-C class named {!r} already exists'.format(name))
-
-            try:
-                (superclass,) = bases
-            except ValueError:
-                raise ValueError('An Objective-C class must have exactly one base class, not {}'.format(len(bases)))
-
-            # Check that the superclass is an ObjCClass.
-            if not isinstance(superclass, ObjCClass):
-                raise TypeError(
-                    'The superclass of an Objective-C class must be an ObjCClass, '
-                    'not a {cls.__module__}.{cls.__qualname__}'
-                    .format(cls=type(superclass))
-                )
-
-            # Check that all protocols are ObjCProtocols, and that there are no duplicates.
-            for proto in protocols:
-                if not isinstance(proto, ObjCProtocol):
-                    raise TypeError(
-                        'The protocols list of an Objective-C class must contain ObjCProtocol objects, '
-                        'not {cls.__module__}.{cls.__qualname__}'
-                        .format(cls=type(proto))
-                    )
-                elif protocols.count(proto) > 1:
-                    raise ValueError('Protocol {} is adopted more than once'.format(proto.name))
-
-            # Create the ObjC class description
-            ptr = libobjc.objc_allocateClassPair(superclass, name, 0)
-            if ptr is None:
-                raise RuntimeError('Class pair allocation failed')
-
-            # Adopt all the protocols.
-            for proto in protocols:
-                if not libobjc.class_addProtocol(ptr, proto):
-                    raise RuntimeError('Failed to adopt protocol {}'.format(proto.name))
-
-            # Pre-Register all the instance variables
-            for attr, obj in attrs.items():
-                if hasattr(obj, 'pre_register'):
-                    obj.pre_register(ptr, attr)
-
-            # Register the ObjC class
-            libobjc.objc_registerClassPair(ptr)
+            ptr, name, attrs = cls._new_from_class_statement(cls, name_or_ptr, bases, attrs, protocols=protocols)
 
         objc_class_name = name.decode('utf-8')
 
