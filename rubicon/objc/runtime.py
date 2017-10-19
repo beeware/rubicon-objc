@@ -1600,9 +1600,6 @@ class ObjCClass(ObjCInstance, type):
         elif not object_isClass(ptr):
             raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
         name = libobjc.class_getName(ptr)
-        # "nil" is an ObjC answer confirming the ptr didn't work.
-        if name == b'nil':
-            raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % ptr)
 
         return ptr, name
 
