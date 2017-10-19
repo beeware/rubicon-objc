@@ -16,23 +16,25 @@ Primitives
 If a Python value needs to be passed in as a primitive, Rubicon will wrap the primitive:
 
 ===== =============================================================
-type  C primitive
+Value C primitive
 ===== ============================================================
 bool  8 bit integer (although it can only hold 2 values - 0 and 1)
 int   32 bit integer
 float double precision floating point
 ===== ============================================================
 
-
 If a Python value needs to be passed in as an object, Rubicon will wrap the primitive in an object:
 
 ===== =================
-type  Objective C type
+Value Objective C type
 ===== =================
 bool  NSNumber (bool)
 int   NSNumber (long)
 float NSNumber (double)
 ===== =================
+
+If you're declaring a method and need to annotate the type of an argument, the Python type name can be used as the annotation type. You can also use any of the `ctypes` primitive types. Rubicon also provides type
+definitions for common Objective-C typedefs, like `NSInteger`, `CGFloat`, and so on.
 
 Lists
 -----
