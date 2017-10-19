@@ -85,7 +85,7 @@ and explicitly declare value as an Objective-C property::
     from rubicon.objc import NSObject, objc_method
 
     class PureHandler(NSObject):
-        value = @obj_property()
+        value = obj_property()
 
         @objc_method
         def initWithValue_(self, v: int):

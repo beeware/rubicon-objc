@@ -14,17 +14,8 @@ This tutorial assumes you've set up your environment as described in the
 Accessing NSURL
 ---------------
 
-Start Python, and use ctypes to import a framework into the Python
-interpreter:
-
-.. code-block:: python
-
-    >>> from ctypes import cdll, util
-    >>> cdll.LoadLibrary(util.find_library("Foundation"))
-
-This loads Apple's Objective-C Foundation libraries into memory. You can now
-reference any class that is defined in that library. Next, we need to get a
-handle to the `NSURL` class:
+Start Python, and get a reference to an Objective-C class. In this example,
+we're going to use the `NSURL` class, Objective-C's representation of URLs:
 
 .. code-block:: python
 
@@ -55,7 +46,7 @@ The second argument (`relativeToURL`) is accessed as a keyword argument. This
 argument is declared as being of type `NSURL *`; since `base` is an instance
 of NSURL, Rubicon can pass through this instance.
 
-Sometimes, an Objective-C method definition will use have the same keyword
+Sometimes, an Objective-C method definition will use the same keyword
 argument name twice. This is legal in Objective-C, but not in Python, as you
 can't repeat a keyword argument in a method call. In this case, you can use a
 "long form" of the method to explicitly invoke a descriptor by replacing
@@ -82,8 +73,28 @@ accessed as a Python attribute::
 
 You can also invoke methods on the instance::
 
-    >>> full.toString()
+    >>> longer = absolute.URLByAppendingPathComponent('how/first-time/')
 
+If you want to output an object at the console, you can use the Objective-C
+property `description`, or for debugging output, `debugDescription`::
+
+    >>> longer.description
+    'http://pybee.org/contributing/how/first-time/'
+
+    >>> longer.debugDescription
+    'http://pybee.org/contributing/how/first-time/>'
+
+Internally, `description` and `debugDescription` are hooked up to their Python
+equivalents, `__str__()` and `__repr__()`, respectively::
+
+    >>> str(absolute)
+    'http://pybee.org/contributing/how/first-time/'
+
+    >>> repr(absolute)
+    '<rubicon.objc.runtime.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>'
+
+    >>> print(absolute)
+    <rubicon.objc.runtime.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>
 
 Time to take over the world!
 ----------------------------

@@ -65,8 +65,15 @@ Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 
 * The `pybee/general`_ channel on Gitter.
 
-We foster a welcoming and respectful community as described in our
-`BeeWare Community Code of Conduct`_.
+Code of Conduct
+---------------
+
+The BeeWare community has a strict `Code of Conduct`_. All users and
+developers are expected to adhere to this code.
+
+If you have any concerns about this code of conduct, or you wish to report a
+violation of this code, please contact the project founder `Russell Keith-
+Magee`.
 
 Contributing
 ------------
