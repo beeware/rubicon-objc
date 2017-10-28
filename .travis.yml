@@ -11,6 +11,7 @@ matrix:
   - osx_image: xcode9
 language: generic
 install:
+  - brew update
   - brew install python3
   - python3 -m pip install tox
   - make -f Makefile
