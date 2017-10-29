@@ -114,7 +114,8 @@ class CFTimerHandle(events.Handle):
 
 
 class CFEventLoop(unix_events.SelectorEventLoop):
-    def __init__(self):
+    def __init__(self, application=None):
+        self._application = application
         self._cfrunloop = libcf.CFRunLoopGetMain()
         self._running = False
 
@@ -142,7 +143,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
                 events._set_running_loop(self)
 
         try:
-            libcf.CFRunLoopRun()
+            if self._application:
+                self._application.run()
+            else:
+                libcf.CFRunLoopRun()
         finally:
             if not recursive:
                 self._running = False
@@ -170,6 +174,9 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
     def run_forever(self, application=None):
         """Run the event loop until stop() is called."""
+        if application is not None:
+            self.set_application(application)
+
         if self.is_running():
             raise RuntimeError(
                 "Recursively calling run_forever is forbidden. "
@@ -225,7 +232,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         Note that due to the nature of CF's main loop, stopping may not be
         immediate.
         """
-        libcf.CFRunLoopStop(self._cfrunloop)
+        if self._application:
+            self._application.terminate()
+        else:
+            libcf.CFRunLoopStop(self._cfrunloop)
 
     def close(self):
         while self._accept_futures:
@@ -237,6 +247,14 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             handler.cancel()
 
         super().close()
+
+    def set_application(self, application):
+        if self._application is not None:
+            raise ValueError("application is already set")
+        if self.is_running():
+            raise RuntimeError("You can't add the application to a loop that's already running.")
+        self._application = application
+        self._policy._application = application
 
 
 class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
