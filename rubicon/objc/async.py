@@ -39,11 +39,23 @@ kCFRunLoopCommonModes = objc_const(libcf, 'kCFRunLoopCommonModes')
 # CoreFoundation methods for async handlers
 ###########################################################################
 
+libcf.CFAbsoluteTimeGetCurrent.restype = CFAbsoluteTime
+libcf.CFAbsoluteTimeGetCurrent.argtypes = []
+
+libcf.CFRunLoopAddTimer.restype = None
+libcf.CFRunLoopAddTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
+
 libcf.CFRunLoopGetMain.restype = CFRunLoopRef
 libcf.CFRunLoopGetMain.argtypes = []
 
-libcf.CFAbsoluteTimeGetCurrent.restype = CFAbsoluteTime
-libcf.CFAbsoluteTimeGetCurrent.argtypes = []
+libcf.CFRunLoopRemoveTimer.restype = None
+libcf.CFRunLoopRemoveTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
+
+libcf.CFRunLoopRun.restype = None
+libcf.CFRunLoopRun.argtypes = []
+
+libcf.CFRunLoopStop.restype = None
+libcf.CFRunLoopStop.argtypes = [CFRunLoopRef]
 
 libcf.CFRunLoopTimerCreate.restype = CFRunLoopTimerRef
 libcf.CFRunLoopTimerCreate.argtypes = [
@@ -55,12 +67,6 @@ libcf.CFRunLoopTimerCreate.argtypes = [
     CFRunLoopTimerCallBack,
     POINTER(CFRunLoopTimerContext),
 ]
-
-libcf.CFRunLoopAddTimer.restype = None
-libcf.CFRunLoopAddTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
-
-libcf.CFRunLoopRemoveTimer.restype = None
-libcf.CFRunLoopRemoveTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
 
 
 ###########################################################################
@@ -82,11 +88,13 @@ class CFTimerHandle(events.Handle):
         # Compute when the timer will fire
         fire_time = libcf.CFAbsoluteTimeGetCurrent() + timeout
 
+        # Define a CF-compatible callback to invoke the underlying callback
         def cfcallback(cftimer, extra):
             callback(*args)
 
         self._cfcallback = CFRunLoopTimerCallBack(cfcallback)
 
+        # Create the timer event, and add it to the run loop.
         self.timer = libcf.CFRunLoopTimerCreate(
             kCFAllocatorDefault,
             fire_time,
@@ -106,8 +114,7 @@ class CFTimerHandle(events.Handle):
 
 
 class CFEventLoop(unix_events.SelectorEventLoop):
-    def __init__(self, application=None):
-        self._application = application
+    def __init__(self):
         self._cfrunloop = libcf.CFRunLoopGetMain()
         self._running = False
 
@@ -121,7 +128,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         if (coroutines.iscoroutine(callback) or coroutines.iscoroutinefunction(callback)):
             raise TypeError("coroutines cannot be used with {}()".format(name))
 
-    def is_running(self):  ###
+    def is_running(self):
         return self._running
 
     def run(self):
@@ -135,7 +142,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
                 events._set_running_loop(self)
 
         try:
-            self._application.run()
+            libcf.CFRunLoopRun()
         finally:
             if not recursive:
                 self._running = False
@@ -149,7 +156,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         def stop(f):
             self.stop()
 
-        future = tasks.async(future, loop=self)
+        future = tasks.ensure_future(future, loop=self)
         future.add_done_callback(stop)
         try:
             self.run_forever(**kw)
@@ -161,11 +168,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         return future.result()
 
-    def run_forever(self, application=None):  ###
+    def run_forever(self, application=None):
         """Run the event loop until stop() is called."""
-        if application is not None:
-            self.set_application(application)
-
         if self.is_running():
             raise RuntimeError(
                 "Recursively calling run_forever is forbidden. "
@@ -177,7 +181,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             self.stop()
 
     # Methods scheduling callbacks.  All these return Handles.
-    def call_soon(self, callback, *args):  ###
+    def call_soon(self, callback, *args):
         self._check_not_coroutine(callback, 'call_soon')
 
         return CFTimerHandle(
@@ -188,9 +192,9 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             args=args
         )
 
-    call_soon_threadsafe = call_soon  ##
+    call_soon_threadsafe = call_soon
 
-    def call_later(self, delay, callback, *args):  ###
+    def call_later(self, delay, callback, *args):
         self._check_not_coroutine(callback, 'call_later')
 
         return CFTimerHandle(
@@ -201,7 +205,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             args=args
         )
 
-    def call_at(self, when, callback, *args):  ###
+    def call_at(self, when, callback, *args):
         self._check_not_coroutine(callback, 'call_at')
 
         return CFTimerHandle(
@@ -212,36 +216,27 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             args=args
         )
 
-    def time(self):  ###
+    def time(self):
         return libcf.CFAbsoluteTimeGetCurrent()
 
-    def stop(self):  ###
+    def stop(self):
         """Stop the inner-most invocation of the event loop.
         Typically, this will mean stopping the event loop completely.
         Note that due to the nature of CF's main loop, stopping may not be
         immediate.
         """
-        if self._application is not None:
-            self._application.terminate(None)
+        libcf.CFRunLoopStop(self._cfrunloop)
 
     def close(self):
-        for future in self._accept_futures.values():
+        while self._accept_futures:
+            future = self._accept_futures.pop()
             future.cancel()
-        self._accept_futures.clear()
 
-        for s in self._handlers:
-            s.cancel()
-        self._handlers.clear()
+        while self._handlers:
+            handler = self._handlers.pop()
+            handler.cancel()
 
         super().close()
-
-    def set_application(self, application):
-        if self._application is not None:
-            raise ValueError("application is already set")
-        if self.is_running():
-            raise RuntimeError("You can't add the application to a loop that's already running.")
-        self._application = application
-        self._policy._application = application
 
 
 class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
@@ -250,9 +245,8 @@ class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
     automatically create an event loop by default for the main thread; other
     threads by default have no event loop.
     """
-    def __init__(self, application=None):
+    def __init__(self):
         self._default_loop = None
-        self._application = application
         self._watcher_lock = threading.Lock()
 
         self._watcher = None
@@ -300,6 +294,6 @@ class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
         return self._default_loop
 
     def _new_default_loop(self):
-        loop = CFEventLoop(application=self._application)
+        loop = CFEventLoop()
         loop._policy = self
         return loop
