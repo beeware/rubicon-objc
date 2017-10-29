@@ -278,10 +278,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         super().__init__()
 
-    def add_reader(self, fd, callback, *args):
-        """Add a reader callback."""
-        self._ensure_fd_no_transport(fd)
-
+    def _add_reader(self, fd, callback, *args):
         try:
             handle = self._sockets[fd]
         except KeyError:
@@ -290,7 +287,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         handle.enable_read(callback, args)
 
-    def remove_reader(self, fd):
+    def add_reader(self, fd, callback, *args):
+        """Add a reader callback."""
+        self._ensure_fd_no_transport(fd)
+        self._add_reader(fd, callback, *args)
+
+    def _remove_reader(self, fd):
         self._ensure_fd_no_transport(fd)
 
         try:
@@ -299,7 +301,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         except KeyError:
             return False
 
-    def add_writer(self, fd, callback, *args):
+    def remove_reader(self, fd):
+        """Remove a reader callback."""
+        self._ensure_fd_no_transport(fd)
+        self._remove_reader(self, fd)
+
+    def _add_writer(self, fd, callback, *args):
         self._ensure_fd_no_transport(fd)
 
         try:
@@ -310,7 +317,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         handle.enable_write(callback, args)
 
-    def remove_writer(self, fd):
+    def add_writer(self, fd, callback, *args):
+        """Add a writer callback.."""
+        self._add_writer(fd, callback, *args)
+
+    def _remove_writer(self, fd):
         self._ensure_fd_no_transport(fd)
 
         try:
@@ -318,6 +329,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             return True
         except KeyError:
             return False
+
+    def remove_writer(self, fd):
+        """Remove a writer callback."""
+        self._ensure_fd_no_transport(fd)
+        self._remove_writer(fd)
 
     ######################################################################
     # Lifecycle and execution
