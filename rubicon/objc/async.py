@@ -1,7 +1,7 @@
 """PEP 3156 event loop based on CoreFoundation"""
 
 import threading
-from asyncio import DefaultEventLoopPolicy, coroutine, coroutines, events, tasks, unix_events
+from asyncio import DefaultEventLoopPolicy, coroutines, events, tasks, unix_events
 from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_long, c_ulong, c_void_p
 
 from .runtime import objc_const, objc_id
@@ -53,10 +53,10 @@ kCFSocketWriteCallBack = 8
 kCFSocketAutomaticallyReenableReadCallBack = 1
 kCFSocketAutomaticallyReenableWriteCallBack = 8
 
+
 ###########################################################################
 # CoreFoundation methods for async handlers
 ###########################################################################
-
 
 class CFSocketContext(Structure):
     _fields_ = [
@@ -66,6 +66,8 @@ class CFSocketContext(Structure):
         ('retain', CFUNCTYPE(None, c_void_p)),  # const void *(*retain)(const void *info)
         ('version', CFIndex),
     ]
+
+
 libcf.CFAbsoluteTimeGetCurrent.restype = CFAbsoluteTime
 libcf.CFAbsoluteTimeGetCurrent.argtypes = []
 
@@ -178,7 +180,7 @@ class CFSocketHandle(events.Handle):
             # Spurious notifications seem to be generated sometimes if you
             # CFSocketDisableCallBacks in the middle of an event.  I don't know
             # about this FD, any more, so let's get rid of it.
-            CFRunLoopRemoveSource(
+            libcf.CFRunLoopRemoveSource(
                 self._loop._cfrunloop, self._src, kCFRunLoopCommonModes
             )
             return
@@ -217,7 +219,7 @@ class CFSocketHandle(events.Handle):
             kCFSocketReadCallBack | kCFSocketWriteCallBack |
             kCFSocketConnectCallBack,
             self._callback,
-            None #self._ctx
+            None
         )
         libcf.CFSocketSetSocketFlags(
             self._cf_socket,
