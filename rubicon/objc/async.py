@@ -13,6 +13,13 @@ from .core_foundation import (
 from .runtime import objc_const, objc_id
 from .types import CFIndex
 
+
+__all__ = [
+    'EventLoopPolicy',
+    'CocoaLifecycle',
+    'iOSLifecycle',
+]
+
 ###########################################################################
 # CoreFoundation types and constants needed for async handlers
 ###########################################################################
@@ -275,8 +282,8 @@ class CFSocketHandle(events.Handle):
 
 
 class CFEventLoop(unix_events.SelectorEventLoop):
-    def __init__(self, application=None):
-        self._application = application
+    def __init__(self, lifecycle=None):
+        self._lifecycle = lifecycle
         self._cfrunloop = libcf.CFRunLoopGetMain()
         self._running = False
 
@@ -363,10 +370,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
                 events._set_running_loop(self)
 
         try:
-            if self._application:
-                self._application.run()
-            else:
-                libcf.CFRunLoopRun()
+            self._lifecycle.start()
         finally:
             if not recursive:
                 self._running = False
@@ -399,9 +403,9 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         return future.result()
 
-    def run_forever(self, application=None):
+    def run_forever(self, lifecycle=None):
         """Run until stop() is called."""
-        self.set_application(application)
+        self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
 
         if self.is_running():
             raise RuntimeError(
@@ -491,10 +495,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         Every callback already scheduled will still run.  This simply informs
         run_forever to stop looping after a complete iteration.
         """
-        if self._application:
-            self._application.terminate()
-        else:
-            libcf.CFRunLoopStop(self._cfrunloop)
+        self._lifecycle.stop()
 
     def close(self):
         """Close the event loop.
@@ -514,25 +515,25 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         super().close()
 
-    def set_application(self, application):
-        """Set the application that is controlling this loop.
+    def _set_lifecycle(self, lifecycle):
+        """Set the application lifecycle that is controlling this loop.
         """
-        if self._application is not None:
-            raise ValueError("Application is already set")
+        if self._lifecycle is not None:
+            raise ValueError("Lifecycle is already set")
         if self.is_running():
-            raise RuntimeError("You can't add the application to a loop that's already running.")
-        self._application = application
-        self._policy._application = application
+            raise RuntimeError("You can't set a lifecycle on a loop that's already running.")
+        self._lifecycle = lifecycle
+        self._policy._lifecycle = lifecycle
 
 
-class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
-    """Default CF event loop policy
+class EventLoopPolicy(events.AbstractEventLoopPolicy):
+    """Rubicon event loop policy
     In this policy, each thread has its own event loop. However, we only
     automatically create an event loop by default for the main thread; other
     threads by default have no event loop.
     """
     def __init__(self):
-        self._application = None
+        self._lifecycle = None
         self._default_loop = None
         self._watcher_lock = threading.Lock()
         self._watcher = None
@@ -546,7 +547,7 @@ class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
         if not self._default_loop and isinstance(threading.current_thread(), threading._MainThread):
             loop = self.get_default_loop()
         else:
-            loop = CFEventLoop(self._application)
+            loop = CFEventLoop(self._lifecycle)
         loop._policy = self
 
         return loop
@@ -558,6 +559,39 @@ class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
         return self._default_loop
 
     def _new_default_loop(self):
-        loop = CFEventLoop(self._application)
+        loop = CFEventLoop(self._lifecycle)
         loop._policy = self
         return loop
+
+
+class CFLifecycle:
+    """A lifecycle manager for raw CoreFoundation apps"""
+    def __init__(self, cfrunloop):
+        self._cfrunloop = cfrunloop
+
+    def start(self):
+        libcf.CFRunLoopRun()
+
+    def stop(self):
+        libcf.CFRunLoopStop(self._cfrunloop)
+
+
+class CocoaLifecycle:
+    """A lifecycle manager for Cocoa (NSApplication) apps."""
+    def __init__(self, application):
+        self._application = application
+
+    def start(self):
+        self._application.run()
+
+    def stop(self):
+        self._application.terminate()
+
+
+class iOSLifecycle:
+    """A lifecycle manager for iOS (UIApplication) apps."""
+    def start(self):
+        pass
+
+    def stop(self):
+        pass

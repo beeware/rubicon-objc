@@ -2,7 +2,7 @@ import asyncio
 import time
 import unittest
 
-from rubicon.objc.async import CFEventLoopPolicy
+from rubicon.objc.async import EventLoopPolicy
 
 
 # Some coroutines with known behavior for testing purposes.
@@ -21,7 +21,7 @@ def stop_loop(loop, delay):
 
 class AsyncRunTests(unittest.TestCase):
     def setUp(self):
-        asyncio.set_event_loop_policy(CFEventLoopPolicy())
+        asyncio.set_event_loop_policy(EventLoopPolicy())
         self.loop = asyncio.get_event_loop()
 
     def tearDown(self):
@@ -59,7 +59,7 @@ class AsyncRunTests(unittest.TestCase):
 
 class AsyncCallTests(unittest.TestCase):
     def setUp(self):
-        asyncio.set_event_loop_policy(CFEventLoopPolicy())
+        asyncio.set_event_loop_policy(EventLoopPolicy())
         self.loop = asyncio.get_event_loop()
 
     def tearDown(self):
@@ -126,7 +126,6 @@ class AsyncReaderWriterTests(unittest.TestCase):
         def echo_server(reader, writer):
             data = yield from reader.read(100)
             message = data.decode()
-            addr = writer.get_extra_info('peername')
             server_messages.append(message)
 
             writer.write(data)

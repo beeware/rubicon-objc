@@ -30,11 +30,11 @@ event loop.
 
 To use asyncio in a pure Core Foundation application, do the following::
 
-    # Import the CoreFoundation Event Loop Policy
-    from rubicon.objc.async import CFEventLoopPolicy
+    # Import the Event Loop Policy
+    from rubicon.objc.async import EventLoopPolicy
 
     # Install the event loop policy
-    asyncio.set_event_loop_policy(CFEventLoopPolicy())
+    asyncio.set_event_loop_policy(EventLoopPolicy())
 
     # Get an event loop, and run it!
     loop = asyncio.get_event_loop()
@@ -52,11 +52,11 @@ CoreFoundation event loop - you need to start the full NSApplication
 lifecycle. To do this, you pass the application instance into the call to
 ``loop.run_forever()``::
 
-    # Import the CoreFoundation Event Loop Policy
-    from rubicon.objc.async import CFEventLoopPolicy
+    # Import the Event Loop Policy and lifecycle
+    from rubicon.objc.async import EventLoopPolicy, CocoaLifecycle
 
     # Install the event loop policy
-    asyncio.set_event_loop_policy(CFEventLoopPolicy())
+    asyncio.set_event_loop_policy(EventLoopPolicy())
 
     # Get a handle to the shared NSApplication
     from ctypes import cdll, util
@@ -68,12 +68,36 @@ lifecycle. To do this, you pass the application instance into the call to
 
     # Get an event loop, and run it, using the NSApplication!
     loop = asyncio.get_event_loop()
-    loop.run_forever(application=app)
+    loop.run_forever(lifecycle=CocoaLifecycle(app))
 
 Again, this will run "forever" -- until either ``loop.stop()`` is called, or
 ``terminate:`` is invoked on the NSApplication.
 
-Integrating asyncio with iOS and UIApplication
-----------------------------------------------
+.. FIXME once this actually works...
+.. Integrating asyncio with iOS and UIApplication
+.. ----------------------------------------------
 
-To be continued...
+.. If you're using UIKit and UIApplication on iOS, you need to use the iOS
+.. lifecycle. To do this, you pass an ``iOSLifecycle`` object into the call to
+.. ``loop.run_forever()``::
+
+..     # Import the Event Loop Policy and lifecycle
+..     from rubicon.objc.async import EventLoopPolicy, iOSLifecycle
+
+..     # Install the event loop policy
+..     asyncio.set_event_loop_policy(EventLoopPolicy())
+
+..     # Get a handle to the shared NSApplication
+..     from ctypes import cdll, util
+..     from rubicon.objc import ObjCClass
+
+..     appkit = cdll.LoadLibrary(util.find_library('AppKit'))
+..     NSApplication = ObjCClass('NSApplication')
+..     app = NSApplication.sharedApplication()
+
+..     # Get an event loop, and run it, using the NSApplication!
+..     loop = asyncio.get_event_loop()
+..     loop.run_forever(lifecycle=iOSLifecycle(app))
+
+.. Again, this will run "forever" -- until either ``loop.stop()`` is called, or
+.. ``terminate:`` is invoked on the NSApplication.
