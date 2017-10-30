@@ -3,9 +3,7 @@
 from asyncio import (
     DefaultEventLoopPolicy, coroutines, events, tasks, unix_events
 )
-from ctypes import (
-    CFUNCTYPE, POINTER, Structure, c_double, c_int, c_long, c_ulong, c_void_p
-)
+from ctypes import CFUNCTYPE, POINTER, Structure, c_int, c_void_p
 import threading
 
 from .core_foundation import (
