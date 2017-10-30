@@ -165,6 +165,7 @@ class CFTimerHandle(events.TimerHandle):
         libcf.CFRunLoopAddTimer(self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes)
 
     def cancel(self):
+        """Cancel the Timer handle"""
         super().cancel()
         libcf.CFRunLoopRemoveTimer(self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes)
         self._loop._timers.discard(self)
@@ -238,25 +239,34 @@ class CFSocketHandle(events.Handle):
         )
 
     def enable_read(self, callback, args):
+        """Add a callback for read activity on the socket."""
         libcf.CFSocketEnableCallBacks(self._cf_socket, kCFSocketReadCallBack)
         self._reader = (callback, args)
 
     def disable_read(self):
+        """Remove the callback for read activity on the socket."""
         libcf.CFSocketDisableCallBacks(self._cf_socket, kCFSocketReadCallBack)
         self._reader = None
         self.cancel()
 
     def enable_write(self, callback, args):
+        """Add a callback for write activity on the socket."""
         libcf.CFSocketEnableCallBacks(self._cf_socket, kCFSocketWriteCallBack)
         self._writer = (callback, args)
 
     def disable_write(self):
+        """Remove the callback for write activity on the socket."""
         libcf.CFSocketDisableCallBacks(self._cf_socket, kCFSocketWriteCallBack)
         self._writer = None
         self.cancel()
 
     def cancel(self):
-        """
+        """(Potentially) cancel the socket handle.
+
+        A socket handle can have both reader and writer components; a call to
+        cancel a socket handle will only be successfull if *both* the reader and
+        writer component have been disabled. If either is still active, cancel()
+        will be a no-op.
         """
         if self._reader is None and self._writer is None:
             super().cancel()
@@ -293,8 +303,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._add_reader(fd, callback, *args)
 
     def _remove_reader(self, fd):
-        self._ensure_fd_no_transport(fd)
-
         try:
             self._sockets[fd].disable_read()
             return True
@@ -307,7 +315,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._remove_reader(self, fd)
 
     def _add_writer(self, fd, callback, *args):
-        self._ensure_fd_no_transport(fd)
 
         try:
             handle = self._sockets[fd]
@@ -319,11 +326,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
     def add_writer(self, fd, callback, *args):
         """Add a writer callback.."""
+        self._ensure_fd_no_transport(fd)
         self._add_writer(fd, callback, *args)
 
     def _remove_writer(self, fd):
-        self._ensure_fd_no_transport(fd)
-
         try:
             self._sockets[fd].disable_write()
             return True
