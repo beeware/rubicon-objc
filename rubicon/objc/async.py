@@ -541,28 +541,6 @@ class CFEventLoopPolicy(events.AbstractEventLoopPolicy):
         self.get_event_loop = self._policy.get_event_loop
         self.set_event_loop = self._policy.set_event_loop
 
-    def get_child_watcher(self):
-        raise NotImplementedError()
-        # if self._watcher is None:
-        #     with self._watcher_lock:
-        #         if self._watcher is None:
-        #             self._watcher = CFChildWatcher()
-        # return self._watcher
-
-    def set_child_watcher(self, watcher):
-        raise NotImplementedError()
-        """Set a child watcher.
-
-        Must be an an instance of CFChildWatcher, as it ties in with CF
-        appropriately.
-        """
-
-        # if watcher is not None and not isinstance(watcher, CFChildWatcher):
-        #     raise TypeError("Only CFChildWatcher is supported!")
-
-        # with self._watcher_lock:
-        #     self._watcher = watcher
-
     def new_event_loop(self):
         """Create a new event loop and return it."""
         if not self._default_loop and isinstance(threading.current_thread(), threading._MainThread):
