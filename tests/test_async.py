@@ -96,3 +96,64 @@ class AsyncCallTests(unittest.TestCase):
         # The co-routine will be queued after 0.2 seconds.
         self.assertGreaterEqual(end - start, 0.2)
         self.assertLess(end - start, 0.3)
+
+
+class AsyncReaderWriterTests(unittest.TestCase):
+    def setUp(self):
+        self.loop = asyncio.get_event_loop()
+        self.server = None
+
+    def tearDown(self):
+        # Close the server
+        if self.server:
+            self.server.close()
+            self.loop.run_until_complete(self.server.wait_closed())
+
+    def test_tcp_echo(self):
+        """A simple TCP Echo client/server works as expected"""
+        # This tests that you can:
+        # * create a TCP server
+        # * create a TCP client
+        # * write to a socket
+        # * read from a socket
+        # * be notified of updates on a socket when data arrives.
+
+        # Requires that port 3742 is available for use.
+
+        server_messages = []
+
+        @asyncio.coroutine
+        def echo_server(reader, writer):
+            data = yield from reader.read(100)
+            message = data.decode()
+            addr = writer.get_extra_info('peername')
+            server_messages.append(message)
+
+            writer.write(data)
+            yield from writer.drain()
+
+            writer.close()
+
+        self.server = self.loop.run_until_complete(
+            asyncio.start_server(echo_server, '127.0.0.1', 3742, loop=self.loop)
+        )
+
+        client_messages = []
+
+        @asyncio.coroutine
+        def echo_client(message, loop):
+            reader, writer = yield from asyncio.open_connection('127.0.0.1', 3742,
+                                                                loop=loop)
+
+            writer.write(message.encode())
+
+            data = yield from reader.read(100)
+            client_messages.append(data.decode())
+
+            writer.close()
+
+        self.loop.run_until_complete(echo_client('Hello, World!', self.loop))
+        self.loop.run_until_complete(echo_client('Goodbye, World!', self.loop))
+
+        self.assertEqual(server_messages, ['Hello, World!', 'Goodbye, World!'])
+        self.assertEqual(client_messages, ['Hello, World!', 'Goodbye, World!'])
