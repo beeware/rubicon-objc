@@ -201,14 +201,9 @@ class CFSocketHandle(events.Handle):
 
     def __init__(self, *, loop, fd):
         """
-        Register a file descriptor with the C{CFRunLoop}, or modify its state
+        Register a file descriptor with the CFRunLoop, or modify its state
         so that it's listening for both notifications (read and write) rather
-        than just one; used to implement C{addReader} and C{addWriter}.
-        @param fd: The file descriptor.
-        @type fd: L{int}
-        @param descr: the L{IReadDescriptor} or L{IWriteDescriptor}
-        @param flag: the flag to register for callbacks on, either
-            C{kCFSocketReadCallBack} or C{kCFSocketWriteCallBack}
+        than just one; used to implement add_reader and add_writer.
         """
         super().__init__(CFSocketCallback(self._cf_socket_callback), None, loop)
 
