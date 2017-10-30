@@ -303,8 +303,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         handle.enable_read(callback, args)
 
     def add_reader(self, fd, callback, *args):
-        """Add a reader callback."""
-        self._ensure_fd_no_transport(fd)
+        """Add a reader callback.
+
+        Method is a direct call through to _add_reader to
+        reflect an internal implementation detail added in Python3.5.
+        """
         self._add_reader(fd, callback, *args)
 
     def _remove_reader(self, fd):
@@ -315,9 +318,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             return False
 
     def remove_reader(self, fd):
-        """Remove a reader callback."""
-        self._ensure_fd_no_transport(fd)
-        self._remove_reader(self, fd)
+        """Remove a reader callback.
+
+        Method is a direct call through to _remove_reader to
+        reflect an internal implementation detail added in Python3.5.
+        """
+        self._remove_reader(fd)
 
     def _add_writer(self, fd, callback, *args):
 
@@ -330,8 +336,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         handle.enable_write(callback, args)
 
     def add_writer(self, fd, callback, *args):
-        """Add a writer callback.."""
-        self._ensure_fd_no_transport(fd)
+        """Add a writer callback.
+
+        Method is a direct call through to _add_writer to
+        reflect an internal implementation detail added in Python3.5.
+        """
         self._add_writer(fd, callback, *args)
 
     def _remove_writer(self, fd):
@@ -342,8 +351,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             return False
 
     def remove_writer(self, fd):
-        """Remove a writer callback."""
-        self._ensure_fd_no_transport(fd)
+        """Remove a writer callback.
+
+        Method is a direct call through to _remove_writer to
+        reflect an internal implementation detail added in Python3.5.
+        """
         self._remove_writer(fd)
 
     ######################################################################
