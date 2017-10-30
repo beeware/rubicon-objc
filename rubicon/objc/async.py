@@ -1,29 +1,31 @@
 """PEP 3156 event loop based on CoreFoundation"""
 
+from asyncio import (
+    DefaultEventLoopPolicy, coroutines, events, tasks, unix_events
+)
+from ctypes import (
+    CFUNCTYPE, POINTER, Structure, c_double, c_int, c_long, c_ulong, c_void_p
+)
 import threading
-from asyncio import DefaultEventLoopPolicy, coroutines, events, tasks, unix_events
-from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_long, c_ulong, c_void_p
 
+from .core_foundation import (
+    CFAbsoluteTime, CFAllocatorRef, CFDataRef, CFOptionFlags,
+    CFStringRef, CFTimeInterval, kCFAllocatorDefault, libcf
+)
 from .runtime import objc_const, objc_id
-from .core_foundation import CFStringRef, libcf
+from .types import CFIndex
 
 ###########################################################################
 # CoreFoundation types and constants needed for async handlers
 ###########################################################################
-CFAllocatorRef = objc_id
-CFData = objc_id
-CFIndex = c_long
-CFOptionFlags = c_ulong
+
 CFRunLoopRef = objc_id
 CFRunLoopMode = CFStringRef
 CFRunLoopSourceRef = objc_id
 
-CFTimeInterval = c_double
-CFAbsoluteTime = CFTimeInterval
 CFRunLoopTimerRef = objc_id
 CFRunLoopTimerCallBack = CFUNCTYPE(None, CFRunLoopTimerRef, c_void_p)
 
-CFDataRef = POINTER(CFData)
 CFSocketRef = objc_id
 CFSocketCallbackType = c_int
 CFSocketCallback = CFUNCTYPE(None, CFSocketRef, CFSocketCallbackType, CFDataRef, c_void_p, c_void_p)
@@ -40,7 +42,6 @@ class CFRunLoopTimerContext(Structure):
     ]
 
 
-kCFAllocatorDefault = objc_const(libcf, 'kCFAllocatorDefault')
 kCFRunLoopCommonModes = objc_const(libcf, 'kCFRunLoopCommonModes')
 
 kCFSocketNoCallBack = 0
@@ -76,9 +77,6 @@ libcf.CFRunLoopAddSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoop
 
 libcf.CFRunLoopAddTimer.restype = None
 libcf.CFRunLoopAddTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
-
-libcf.CFRunLoopGetMain.restype = CFRunLoopRef
-libcf.CFRunLoopGetMain.argtypes = []
 
 libcf.CFRunLoopRemoveSource.restype = None
 libcf.CFRunLoopRemoveSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoopMode]
