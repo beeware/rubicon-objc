@@ -13,9 +13,11 @@ from .runtime import (
 from .types import CFIndex, CFRange, CGFloat
 
 __all__ = [
+    'CFAbsoluteTime',
     'CFAllocatorRef',
     'CFArrayRef',
     'CFAttributedStringRef',
+    'CFData',
     'CFDataRef',
     'CFDictionaryRef',
     'CFMutableArrayRef',
@@ -23,17 +25,20 @@ __all__ = [
     'CFMutableSetRef',
     'CFNumberRef',
     'CFNumberType',
+    'CFOptionFlags',
     'CFRunLoopRef',
     'CFSTR',
     'CFSetRef',
     'CFStringEncoding',
     'CFStringRef',
+    'CFTimeInterval',
     'CFTypeID',
     'CFTypeRef',
     'NSDecimalNumber',
     'at',
     'from_value',
     'is_str',
+    'kCFAllocatorDefault',
     'kCFNumberCFIndexType',
     'kCFNumberCGFloatType',
     'kCFNumberCharType',
@@ -62,6 +67,7 @@ __all__ = [
     'to_value',
 ]
 
+
 ######################################################################
 
 # CORE FOUNDATION
@@ -75,20 +81,27 @@ CFTypeID = c_ulong
 CFTypeRef = objc_id
 
 CFAllocatorRef = objc_id
+kCFAllocatorDefault = None
+
 CFArrayRef = objc_id
 CFAttributedStringRef = objc_id
+CFData = objc_id
 CFDataRef = objc_id
 CFDictionaryRef = objc_id
 CFMutableArrayRef = objc_id
 CFMutableDictionaryRef = objc_id
 CFMutableSetRef = objc_id
 CFNumberRef = objc_id
+CFOptionFlags = c_ulong
 CFRunLoopRef = objc_id
 CFSetRef = objc_id
 CFStringRef = objc_id
 
 CFStringEncoding = c_uint32
 kCFStringEncodingUTF8 = 0x08000100
+
+CFTimeInterval = c_double
+CFAbsoluteTime = CFTimeInterval
 
 libcf.CFGetTypeID.restype = CFTypeID
 libcf.CFGetTypeID.argtypes = [CFTypeRef]
