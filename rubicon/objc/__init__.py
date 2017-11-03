@@ -5,8 +5,8 @@ from .core_foundation import (  # noqa: F401
     to_number, to_set, to_str, to_value,
 )
 from .runtime import (  # noqa: F401
-    IMP, SEL, Block, Class, Ivar, Method, NSObject, ObjCBlock, ObjCClass,
-    ObjCInstance, ObjCMetaClass, objc_classmethod, objc_const, objc_id,
+    IMP, SEL, Block, Class, Ivar, Method, NSObject, NSObjectProtocol, ObjCBlock, ObjCClass,
+    ObjCInstance, ObjCMetaClass, ObjCProtocol, objc_classmethod, objc_const, objc_id,
     objc_ivar, objc_method, objc_property, objc_property_t, objc_rawmethod,
     send_message, send_super,
 )

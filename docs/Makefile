@@ -166,7 +166,7 @@ spelling:
 
 install:
 	@echo "... setting up virtualenv"
-	virtualenv env
+	virtualenv ../env
 	. $(VENV); pip install -r requirements_docs.txt
 	@echo "\n" \
 	      "-------------------------------------------------------------------------------------------------- \n" \

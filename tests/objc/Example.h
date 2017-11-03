@@ -57,6 +57,8 @@ extern NSString *const SomeGlobalStringConstant;
 @property (retain) id<Callback> callback;
 @property (readonly) int ambiguous;
 
++(Protocol *)callbackProtocol;
+
 +(int) staticIntField;
 +(void) setStaticIntField: (int) v;
 
