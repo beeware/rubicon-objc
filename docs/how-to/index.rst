@@ -12,4 +12,5 @@ How-to guides are recipes that take the user through steps in key subjects. They
 
    Get started <get-started>
    Mapping Python types to Objective-C <type-mapping>
+   Using and creating Objective-C protocols <protocols>
    Contribute to Toga <contribute>
