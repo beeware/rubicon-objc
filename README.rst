@@ -85,7 +85,7 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 .. _Read The Docs: http://rubicon-objc.readthedocs.org
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
 .. _pybee/general: https://gitter.im/pybee/general
-.. _BeeWare Community Code of Conduct: http://pybee.org/community/behavior/
+.. _Code of Conduct: http://pybee.org/community/behavior/
 .. _log them on GitHub: https://github.com/pybee/rubicon-objc/issues
 .. _fork the code: https://github.com/pybee/rubicon-objc
 .. _submit a pull request: https://github.com/pybee/rubicon-objc/pulls
