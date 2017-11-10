@@ -11,6 +11,7 @@ Release History
 * Added support for creating Objective-C blocks from Python callables. (ojii)
 * Added support for creating, extending and conforming to Objective-C protocols.
 * Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
+* Added support for registering custom ``ObjCInstance`` subclasses to be used to represent Objective-C objects of specific classes.
 
 0.2.8
 -----
