@@ -1291,7 +1291,10 @@ class ObjCInstance(object):
         if core_foundation.is_str(self):
             return core_foundation.to_str(self)
         else:
-            return self.description
+            desc = self.description
+            if desc is None:
+                raise ValueError('{self.name}.description returned nil'.format(self=self))
+            return desc
 
     def __repr__(self):
         return "<%s.%s %#x: %s at %#x: %s>" % (
@@ -1563,6 +1566,9 @@ class ObjCClass(ObjCInstance, type):
             self.name,
             self.ptr.value,
         )
+
+    def __str__(self):
+        return "{cls.__name__}({self.name!r})".format(cls=type(self), self=self)
 
     def __del__(self):
         libc.free(self.methods_ptr)
