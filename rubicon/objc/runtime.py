@@ -1143,6 +1143,76 @@ def objc_rawmethod(f):
 
 ######################################################################
 
+_type_for_objcclass_map = {}
+
+
+def type_for_objcclass(objcclass):
+    """Look up the ObjCInstance subclass used to represent instances of the given Objective-C class in Python.
+
+    If the exact Objective-C class is not registered, each superclass is also checked, defaulting to ObjCInstance
+    if none of the classes in the superclass chain is registered. Afterwards, all searched superclasses are registered
+    for the ObjCInstance subclass that was found.
+    """
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    superclass = objcclass
+    traversed_classes = []
+    pytype = ObjCInstance
+    while superclass.value is not None:
+        try:
+            pytype = _type_for_objcclass_map[superclass.value]
+        except KeyError:
+            traversed_classes.append(superclass)
+            superclass = libobjc.class_getSuperclass(superclass)
+        else:
+            break
+
+    for cls in traversed_classes:
+        register_type_for_objcclass(pytype, cls)
+
+    return pytype
+
+
+def register_type_for_objcclass(pytype, objcclass):
+    """Register a conversion from an Objective-C class to an ObjCInstance subclass."""
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    _type_for_objcclass_map[objcclass.value] = pytype
+
+
+def unregister_type_for_objcclass(objcclass):
+    """Unregister a conversion from an Objective-C class to an ObjCInstance subclass"""
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    del _type_for_objcclass_map[objcclass.value]
+
+
+def get_type_for_objcclass_map():
+    """Get a copy of all currently registered ObjCInstance subclasses as a mapping.
+    Keys are Objective-C class addresses as integers.
+    """
+
+    return dict(_type_for_objcclass_map)
+
+
+def for_objcclass(objcclass):
+    """Decorator for registering a conversion from an Objective-C class to an ObjCInstance subclass.
+    This is equivalent to calling register_type_for_objcclass.
+    """
+
+    def _for_objcclass(pytype):
+        register_type_for_objcclass(pytype, objcclass)
+        return pytype
+
+    return _for_objcclass
+
+
 class ObjCInstance(object):
     """Python wrapper for an Objective-C instance."""
 
@@ -1151,30 +1221,6 @@ class ObjCInstance(object):
     @property
     def objc_class(self):
         return ObjCClass(libobjc.object_getClass(self))
-
-    @classmethod
-    def _select_mixin(cls, object_ptr):
-        nsmutablearray = libobjc.objc_getClass(b'NSMutableArray')
-        if send_message(object_ptr, 'isKindOfClass:', nsmutablearray):
-            return ObjCMutableListInstance
-
-        nsarray = libobjc.objc_getClass(b'NSArray')
-        if send_message(object_ptr, 'isKindOfClass:', nsarray):
-            return ObjCListInstance
-
-        nsmutabledictionary = libobjc.objc_getClass(b'NSMutableDictionary')
-        if send_message(object_ptr, 'isKindOfClass:', nsmutabledictionary):
-            return ObjCMutableDictInstance
-
-        nsdictionary = libobjc.objc_getClass(b'NSDictionary')
-        if send_message(object_ptr, 'isKindOfClass:', nsdictionary):
-            return ObjCDictInstance
-
-        protocol = libobjc.objc_getClass(b'Protocol')
-        if send_message(object_ptr, 'isKindOfClass:', protocol, restype=c_bool, argtypes=[c_void_p]):
-            return ObjCProtocol
-
-        return cls
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """Create a new ObjCInstance or return a previously created one
@@ -1208,7 +1254,7 @@ class ObjCInstance(object):
             if is_block:
                 cls = ObjCBlockInstance
             else:
-                cls = cls._select_mixin(object_ptr)
+                cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
@@ -1571,6 +1617,15 @@ register_ctype_for_type(ObjCInstance, objc_id)
 register_ctype_for_type(ObjCClass, Class)
 
 
+NSObject = ObjCClass('NSObject')
+NSArray = ObjCClass('NSArray')
+NSMutableArray = ObjCClass('NSMutableArray')
+NSDictionary = ObjCClass('NSDictionary')
+NSMutableDictionary = ObjCClass('NSMutableDictionary')
+Protocol = ObjCClass('Protocol')
+
+
+@for_objcclass(NSArray)
 class ObjCListInstance(ObjCInstance):
     def __getitem__(self, item):
         if isinstance(item, slice):
@@ -1619,6 +1674,7 @@ class ObjCListInstance(ObjCInstance):
         return self.objc_class.arrayWithArray_(self)
 
 
+@for_objcclass(NSMutableArray)
 class ObjCMutableListInstance(ObjCListInstance):
     def _slice_to_range_params(self, s):
         step = s.step or 1
@@ -1709,6 +1765,7 @@ class ObjCMutableListInstance(ObjCListInstance):
         self.insertObject_atIndex_(value, idx)
 
 
+@for_objcclass(NSDictionary)
 class ObjCDictInstance(ObjCInstance):
     def __getitem__(self, item):
         v = self.objectForKey_(item)
@@ -1755,6 +1812,7 @@ class ObjCDictInstance(ObjCInstance):
         return ObjCClass('NSMutableDictionary').dictionaryWithDictionary_(self)
 
 
+@for_objcclass(NSMutableDictionary)
 class ObjCMutableDictInstance(ObjCDictInstance):
     no_pop_default = object()
 
@@ -1805,10 +1863,7 @@ class ObjCMutableDictInstance(ObjCDictInstance):
             self.setObject_forKey_(v, k)
 
 
-NSObject = ObjCClass('NSObject')
-Protocol = ObjCClass('Protocol')
-
-
+@for_objcclass(Protocol)
 class ObjCProtocol(ObjCInstance):
     """Python wrapper for an Objective-C protocol."""
 
