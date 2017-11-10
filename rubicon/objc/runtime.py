@@ -53,10 +53,12 @@ __all__ = [
     'convert_method_arguments',
     'create_block_descriptor_struct',
     'encoding_from_annotation',
+    'for_objcclass',
     'get_class',
     'get_instance_variable',
     'get_metaclass',
     'get_superclass_of_object',
+    'get_type_for_objcclass_map',
     'libc',
     'libobjc',
     'objc_block',
@@ -71,11 +73,14 @@ __all__ = [
     'objc_rawmethod',
     'objc_super',
     'object_isClass',
+    'register_type_for_objcclass',
     'send_message',
     'send_super',
     'set_instance_variable',
     'should_use_fpret',
     'should_use_stret',
+    'type_for_objcclass',
+    'unregister_type_for_objcclass',
 ]
 
 if sizeof(c_void_p) == 4:
