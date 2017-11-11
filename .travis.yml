@@ -1,3 +1,6 @@
+branches:
+  only:
+    - master
 os: osx
 matrix:
   include:
