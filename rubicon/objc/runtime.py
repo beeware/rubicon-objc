@@ -1578,6 +1578,21 @@ class ObjCClass(ObjCInstance, type):
     def __del__(self):
         libc.free(self.methods_ptr)
 
+    def __instancecheck__(self, instance):
+        if isinstance(instance, ObjCInstance):
+            return bool(instance.isKindOfClass(self))
+        else:
+            return False
+
+    def __subclasscheck__(self, subclass):
+        if isinstance(subclass, ObjCClass):
+            return bool(subclass.isSubclassOfClass(self))
+        else:
+            raise TypeError(
+                'issubclass(X, {self!r}) arg 1 must be an ObjCClass, not {tp.__module__}.{tp.__qualname__}'
+                .format(self=self, tp=type(subclass))
+            )
+
     def _reload_methods(self):
         old_methods_ptr = self.methods_ptr
         self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
@@ -1945,6 +1960,24 @@ class ObjCProtocol(ObjCInstance):
     def __repr__(self):
         return '<{cls.__module__}.{cls.__qualname__}: {self.name} at {self.ptr.value:#x}>'.format(
             cls=type(self), self=self)
+
+    def __instancecheck__(self, instance):
+        if isinstance(instance, ObjCInstance):
+            return bool(instance.conformsToProtocol(self))
+        else:
+            return False
+
+    def __subclasscheck__(self, subclass):
+        if isinstance(subclass, ObjCClass):
+            return bool(subclass.conformsToProtocol(self))
+        elif isinstance(subclass, ObjCProtocol):
+            return bool(libobjc.protocol_conformsToProtocol(subclass, self))
+        else:
+            raise TypeError(
+                'issubclass(X, {self!r}) arg 1 must be an ObjCClass or ObjCProtocol, '
+                'not {tp.__module__}.{tp.__qualname__}'
+                .format(self=self, tp=type(subclass))
+            )
 
 
 # Need to use a different name to avoid conflict with the NSObject class.

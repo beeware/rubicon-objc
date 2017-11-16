@@ -230,6 +230,81 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(DerivedProtocol.protocols, (BaseProtocolOne, BaseProtocolTwo))
 
+    def test_objcclass_instancecheck(self):
+        """isinstance works with an ObjCClass as the second argument."""
+
+        NSArray = ObjCClass('NSArray')
+        NSString = ObjCClass('NSString')
+
+        self.assertIsInstance(NSObject.new(), NSObject)
+        self.assertIsInstance(core_foundation.at(''), NSString)
+        self.assertIsInstance(core_foundation.at(''), NSObject)
+        self.assertIsInstance(NSObject, NSObject)
+        self.assertIsInstance(NSObject, NSObject.objc_class)
+
+        self.assertNotIsInstance(object(), NSObject)
+        self.assertNotIsInstance(NSObject.new(), NSString)
+        self.assertNotIsInstance(NSArray.array, NSString)
+
+    def test_objcclass_subclasscheck(self):
+        """issubclass works with an ObjCClass as the second argument."""
+
+        NSArray = ObjCClass('NSArray')
+        NSString = ObjCClass('NSString')
+
+        self.assertTrue(issubclass(NSObject, NSObject))
+        self.assertTrue(issubclass(NSString, NSObject))
+        self.assertTrue(issubclass(NSObject.objc_class, NSObject))
+        self.assertTrue(issubclass(NSObject.objc_class, NSObject.objc_class))
+
+        self.assertFalse(issubclass(NSObject, NSString))
+        self.assertFalse(issubclass(NSArray, NSString))
+
+        with self.assertRaises(TypeError):
+            issubclass(object(), NSObject)
+        with self.assertRaises(TypeError):
+            issubclass(object, NSObject)
+        with self.assertRaises(TypeError):
+            issubclass(NSObject.new(), NSObject)
+        with self.assertRaises(TypeError):
+            issubclass(NSObjectProtocol, NSObject)
+
+    def test_objcprotocol_instancecheck(self):
+        """isinstance works with an ObjCProtocol as the second argument."""
+
+        NSCoding = ObjCProtocol('NSCoding')
+        NSSecureCoding = ObjCProtocol('NSSecureCoding')
+
+        self.assertIsInstance(core_foundation.at(''), NSSecureCoding)
+        self.assertIsInstance(core_foundation.at(''), NSCoding)
+
+        self.assertNotIsInstance(object(), NSSecureCoding)
+        self.assertNotIsInstance(NSObject.new(), NSSecureCoding)
+
+    def test_objcprotocol_subclasscheck(self):
+        """issubclass works with an ObjCProtocol as the second argument."""
+
+        NSString = ObjCClass('NSString')
+        NSCopying = ObjCProtocol('NSCopying')
+        NSCoding = ObjCProtocol('NSCoding')
+        NSSecureCoding = ObjCProtocol('NSSecureCoding')
+
+        self.assertTrue(issubclass(NSObject, NSObjectProtocol))
+        self.assertTrue(issubclass(NSString, NSObjectProtocol))
+        self.assertTrue(issubclass(NSSecureCoding, NSSecureCoding))
+        self.assertTrue(issubclass(NSSecureCoding, NSCoding))
+
+        self.assertFalse(issubclass(NSObject, NSSecureCoding))
+        self.assertFalse(issubclass(NSCoding, NSSecureCoding))
+        self.assertFalse(issubclass(NSCopying, NSSecureCoding))
+
+        with self.assertRaises(TypeError):
+            issubclass(object(), NSSecureCoding)
+        with self.assertRaises(TypeError):
+            issubclass(object, NSSecureCoding)
+        with self.assertRaises(TypeError):
+            issubclass(NSObject.new(), NSSecureCoding)
+
     def test_field(self):
         "A field on an instance can be accessed and mutated"
 
