@@ -15,14 +15,14 @@ Protocol objects can be looked up using the ``ObjCProtocol`` constructor, simila
     >>> NSCopying
     <rubicon.objc.runtime.ObjCProtocol: NSCopying at 0x7fff76543210>
 
-A protocol object can be passed to the ``conformsToProtocol:`` method of an Objective-C object, to check whether it conforms to the given protocol:
+The ``isinstance`` function can be used to check whether an object conforms to a protocol:
 
 .. code-block:: python
 
-    >>> NSObject.new().conformsToProtocol(NSCopying)
-    0
-    >>> NSArray.array().conformsToProtocol(NSCopying)
-    1
+    >>> isinstance(NSObject.new(), NSCopying)
+    False
+    >>> isinstance(NSArray.array(), NSCopying)
+    True
 
 Implementing a protocol
 ------------------------
@@ -66,8 +66,8 @@ And we can check that the class conforms to the protocol:
 
 .. code-block:: python
 
-    >>> ua.conformsToProtocol(NSCopying)
-    1
+    >>> isinstance(ua, NSCopying)
+    True
 
 Writing custom protocols
 ------------------------
