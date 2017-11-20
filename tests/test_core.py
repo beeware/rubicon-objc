@@ -10,9 +10,10 @@ from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSRange, NSUInteger,
-    ObjCClass, ObjCInstance, ObjCMetaClass, core_foundation, objc_classmethod,
-    objc_const, objc_method, objc_property, send_message, types,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSRange, NSRect,
+    NSSize, NSUInteger, ObjCClass, ObjCInstance, ObjCMetaClass,
+    core_foundation, objc_classmethod, objc_const, objc_method, objc_property,
+    send_message, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
@@ -793,3 +794,44 @@ class RubiconTest(unittest.TestCase):
 
         string_const = objc_const(rubiconharness, "SomeGlobalStringConstant")
         self.assertEqual(str(string_const), "Some global string constant")
+
+    def test_interface_return_struct(self):
+        "An ObjC protocol implementation that returns values by struct can be defined in Python."
+
+        results = {}
+
+        class StructReturnHandler(NSObject):
+            @objc_method
+            def initWithValue_(self, value):
+                self.value = value
+                return self
+
+            @objc_method
+            def thingSize_(self, input: NSSize) -> NSSize:
+                results['size'] = True
+                return NSSize(input.width + self.__dict__['value'], input.height * self.__dict__['value'])
+
+            @objc_method
+            def thingRect_(self, input: NSRect) -> NSRect:
+                results['rect'] = True
+                return NSMakeRect(
+                    input.origin.y + self.value, input.origin.x,
+                    input.size.height + self.value, input.size.width
+                )
+
+        # Create two handler instances so we can check the right one
+        # is being invoked.
+        handler1 = StructReturnHandler.alloc().initWithValue_(5)
+        handler2 = StructReturnHandler.alloc().initWithValue_(10)
+
+        outSize = handler1.thingSize_(NSSize(20, 30))
+        self.assertEqual(outSize.width, 25)
+        self.assertEqual(outSize.height, 150)
+        self.assertTrue(results.get('size'))
+
+        outRect = handler2.thingRect_(NSMakeRect(10, 20, 30, 40))
+        self.assertEqual(outRect.origin.x, 30)
+        self.assertEqual(outRect.origin.y, 10)
+        self.assertEqual(outRect.size.width, 50)
+        self.assertEqual(outRect.size.height, 30)
+        self.assertTrue(results.get('rect'))

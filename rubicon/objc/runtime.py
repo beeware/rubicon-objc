@@ -5,7 +5,7 @@ from ctypes import (
     CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, addressof,
     alignment, byref, c_bool, c_char_p, c_double, c_float, c_int, c_int32,
     c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong, c_void_p, cast,
-    sizeof, util,
+    py_object, sizeof, util,
 )
 from enum import Enum
 
@@ -629,6 +629,9 @@ def send_super(receiver, selName, *args, **kwargs):
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
+    if type(restype) == type(Structure):
+        restype == py_object
+
     send = libobjc['objc_msgSendSuper']
     send.restype = restype
     if argtypes:
@@ -671,6 +674,11 @@ def add_method(cls, selName, method, encoding):
     signature = tuple(ctype_for_type(tp) for tp in encoding)
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
+
+    # If the return type is a structure, use py_object as the signature.
+    if type(signature[0]) == type(Structure):
+        signature = (py_object,) + signature[1:]
+
     selector = SEL(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
