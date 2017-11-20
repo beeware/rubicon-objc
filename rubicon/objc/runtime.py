@@ -40,6 +40,7 @@ __all__ = [
     'ObjCMutableDictInstance',
     'ObjCMutableListInstance',
     'ObjCPartialMethod',
+    'ObjCProtocol',
     'SEL',
     'add_ivar',
     'add_method',
@@ -52,10 +53,12 @@ __all__ = [
     'convert_method_arguments',
     'create_block_descriptor_struct',
     'encoding_from_annotation',
+    'for_objcclass',
     'get_class',
     'get_instance_variable',
     'get_metaclass',
     'get_superclass_of_object',
+    'get_type_for_objcclass_map',
     'libc',
     'libobjc',
     'objc_block',
@@ -70,11 +73,14 @@ __all__ = [
     'objc_rawmethod',
     'objc_super',
     'object_isClass',
+    'register_type_for_objcclass',
     'send_message',
     'send_super',
     'set_instance_variable',
     'should_use_fpret',
     'should_use_stret',
+    'type_for_objcclass',
+    'unregister_type_for_objcclass',
 ]
 
 if sizeof(c_void_p) == 4:
@@ -436,6 +442,14 @@ libobjc.object_setIvar.argtypes = [objc_id, Ivar, objc_id]
 
 ######################################################################
 
+
+class objc_property_attribute_t(Structure):
+    _fields_ = [
+        ('name', c_char_p),
+        ('value', c_char_p),
+    ]
+
+
 # const char *property_getAttributes(objc_property_t property)
 libobjc.property_getAttributes.restype = c_char_p
 libobjc.property_getAttributes.argtypes = [objc_property_t]
@@ -444,16 +458,41 @@ libobjc.property_getAttributes.argtypes = [objc_property_t]
 libobjc.property_getName.restype = c_char_p
 libobjc.property_getName.argtypes = [objc_property_t]
 
+# objc_property_attribute_t *property_copyAttributeList(objc_property_t property, unsigned int *outCount)
+libobjc.property_copyAttributeList.restype = POINTER(objc_property_attribute_t)
+libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
+
 ######################################################################
+
+
+class objc_method_description(Structure):
+    _fields_ = [
+        ('name', SEL),
+        ('types', c_char_p),
+    ]
+
+
+# void protocol_addMethodDescription(Protocol *proto, SEL name, const char *types,
+#     BOOL isRequiredMethod, BOOL isInstanceMethod)
+libobjc.protocol_addMethodDescription.restype = None
+libobjc.protocol_addMethodDescription.argtypes = [objc_id, SEL, c_char_p, c_bool, c_bool]
+
+# void protocol_addProtocol(Protocol *proto, Protocol *addition)
+libobjc.protocol_addProtocol.restype = None
+libobjc.protocol_addProtocol.argtypes = [objc_id, objc_id]
+
+# void protocol_addProperty(Protocol *proto, const char *name, const objc_property_attribute_t *attributes,
+#     unsigned int attributeCount, BOOL isRequiredProperty, BOOL isInstanceProperty)
+libobjc.protocol_addProperty.restype = None
+libobjc.protocol_addProperty.argtypes = [objc_id, c_char_p, POINTER(objc_property_attribute_t), c_uint, c_bool, c_bool]
+
+# Protocol *objc_allocateProtocol(const char *name)
+libobjc.objc_allocateProtocol.restype = objc_id
+libobjc.objc_allocateProtocol.argtypes = [c_char_p]
 
 # BOOL protocol_conformsToProtocol(Protocol *proto, Protocol *other)
 libobjc.protocol_conformsToProtocol.restype = c_bool
 libobjc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
-
-
-class objc_method_description(Structure):
-    _fields_ = [("name", SEL), ("types", c_char_p)]
-
 
 # struct objc_method_description *protocol_copyMethodDescriptionList(
 #     Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
@@ -466,7 +505,7 @@ libobjc.protocol_copyPropertyList.restype = POINTER(objc_property_t)
 libobjc.protocol_copyPropertyList.argtypes = [objc_id, POINTER(c_uint)]
 
 # Protocol **protocol_copyProtocolList(Protocol *proto, unsigned int *outCount)
-libobjc.protocol_copyProtocolList = POINTER(objc_id)
+libobjc.protocol_copyProtocolList.restype = POINTER(objc_id)
 libobjc.protocol_copyProtocolList.argtypes = [objc_id, POINTER(c_uint)]
 
 # struct objc_method_description protocol_getMethodDescription(
@@ -477,6 +516,10 @@ libobjc.protocol_getMethodDescription.argtypes = [objc_id, SEL, c_bool, c_bool]
 # const char *protocol_getName(Protocol *p)
 libobjc.protocol_getName.restype = c_char_p
 libobjc.protocol_getName.argtypes = [objc_id]
+
+# void objc_registerProtocol(Protocol *proto)
+libobjc.objc_registerProtocol.restype = None
+libobjc.objc_registerProtocol.argtypes = [objc_id]
 
 ######################################################################
 
@@ -983,7 +1026,13 @@ def objc_method(f):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls, name, _objc_method, encoding)
 
+    def protocol_register(proto, attr):
+        name = attr.replace('_', ':')
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, True)
+
     _objc_method.register = register
+    _objc_method.protocol_register = protocol_register
 
     return _objc_method
 
@@ -1008,7 +1057,13 @@ def objc_classmethod(f):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
 
+    def protocol_register(proto, attr):
+        name = attr.replace('_', ':')
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, False)
+
     _objc_classmethod.register = register
+    _objc_classmethod.protocol_register = protocol_register
 
     return _objc_classmethod
 
@@ -1024,6 +1079,9 @@ class objc_ivar(object):
 
     def pre_register(self, ptr, attr):
         return add_ivar(ptr, attr, self.vartype)
+
+    def protocol_register(self, proto, attr):
+        raise TypeError('Objective-C protocols cannot have ivars')
 
 
 class objc_property(object):
@@ -1072,6 +1130,13 @@ class objc_property(object):
         cls.imp_keep_alive_table[attr] = add_method(cls.ptr, attr, _objc_getter, getter_encoding)
         cls.imp_keep_alive_table[setter_name] = add_method(cls.ptr, setter_name, _objc_setter, setter_encoding)
 
+    def protocol_register(self, proto, attr):
+        attrs = (objc_property_attribute_t * 2)(
+            objc_property_attribute_t(b'T', b'@'),  # Type: id
+            objc_property_attribute_t(b'&', b''),  # retain
+        )
+        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, 2, True, True)
+
 
 def objc_rawmethod(f):
     encoding = encoding_from_annotation(f, offset=2)
@@ -1079,11 +1144,87 @@ def objc_rawmethod(f):
     def register(cls, attr):
         name = attr.replace("_", ":")
         cls.imp_keep_alive_table[name] = add_method(cls, name, f, encoding)
+
+    def protocol_register(proto, attr):
+        raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
+
     f.register = register
+    f.protocol_register = protocol_register
+
     return f
 
 
 ######################################################################
+
+_type_for_objcclass_map = {}
+
+
+def type_for_objcclass(objcclass):
+    """Look up the ObjCInstance subclass used to represent instances of the given Objective-C class in Python.
+
+    If the exact Objective-C class is not registered, each superclass is also checked, defaulting to ObjCInstance
+    if none of the classes in the superclass chain is registered. Afterwards, all searched superclasses are registered
+    for the ObjCInstance subclass that was found.
+    """
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    superclass = objcclass
+    traversed_classes = []
+    pytype = ObjCInstance
+    while superclass.value is not None:
+        try:
+            pytype = _type_for_objcclass_map[superclass.value]
+        except KeyError:
+            traversed_classes.append(superclass)
+            superclass = libobjc.class_getSuperclass(superclass)
+        else:
+            break
+
+    for cls in traversed_classes:
+        register_type_for_objcclass(pytype, cls)
+
+    return pytype
+
+
+def register_type_for_objcclass(pytype, objcclass):
+    """Register a conversion from an Objective-C class to an ObjCInstance subclass."""
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    _type_for_objcclass_map[objcclass.value] = pytype
+
+
+def unregister_type_for_objcclass(objcclass):
+    """Unregister a conversion from an Objective-C class to an ObjCInstance subclass"""
+
+    if isinstance(objcclass, ObjCClass):
+        objcclass = objcclass.ptr
+
+    del _type_for_objcclass_map[objcclass.value]
+
+
+def get_type_for_objcclass_map():
+    """Get a copy of all currently registered ObjCInstance subclasses as a mapping.
+    Keys are Objective-C class addresses as integers.
+    """
+
+    return dict(_type_for_objcclass_map)
+
+
+def for_objcclass(objcclass):
+    """Decorator for registering a conversion from an Objective-C class to an ObjCInstance subclass.
+    This is equivalent to calling register_type_for_objcclass.
+    """
+
+    def _for_objcclass(pytype):
+        register_type_for_objcclass(pytype, objcclass)
+        return pytype
+
+    return _for_objcclass
+
 
 class ObjCInstance(object):
     """Python wrapper for an Objective-C instance."""
@@ -1093,26 +1234,6 @@ class ObjCInstance(object):
     @property
     def objc_class(self):
         return ObjCClass(libobjc.object_getClass(self))
-
-    @classmethod
-    def _select_mixin(cls, object_ptr):
-        nsmutablearray = libobjc.objc_getClass(b'NSMutableArray')
-        if send_message(object_ptr, 'isKindOfClass:', nsmutablearray):
-            return ObjCMutableListInstance
-
-        nsarray = libobjc.objc_getClass(b'NSArray')
-        if send_message(object_ptr, 'isKindOfClass:', nsarray):
-            return ObjCListInstance
-
-        nsmutabledictionary = libobjc.objc_getClass(b'NSMutableDictionary')
-        if send_message(object_ptr, 'isKindOfClass:', nsmutabledictionary):
-            return ObjCMutableDictInstance
-
-        nsdictionary = libobjc.objc_getClass(b'NSDictionary')
-        if send_message(object_ptr, 'isKindOfClass:', nsdictionary):
-            return ObjCDictInstance
-
-        return cls
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """Create a new ObjCInstance or return a previously created one
@@ -1146,7 +1267,7 @@ class ObjCInstance(object):
             if is_block:
                 cls = ObjCBlockInstance
             else:
-                cls = cls._select_mixin(object_ptr)
+                cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
@@ -1183,7 +1304,10 @@ class ObjCInstance(object):
         if core_foundation.is_str(self):
             return core_foundation.to_str(self)
         else:
-            return self.description
+            desc = self.description
+            if desc is None:
+                raise ValueError('{self.name}.description returned nil'.format(self=self))
+            return desc
 
     def __repr__(self):
         return "<%s.%s %#x: %s at %#x: %s>" % (
@@ -1261,6 +1385,281 @@ class ObjCInstance(object):
                 super(ObjCInstance, type(self)).__setattr__(self, name, value)
 
 
+# The inheritance order is important here.
+# type must come after ObjCInstance, so super() refers to ObjCInstance.
+# This allows the ObjCInstance constructor to receive the class pointer
+# as well as the name, bases, attrs arguments.
+# The other way around this would not be possible, because then
+# the type constructor would be called before ObjCInstance's, and there
+# would be no opportunity to pass extra arguments.
+class ObjCClass(ObjCInstance, type):
+    """Python wrapper for an Objective-C class."""
+
+    @property
+    def superclass(self):
+        """The superclass of this class, or None if this is a root class (such as NSObject)."""
+
+        super_ptr = libobjc.class_getSuperclass(self)
+        if super_ptr.value is None:
+            return None
+        else:
+            return ObjCClass(super_ptr)
+
+    @property
+    def protocols(self):
+        """The protocols adopted by this class."""
+
+        out_count = c_uint()
+        protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
+        return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
+
+    def _new_from_name(cls, name):
+        name = ensure_bytes(name)
+        ptr = get_class(name)
+        if ptr.value is None:
+            raise NameError("ObjC Class '%s' couldn't be found." % name)
+
+        return ptr, name
+
+    def _new_from_ptr(cls, ptr):
+        ptr = cast(ptr, Class)
+        if ptr.value is None:
+            raise ValueError("Cannot create ObjCClass from nil pointer")
+        elif not object_isClass(ptr):
+            raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
+        name = libobjc.class_getName(ptr)
+
+        return ptr, name
+
+    def _new_from_class_statement(cls, name, bases, attrs, *, protocols):
+        name = ensure_bytes(name)
+
+        if get_class(name).value is not None:
+            raise RuntimeError('An Objective-C class named {!r} already exists'.format(name))
+
+        try:
+            (superclass,) = bases
+        except ValueError:
+            raise ValueError('An Objective-C class must have exactly one base class, not {}'.format(len(bases)))
+
+        # Check that the superclass is an ObjCClass.
+        if not isinstance(superclass, ObjCClass):
+            raise TypeError(
+                'The superclass of an Objective-C class must be an ObjCClass, '
+                'not a {cls.__module__}.{cls.__qualname__}'
+                .format(cls=type(superclass))
+            )
+
+        # Check that all protocols are ObjCProtocols, and that there are no duplicates.
+        for proto in protocols:
+            if not isinstance(proto, ObjCProtocol):
+                raise TypeError(
+                    'The protocols list of an Objective-C class must contain ObjCProtocol objects, '
+                    'not {cls.__module__}.{cls.__qualname__}'
+                    .format(cls=type(proto))
+                )
+            elif protocols.count(proto) > 1:
+                raise ValueError('Protocol {} is adopted more than once'.format(proto.name))
+
+        # Create the ObjC class description
+        ptr = libobjc.objc_allocateClassPair(superclass, name, 0)
+        if ptr is None:
+            raise RuntimeError('Class pair allocation failed')
+
+        # Adopt all the protocols.
+        for proto in protocols:
+            if not libobjc.class_addProtocol(ptr, proto):
+                raise RuntimeError('Failed to adopt protocol {}'.format(proto.name))
+
+        # Pre-Register all the instance variables
+        for attr, obj in attrs.items():
+            if hasattr(obj, 'pre_register'):
+                obj.pre_register(ptr, attr)
+
+        # Register the ObjC class
+        libobjc.objc_registerClassPair(ptr)
+
+        return ptr, name, attrs
+
+    def __new__(cls, name_or_ptr, bases=None, attrs=None, *, protocols=()):
+        """Create a new ObjCClass instance or return a previously created instance for the given Objective-C class.
+
+        If called with a single class pointer argument, an ObjCClass for that class pointer is returned.
+        If called with a single str or bytes argument, the Objective-C with that name is returned.
+
+        If called with three arguments, they must a name, a superclass list, and a namespace dict. A new Objective-C
+        class with those properties is created and returned. This form is usually called implicitly when subclassing
+        another ObjCClass.
+        In the three-argument form, an optional protocols keyword argument is also accepted. If present, it must be
+        a sequence of ObjCProtocol objects that the new class should adopt.
+        """
+
+        if (bases is None) ^ (attrs is None):
+            raise TypeError('ObjCClass arguments 2 and 3 must be given together')
+
+        if bases is None and attrs is None:
+            # A single argument provided. If it's a string, treat it as
+            # a class name. Anything else treat as a class pointer.
+
+            if protocols:
+                raise ValueError('protocols kwarg is not allowed for the single-argument form of ObjCClass')
+
+            attrs = {}
+
+            if isinstance(name_or_ptr, (bytes, str)):
+                ptr, name = cls._new_from_name(cls, name_or_ptr)
+            else:
+                ptr, name = cls._new_from_ptr(cls, name_or_ptr)
+                if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
+                    return ObjCMetaClass(ptr)
+        else:
+            ptr, name, attrs = cls._new_from_class_statement(cls, name_or_ptr, bases, attrs, protocols=protocols)
+
+        objc_class_name = name.decode('utf-8')
+
+        # Create the class object. If there is already a cached instance for ptr,
+        # it is returned and the additional arguments are ignored.
+        # Logically this can only happen when creating an ObjCClass from an existing
+        # name or pointer, not when creating a new class.
+        # If there is no cached instance for ptr, a new one is created and cached.
+        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+            '_class_inited': False,
+            'name': objc_class_name,
+            'methods_ptr_count': c_uint(0),
+            'methods_ptr': None,
+            # Mapping of name -> method pointer
+            'instance_method_ptrs': {},
+            # Mapping of name -> instance method
+            'instance_methods': {},
+            # Mapping of name -> (accessor method, mutator method)
+            'instance_properties': {},
+            # Explicitly declared properties
+            'forced_properties': set(),
+            # Mapping of first selector part -> ObjCPartialMethod instances
+            'partial_methods': {},
+            # Mapping of name -> CFUNCTYPE callback function
+            # This only contains the IMPs of methods created in Python,
+            # which need to be kept from being garbage-collected.
+            # It does not contain any other methods, do not use it for calling methods.
+            'imp_keep_alive_table': {},
+        })
+
+        if not self._class_inited:
+            self._class_inited = True
+
+            # Register all the methods, class methods, etc
+            registered_something = False
+            for attr, obj in attrs.items():
+                if hasattr(obj, "register"):
+                    registered_something = True
+                    obj.register(self, attr)
+
+            # If anything was registered, reload the methods of this class
+            # (and the metaclass, because there may be new class methods).
+            if registered_something:
+                self._reload_methods()
+                self.objc_class._reload_methods()
+
+        return self
+
+    def __init__(self, *args, **kwargs):
+        # Prevent kwargs from being passed on to type.__init__, which does not accept any kwargs in Python < 3.6.
+        super().__init__(*args)
+
+    def declare_property(self, name):
+        self.forced_properties.add(name)
+
+    def declare_class_property(self, name):
+        self.objc_class.forced_properties.add(name)
+
+    def __repr__(self):
+        return "<%s.%s: %s at %#x>" % (
+            type(self).__module__,
+            type(self).__qualname__,
+            self.name,
+            self.ptr.value,
+        )
+
+    def __str__(self):
+        return "{cls.__name__}({self.name!r})".format(cls=type(self), self=self)
+
+    def __del__(self):
+        libc.free(self.methods_ptr)
+
+    def __instancecheck__(self, instance):
+        if isinstance(instance, ObjCInstance):
+            return bool(instance.isKindOfClass(self))
+        else:
+            return False
+
+    def __subclasscheck__(self, subclass):
+        if isinstance(subclass, ObjCClass):
+            return bool(subclass.isSubclassOfClass(self))
+        else:
+            raise TypeError(
+                'issubclass(X, {self!r}) arg 1 must be an ObjCClass, not {tp.__module__}.{tp.__qualname__}'
+                .format(self=self, tp=type(subclass))
+            )
+
+    def _reload_methods(self):
+        old_methods_ptr = self.methods_ptr
+        self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
+        # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
+        libc.free(old_methods_ptr)
+
+        for i in range(self.methods_ptr_count.value):
+            method = self.methods_ptr[i]
+            name = libobjc.method_getName(method).name.decode("utf-8")
+            self.instance_method_ptrs[name] = method
+
+            first, *rest = name.split(":")
+            # Selectors end in a colon iff the method takes arguments.
+            # Because of this, rest must either be empty (method takes no arguments)
+            # or the last element must be an empty string (method takes arguments).
+            assert not rest or rest[-1] == ""
+
+            try:
+                partial = self.partial_methods[first]
+            except KeyError:
+                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+
+            # order is rest without the dummy "" part
+            order = rest[:-1]
+            partial.methods[frozenset(rest)] = (method, order)
+
+
+class ObjCMetaClass(ObjCClass):
+    """Python wrapper for an Objective-C metaclass."""
+
+    def __new__(cls, name_or_ptr):
+        if isinstance(name_or_ptr, (bytes, str)):
+            name = ensure_bytes(name_or_ptr)
+            ptr = libobjc.objc_getMetaClass(name)
+            if ptr.value is None:
+                raise NameError("Objective-C metaclass {} not found".format(name))
+        else:
+            ptr = cast(name_or_ptr, Class)
+            if ptr.value is None:
+                raise ValueError("Cannot create ObjCMetaClass for nil pointer")
+            elif not object_isClass(ptr) or not libobjc.class_isMetaClass(ptr):
+                raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
+
+        return super().__new__(cls, ptr)
+
+
+register_ctype_for_type(ObjCInstance, objc_id)
+register_ctype_for_type(ObjCClass, Class)
+
+
+NSObject = ObjCClass('NSObject')
+NSArray = ObjCClass('NSArray')
+NSMutableArray = ObjCClass('NSMutableArray')
+NSDictionary = ObjCClass('NSDictionary')
+NSMutableDictionary = ObjCClass('NSMutableDictionary')
+Protocol = ObjCClass('Protocol')
+
+
+@for_objcclass(NSArray)
 class ObjCListInstance(ObjCInstance):
     def __getitem__(self, item):
         if isinstance(item, slice):
@@ -1309,6 +1708,7 @@ class ObjCListInstance(ObjCInstance):
         return self.objc_class.arrayWithArray_(self)
 
 
+@for_objcclass(NSMutableArray)
 class ObjCMutableListInstance(ObjCListInstance):
     def _slice_to_range_params(self, s):
         step = s.step or 1
@@ -1399,6 +1799,7 @@ class ObjCMutableListInstance(ObjCListInstance):
         self.insertObject_atIndex_(value, idx)
 
 
+@for_objcclass(NSDictionary)
 class ObjCDictInstance(ObjCInstance):
     def __getitem__(self, item):
         v = self.objectForKey_(item)
@@ -1445,6 +1846,7 @@ class ObjCDictInstance(ObjCInstance):
         return ObjCClass('NSMutableDictionary').dictionaryWithDictionary_(self)
 
 
+@for_objcclass(NSMutableDictionary)
 class ObjCMutableDictInstance(ObjCDictInstance):
     no_pop_default = object()
 
@@ -1495,194 +1897,100 @@ class ObjCMutableDictInstance(ObjCDictInstance):
             self.setObject_forKey_(v, k)
 
 
-# The inheritance order is important here.
-# type must come after ObjCInstance, so super() refers to ObjCInstance.
-# This allows the ObjCInstance constructor to receive the class pointer
-# as well as the name, bases, attrs arguments.
-# The other way around this would not be possible, because then
-# the type constructor would be called before ObjCInstance's, and there
-# would be no opportunity to pass extra arguments.
-class ObjCClass(ObjCInstance, type):
-    """Python wrapper for an Objective-C class."""
+@for_objcclass(Protocol)
+class ObjCProtocol(ObjCInstance):
+    """Python wrapper for an Objective-C protocol."""
 
     @property
-    def superclass(self):
-        super_ptr = libobjc.class_getSuperclass(self)
-        if super_ptr.value is None:
-            return None
-        else:
-            return ObjCClass(super_ptr)
+    def name(self):
+        """The name of this protocol."""
 
-    def __new__(cls, *args, **kwargs):
-        """Create a new ObjCClass instance or return a previously created
-        instance for the given Objective-C class.  The argument may be either
-        the name of the class to retrieve, a pointer to the class, or the
-        usual (name, bases, attrs) triple that is provided when called as
-        a subclass."""
+        return libobjc.protocol_getName(self).decode('utf-8')
 
-        if len(args) == 1:
-            # A single argument provided. If it's a string, treat it as
-            # a class name. Anything else treat as a class pointer.
+    @property
+    def protocols(self):
+        """The superprotocols of this protocol."""
 
-            # Determine name and ptr values from passed in argument.
-            class_name_or_ptr = args[0]
-            attrs = {}
+        out_count = c_uint()
+        protocols_ptr = libobjc.protocol_copyProtocolList(self, byref(out_count))
+        return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
-            if isinstance(class_name_or_ptr, (bytes, str)):
-                name = ensure_bytes(class_name_or_ptr)
-                ptr = get_class(name)
+    def __new__(cls, name_or_ptr, bases=None, ns=None):
+        if (bases is None) ^ (ns is None):
+            raise TypeError('ObjCProtocol arguments 2 and 3 must be given together')
+
+        if bases is None and ns is None:
+            if isinstance(name_or_ptr, (bytes, str)):
+                name = ensure_bytes(name_or_ptr)
+                ptr = libobjc.objc_getProtocol(name)
                 if ptr.value is None:
-                    raise NameError("ObjC Class '%s' couldn't be found." % class_name_or_ptr)
+                    raise NameError('Objective-C protocol {} not found'.format(name))
             else:
-                ptr = cast(class_name_or_ptr, Class)
+                ptr = cast(name_or_ptr, objc_id)
                 if ptr.value is None:
-                    raise ValueError("Cannot create ObjCClass from nil pointer")
-                elif not object_isClass(ptr):
-                    raise ValueError("Pointer {} ({:#x}) does not refer to a class".format(ptr, ptr.value))
-                name = libobjc.class_getName(ptr)
-                # "nil" is an ObjC answer confirming the ptr didn't work.
-                if name == b'nil':
-                    raise RuntimeError("Couldn't create ObjC class for pointer '%s'." % class_name_or_ptr)
-                if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
-                    return ObjCMetaClass(ptr)
-
+                    raise ValueError('Cannot create ObjCProtocol for nil pointer')
+                elif not send_message(ptr, 'isKindOfClass:', Protocol, restype=c_bool, argtypes=[objc_id]):
+                    raise ValueError('Pointer {} ({:#x}) does not refer to a protocol'.format(ptr, ptr.value))
         else:
-            name, bases, attrs = args
-            name = ensure_bytes(name)
-            if not isinstance(bases[0], ObjCClass):
-                raise RuntimeError("Base class isn't an ObjCClass.")
-
-            ptr = get_class(name)
-            if ptr.value is None:
-                # Create the ObjC class description
-                ptr = libobjc.objc_allocateClassPair(bases[0].ptr, name, 0)
-                if ptr is None:
-                    raise RuntimeError("Class pair allocation failed")
-
-                # Pre-Register all the instance variables
-                for attr, obj in attrs.items():
-                    if hasattr(obj, "pre_register"):
-                        obj.pre_register(ptr, attr)
-
-                # Register the ObjC class
-                libobjc.objc_registerClassPair(ptr)
-            else:
-                raise RuntimeError(
-                    "ObjC runtime already contains a registered class named '%s'." % name.decode('utf-8')
-                )
-
-        objc_class_name = name.decode('utf-8')
-
-        # Create the class object. If there is already a cached instance for ptr,
-        # it is returned and the additional arguments are ignored.
-        # Logically this can only happen when creating an ObjCClass from an existing
-        # name or pointer, not when creating a new class.
-        # If there is no cached instance for ptr, a new one is created and cached.
-        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
-            '_class_inited': False,
-            'name': objc_class_name,
-            'methods_ptr_count': c_uint(0),
-            'methods_ptr': None,
-            # Mapping of name -> method pointer
-            'instance_method_ptrs': {},
-            # Mapping of name -> instance method
-            'instance_methods': {},
-            # Mapping of name -> (accessor method, mutator method)
-            'instance_properties': {},
-            # Explicitly declared properties
-            'forced_properties': set(),
-            # Mapping of first selector part -> ObjCPartialMethod instances
-            'partial_methods': {},
-            # Mapping of name -> CFUNCTYPE callback function
-            # This only contains the IMPs of methods created in Python,
-            # which need to be kept from being garbage-collected.
-            # It does not contain any other methods, do not use it for calling methods.
-            'imp_keep_alive_table': {},
-        })
-
-        if not self._class_inited:
-            self._class_inited = True
-
-            # Register all the methods, class methods, etc
-            registered_something = False
-            for attr, obj in attrs.items():
-                if hasattr(obj, "register"):
-                    registered_something = True
-                    obj.register(self, attr)
-
-            # If anything was registered, reload the methods of this class
-            # (and the metaclass, because there may be new class methods).
-            if registered_something:
-                self._reload_methods()
-                self.objc_class._reload_methods()
-
-        return self
-
-    def declare_property(self, name):
-        self.forced_properties.add(name)
-
-    def declare_class_property(self, name):
-        self.objc_class.forced_properties.add(name)
-
-    def __repr__(self):
-        return "<%s.%s: %s at %#x>" % (
-            type(self).__module__,
-            type(self).__qualname__,
-            self.name,
-            self.ptr.value,
-        )
-
-    def __del__(self):
-        libc.free(self.methods_ptr)
-
-    def _reload_methods(self):
-        old_methods_ptr = self.methods_ptr
-        self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
-        # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
-        libc.free(old_methods_ptr)
-
-        for i in range(self.methods_ptr_count.value):
-            method = self.methods_ptr[i]
-            name = libobjc.method_getName(method).name.decode("utf-8")
-            self.instance_method_ptrs[name] = method
-
-            first, *rest = name.split(":")
-            # Selectors end in a colon iff the method takes arguments.
-            # Because of this, rest must either be empty (method takes no arguments)
-            # or the last element must be an empty string (method takes arguments).
-            assert not rest or rest[-1] == ""
-
-            try:
-                partial = self.partial_methods[first]
-            except KeyError:
-                partial = self.partial_methods[first] = ObjCPartialMethod(first)
-
-            # order is rest without the dummy "" part
-            order = rest[:-1]
-            partial.methods[frozenset(rest)] = (method, order)
-
-
-class ObjCMetaClass(ObjCClass):
-    """Python wrapper for an Objective-C metaclass."""
-
-    def __new__(cls, name_or_ptr):
-        if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
-            ptr = libobjc.objc_getMetaClass(name)
-            if ptr.value is None:
-                raise NameError("Objective-C metaclass {} not found".format(name))
-        else:
-            ptr = cast(name_or_ptr, Class)
-            if ptr.value is None:
-                raise ValueError("Cannot create ObjCMetaClass for nil pointer")
-            elif not object_isClass(ptr) or not libobjc.class_isMetaClass(ptr):
-                raise ValueError("Pointer {} ({:#x}) does not refer to a metaclass".format(ptr, ptr.value))
+
+            if libobjc.objc_getProtocol(name).value is not None:
+                raise RuntimeError('An Objective-C protocol named {!r} already exists'.format(name))
+
+            # Check that all bases are protocols.
+            for base in bases:
+                if not isinstance(base, ObjCProtocol):
+                    raise TypeError(
+                        'An Objective-C protocol can only extend ObjCProtocol objects, '
+                        'not {cls.__module__}.{cls.__qualname__}'
+                        .format(cls=type(base))
+                    )
+
+            # Allocate the protocol object.
+            ptr = libobjc.objc_allocateProtocol(name)
+            if ptr is None:
+                raise RuntimeError('Protocol allocation failed')
+
+            # Adopt all the protocols.
+            for proto in bases:
+                libobjc.protocol_addProtocol(ptr, proto)
+
+            # Register all methods and properties.
+            for attr, obj in ns.items():
+                if hasattr(obj, 'protocol_register'):
+                    obj.protocol_register(ptr, attr)
+
+            # Register the protocol object
+            libobjc.objc_registerProtocol(ptr)
 
         return super().__new__(cls, ptr)
 
+    def __repr__(self):
+        return '<{cls.__module__}.{cls.__qualname__}: {self.name} at {self.ptr.value:#x}>'.format(
+            cls=type(self), self=self)
 
-register_ctype_for_type(ObjCInstance, objc_id)
-register_ctype_for_type(ObjCClass, Class)
+    def __instancecheck__(self, instance):
+        if isinstance(instance, ObjCInstance):
+            return bool(instance.conformsToProtocol(self))
+        else:
+            return False
+
+    def __subclasscheck__(self, subclass):
+        if isinstance(subclass, ObjCClass):
+            return bool(subclass.conformsToProtocol(self))
+        elif isinstance(subclass, ObjCProtocol):
+            return bool(libobjc.protocol_conformsToProtocol(subclass, self))
+        else:
+            raise TypeError(
+                'issubclass(X, {self!r}) arg 1 must be an ObjCClass or ObjCProtocol, '
+                'not {tp.__module__}.{tp.__qualname__}'
+                .format(self=self, tp=type(subclass))
+            )
+
+
+# Need to use a different name to avoid conflict with the NSObject class.
+# NSObjectProtocol is also the name that Swift uses when importing the NSObject protocol.
+NSObjectProtocol = ObjCProtocol('NSObject')
 
 
 ######################################################################
@@ -1699,8 +2007,6 @@ register_ctype_for_type(ObjCClass, Class)
 # to be careful to not create another ObjCInstance here (which
 # happens when the usual method decorator turns the self argument
 # into an ObjCInstance), or else get trapped in an infinite recursion.
-
-NSObject = ObjCClass('NSObject')
 
 # Try to reuse an existing DeallocationObserver class.
 # This allows reloading the module without having to restart

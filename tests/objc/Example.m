@@ -12,6 +12,12 @@ NSString *const SomeGlobalStringConstant = @"Some global string constant";
 @synthesize callback = _callback;
 @synthesize ambiguous = _ambiguous;
 
++(Protocol *)callbackProtocol {
+    // Since the Callback protocol is not adopted by any class in the test harness, the compiler doesn't generate
+    // runtime info for it by default. To force the protocol to be available at runtime, we use it as an object here.
+    return @protocol(Callback);
+}
+
 static int _staticIntField = 11;
 
 +(int) staticIntField
