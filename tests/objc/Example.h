@@ -44,6 +44,7 @@ extern NSString *const SomeGlobalStringConstant;
     NSDictionary *_dict;
     id<Callback> _callback;
     int _ambiguous;
+
 }
 
 #if __has_extension(objc_class_property)
@@ -110,5 +111,7 @@ extern NSString *const SomeGlobalStringConstant;
 
 -(id) processDictionary:(NSDictionary *) dict;
 -(id) processArray:(NSArray *) dict;
+
+-(NSSize) testThing:(int) value;
 
 @end

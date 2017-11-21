@@ -254,4 +254,12 @@ static int _staticIntField = 11;
     return [array objectAtIndex:1];
 }
 
+-(NSSize) testThing:(int) value
+{
+    printf("VALUE: %d\n", value);
+    NSSize size = [_thing computeSize:NSMakeSize(0, value)];
+    printf("SIZE: %f %f\n", size.width, size.height);
+    return size;
+}
+
 @end
