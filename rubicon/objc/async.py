@@ -1,18 +1,17 @@
 """PEP 3156 event loop based on CoreFoundation"""
 
+import threading
 from asyncio import (
-    DefaultEventLoopPolicy, coroutines, events, tasks, unix_events
+    DefaultEventLoopPolicy, coroutines, events, tasks, unix_events,
 )
 from ctypes import CFUNCTYPE, POINTER, Structure, c_int, c_void_p
-import threading
 
 from .core_foundation import (
-    CFAbsoluteTime, CFAllocatorRef, CFDataRef, CFOptionFlags,
-    CFStringRef, CFTimeInterval, kCFAllocatorDefault, libcf
+    CFAbsoluteTime, CFAllocatorRef, CFDataRef, CFOptionFlags, CFStringRef,
+    CFTimeInterval, kCFAllocatorDefault, libcf,
 )
 from .runtime import objc_const, objc_id
 from .types import CFIndex
-
 
 __all__ = [
     'EventLoopPolicy',
