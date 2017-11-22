@@ -31,7 +31,6 @@
 
 -(NSSize) computeSize: (NSSize) input
 {
-    printf("THING COMPUTE %f %f\n", input.width, input.height);
     return NSMakeSize(input.width * 2, input.height * 3);
 }
 

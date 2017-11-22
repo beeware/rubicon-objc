@@ -999,15 +999,8 @@ class RubiconTest(unittest.TestCase):
             @objc_method
             def computeSize_(self, input: NSSize) -> NSSize:
                 results['size'] = True
-                print("INPUT", input.width, input.height)
                 sup = send_super(self, 'computeSize:', input, restype=NSSize, argtypes=[NSSize])
-                print("SUPER", sup.width, sup.height)
-                output = NSSize(
-                    input.width + self.value,
-                    sup.height
-                )
-                print("COMPUTED OUTPUT", output.width, output.height)
-                return output
+                return NSSize(input.width + self.value, sup.height)
 
             @objc_method
             def computeRect_(self, input: NSRect) -> NSRect:
@@ -1046,7 +1039,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(outSize.height, 30)
 
         # Test the python handler
-        print('-'*40)
         obj.thing = handler1
         outSize = obj.testThing(15)
         self.assertEqual(outSize.width, 5)
