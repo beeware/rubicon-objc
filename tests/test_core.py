@@ -10,9 +10,10 @@ from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSObject, NSObjectProtocol, NSRange, NSUInteger,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
+    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
     ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation, objc_classmethod,
-    objc_const, objc_method, objc_property, send_message, types,
+    objc_const, objc_method, objc_property, send_message, send_super, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
@@ -982,3 +983,71 @@ class RubiconTest(unittest.TestCase):
 
         string_const = objc_const(rubiconharness, "SomeGlobalStringConstant")
         self.assertEqual(str(string_const), "Some global string constant")
+
+    def test_interface_return_struct(self):
+        "An ObjC protocol implementation that returns values by struct can be defined in Python."
+
+        results = {}
+        Thing = ObjCClass("Thing")
+
+        class StructReturnHandler(Thing):
+            @objc_method
+            def initWithValue_(self, value):
+                self.value = value
+                return self
+
+            @objc_method
+            def computeSize_(self, input: NSSize) -> NSSize:
+                results['size'] = True
+                print("INPUT", input.width, input.height)
+                sup = send_super(self, 'computeSize:', input, restype=NSSize, argtypes=[NSSize])
+                print("SUPER", sup.width, sup.height)
+                output = NSSize(
+                    input.width + self.value,
+                    sup.height
+                )
+                print("COMPUTED OUTPUT", output.width, output.height)
+                return output
+
+            @objc_method
+            def computeRect_(self, input: NSRect) -> NSRect:
+                results['rect'] = True
+                return NSMakeRect(
+                    input.origin.y + self.value, input.origin.x,
+                    input.size.height + self.value, input.size.width
+                )
+
+        # Create two handler instances so we can check the right one
+        # is being invoked.
+        handler1 = StructReturnHandler.alloc().initWithValue_(5)
+        handler2 = StructReturnHandler.alloc().initWithValue_(10)
+
+        outSize = handler1.computeSize(NSSize(20, 30))
+        self.assertEqual(outSize.width, 25)
+        self.assertEqual(outSize.height, 90)
+        self.assertTrue(results.get('size'))
+
+        outRect = handler2.computeRect(NSMakeRect(10, 20, 30, 40))
+        self.assertEqual(outRect.origin.x, 30)
+        self.assertEqual(outRect.origin.y, 10)
+        self.assertEqual(outRect.size.width, 50)
+        self.assertEqual(outRect.size.height, 30)
+        self.assertTrue(results.get('rect'))
+
+        # Invoke a method through an interface.
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+
+        # Test the base class directly
+        thing1 = Thing.alloc().init()
+        obj.thing = thing1
+        outSize = obj.testThing(10)
+        self.assertEqual(outSize.width, 0)
+        self.assertEqual(outSize.height, 30)
+
+        # Test the python handler
+        print('-'* 40)
+        obj.thing = handler1
+        outSize = obj.testThing(15)
+        self.assertEqual(outSize.width, 5)
+        self.assertEqual(outSize.height, 45)
