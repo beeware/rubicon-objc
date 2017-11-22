@@ -1046,7 +1046,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(outSize.height, 30)
 
         # Test the python handler
-        print('-'* 40)
+        print('-'*40)
         obj.thing = handler1
         outSize = obj.testThing(15)
         self.assertEqual(outSize.width, 5)

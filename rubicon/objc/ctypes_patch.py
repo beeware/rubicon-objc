@@ -1,13 +1,19 @@
 """This module provides a workaround to allow callback functions to return composite types (most importantly structs).
 
-Currently, ctypes callback functions (created by passing a Python callable to a CFUNCTYPE object) are only able to return what ctypes considers a "simple" type. This includes void (None), scalars (c_int, c_float, etc.), c_void_p, c_char_p, c_wchar_p, and py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is not possible. This issue has been reported on the Python bug tracker as bpo-5710 (https://bugs.python.org/issue5710).
+Currently, ctypes callback functions (created by passing a Python callable to a CFUNCTYPE object) are only able to
+return what ctypes considers a "simple" type. This includes void (None), scalars (c_int, c_float, etc.), c_void_p,
+c_char_p, c_wchar_p, and py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is
+not possible. This issue has been reported on the Python bug tracker as bpo-5710 (https://bugs.python.org/issue5710).
 
-For pointers, the easiest workaround is to return a c_void_p instead of the correctly typed pointer, and to cast the value on both sides. For structs and unions there is no easy workaround, which is why this somewhat hacky workaround is necessary.
+For pointers, the easiest workaround is to return a c_void_p instead of the correctly typed pointer, and to cast
+the value on both sides. For structs and unions there is no easy workaround, which is why this somewhat hacky
+workaround is necessary.
 """
 
 import ctypes
 import sys
 import warnings
+
 
 # This module relies on the layout of a few internal Python and ctypes structures.
 # Because of this, it's possible (but not all that likely) that things will break on newer/older Python versions.
@@ -19,10 +25,12 @@ if sys.version_info < (3, 4) or sys.version_info >= (3, 7):
         .format(sys.version_info)
     )
 
+
 # The PyTypeObject struct from "Include/object.h".
 # This is a forward declaration, fields are set later once PyVarObject has been declared.
 class PyTypeObject(ctypes.Structure):
     pass
+
 
 # The PyObject struct from "Include/object.h".
 class PyObject(ctypes.Structure):
@@ -31,12 +39,14 @@ class PyObject(ctypes.Structure):
         ("ob_type", ctypes.POINTER(PyTypeObject)),
     ]
 
+
 # The PyVarObject struct from "Include/object.h".
 class PyVarObject(ctypes.Structure):
     _fields_ = [
         ("ob_base", PyObject),
         ("ob_size", ctypes.c_ssize_t),
     ]
+
 
 # This structure is not stable across Python versions, but the few fields that we use probably won't change.
 PyTypeObject._fields_ = [
@@ -47,9 +57,11 @@ PyTypeObject._fields_ = [
     # There are many more fields, but we're only interested in the size fields, so we can leave out everything else.
 ]
 
+
 # The PyTypeObject structure for the dict class.
 # This is used to determine the size of the PyDictObject structure.
 PyDict_Type = PyTypeObject.from_address(id(dict))
+
 
 # The PyDictObject structure from "Include/dictobject.h".
 # This structure is not stable across Python versions, and did indeed change in recent Python releases.
@@ -60,10 +72,12 @@ class PyDictObject(ctypes.Structure):
         ("PyDictObject_opaque", (ctypes.c_ubyte*PyDict_Type.tp_basicsize)),
     ]
 
+
 # The ffi_type structure from libffi's "include/ffi.h".
 # This is a forward declaration, because the structure contains pointers to itself.
 class ffi_type(ctypes.Structure):
     pass
+
 
 ffi_type._fields_ = [
     ("size", ctypes.c_size_t),
@@ -72,9 +86,11 @@ ffi_type._fields_ = [
     ("elements", ctypes.POINTER(ctypes.POINTER(ffi_type))),
 ]
 
+
 # The GETFUNC and SETFUNC typedefs from "Modules/_ctypes/ctypes.h".
 GETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.c_ssize_t)
 SETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.py_object, ctypes.c_ssize_t)
+
 
 # The StgDictObject structure from "Modules/_ctypes/ctypes.h".
 # This structure is not officially stable across Python versions,
@@ -92,13 +108,15 @@ class StgDictObject(ctypes.Structure):
         # There are a few more fields, but we leave them out again because we don't need them.
     ]
 
+
 # The PyObject_stgdict function from "Modules/_ctypes/ctypes.h".
 ctypes.pythonapi.PyType_stgdict.restype = ctypes.POINTER(StgDictObject)
 ctypes.pythonapi.PyType_stgdict.argtypes = [ctypes.py_object]
 
+
 def make_callback_returnable(ctype):
     """Modify the given ctypes type so it can be returned from a callback function.
-    
+
     This function may be used as a decorator on a struct/union declaration.
     """
 
