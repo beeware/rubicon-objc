@@ -125,9 +125,9 @@ def make_callback_returnable(ctype):
 
     # Ensure that there is no existing getfunc or setfunc on the stgdict.
     if ctypes.cast(stgdict_c.getfunc, ctypes.c_void_p).value is not None:
-        raise ValueError("The ctype {} already has a getfunc")
+        raise ValueError("The ctype {}.{} already has a getfunc".format(ctype.__module__, ctype.__name__))
     elif ctypes.cast(stgdict_c.setfunc, ctypes.c_void_p).value is not None:
-        raise ValueError("The ctype {} already has a setfunc")
+        raise ValueError("The ctype {}.{} already has a setfunc".format(ctype.__module__, ctype.__name__))
 
     # Define the getfunc and setfunc.
     @GETFUNC
