@@ -7,7 +7,6 @@ from ctypes import (
     c_ubyte, c_uint, c_ulong, c_ulonglong, c_ushort, c_void_p, c_wchar,
     c_wchar_p, py_object, sizeof,
 )
-from .ctypes_patch import make_callback_returnable
 
 __all__ = [
     'CFIndex',
@@ -614,7 +613,6 @@ class UnknownPointer(c_void_p):
     """
 
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
-@make_callback_returnable
 @with_preferred_encoding(_NSPointEncoding)
 class NSPoint(Structure):
     _fields_ = [
@@ -626,7 +624,6 @@ class NSPoint(Structure):
 CGPoint = NSPoint
 
 
-@make_callback_returnable
 @with_preferred_encoding(_NSSizeEncoding)
 class NSSize(Structure):
     _fields_ = [
@@ -638,7 +635,6 @@ class NSSize(Structure):
 CGSize = NSSize
 
 
-@make_callback_returnable
 @with_preferred_encoding(_NSRectEncoding)
 class NSRect(Structure):
     _fields_ = [
@@ -672,7 +668,6 @@ CGPointMake = NSMakePoint
 
 
 # iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
-@make_callback_returnable
 @with_preferred_encoding(_UIEdgeInsetsEncoding)
 class UIEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
@@ -689,7 +684,6 @@ UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
 
 
 # macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
-@make_callback_returnable
 @with_preferred_encoding(_NSEdgeInsetsEncoding)
 class NSEdgeInsets(Structure):
     _fields_ = [('top', CGFloat),
@@ -715,7 +709,6 @@ CGGlyph = c_ushort
 
 # CFRange struct defined in CFBase.h
 # This replaces the CFRangeMake(LOC, LEN) macro.
-@make_callback_returnable
 class CFRange(Structure):
     _fields_ = [
         ("location", CFIndex),
@@ -724,7 +717,6 @@ class CFRange(Structure):
 
 
 # NSRange.h  (Note, not defined the same as CFRange)
-@make_callback_returnable
 @with_preferred_encoding(_NSRangeEncoding)
 class NSRange(Structure):
     _fields_ = [
