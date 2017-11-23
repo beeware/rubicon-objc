@@ -11,9 +11,10 @@ from enum import Enum
 
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
-    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
-    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation, objc_classmethod,
-    objc_const, objc_method, objc_property, send_message, send_super, types,
+    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
+    ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation,
+    objc_classmethod, objc_const, objc_method, objc_property, send_message,
+    send_super, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
@@ -1015,7 +1016,7 @@ class RubiconTest(unittest.TestCase):
             # have to use it - just have to register that it exists.
             @objc_method
             def origin(self) -> NSSize:
-                return NSPoint(0, 0)
+                return NSSize(0, 0)
 
         # Create two handler instances so we can check the right one
         # is being invoked.

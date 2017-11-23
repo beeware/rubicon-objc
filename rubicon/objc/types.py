@@ -612,6 +612,7 @@ class UnknownPointer(c_void_p):
     to it.
     """
 
+
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
 @with_preferred_encoding(_NSPointEncoding)
 class NSPoint(Structure):

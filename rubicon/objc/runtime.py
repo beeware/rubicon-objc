@@ -2,10 +2,10 @@ import collections.abc
 import inspect
 import os
 from ctypes import (
-    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union, addressof,
-    alignment, byref, c_bool, c_char_p, c_double, c_float, c_int, c_int32,
-    c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong, c_void_p, cast,
-    sizeof, util,
+    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union,
+    addressof, alignment, byref, c_bool, c_char_p, c_double, c_float, c_int,
+    c_int32, c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong,
+    c_void_p, cast, sizeof, util,
 )
 from enum import Enum
 
