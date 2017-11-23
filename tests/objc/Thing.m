@@ -29,4 +29,9 @@
     return self.name;
 }
 
+-(NSSize) computeSize: (NSSize) input
+{
+    return NSMakeSize(input.width * 2, input.height * 3);
+}
+
 @end

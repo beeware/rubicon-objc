@@ -11,4 +11,6 @@
 
 -(NSString *) toString;
 
+-(NSSize) computeSize: (NSSize) input;
+
 @end

@@ -2,13 +2,14 @@ import collections.abc
 import inspect
 import os
 from ctypes import (
-    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, addressof,
+    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union, addressof,
     alignment, byref, c_bool, c_char_p, c_double, c_float, c_int, c_int32,
     c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong, c_void_p, cast,
     sizeof, util,
 )
 from enum import Enum
 
+from . import ctypes_patch
 from .types import (
     NSNotFound, __arm__, __i386__, __x86_64__, compound_value_for_sequence,
     ctype_for_type, ctypes_for_method_encoding, encoding_for_ctype,
@@ -711,9 +712,13 @@ def add_method(cls, selName, method, encoding):
     The third type code must be a selector.
     Additional type codes are for types of other arguments if any.
     """
-    signature = tuple(ctype_for_type(tp) for tp in encoding)
+    signature = [ctype_for_type(tp) for tp in encoding]
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
+    if signature[0] is not None and issubclass(signature[0], (Structure, Union)):
+        # Patch struct/union return types to make them work in callbacks.
+        # See the source code of the ctypes_patch module for details.
+        ctypes_patch.make_callback_returnable(signature[0])
     selector = SEL(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 

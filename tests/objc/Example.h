@@ -111,4 +111,6 @@ extern NSString *const SomeGlobalStringConstant;
 -(id) processDictionary:(NSDictionary *) dict;
 -(id) processArray:(NSArray *) dict;
 
+-(NSSize) testThing:(int) value;
+
 @end
