@@ -715,10 +715,6 @@ def add_method(cls, selName, method, encoding):
     signature = [ctype_for_type(tp) for tp in encoding]
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
-    if signature[0] is not None and issubclass(signature[0], (Structure, Union)):
-        # Patch struct/union return types to make them work in callbacks.
-        # See the source code of the ctypes_patch module for details.
-        ctypes_patch.make_callback_returnable(signature[0])
     selector = SEL(selName)
     types = b"".join(encoding_for_ctype(ctype) for ctype in signature)
 
