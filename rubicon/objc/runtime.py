@@ -673,12 +673,15 @@ def send_super(receiver, selName, *args, **kwargs):
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
-    send = libobjc['objc_msgSendSuper']
-    send.restype = restype
-    if argtypes:
-        send.argtypes = [POINTER(objc_super), SEL] + argtypes
+    if should_use_stret(restype):
+        send = libobjc['objc_msgSendSuper_stret']
     else:
-        send.argtypes = None
+        send = libobjc['objc_msgSendSuper']
+    send.restype = restype
+    if argtypes is None:
+        send.argtypes = [POINTER(objc_super), SEL]
+    else:
+        send.argtypes = [POINTER(objc_super), SEL] + argtypes
     result = send(byref(super_struct), selector, *args)
     if restype == c_void_p:
         result = c_void_p(result)
