@@ -2,10 +2,10 @@ import collections.abc
 import inspect
 import os
 from ctypes import (
-    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union, addressof,
-    alignment, byref, c_bool, c_char_p, c_double, c_float, c_int, c_int32,
-    c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong, c_void_p, cast,
-    sizeof, util,
+    CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union,
+    addressof, alignment, byref, c_bool, c_char_p, c_double, c_float, c_int,
+    c_int32, c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong,
+    c_void_p, cast, sizeof, util,
 )
 from enum import Enum
 
@@ -673,12 +673,15 @@ def send_super(receiver, selName, *args, **kwargs):
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
 
-    send = libobjc['objc_msgSendSuper']
-    send.restype = restype
-    if argtypes:
-        send.argtypes = [POINTER(objc_super), SEL] + argtypes
+    if should_use_stret(restype):
+        send = libobjc['objc_msgSendSuper_stret']
     else:
-        send.argtypes = None
+        send = libobjc['objc_msgSendSuper']
+    send.restype = restype
+    if argtypes is None:
+        send.argtypes = [POINTER(objc_super), SEL]
+    else:
+        send.argtypes = [POINTER(objc_super), SEL] + argtypes
     result = send(byref(super_struct), selector, *args)
     if restype == c_void_p:
         result = c_void_p(result)

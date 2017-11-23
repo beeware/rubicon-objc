@@ -14,7 +14,6 @@ import ctypes
 import sys
 import warnings
 
-
 # This module relies on the layout of a few internal Python and ctypes structures.
 # Because of this, it's possible (but not all that likely) that things will break on newer/older Python versions.
 if sys.version_info < (3, 4) or sys.version_info >= (3, 7):
@@ -118,16 +117,23 @@ def make_callback_returnable(ctype):
     """Modify the given ctypes type so it can be returned from a callback function.
 
     This function may be used as a decorator on a struct/union declaration.
+
+    The method is idempotent; it only modifies the type the first time it
+    is invoked on a type.
     """
+    # The presence of the _rubicon_objc_ctypes_patch_getfunc attribute is a
+    # sentinel for whether the type has been modified previously.
+    if hasattr(ctype, '_rubicon_objc_ctypes_patch_getfunc'):
+        return ctype
 
     # Extract the StgDict from the ctype.
     stgdict_c = ctypes.pythonapi.PyType_stgdict(ctype).contents
 
     # Ensure that there is no existing getfunc or setfunc on the stgdict.
     if ctypes.cast(stgdict_c.getfunc, ctypes.c_void_p).value is not None:
-        raise ValueError("The ctype {} already has a getfunc")
+        raise ValueError("The ctype {}.{} already has a getfunc".format(ctype.__module__, ctype.__name__))
     elif ctypes.cast(stgdict_c.setfunc, ctypes.c_void_p).value is not None:
-        raise ValueError("The ctype {} already has a setfunc")
+        raise ValueError("The ctype {}.{} already has a setfunc".format(ctype.__module__, ctype.__name__))
 
     # Define the getfunc and setfunc.
     @GETFUNC
