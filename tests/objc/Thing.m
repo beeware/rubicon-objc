@@ -34,4 +34,10 @@
     return NSMakeSize(input.width * 2, input.height * 3);
 }
 
+-(NSRect) computeRect: (NSRect) input
+{
+    return NSMakeRect(input.origin.x + 100, input.origin.y + 200, input.size.width * 2, input.size.height * 3);
+}
+
+
 @end

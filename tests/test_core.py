@@ -1005,10 +1005,17 @@ class RubiconTest(unittest.TestCase):
             @objc_method
             def computeRect_(self, input: NSRect) -> NSRect:
                 results['rect'] = True
+                sup = send_super(self, 'computeRect:', input, restype=NSRect, argtypes=[NSRect])
                 return NSMakeRect(
-                    input.origin.y + self.value, input.origin.x,
-                    input.size.height + self.value, input.size.width
+                    input.origin.y + self.value, sup.origin.x,
+                    input.size.height + self.value, sup.size.width
                 )
+
+            # Register a second method returning NSSize. Don't
+            # have to use it - just have to register that it exists.
+            @objc_method
+            def origin(self) -> NSSize:
+                return NSPoint(0, 0)
 
         # Create two handler instances so we can check the right one
         # is being invoked.
@@ -1022,9 +1029,9 @@ class RubiconTest(unittest.TestCase):
 
         outRect = handler2.computeRect(NSMakeRect(10, 20, 30, 40))
         self.assertEqual(outRect.origin.x, 30)
-        self.assertEqual(outRect.origin.y, 10)
+        self.assertEqual(outRect.origin.y, 110)
         self.assertEqual(outRect.size.width, 50)
-        self.assertEqual(outRect.size.height, 30)
+        self.assertEqual(outRect.size.height, 60)
         self.assertTrue(results.get('rect'))
 
         # Invoke a method through an interface.
