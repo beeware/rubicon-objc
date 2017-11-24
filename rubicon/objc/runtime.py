@@ -947,9 +947,18 @@ def cache_property_methods(cls, name):
         # Check 3: Is there a setName: method to set the property with the given name
         mutator = cache_method(cls, 'set' + name[0].title() + name[1:] + ':')
 
+        # Check 4: Is this a forced property on this class or a superclass?
+        forced = False
+        superclass = cls
+        while superclass is not None:
+            if name in superclass.forced_properties:
+                forced = True
+                break
+            superclass = superclass.superclass
+
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
-        if responds or (accessor and mutator) or (name in cls.forced_properties):
+        if responds or (accessor and mutator) or forced:
             methods = (accessor, mutator)
         else:
             methods = None
