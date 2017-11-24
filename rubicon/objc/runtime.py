@@ -1309,9 +1309,8 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        from . import core_foundation
-        if core_foundation.is_str(self):
-            return core_foundation.to_str(self)
+        if isinstance(self, NSString):
+            return self.UTF8String.decode('utf-8')
         else:
             desc = self.description
             if desc is None:
@@ -1661,6 +1660,10 @@ register_ctype_for_type(ObjCClass, Class)
 
 
 NSObject = ObjCClass('NSObject')
+NSObject.declare_property('debugDescription')
+NSObject.declare_property('description')
+NSString = ObjCClass('NSString')
+NSString.declare_property('UTF8String')
 NSArray = ObjCClass('NSArray')
 NSMutableArray = ObjCClass('NSMutableArray')
 NSDictionary = ObjCClass('NSDictionary')

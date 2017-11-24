@@ -37,7 +37,6 @@ __all__ = [
     'NSDecimalNumber',
     'at',
     'from_value',
-    'is_str',
     'kCFAllocatorDefault',
     'kCFNumberCFIndexType',
     'kCFNumberCGFloatType',
@@ -152,10 +151,6 @@ def to_str(cfstring):
     result = libcf.CFStringGetCString(cfstring, buffer, len(buffer), kCFStringEncodingUTF8)
     if result:
         return buffer.value.decode('utf-8')
-
-
-def is_str(cfobject):
-    return libcf.CFGetTypeID(cfobject) == libcf.CFStringGetTypeID()
 
 
 libcf.CFDataCreate.restype = CFDataRef
