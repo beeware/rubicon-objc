@@ -1,4 +1,4 @@
-__version__ = '0.2.8'
+__version__ = '0.2.9'
 
 from .core_foundation import (  # noqa: F401
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, at, to_list,

@@ -7,3 +7,9 @@ include Makefile
 recursive-include tests *.py
 recursive-include tests *.h
 recursive-include tests *.m
+recursive-include docs *.bat
+recursive-include docs *.png
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs *.txt
+recursive-include docs Makefile
