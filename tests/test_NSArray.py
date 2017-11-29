@@ -118,7 +118,7 @@ class NSArrayMixinTest(unittest.TestCase):
         example.array = a
 
         self.assertEqual(example.array, self.py_list)
-        self.assertTrue(isinstance(example.array, ObjCListInstance))
+        self.assertIsInstance(example.array, ObjCListInstance)
         self.assertEqual(example.array[1], 'two')
 
 
@@ -269,17 +269,17 @@ class PythonObjectTest(unittest.TestCase):
 
         obj1 = PrimitiveListAttrContainer.alloc().init()
         self.assertEqual(obj1.data, [1, 2, 3])
-        self.assertTrue(isinstance(obj1.data, list))
+        self.assertIsInstance(obj1.data, list)
 
         # If it's set through a method call, it becomes an objc instance
         obj2 = PrimitiveListAttrContainer.alloc().initWithList_([4, 5, 6])
         self.assertEqual(obj2.data, [4, 5, 6])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
         # If it's set by direct attribute access, it becomes a Python object.
         obj2.data = [7, 8, 9]
         self.assertEqual(obj2.data, [7, 8, 9])
-        self.assertTrue(isinstance(obj2.data, list))
+        self.assertIsInstance(obj2.data, list)
 
     def test_primitive_list_property(self):
         class PrimitiveListContainer(NSObject):
@@ -297,15 +297,15 @@ class PythonObjectTest(unittest.TestCase):
 
         obj1 = PrimitiveListContainer.alloc().init()
         self.assertEqual(obj1.data, [1, 2, 3])
-        self.assertTrue(isinstance(obj1.data, ObjCListInstance))
+        self.assertIsInstance(obj1.data, ObjCListInstance)
 
         obj2 = PrimitiveListContainer.alloc().initWithList_([4, 5, 6])
         self.assertEqual(obj2.data, [4, 5, 6])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
         obj2.data = [7, 8, 9]
         self.assertEqual(obj2.data, [7, 8, 9])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
     def test_object_list_attribute(self):
         class ObjectListAttrContainer(NSObject):
@@ -321,17 +321,17 @@ class PythonObjectTest(unittest.TestCase):
 
         obj1 = ObjectListAttrContainer.alloc().init()
         self.assertEqual(obj1.data, ['x1', 'y2', 'z3'])
-        self.assertTrue(isinstance(obj1.data, list))
+        self.assertIsInstance(obj1.data, list)
 
         # If it's set through a method call, it becomes an objc instance
         obj2 = ObjectListAttrContainer.alloc().initWithList_(['a4', 'b5', 'c6'])
         self.assertEqual(obj2.data, ['a4', 'b5', 'c6'])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
         # If it's set by direct attribute access, it becomes a Python object.
         obj2.data = ['i7', 'j8', 'k9']
         self.assertEqual(obj2.data, ['i7', 'j8', 'k9'])
-        self.assertTrue(isinstance(obj2.data, list))
+        self.assertIsInstance(obj2.data, list)
 
     def test_object_list_property(self):
         class ObjectListContainer(NSObject):
@@ -349,15 +349,15 @@ class PythonObjectTest(unittest.TestCase):
 
         obj1 = ObjectListContainer.alloc().init()
         self.assertEqual(obj1.data, ['x1', 'y2', 'z3'])
-        self.assertTrue(isinstance(obj1.data, ObjCListInstance))
+        self.assertIsInstance(obj1.data, ObjCListInstance)
 
         obj2 = ObjectListContainer.alloc().initWithList_(['a4', 'b5', 'c6'])
         self.assertEqual(obj2.data, ['a4', 'b5', 'c6'])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
         obj2.data = ['i7', 'j8', 'k9']
         self.assertEqual(obj2.data, ['i7', 'j8', 'k9'])
-        self.assertTrue(isinstance(obj2.data, ObjCListInstance))
+        self.assertIsInstance(obj2.data, ObjCListInstance)
 
     def test_multitype_list_property(self):
         class MultitypeListContainer(NSObject):
@@ -371,4 +371,4 @@ class PythonObjectTest(unittest.TestCase):
 
         obj.data = [4, True, 'Hello', example]
         self.assertEqual(obj.data, [4, True, 'Hello', example])
-        self.assertTrue(isinstance(obj.data, ObjCListInstance))
+        self.assertIsInstance(obj.data, ObjCListInstance)
