@@ -132,7 +132,7 @@ class objc_id(c_void_p):
 
 
 @with_encoding(b'@?')
-class objc_block(c_void_p):
+class objc_block(objc_id):
     pass
 
 
@@ -616,12 +616,16 @@ def send_message(receiver, selName, *args, **kwargs):
     be a ctypes type and argtypes should be a list of ctypes types for
     the arguments of the message only.
     """
-    if type(receiver) in (ObjCClass, ObjCInstance):
+    try:
         receiver = receiver._as_parameter_
+    except AttributeError:
+        pass
 
-    if isinstance(receiver, (str, bytes)):
+    if isinstance(receiver, objc_id):
+        pass
+    elif isinstance(receiver, (str, bytes)):
         receiver = cast(get_class(receiver), objc_id)
-    elif type(receiver) in (objc_id, Class, c_void_p):
+    elif type(receiver) == c_void_p:
         receiver = cast(receiver, objc_id)
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
@@ -665,8 +669,18 @@ def send_super(receiver, selName, *args, **kwargs):
 
     This is the equivalent of [super selname:args].
     """
-    if hasattr(receiver, '_as_parameter_'):
+    try:
         receiver = receiver._as_parameter_
+    except AttributeError:
+        pass
+
+    if isinstance(receiver, objc_id):
+        pass
+    elif type(receiver) == c_void_p:
+        receiver = cast(receiver, objc_id)
+    else:
+        raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
+
     superclass = get_superclass_of_object(receiver)
     super_struct = objc_super(receiver, superclass)
     selector = SEL(selName)
@@ -797,17 +811,16 @@ class ObjCMethod(object):
                     # Convert Python enum objects to their values
                     arg = arg.value
 
-                if argtype == objc_id:
-                    # Convert Python objects to Core Foundation objects
-                    arg = from_value(arg)
-                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
-                    arg = compound_value_for_sequence(arg, argtype)
-
-                if argtype == objc_block:
+                if issubclass(argtype, objc_block):
                     if isinstance(arg, Block):
                         arg = arg.block
                     else:
                         arg = Block(arg).block
+                elif issubclass(argtype, objc_id):
+                    # Convert Python objects to Core Foundation objects
+                    arg = from_value(arg)
+                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
+                    arg = compound_value_for_sequence(arg, argtype)
 
                 converted_args.append(arg)
         else:
@@ -829,10 +842,8 @@ class ObjCMethod(object):
 
             # Convert result to python type if it is a instance or class pointer.
             from .core_foundation import to_value
-            if self.restype in {objc_id, objc_block}:
+            if self.restype is not None and issubclass(self.restype, objc_id):
                 result = to_value(ObjCInstance(result))
-            elif self.restype == Class:
-                result = ObjCClass(result)
             return result
 
 
@@ -1004,11 +1015,7 @@ def convert_method_arguments(encoding, args):
     from .core_foundation import to_value
     new_args = []
     for e, a in zip(encoding[3:], args):
-        if issubclass(e, ObjCInstance):
-            new_args.append(to_value(ObjCInstance(a)))
-        elif e == ObjCClass:
-            new_args.append(ObjCClass(a))
-        elif e == objc_block:
+        if issubclass(e, (objc_id, ObjCInstance)):
             new_args.append(to_value(ObjCInstance(a)))
         else:
             new_args.append(a)
@@ -1023,9 +1030,7 @@ def objc_method(f):
         py_self = ObjCInstance(receiver)
         args = convert_method_arguments(encoding, args)
         result = f(py_self, *args)
-        if isinstance(result, ObjCClass):
-            result = result.ptr.value
-        elif isinstance(result, ObjCInstance):
+        if isinstance(result, ObjCInstance):
             result = result.ptr.value
         elif isinstance(result, str):
             result = at(result).ptr.value
@@ -1054,9 +1059,7 @@ def objc_classmethod(f):
         py_cls = ObjCClass(objc_cls)
         args = convert_method_arguments(encoding, args)
         result = f(py_cls, *args)
-        if isinstance(result, ObjCClass):
-            result = result.ptr.value
-        elif isinstance(result, ObjCInstance):
+        if isinstance(result, ObjCInstance):
             result = result.ptr.value
         elif isinstance(result, str):
             result = at(result).ptr.value
@@ -1122,9 +1125,7 @@ class objc_property(object):
             from .core_foundation import at
             py_self = ObjCInstance(objc_self)
             result = getter(py_self)
-            if isinstance(result, ObjCClass):
-                result = result.ptr.value
-            elif isinstance(result, ObjCInstance):
+            if isinstance(result, ObjCInstance):
                 result = result.ptr.value
             elif isinstance(result, str):
                 result = at(result).ptr.value
@@ -1248,7 +1249,6 @@ class ObjCInstance(object):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
         # Make sure that object_ptr is wrapped in an objc_id.
-        is_block = isinstance(object_ptr, objc_block)
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
 
@@ -1265,7 +1265,7 @@ class ObjCInstance(object):
             return cls._cached_objects[object_ptr.value]
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not is_block and not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
+        if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
@@ -1273,14 +1273,14 @@ class ObjCInstance(object):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
-            if is_block:
+            if isinstance(object_ptr, objc_block):
                 cls = ObjCBlockInstance
             else:
                 cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
-        if is_block:
+        if isinstance(object_ptr, objc_block):
             super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.

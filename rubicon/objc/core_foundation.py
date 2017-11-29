@@ -7,8 +7,7 @@ from decimal import Decimal
 from enum import Enum
 
 from .runtime import (
-    SEL, Class, ObjCClass, ObjCInstance, get_class, libobjc, objc_id,
-    send_message,
+    SEL, ObjCClass, ObjCInstance, get_class, libobjc, objc_id, send_message,
 )
 from .types import CFIndex, CFRange, CGFloat
 
@@ -340,10 +339,8 @@ def to_value(cftype):
     except KeyError:
         ret = cftype
 
-    if type(ret) == objc_id:
+    if isinstance(ret, objc_id):
         return ObjCInstance(ret)
-    elif type(ret) == Class:
-        return ObjCClass(ret)
     else:
         return ret
 
