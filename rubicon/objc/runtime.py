@@ -898,7 +898,8 @@ class ObjCBoundMethod(object):
             self.receiver = receiver
 
     def __repr__(self):
-        return '<ObjCBoundMethod %s (%s)>' % (self.method.name, self.receiver)
+        return '{cls.__module__}.{cls.__qualname__}({self.method}, {self.receiver})'.format(
+            cls=type(self), self=self)
 
     def __call__(self, *args, **kwargs):
         """Call the method with the given arguments."""
