@@ -1,13 +1,14 @@
 import collections.abc
+import decimal
+import enum
 import inspect
 import os
 from ctypes import (
     CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union,
     addressof, alignment, byref, c_bool, c_char_p, c_double, c_float, c_int,
     c_int32, c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong,
-    c_void_p, cast, sizeof, util,
+    c_void_p, cast, sizeof, string_at, util,
 )
-from enum import Enum
 
 from . import ctypes_patch
 from .types import (
@@ -45,6 +46,7 @@ __all__ = [
     'SEL',
     'add_ivar',
     'add_method',
+    'at',
     'c_ptrdiff_t',
     'cache_method',
     'cache_property_accessor',
@@ -62,6 +64,7 @@ __all__ = [
     'get_type_for_objcclass_map',
     'libc',
     'libobjc',
+    'ns_from_py',
     'objc_block',
     'objc_classmethod',
     'objc_const',
@@ -74,6 +77,7 @@ __all__ = [
     'objc_rawmethod',
     'objc_super',
     'object_isClass',
+    'py_from_ns',
     'register_type_for_objcclass',
     'send_message',
     'send_super',
@@ -132,7 +136,7 @@ class objc_id(c_void_p):
 
 
 @with_encoding(b'@?')
-class objc_block(c_void_p):
+class objc_block(objc_id):
     pass
 
 
@@ -616,12 +620,16 @@ def send_message(receiver, selName, *args, **kwargs):
     be a ctypes type and argtypes should be a list of ctypes types for
     the arguments of the message only.
     """
-    if type(receiver) in (ObjCClass, ObjCInstance):
+    try:
         receiver = receiver._as_parameter_
+    except AttributeError:
+        pass
 
-    if isinstance(receiver, (str, bytes)):
+    if isinstance(receiver, objc_id):
+        pass
+    elif isinstance(receiver, (str, bytes)):
         receiver = cast(get_class(receiver), objc_id)
-    elif type(receiver) in (objc_id, Class, c_void_p):
+    elif type(receiver) == c_void_p:
         receiver = cast(receiver, objc_id)
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
@@ -665,8 +673,18 @@ def send_super(receiver, selName, *args, **kwargs):
 
     This is the equivalent of [super selname:args].
     """
-    if hasattr(receiver, '_as_parameter_'):
+    try:
         receiver = receiver._as_parameter_
+    except AttributeError:
+        pass
+
+    if isinstance(receiver, objc_id):
+        pass
+    elif type(receiver) == c_void_p:
+        receiver = cast(receiver, objc_id)
+    else:
+        raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
+
     superclass = get_superclass_of_object(receiver)
     super_struct = objc_super(receiver, superclass)
     selector = SEL(selName)
@@ -790,24 +808,22 @@ class ObjCMethod(object):
         f = self.get_callable()
 
         if convert_args:
-            from .core_foundation import from_value
             converted_args = []
             for argtype, arg in zip(self.argtypes[2:], args):
-                if isinstance(arg, Enum):
+                if isinstance(arg, enum.Enum):
                     # Convert Python enum objects to their values
                     arg = arg.value
 
-                if argtype == objc_id:
-                    # Convert Python objects to Core Foundation objects
-                    arg = from_value(arg)
-                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
-                    arg = compound_value_for_sequence(arg, argtype)
-
-                if argtype == objc_block:
+                if issubclass(argtype, objc_block):
                     if isinstance(arg, Block):
                         arg = arg.block
                     else:
                         arg = Block(arg).block
+                elif issubclass(argtype, objc_id):
+                    # Convert Python objects to Foundation objects
+                    arg = ns_from_py(arg)
+                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
+                    arg = compound_value_for_sequence(arg, argtype)
 
                 converted_args.append(arg)
         else:
@@ -828,11 +844,8 @@ class ObjCMethod(object):
                 return result
 
             # Convert result to python type if it is a instance or class pointer.
-            from .core_foundation import to_value
-            if self.restype in {objc_id, objc_block}:
-                result = to_value(ObjCInstance(result))
-            elif self.restype == Class:
-                result = ObjCClass(result)
+            if self.restype is not None and issubclass(self.restype, objc_id):
+                result = py_from_ns(result, _auto=True)
             return result
 
 
@@ -887,7 +900,8 @@ class ObjCBoundMethod(object):
             self.receiver = receiver
 
     def __repr__(self):
-        return '<ObjCBoundMethod %s (%s)>' % (self.method.name, self.receiver)
+        return '{cls.__module__}.{cls.__qualname__}({self.method}, {self.receiver})'.format(
+            cls=type(self), self=self)
 
     def __call__(self, *args, **kwargs):
         """Call the method with the given arguments."""
@@ -947,9 +961,18 @@ def cache_property_methods(cls, name):
         # Check 3: Is there a setName: method to set the property with the given name
         mutator = cache_method(cls, 'set' + name[0].title() + name[1:] + ':')
 
+        # Check 4: Is this a forced property on this class or a superclass?
+        forced = False
+        superclass = cls
+        while superclass is not None:
+            if name in superclass.forced_properties:
+                forced = True
+                break
+            superclass = superclass.superclass
+
         # If the class responds as a property, or it has both an accessor *and*
         # and mutator, then treat it as a property in Python.
-        if responds or (accessor and mutator) or (name in cls.forced_properties):
+        if responds or (accessor and mutator) or forced:
             methods = (accessor, mutator)
         else:
             methods = None
@@ -992,15 +1015,10 @@ def convert_method_arguments(encoding, args):
     """Used to convert Objective-C method arguments to Python values
     before passing them on to the Python-defined method.
     """
-    from .core_foundation import to_value
     new_args = []
     for e, a in zip(encoding[3:], args):
-        if issubclass(e, ObjCInstance):
-            new_args.append(to_value(ObjCInstance(a)))
-        elif e == ObjCClass:
-            new_args.append(ObjCClass(a))
-        elif e == objc_block:
-            new_args.append(to_value(ObjCInstance(a)))
+        if issubclass(e, (objc_id, ObjCInstance)):
+            new_args.append(py_from_ns(a, _auto=True))
         else:
             new_args.append(a)
     return new_args
@@ -1010,17 +1028,17 @@ def objc_method(f):
     encoding = encoding_from_annotation(f)
 
     def _objc_method(receiver, objc_cmd, *args):
-        from .core_foundation import at
         py_self = ObjCInstance(receiver)
         args = convert_method_arguments(encoding, args)
         result = f(py_self, *args)
-        if isinstance(result, ObjCClass):
-            result = result.ptr.value
-        elif isinstance(result, ObjCInstance):
-            result = result.ptr.value
-        elif isinstance(result, str):
-            result = at(result).ptr.value
-        return result
+        if encoding[0] is not None and issubclass(encoding[0], (objc_id, ObjCInstance)):
+            result = ns_from_py(result)
+            if result is not None:
+                result = result.ptr
+        if isinstance(result, c_void_p):
+            return result.value
+        else:
+            return result
 
     def register(cls, attr):
         name = attr.replace("_", ":")
@@ -1041,17 +1059,17 @@ def objc_classmethod(f):
     encoding = encoding_from_annotation(f)
 
     def _objc_classmethod(objc_cls, objc_cmd, *args):
-        from .core_foundation import at
         py_cls = ObjCClass(objc_cls)
         args = convert_method_arguments(encoding, args)
         result = f(py_cls, *args)
-        if isinstance(result, ObjCClass):
-            result = result.ptr.value
-        elif isinstance(result, ObjCInstance):
-            result = result.ptr.value
-        elif isinstance(result, str):
-            result = at(result).ptr.value
-        return result
+        if encoding[0] is not None and issubclass(encoding[0], (objc_id, ObjCInstance)):
+            result = ns_from_py(result)
+            if result is not None:
+                result = result.ptr
+        if isinstance(result, c_void_p):
+            return result.value
+        else:
+            return result
 
     def register(cls, attr):
         name = attr.replace("_", ":")
@@ -1110,16 +1128,12 @@ class objc_property(object):
         setter_encoding = encoding_from_annotation(setter)
 
         def _objc_getter(objc_self, objc_cmd):
-            from .core_foundation import at
             py_self = ObjCInstance(objc_self)
-            result = getter(py_self)
-            if isinstance(result, ObjCClass):
-                result = result.ptr.value
-            elif isinstance(result, ObjCInstance):
-                result = result.ptr.value
-            elif isinstance(result, str):
-                result = at(result).ptr.value
-            return result
+            result = ns_from_py(getter(py_self))
+            if result is None:
+                return None
+            else:
+                return result.ptr.value
 
         def _objc_setter(objc_self, objc_cmd, name):
             py_self = ObjCInstance(objc_self)
@@ -1239,7 +1253,6 @@ class ObjCInstance(object):
         """Create a new ObjCInstance or return a previously created one
         for the given object_ptr which should be an Objective-C id."""
         # Make sure that object_ptr is wrapped in an objc_id.
-        is_block = isinstance(object_ptr, objc_block)
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
 
@@ -1256,7 +1269,7 @@ class ObjCInstance(object):
             return cls._cached_objects[object_ptr.value]
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not is_block and not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
+        if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
             return ObjCClass(object_ptr)
 
         # Otherwise, create a new ObjCInstance.
@@ -1264,14 +1277,14 @@ class ObjCInstance(object):
             # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
             self = super().__new__(cls, _name, _bases, _ns)
         else:
-            if is_block:
+            if isinstance(object_ptr, objc_block):
                 cls = ObjCBlockInstance
             else:
                 cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
-        if is_block:
+        if isinstance(object_ptr, objc_block):
             super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
@@ -1300,9 +1313,8 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        from . import core_foundation
-        if core_foundation.is_str(self):
-            return core_foundation.to_str(self)
+        if isinstance(self, NSString):
+            return self.UTF8String.decode('utf-8')
         else:
             desc = self.description
             if desc is None:
@@ -1378,7 +1390,7 @@ class ObjCInstance(object):
             method = cache_property_mutator(self.objc_class, name)
             if method:
                 # Convert enums to their underlying values.
-                if isinstance(value, Enum):
+                if isinstance(value, enum.Enum):
                     value = value.value
                 ObjCBoundMethod(method, self)(value)
             else:
@@ -1652,11 +1664,135 @@ register_ctype_for_type(ObjCClass, Class)
 
 
 NSObject = ObjCClass('NSObject')
+NSObject.declare_property('debugDescription')
+NSObject.declare_property('description')
+NSNumber = ObjCClass('NSNumber')
+NSDecimalNumber = ObjCClass('NSDecimalNumber')
+NSString = ObjCClass('NSString')
+NSString.declare_property('UTF8String')
+NSData = ObjCClass('NSData')
 NSArray = ObjCClass('NSArray')
 NSMutableArray = ObjCClass('NSMutableArray')
 NSDictionary = ObjCClass('NSDictionary')
 NSMutableDictionary = ObjCClass('NSMutableDictionary')
 Protocol = ObjCClass('Protocol')
+
+
+def py_from_ns(nsobj, *, _auto=False):
+    """Convert a Foundation object into an equivalent Python object if possible.
+
+    Currently supported types:
+
+    * ``objc_id``, ``Class``: Wrapped in an ``ObjCInstance`` and converted as below
+    * ``NSString``: Converted to ``str``
+    * ``NSData``: Converted to ``bytes``
+    * ``NSDecimalNumber``: Converted to ``decimal.Decimal``
+    * ``NSDictionary``: Converted to ``dict``, with all keys and values converted recursively
+    * ``NSArray``: Converted to ``list``, with all elements converted recursively
+    * ``NSNumber``: Converted to a ``bool``, ``int`` or ``float`` based on the type of its contents
+
+    Other objects are returned unmodified as an ``ObjCInstance``.
+    """
+
+    if isinstance(nsobj, (objc_id, Class)):
+        nsobj = ObjCInstance(nsobj)
+    if not isinstance(nsobj, ObjCInstance):
+        return nsobj
+
+    if nsobj.isKindOfClass(NSString):
+        return str(nsobj)
+    elif nsobj.isKindOfClass(NSDecimalNumber):
+        return decimal.Decimal(nsobj.descriptionWithLocale(None))
+    elif nsobj.isKindOfClass(NSNumber):
+        # Choose the property to access based on the type encoding. The actual conversion is done by ctypes.
+        # Signed and unsigned integers are in separate cases to prevent overflow with unsigned long longs.
+        objc_type = nsobj.objCType
+        if objc_type == b'B':
+            return nsobj.boolValue
+        elif objc_type in b'csilq':
+            return nsobj.longLongValue
+        elif objc_type in b'CSILQ':
+            return nsobj.unsignedLongLongValue
+        elif objc_type in b'fd':
+            return nsobj.doubleValue
+        else:
+            raise TypeError(
+                'NSNumber containing unsupported type {!r} cannot be converted to a Python object'
+                .format(objc_type)
+            )
+    elif _auto:
+        # _auto is a private kwarg that is only passed when py_from_ns is called to perform an implicit conversion
+        # of a method return value or argument into Python. In this case we only want to perform a few simple
+        # conversions (strings and numbers).
+        return nsobj
+    elif nsobj.isKindOfClass(NSData):
+        # Despite the name, string_at converts the data at the address to a bytes object, not str.
+        return string_at(send_message(nsobj, 'bytes', restype=POINTER(c_uint8), argtypes=[]), nsobj.length)
+    elif nsobj.isKindOfClass(NSDictionary):
+        return {py_from_ns(k): py_from_ns(v) for k, v in nsobj.items()}
+    elif nsobj.isKindOfClass(NSArray):
+        return [py_from_ns(o) for o in nsobj]
+    else:
+        return nsobj
+
+
+def ns_from_py(pyobj):
+    """Convert a Python object into an equivalent Foundation object. The returned object is autoreleased.
+
+    This function is also available under the name ``at``, because its functionality is very similar to that of the
+    Objective-C ``@`` operator and literals.
+
+    Currently supported types:
+
+    * ``None``, ``ObjCInstance``: Returned as-is
+    * ``enum.Enum``: Replaced by their ``value`` and converted as below
+    * ``str``: Converted to ``NSString``
+    * ``bytes``: Converted to ``NSData``
+    * ``decimal.Decimal``: Converted to ``NSDecimalNumber``
+    * ``dict``: Converted to ``NSDictionary``, with all keys and values converted recursively
+    * ``list``: Converted to ``NSArray``, with all elements converted recursively
+    * ``bool``, ``int``, ``float``: Converted to ``NSNumber``
+
+    Other types cause a ``TypeError``.
+    """
+
+    if isinstance(pyobj, enum.Enum):
+        pyobj = pyobj.value
+
+    # Many Objective-C method calls here use the convert_result=False kwarg to disable automatic conversion of
+    # return values, because otherwise most of the Objective-C objects would be converted back to Python objects.
+    if pyobj is None or isinstance(pyobj, ObjCInstance):
+        return pyobj
+    elif isinstance(pyobj, str):
+        return ObjCInstance(NSString.stringWithUTF8String_(pyobj.encode('utf-8'), convert_result=False))
+    elif isinstance(pyobj, bytes):
+        return ObjCInstance(NSData.dataWithBytes(pyobj, length=len(pyobj)))
+    elif isinstance(pyobj, decimal.Decimal):
+        return ObjCInstance(NSDecimalNumber.decimalNumberWithString_(pyobj.to_eng_string(), convert_result=False))
+    elif isinstance(pyobj, dict):
+        dikt = NSMutableDictionary.dictionaryWithCapacity(len(pyobj))
+        for k, v in pyobj.items():
+            dikt.setObject(v, forKey=k)
+        return dikt
+    elif isinstance(pyobj, list):
+        array = NSMutableArray.arrayWithCapacity(len(pyobj))
+        for v in pyobj:
+            array.addObject(v)
+        return array
+    elif isinstance(pyobj, bool):
+        return ObjCInstance(NSNumber.numberWithBool_(pyobj, convert_result=False))
+    elif isinstance(pyobj, int):
+        return ObjCInstance(NSNumber.numberWithLong_(pyobj, convert_result=False))
+    elif isinstance(pyobj, float):
+        return ObjCInstance(NSNumber.numberWithDouble_(pyobj, convert_result=False))
+    else:
+        raise TypeError(
+            "Don't know how to convert a {cls.__module__}.{cls.__qualname__} to a Foundation object"
+            .format(cls=type(pyobj))
+        )
+
+
+at = ns_from_py
 
 
 @for_objcclass(NSArray)

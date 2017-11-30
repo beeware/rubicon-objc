@@ -581,9 +581,9 @@ if __LP64__:
     NSInteger = c_long
     NSUInteger = c_ulong
     CGFloat = c_double
-    _NSPointEncoding = b'{CGPoint=dd}'
-    _NSSizeEncoding = b'{CGSize=dd}'
-    _NSRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
+    _NSPointEncoding = _CGPointEncoding = b'{CGPoint=dd}'
+    _NSSizeEncoding = _CGSizeEncoding = b'{CGSize=dd}'
+    _NSRectEncoding = _CGRectEncoding = b'{CGRect={CGPoint=dd}{CGSize=dd}}'
     _NSRangeEncoding = b'{_NSRange=QQ}'
     _UIEdgeInsetsEncoding = b'{UIEdgeInsets=dddd}'
     _NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
@@ -592,9 +592,12 @@ else:
     NSInteger = c_int
     NSUInteger = c_uint
     CGFloat = c_float
-    _NSPointEncoding = b'{CGPoint=ff}'
-    _NSSizeEncoding = b'{CGSize=ff}'
-    _NSRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
+    _NSPointEncoding = b'{_NSPoint=ff}'
+    _CGPointEncoding = b'{CGPoint=ff}'
+    _NSSizeEncoding = b'{_NSSize=ff}'
+    _CGSizeEncoding = b'{CGSize=ff}'
+    _NSRectEncoding = b'{_NSRect={_NSPoint=ff}{_NSSize=ff}}'
+    _CGRectEncoding = b'{CGRect={CGPoint=ff}{CGSize=ff}}'
     _NSRangeEncoding = b'{_NSRange=II}'
     _UIEdgeInsetsEncoding = b'{UIEdgeInsets=ffff}'
     _NSEdgeInsetsEncoding = b'{NSEdgeInsets=ffff}'
@@ -622,7 +625,15 @@ class NSPoint(Structure):
     ]
 
 
-CGPoint = NSPoint
+if _CGPointEncoding == _NSPointEncoding:
+    CGPoint = NSPoint
+else:
+    @with_preferred_encoding(_CGPointEncoding)
+    class CGPoint(Structure):
+        _fields_ = [
+            ("x", CGFloat),
+            ("y", CGFloat)
+        ]
 
 
 @with_preferred_encoding(_NSSizeEncoding)
@@ -633,7 +644,15 @@ class NSSize(Structure):
     ]
 
 
-CGSize = NSSize
+if _CGSizeEncoding == _NSSizeEncoding:
+    CGSize = NSSize
+else:
+    @with_preferred_encoding(_CGSizeEncoding)
+    class CGSize(Structure):
+        _fields_ = [
+            ("width", CGFloat),
+            ("height", CGFloat)
+        ]
 
 
 @with_preferred_encoding(_NSRectEncoding)
@@ -644,28 +663,39 @@ class NSRect(Structure):
     ]
 
 
-CGRect = NSRect
+if _CGRectEncoding == _NSRectEncoding:
+    CGRect = NSRect
+else:
+    @with_preferred_encoding(_CGRectEncoding)
+    class CGRect(Structure):
+        _fields_ = [
+            ("origin", CGPoint),
+            ("size", CGSize)
+        ]
 
 
 def NSMakeSize(w, h):
     return NSSize(w, h)
 
 
-CGSizeMake = NSMakeSize
+def CGSizeMake(w, h):
+    return CGSize(w, h)
 
 
 def NSMakeRect(x, y, w, h):
     return NSRect(NSPoint(x, y), NSSize(w, h))
 
 
-CGRectMake = NSMakeRect
+def CGRectMake(x, y, w, h):
+    return CGRect(CGPoint(x, y), CGSize(w, h))
 
 
 def NSMakePoint(x, y):
     return NSPoint(x, y)
 
 
-CGPointMake = NSMakePoint
+def CGPointMake(x, y):
+    return CGPoint(x, y)
 
 
 # iOS: /System/Library/Frameworks/UIKit.framework/Headers/UIGeometry.h
