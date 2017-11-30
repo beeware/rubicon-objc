@@ -2,7 +2,7 @@ import asyncio
 import time
 import unittest
 
-from rubicon.objc.async import EventLoopPolicy
+from rubicon.objc.eventloop import EventLoopPolicy
 
 
 # Some coroutines with known behavior for testing purposes.
