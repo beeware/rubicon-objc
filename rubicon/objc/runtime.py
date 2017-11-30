@@ -1726,6 +1726,7 @@ def py_from_ns(nsobj, *, _auto=False):
         # conversions (strings and numbers).
         return nsobj
     elif nsobj.isKindOfClass(NSData):
+        # Despite the name, string_at converts the data at the address to a bytes object, not str.
         return string_at(send_message(nsobj, 'bytes', restype=POINTER(c_uint8), argtypes=[]), nsobj.length)
     elif nsobj.isKindOfClass(NSDictionary):
         return {py_from_ns(k): py_from_ns(v) for k, v in nsobj.items()}
