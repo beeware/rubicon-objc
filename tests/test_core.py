@@ -12,7 +12,7 @@ from enum import Enum
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
     NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, core_foundation,
+    ObjCInstance, ObjCMetaClass, ObjCProtocol, at,
     objc_classmethod, objc_const, objc_method, objc_property, send_message,
     send_super, types,
 )
@@ -239,8 +239,8 @@ class RubiconTest(unittest.TestCase):
         NSString = ObjCClass('NSString')
 
         self.assertIsInstance(NSObject.new(), NSObject)
-        self.assertIsInstance(core_foundation.at(''), NSString)
-        self.assertIsInstance(core_foundation.at(''), NSObject)
+        self.assertIsInstance(at(''), NSString)
+        self.assertIsInstance(at(''), NSObject)
         self.assertIsInstance(NSObject, NSObject)
         self.assertIsInstance(NSObject, NSObject.objc_class)
 
@@ -277,8 +277,8 @@ class RubiconTest(unittest.TestCase):
         NSCoding = ObjCProtocol('NSCoding')
         NSSecureCoding = ObjCProtocol('NSSecureCoding')
 
-        self.assertIsInstance(core_foundation.at(''), NSSecureCoding)
-        self.assertIsInstance(core_foundation.at(''), NSCoding)
+        self.assertIsInstance(at(''), NSSecureCoding)
+        self.assertIsInstance(at(''), NSCoding)
 
         self.assertNotIsInstance(object(), NSSecureCoding)
         self.assertNotIsInstance(NSObject.new(), NSSecureCoding)
@@ -738,7 +738,7 @@ class RubiconTest(unittest.TestCase):
     def test_partial_method_lots_of_args(self):
         pystring = "Uñîçö∂€"
         pybytestring = pystring.encode("utf-8")
-        nsstring = core_foundation.at(pystring)
+        nsstring = at(pystring)
         buf = create_string_buffer(len(pybytestring) + 1)
         usedLength = NSUInteger()
         remaining = NSRange(0, 0)
@@ -977,7 +977,7 @@ class RubiconTest(unittest.TestCase):
     def test_cfstring_to_str(self):
         "CFString/NSString instances can be converted to Python str."
 
-        self.assertEqual(str(core_foundation.at("abcdef")), "abcdef")
+        self.assertEqual(str(at("abcdef")), "abcdef")
 
     def test_objc_const(self):
         "objc_const works."
