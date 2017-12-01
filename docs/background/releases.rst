@@ -12,6 +12,7 @@ Release History
 * Fixed ``declare_property`` not applying to subclasses of the class it was called on.
 * Fixed ``repr`` of ``ObjCBoundMethod`` when the wrapped method is not an ``ObjCMethod``.
 * Fixed the encodings of ``NSPoint``, ``NSSize``, and ``NSRect`` on 32-bit systems.
+* Renamed the ``async`` support package to ``eventloop`` to avoid a Python 3.5+ keyword clash.
 
 0.2.9
 -----
@@ -25,6 +26,7 @@ Release History
 * Added support for creating, extending and conforming to Objective-C protocols.
 * Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
 * Added support for registering custom ``ObjCInstance`` subclasses to be used to represent Objective-C objects of specific classes.
+* Added support for integrating NSApplication and UIApplication event loops with Python's asyncio event loop.
 
 0.2.8
 -----
