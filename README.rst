@@ -35,25 +35,28 @@ framework (e.g., ``NSString``).
 Tutorial
 --------
 
-Want to jump in and get started? We have a `hands-on tutorial for beginners <>`__.
+Want to jump in and get started? We have a `hands-on tutorial for
+beginners <https://rubicon-objc.readthedocs.io/en/latest/tutorial/index.html>`__.
 
 How-to guides
 -------------
 
 Looking for guidance on how to solve a specific problems? We have `how-to
-guides and recipes <>`__ for common problems and tasks, including how to
-contribute.
-
+guides and recipes <https://rubicon-objc.readthedocs.io/en/latest/how-to/index.html>`__
+for common problems and tasks, including how to contribute.
 
 Reference
 ---------
 
-Just want the raw technical details? Here's our `Technical reference <>`__.
+Just want the raw technical details? Here's our `Technical
+reference <https://rubicon-objc.readthedocs.io/en/latest/reference/index.html>`__.
 
 Background
 ----------
 
-Looking for explanations and discussion of key topics and concepts? Our `background <>`__ guides may help.
+Looking for explanations and discussion of key topics and concepts?
+Our `background <https://rubicon-objc.readthedocs.io/en/latest/background/index.html>`__
+guides may help.
 
 
 Community
