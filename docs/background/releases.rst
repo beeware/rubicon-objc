@@ -1,14 +1,27 @@
 Release History
 ===============
 
-(next version)
---------------
+0.2.10
+------
+
+* Rewrote almost all Core Foundation-based functions to use Foundation instead.
+  * The functions ``from_value`` and ``NSDecimalNumber.from_decimal`` have been removed and replaced by ``ns_from_py``.
+  * The function ``at`` is now an alias for ``ns_from_py``.
+  * The function ``is_str`` has been removed. ``is_str(obj)`` calls should be replaced with ``isinstance(obj, NSString)``.
+  * The functions ``to_list``, ``to_number``, ``to_set``, ``to_str``, and ``to_value`` have been removed and replaced by ``py_from_ns``.
+* Fixed ``declare_property`` not applying to subclasses of the class it was called on.
+* Fixed ``repr`` of ``ObjCBoundMethod`` when the wrapped method is not an ``ObjCMethod``.
+* Fixed the encodings of ``NSPoint``, ``NSSize``, and ``NSRect`` on 32-bit systems.
+
+0.2.9
+-----
 
 * Improved handling of boolean types.
 * Added support for using primitives as object values (e.g, as the key/value in an NSDictonary).
 * Added support for passing Python lists as Objective-C NSArray arguments, and Python dicts as Objective-C NSDictionary arguments.
 * Corrected support to storing strings and other objects as properties on Python-defined Objective-C classes.
 * Added support for creating Objective-C blocks from Python callables. (ojii)
+* Added support for returning compound values (structures and unions) from Objective-C methods defined in Python.
 * Added support for creating, extending and conforming to Objective-C protocols.
 * Added an ``objc_const`` convenience function to look up global Objective-C object constants in a DLL.
 * Added support for registering custom ``ObjCInstance`` subclasses to be used to represent Objective-C objects of specific classes.
