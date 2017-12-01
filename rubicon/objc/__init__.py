@@ -1,4 +1,4 @@
-__version__ = '0.2.9'
+__version__ = '0.2.10'
 
 from .runtime import (  # noqa: F401
     IMP, SEL, Block, Class, Ivar, Method, NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSObject,
