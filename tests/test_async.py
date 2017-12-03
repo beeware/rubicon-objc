@@ -156,3 +156,40 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
         self.assertEqual(server_messages, ['Hello, World!', 'Goodbye, World!'])
         self.assertEqual(client_messages, ['Hello, World!', 'Goodbye, World!'])
+
+
+class AsyncSubprocessTests(unittest.TestCase):
+    def setUp(self):
+        asyncio.set_event_loop_policy(EventLoopPolicy())
+        self.loop = asyncio.get_event_loop()
+
+    def tearDown(self):
+        asyncio.set_event_loop_policy(None)
+        self.loop.close()
+
+    def test_subprocess(self):
+        @asyncio.coroutine
+        def list_dir():
+            self.proc = yield from asyncio.create_subprocess_shell(
+                'ls',
+                stdout=asyncio.subprocess.PIPE,
+            )
+
+            entries = set()
+            line = yield from self.proc.stdout.readline()
+            while line:
+                entries.add(line.decode('utf-8').strip())
+                line = yield from self.proc.stdout.readline()
+
+            return entries
+
+        task = asyncio.ensure_future(list_dir())
+        self.loop.run_until_complete(task)
+
+        # Check for some files that should exist.
+        # Everything in the sample set, less everything from the result,
+        # should be an empty set.
+        self.assertEqual(
+            {'README.rst', 'MANIFEST.in', 'setup.py', 'setup.cfg'} - task.result(),
+            set()
+        )
