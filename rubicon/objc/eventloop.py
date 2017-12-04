@@ -2,7 +2,8 @@
 
 import threading
 from asyncio import (
-    DefaultEventLoopPolicy, coroutines, events, tasks, unix_events,
+    DefaultEventLoopPolicy, SafeChildWatcher, coroutines, events, tasks,
+    unix_events,
 )
 from ctypes import CFUNCTYPE, POINTER, Structure, c_int, c_void_p
 
@@ -550,7 +551,7 @@ class EventLoopPolicy(events.AbstractEventLoopPolicy):
 
     def new_event_loop(self):
         """Create a new event loop and return it."""
-        if not self._default_loop and isinstance(threading.current_thread(), threading._MainThread):
+        if not self._default_loop and threading.current_thread() == threading.main_thread():
             loop = self.get_default_loop()
         else:
             loop = CFEventLoop(self._lifecycle)
@@ -568,6 +569,30 @@ class EventLoopPolicy(events.AbstractEventLoopPolicy):
         loop = CFEventLoop(self._lifecycle)
         loop._policy = self
         return loop
+
+    def _init_watcher(self):
+        with events._lock:
+            if self._watcher is None:  # pragma: no branch
+                self._watcher = SafeChildWatcher()
+                if threading.current_thread() == threading.main_thread():
+                    self._watcher.attach_loop(self._default_loop)
+
+    def get_child_watcher(self):
+        """Get the watcher for child processes.
+
+        If not yet set, a SafeChildWatcher object is automatically created.
+        """
+        if self._watcher is None:
+            self._init_watcher()
+
+        return self._watcher
+
+    def set_child_watcher(self, watcher):
+        """Set the watcher for child processes."""
+        if self._watcher is not None:
+            self._watcher.close()
+
+        self._watcher = watcher
 
 
 class CFLifecycle:
