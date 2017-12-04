@@ -12,9 +12,8 @@ from enum import Enum
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
     NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, at,
-    objc_classmethod, objc_const, objc_method, objc_property, send_message,
-    send_super, types,
+    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod,
+    objc_const, objc_method, objc_property, send_message, send_super, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
