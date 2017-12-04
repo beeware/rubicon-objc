@@ -108,6 +108,7 @@ class AsyncReaderWriterTests(unittest.TestCase):
         if self.server:
             self.server.close()
             self.loop.run_until_complete(self.server.wait_closed())
+        self.loop.close()
 
     def test_tcp_echo(self):
         """A simple TCP Echo client/server works as expected"""
@@ -170,17 +171,19 @@ class AsyncSubprocessTests(unittest.TestCase):
     def test_subprocess(self):
         @asyncio.coroutine
         def list_dir():
-            self.proc = yield from asyncio.create_subprocess_shell(
+            proc = yield from asyncio.create_subprocess_shell(
                 'ls',
                 stdout=asyncio.subprocess.PIPE,
             )
 
             entries = set()
-            line = yield from self.proc.stdout.readline()
+            line = yield from proc.stdout.readline()
             while line:
                 entries.add(line.decode('utf-8').strip())
-                line = yield from self.proc.stdout.readline()
+                line = yield from proc.stdout.readline()
 
+            # Cleanup - close the transport.
+            proc._transport.close()
             return entries
 
         task = asyncio.ensure_future(list_dir())
