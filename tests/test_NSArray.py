@@ -5,7 +5,7 @@ from ctypes import CDLL, util
 from rubicon.objc import (
     NSArray, NSMutableArray, NSObject, ObjCClass, objc_method, objc_property,
 )
-from rubicon.objc.runtime import ObjCListInstance
+from rubicon.objc.collections import ObjCListInstance
 
 try:
     import platform

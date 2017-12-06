@@ -1,5 +1,9 @@
 __version__ = '0.2.10'
 
+from . import types  # noqa: F401
+from . import runtime  # noqa: F401
+from . import collections  # noqa: F401
+
 from .runtime import (  # noqa: F401
     IMP, SEL, Block, Class, Ivar, Method, NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSObject,
     NSObjectProtocol, ObjCBlock, ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, ns_from_py,

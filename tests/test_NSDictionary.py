@@ -6,7 +6,7 @@ from rubicon.objc import (
     NSDictionary, NSMutableDictionary, NSObject, ObjCClass, objc_method,
     objc_property,
 )
-from rubicon.objc.runtime import ObjCDictInstance
+from rubicon.objc.collections import ObjCDictInstance
 
 try:
     import platform
