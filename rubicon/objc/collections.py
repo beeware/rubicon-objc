@@ -1,6 +1,7 @@
-from .types import NSNotFound
+from .types import NSNotFound, NSRange
 from .runtime import (
-    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCClass, ObjCInstance, for_objcclass, send_message
+    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCClass, ObjCInstance, for_objcclass, ns_from_py,
+    send_message
 )
 
 
@@ -8,14 +9,11 @@ from .runtime import (
 class ObjCListInstance(ObjCInstance):
     def __getitem__(self, item):
         if isinstance(item, slice):
-            start = item.start or 0
-            if start < 0:
-                start = len(self) + start
-            stop = item.stop or len(self)
-            if stop < 0:
-                stop = len(self) + stop
-            step = item.step or 1
-            return [self.objectAtIndex(x) for x in range(start, stop, step)]
+            start, stop, step = item.indices(len(self))
+            if step == 1:
+                return self.subarrayWithRange(NSRange(start, stop-start))
+            else:
+                return ns_from_py([self.objectAtIndex(x) for x in range(start, stop, step)])
 
         if item < 0:
             item = len(self) + item
@@ -55,42 +53,28 @@ class ObjCListInstance(ObjCInstance):
 
 @for_objcclass(NSMutableArray)
 class ObjCMutableListInstance(ObjCListInstance):
-    def _slice_to_range_params(self, s):
-        step = s.step or 1
-        start = s.start
-        stop = s.stop
-
-        if start is not None and start < 0:
-            start = len(self) + start
-        if stop is not None and stop < 0:
-            stop = len(self) + stop
-
-        if step < 0:
-            start = start or (len(self) - 1)
-            stop = stop or -1
-        else:
-            start = start or 0
-            stop = stop or len(self)
-
-        return start, stop, step
-
     def __setitem__(self, item, value):
         if isinstance(item, slice):
-            start, stop, step = self._slice_to_range_params(item)
+            arr = ns_from_py(value)
+            if not isinstance(arr, NSArray):
+                raise TypeError(
+                    '{cls.__module__}.{cls.__qualname__} is not convertible to NSArray'
+                    .format(cls=type(value))
+                )
 
+            start, stop, step = item.indices(len(self))
             if step == 1:
-                for idx in range(start, stop):
-                    self.removeObjectAtIndex_(start)
-                for item in reversed(value):
-                    self.insertObject_atIndex_(item, start)
+                self.replaceObjectsInRange(NSRange(start, stop-start), withObjectsFromArray=arr)
             else:
-                indexes = range(start, stop, step)
-                if len(value) != len(indexes):
-                    raise ValueError('attempt to assign sequence of size %d '
-                                     'to extended slice of size %d' %
-                                     (len(value), len(indexes)))
-                for idx, value in zip(indexes, value):
-                    self.replaceObjectAtIndex_withObject_(idx, value)
+                indices = range(start, stop, step)
+                if len(arr) != len(indices):
+                    raise ValueError(
+                        'attempt to assign sequence of size {} to extended slice of size {}'
+                        .format(len(value), len(indices))
+                    )
+
+                for idx, obj in zip(indices, arr):
+                    self.replaceObjectAtIndex(idx, withObject=obj)
 
             return
 
@@ -103,10 +87,12 @@ class ObjCMutableListInstance(ObjCListInstance):
 
     def __delitem__(self, item):
         if isinstance(item, slice):
-            indexes = list(range(*self._slice_to_range_params(item)))
-            indexes.sort(reverse=True)
-            for index in indexes:
-                self.removeObjectAtIndex(index)
+            start, stop, step = item.indices(len(self))
+            if step == 1:
+                self.removeObjectsInRange(NSRange(start, stop-start))
+            else:
+                for idx in sorted(range(start, stop, step), reverse=True):
+                    self.removeObjectAtIndex(idx)
             return
 
         if item < 0:
