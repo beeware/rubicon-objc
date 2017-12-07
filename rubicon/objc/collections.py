@@ -14,13 +14,16 @@ class ObjCListInstance(ObjCInstance):
                 return self.subarrayWithRange(NSRange(start, stop-start))
             else:
                 return ns_from_py([self.objectAtIndex(x) for x in range(start, stop, step)])
+        else:
+            if item < 0:
+                index = len(self) + item
+            else:
+                index = item
 
-        if item < 0:
-            item = len(self) + item
-        if item >= len(self):
-            raise IndexError('list index out of range')
+            if index not in range(len(self)):
+                raise IndexError('{cls.__name__} index out of range'.format(cls=type(self)))
 
-        return self.objectAtIndex(item)
+            return self.objectAtIndex(index)
 
     def __len__(self):
         return send_message(self.ptr, 'count').value or 0
@@ -75,15 +78,16 @@ class ObjCMutableListInstance(ObjCListInstance):
 
                 for idx, obj in zip(indices, arr):
                     self.replaceObjectAtIndex(idx, withObject=obj)
+        else:
+            if item < 0:
+                index = len(self) + item
+            else:
+                index = item
 
-            return
+            if index not in range(len(self)):
+                raise IndexError('{cls.__name__} assignment index out of range'.format(cls=type(self)))
 
-        if item < 0:
-            item = len(self) + item
-        if item >= len(self):
-            raise IndexError('list assignment index out of range')
-
-        self.replaceObjectAtIndex_withObject_(item, value)
+            self.replaceObjectAtIndex(index, withObject=value)
 
     def __delitem__(self, item):
         if isinstance(item, slice):
@@ -93,14 +97,16 @@ class ObjCMutableListInstance(ObjCListInstance):
             else:
                 for idx in sorted(range(start, stop, step), reverse=True):
                     self.removeObjectAtIndex(idx)
-            return
+        else:
+            if item < 0:
+                index = len(self) + item
+            else:
+                index = item
 
-        if item < 0:
-            item = len(self) + item
-        if item >= len(self):
-            raise IndexError('list assignment index out of range')
+            if index not in range(len(self)):
+                raise IndexError('{cls.__name__} assignment index out of range'.format(cls=type(self)))
 
-        self.removeObjectAtIndex_(item)
+            self.removeObjectAtIndex_(index)
 
     def append(self, value):
         self.addObject_(value)

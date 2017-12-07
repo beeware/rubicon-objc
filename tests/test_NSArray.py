@@ -43,6 +43,9 @@ class NSArrayMixinTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             a[len(self.py_list) + 10]
 
+        with self.assertRaises(IndexError):
+            a[-len(self.py_list) - 1]
+
     def test_len(self):
         a = self.make_array(self.py_list)
 
@@ -137,11 +140,23 @@ class NSMutableArrayMixinTest(NSArrayMixinTest):
         a[2] = 'four'
         self.assertEqual(a[2], 'four')
 
+        with self.assertRaises(IndexError):
+            a[len(a)] = 'invalid'
+
+        with self.assertRaises(IndexError):
+            a[-len(a) - 1] = 'invalid'
+
     def test_del(self):
         a = self.make_array(self.py_list)
         del a[0]
         self.assertEqual(len(a), 2)
         self.assertEqual(a[0], 'two')
+
+        with self.assertRaises(IndexError):
+            del a[len(a)]
+
+        with self.assertRaises(IndexError):
+            del a[-len(a) - 1]
 
     def test_append(self):
         a = self.make_array()
