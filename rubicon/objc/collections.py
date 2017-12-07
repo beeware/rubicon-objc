@@ -1,6 +1,6 @@
 from .types import NSUInteger, NSNotFound, NSRange
 from .runtime import (
-    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCClass, ObjCInstance, for_objcclass, ns_from_py,
+    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCInstance, for_objcclass, ns_from_py, objc_id,
     send_message
 )
 
@@ -51,7 +51,7 @@ class ObjCListInstance(ObjCInstance):
         return len([x for x in self if x == value])
 
     def copy(self):
-        return self.objc_class.arrayWithArray_(self)
+        return ObjCInstance(send_message(self, 'copy', restype=objc_id))
 
 
 @for_objcclass(NSMutableArray)
@@ -107,6 +107,9 @@ class ObjCMutableListInstance(ObjCListInstance):
                 raise IndexError('{cls.__name__} assignment index out of range'.format(cls=type(self)))
 
             self.removeObjectAtIndex_(index)
+
+    def copy(self):
+        return self.mutableCopy()
 
     def append(self, value):
         self.addObject_(value)
@@ -174,7 +177,7 @@ class ObjCDictInstance(ObjCInstance):
             yield key, self.objectForKey_(key)
 
     def copy(self):
-        return ObjCClass('NSMutableDictionary').dictionaryWithDictionary_(self)
+        return ObjCInstance(send_message(self, 'copy', restype=objc_id))
 
 
 @for_objcclass(NSMutableDictionary)
@@ -189,6 +192,9 @@ class ObjCMutableDictInstance(ObjCDictInstance):
             raise KeyError(item)
 
         self.removeObjectForKey_(item)
+
+    def copy(self):
+        return self.mutableCopy()
 
     def clear(self):
         self.removeAllObjects()
