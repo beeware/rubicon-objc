@@ -275,6 +275,18 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(d['four'], 'FIVE')
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
+    def test_update4(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d, self.py_dict)
+        d.update({'one': 'two'}, three='four', four='FIVE')
+        self.assertNotEqual(d, self.py_dict)
+        self.assertEqual(d['one'], 'two')
+        self.assertEqual(d['two'], 'TWO')
+        self.assertEqual(d['three'], 'four')
+        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
+
 
 class PythonObjectTest(unittest.TestCase):
     def test_primitive_dict_attribute(self):

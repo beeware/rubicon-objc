@@ -222,10 +222,8 @@ class ObjCMutableDictInstance(ObjCDictInstance):
         return value
 
     def update(self, new=None, **kwargs):
-        if new is None:
-            new = kwargs
-        else:
-            new = dict(new)
+        if new is not None:
+            kwargs.update(new)
 
-        for k, v in new.items():
+        for k, v in kwargs.items():
             self.setObject_forKey_(v, k)
