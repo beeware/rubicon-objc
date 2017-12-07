@@ -127,10 +127,7 @@ class ObjCMutableListInstance(ObjCListInstance):
         del self[self.index(value)]
 
     def reverse(self):
-        self.removeAllObjects  # this is a test
-        new_contents = self.reverseObjectEnumerator().allObjects()
-        self.removeAllObjects()
-        self.addObjectsFromArray_(new_contents)
+        self.setArray(self.reverseObjectEnumerator().allObjects())
 
     def insert(self, idx, value):
         self.insertObject_atIndex_(value, idx)
