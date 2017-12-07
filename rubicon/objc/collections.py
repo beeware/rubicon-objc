@@ -1,4 +1,4 @@
-from .types import NSNotFound, NSRange
+from .types import NSUInteger, NSNotFound, NSRange
 from .runtime import (
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCClass, ObjCInstance, for_objcclass, ns_from_py,
     send_message
@@ -26,7 +26,7 @@ class ObjCListInstance(ObjCInstance):
             return self.objectAtIndex(index)
 
     def __len__(self):
-        return send_message(self.ptr, 'count').value or 0
+        return send_message(self.ptr, 'count', restype=NSUInteger)
 
     def __iter__(self):
         for i in range(len(self)):
