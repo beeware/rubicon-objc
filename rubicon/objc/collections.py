@@ -36,10 +36,10 @@ class ObjCListInstance(ObjCInstance):
         return self.containsObject_(item)
 
     def __eq__(self, other):
-        for a, b in zip(self, other):
-            if a != b:
-                return False
-        return True
+        return list(self) == other
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def index(self, value):
         idx = self.indexOfObject_(value)

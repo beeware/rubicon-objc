@@ -96,6 +96,11 @@ class NSArrayMixinTest(unittest.TestCase):
         self.assertEqual(self.py_list, b)
         self.assertEqual(b, a)
 
+        self.assertNotEqual(a, object())
+        self.assertNotEqual(a, [])
+        self.assertNotEqual(a, self.py_list[:2])
+        self.assertNotEqual(a, self.py_list + ['spam', 'ham'])
+
     def test_slice_access(self):
         a = self.make_array(self.py_list * 2)
         self.assertEqual(a[1:4], ['two', 'three', 'one'])
