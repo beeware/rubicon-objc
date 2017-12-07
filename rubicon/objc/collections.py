@@ -152,13 +152,10 @@ class ObjCDictInstance(ObjCInstance):
         return self.objectForKey_(item) is not None
 
     def __eq__(self, other):
-        if set(self.keys()) != set(other.keys()):
-            return False
-        for item in self:
-            if self[item] != other[item]:
-                return False
+        return dict(self) == other
 
-        return True
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def get(self, item, default=None):
         v = self.objectForKey_(item)

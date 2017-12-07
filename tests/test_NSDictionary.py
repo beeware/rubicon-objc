@@ -82,6 +82,26 @@ class NSDictionaryMixinTest(unittest.TestCase):
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
 
+    def test_equivalence(self):
+        d1 = self.make_dictionary(self.py_dict)
+        d2 = self.make_dictionary(self.py_dict)
+        smaller_py_dict = self.py_dict.copy()
+        del smaller_py_dict['three']
+        bigger_py_dict = {'four': 'FOUR'}
+        bigger_py_dict.update(self.py_dict)
+
+        self.assertEqual(d1, self.py_dict)
+        self.assertEqual(d2, self.py_dict)
+        self.assertEqual(d1, d2)
+        self.assertEqual(self.py_dict, d1)
+        self.assertEqual(self.py_dict, d2)
+        self.assertEqual(d2, d1)
+
+        self.assertNotEqual(d1, object())
+        self.assertNotEqual(d1, {})
+        self.assertNotEqual(d1, smaller_py_dict)
+        self.assertNotEqual(d1, bigger_py_dict)
+
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
         for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):
