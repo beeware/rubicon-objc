@@ -214,6 +214,9 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
             self.assertEqual(value, self.py_dict[key])
             self.assertTrue(key not in d)
 
+        with self.assertRaises(KeyError):
+            d.popitem()
+
     def test_setdefault1(self):
         d = self.make_dictionary(self.py_dict)
 

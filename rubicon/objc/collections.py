@@ -205,6 +205,9 @@ class ObjCMutableDictInstance(ObjCDictInstance):
         return value
 
     def popitem(self):
+        if len(self) == 0:
+            raise KeyError("popitem(): {cls.__name__} is empty".format(cls=type(self)))
+
         key = self.allKeys().firstObject()
         value = self.objectForKey_(key)
         self.removeObjectForKey_(key)
