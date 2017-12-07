@@ -1,6 +1,17 @@
 Release History
 ===============
 
+(next version)
+--------------
+
+* Fixed various bugs in the collection ``ObjCInstance`` subclasses:
+  * Fixed getting/setting/deleting items or slices with indices lower than ``-len(obj)``. Previously this crashed Python, now an ``IndexError`` is raised.
+  * Fixed slices with step size 0. Previously they were ignored and 1 was incorrectly used as the step size, now an ``IndexError`` is raised.
+  * Fixed equality checks between Objective-C arrays/dictionaries and non-sequence/mapping objects. Previously this incorrectly raised a ``TypeError``, now it returns ``False``.
+  * Fixed equality checks between Objective-C arrays and sequences of different lengths. Previously this incorrectly returned ``True`` if the shorter sequence was a prefix of the longer one, now ``False`` is returned.
+  * Fixed calling ``popitem`` on an empty Objective-C dictionary. Previously this crashed Python, now a ``KeyError`` is raised.
+  * Fixed calling ``update`` with both a mapping and keyword arguments on an Objective-C dictionary. Previously the kwargs were incorrectly ignored if a mapping was given, now both are respected.
+
 0.2.10
 ------
 
