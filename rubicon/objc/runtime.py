@@ -874,7 +874,10 @@ class ObjCPartialMethod(object):
         try:
             meth, order = self.methods[rest]
         except KeyError:
-            raise ValueError("No method with selector parts {}".format(set(kwargs)))
+            raise ValueError(
+                "No method was found starting with {!r} and with selector parts {}\nKnown selector parts are:\n{}"
+                .format(self.name_start, set(kwargs), "\n".join(repr(parts) for parts in self.methods))
+            )
 
         meth = ObjCMethod(meth)
         args += [kwargs[name] for name in order]
