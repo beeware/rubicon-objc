@@ -11,6 +11,7 @@ Release History
   * Fixed equality checks between Objective-C arrays and sequences of different lengths. Previously this incorrectly returned ``True`` if the shorter sequence was a prefix of the longer one, now ``False`` is returned.
   * Fixed calling ``popitem`` on an empty Objective-C dictionary. Previously this crashed Python, now a ``KeyError`` is raised.
   * Fixed calling ``update`` with both a mapping and keyword arguments on an Objective-C dictionary. Previously the kwargs were incorrectly ignored if a mapping was given, now both are respected.
+* Fixed calling methods using kwarg syntax if a superclass and subclass define methods with the same prefix, but different names. For example, if a superclass had a method ``initWithFoo:bar:`` and the subclass ``initWithFoo:spam:``, the former could not be called on instances of the subclass.
 
 0.2.10
 ------

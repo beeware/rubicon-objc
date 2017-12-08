@@ -919,7 +919,7 @@ def cache_method(cls, name):
     while supercls is not None:
         # Load the class's methods if we haven't done so yet.
         if supercls.methods_ptr is None:
-            supercls._reload_methods()
+            supercls._load_methods()
 
         try:
             objc_method = supercls.instance_methods[name]
@@ -1353,7 +1353,7 @@ class ObjCInstance(object):
         while cls is not None:
             # Load the class's methods if we haven't done so yet.
             if cls.methods_ptr is None:
-                cls._reload_methods()
+                cls._load_methods()
 
             try:
                 method = cls.partial_methods[name]
@@ -1568,8 +1568,8 @@ class ObjCClass(ObjCInstance, type):
             # If anything was registered, reload the methods of this class
             # (and the metaclass, because there may be new class methods).
             if registered_something:
-                self._reload_methods()
-                self.objc_class._reload_methods()
+                self._load_methods()
+                self.objc_class._load_methods()
 
         return self
 
@@ -1612,11 +1612,14 @@ class ObjCClass(ObjCInstance, type):
                 .format(self=self, tp=type(subclass))
             )
 
-    def _reload_methods(self):
-        old_methods_ptr = self.methods_ptr
+    def _load_methods(self):
+        if self.methods_ptr is not None:
+            raise RuntimeError("_load_methods cannot be called more than once")
+
         self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
-        # old_methods_ptr may be None, but free(NULL) is a no-op, so that's fine.
-        libc.free(old_methods_ptr)
+
+        if self.superclass is not None and self.superclass.methods_ptr is None:
+            self.superclass._load_methods()
 
         for i in range(self.methods_ptr_count.value):
             method = self.methods_ptr[i]
@@ -1632,7 +1635,14 @@ class ObjCClass(ObjCInstance, type):
             try:
                 partial = self.partial_methods[first]
             except KeyError:
+                if self.superclass is None:
+                    super_partial = None
+                else:
+                    super_partial = self.superclass.partial_methods.get(first)
+
                 partial = self.partial_methods[first] = ObjCPartialMethod(first)
+                if super_partial is not None:
+                    partial.methods.update(super_partial.methods)
 
             # order is rest without the dummy "" part
             order = rest[:-1]
