@@ -1,7 +1,14 @@
 __version__ = '0.2.10'
 
+# Import commonly used submodules right away.
+# The first two imports are only included for clarity. They are not strictly necessary, because the from-imports below
+# also import the types and runtime modules and implicitly add them to the rubicon.objc namespace.
 from . import types  # noqa: F401
 from . import runtime  # noqa: F401
+# The import of collections is important, however. The classes from collections are not meant to be used directly,
+# instead they are registered with the runtime module (using the for_objcclass decorator) so they are used in place of
+# ObjCInstance when representing Foundation collections in Python. If this module is not imported, the registration
+# will not take place, and Foundation collections will not support the expected methods/operators in Python!
 from . import collections  # noqa: F401
 
 from .runtime import (  # noqa: F401
