@@ -6,7 +6,7 @@ from rubicon.objc import (
     NSDictionary, NSMutableDictionary, NSObject, ObjCClass, objc_method,
     objc_property,
 )
-from rubicon.objc.runtime import ObjCDictInstance
+from rubicon.objc.collections import ObjCDictInstance
 
 try:
     import platform
@@ -81,6 +81,26 @@ class NSDictionaryMixinTest(unittest.TestCase):
         e = d.copy()
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
+
+    def test_equivalence(self):
+        d1 = self.make_dictionary(self.py_dict)
+        d2 = self.make_dictionary(self.py_dict)
+        smaller_py_dict = self.py_dict.copy()
+        del smaller_py_dict['three']
+        bigger_py_dict = {'four': 'FOUR'}
+        bigger_py_dict.update(self.py_dict)
+
+        self.assertEqual(d1, self.py_dict)
+        self.assertEqual(d2, self.py_dict)
+        self.assertEqual(d1, d2)
+        self.assertEqual(self.py_dict, d1)
+        self.assertEqual(self.py_dict, d2)
+        self.assertEqual(d2, d1)
+
+        self.assertNotEqual(d1, object())
+        self.assertNotEqual(d1, {})
+        self.assertNotEqual(d1, smaller_py_dict)
+        self.assertNotEqual(d1, bigger_py_dict)
 
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
@@ -194,6 +214,9 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
             self.assertEqual(value, self.py_dict[key])
             self.assertTrue(key not in d)
 
+        with self.assertRaises(KeyError):
+            d.popitem()
+
     def test_setdefault1(self):
         d = self.make_dictionary(self.py_dict)
 
@@ -245,6 +268,18 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
         self.assertEqual(d, self.py_dict)
         d.update(one='two', three='four', four='FIVE')
+        self.assertNotEqual(d, self.py_dict)
+        self.assertEqual(d['one'], 'two')
+        self.assertEqual(d['two'], 'TWO')
+        self.assertEqual(d['three'], 'four')
+        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(len(d), len(self.py_dict) + 1)
+
+    def test_update4(self):
+        d = self.make_dictionary(self.py_dict)
+
+        self.assertEqual(d, self.py_dict)
+        d.update({'one': 'two'}, three='four', four='FIVE')
         self.assertNotEqual(d, self.py_dict)
         self.assertEqual(d['one'], 'two')
         self.assertEqual(d['two'], 'TWO')
