@@ -1107,21 +1107,24 @@ class objc_property(object):
 
     def register(self, cls, attr):
         def getter(_self) -> ObjCInstance:
-            return getattr(_self, '_' + attr, None)
+            getter_result = getattr(_self, '_' + attr, None)
+            if isinstance(getter_result, ObjCBoundMethod):
+                getter_result = getter_result()
+            return getter_result
 
         def setter(_self, new):
             if not hasattr(_self, '_' + attr):
                 setattr(_self, '_' + attr, None)
-            if getattr(_self, '_' + attr) is None:
+            if getter(_self) is None:
                 setattr(_self, '_' + attr, new)
                 if new is not None:
                     new.retain()
             else:
-                if not getattr(_self, '_' + attr).isEqualTo_(new):
-                    getattr(_self, '_' + attr).release()
+                if not getter(_self).isEqualTo_(new):
+                    getter(_self).release()
                     setattr(_self, '_' + attr, new)
                     if new is not None:
-                        getattr(_self, '_' + attr).retain()
+                        getter(_self).retain()
 
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
