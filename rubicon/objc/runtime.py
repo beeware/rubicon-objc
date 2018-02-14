@@ -1117,11 +1117,10 @@ class objc_property(object):
                 if new is not None:
                     new.retain()
             else:
-                if not getattr(_self, '_' + attr).isEqualTo_(new):
-                    getattr(_self, '_' + attr).release()
-                    setattr(_self, '_' + attr, new)
-                    if new is not None:
-                        getattr(_self, '_' + attr).retain()
+                getattr(_self, '_' + attr).autorelease()
+                setattr(_self, '_' + attr, new)
+                if new is not None:
+                    getattr(_self, '_' + attr).retain()
 
         getter_encoding = encoding_from_annotation(getter)
         setter_encoding = encoding_from_annotation(setter)
