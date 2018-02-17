@@ -24,7 +24,9 @@ we're going to use the `NSURL` class, Objective-C's representation of URLs:
 
 This gives us an `NSURL` class in Python which is transparently bridged to the
 `NSURL` class in the Objective-C runtime. Any method or property described in
-`Apple's documentation on NSURL <https://developer.apple.com/reference/foundation/nsurl?language=objc>`__  can be accessed over this bridge.
+`Apple's documentation on NSURL
+<https://developer.apple.com/reference/foundation/nsurl?language=objc>`__  can
+be accessed over this bridge.
 
 Let's create an instance of an `NSURL` object. The `NSURL` documentation
 describes a static constructor `+URLWithString:`; we can invoke this
@@ -58,10 +60,10 @@ colons with underscores::
 Instance methods
 ----------------
 
-So far, we've been using the `+URLWithString:` static constructor. However, `NSURL`
-also provides an initializer method `-initWithString:`. To use this method, you
-first have to instruct the Objective-C runtime to allocate memory for the instance,
-then invoke the initializer:
+So far, we've been using the `+URLWithString:` static constructor. However,
+`NSURL` also provides an initializer method `-initWithString:`. To use this
+method, you first have to instruct the Objective-C runtime to allocate memory
+for the instance, then invoke the initializer:
 
     >>> base = NSURL.alloc().initWithString("http://pybee.org/")
 
