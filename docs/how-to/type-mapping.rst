@@ -82,5 +82,30 @@ means you can treat the return value as if it were a dict - iterating over
 keys, values or items, retrieving objects by key, and so on.
 
 `NSPoint`, `NSSize`, and `NSRect`
----------------------------------
+ -------------------------------
 
+On instances of an Objective C structure, each field is exposed as a Python
+attribute. For example, if you create an instance of an `NSSize` object you can
+access its width and height by calling `NSSize.width`.
+
+When you need to pass an Objective C structure to an Objective C method,
+you can pass a tuple instead. For example, if you pass (10.0, 5.1) where a
+`NSSize` is expected, it will be converted automatically in the appropriate
+width, height for the structure.
+
+Prevent type conversion
+-----------------------
+
+For some use cases you may not actually want to do an automatic type conversion.
+For example if you need to make use of an actual `NSString` object in a Python
+program, you need the ability to prevent automatic conversion in to `str`.
+
+To prevent type conversion, pass `convert_result=False` as a parameter. An
+example of this in action would be to create a text string in Python::
+
+    text_string = ObjCInstance(
+        ObjCInstance(NSString.alloc(convert_result=False)).initWithString_(text, convert_result=False)
+    )
+
+This is admittedly really ugly, because this gets unwrapped twice and there
+is no ObjCStringInstance yet like there is for dictionaries above.
