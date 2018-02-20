@@ -14,9 +14,9 @@ to contribute code, please `fork the code`_ and `submit a pull request`_.
 Set up your development environment
 ===================================
 
-The recommended way of setting up your development environment for Rubicon
-is to install a virtual environment, install the required dependencies and
-start coding::
+The recommended way of setting up your development environment for Rubicon is
+to install a virtual environment, install the required dependencies and start
+coding::
 
     $ python3 -m venv venv
     $ source venv/bin/activate.sh
@@ -24,17 +24,16 @@ start coding::
     $ cd rubicon-objc
     $ pip install -e .
 
-In order to test the capabilities of Rubicon, the test suite contains
-an Objective-C library with some known classes. To run the test suite,
-you'll need to compile this library::
+In order to test the capabilities of Rubicon, the test suite contains an
+Objective-C library with some known classes. To run the test suite, you'll need
+to compile this library::
 
     $ make
 
 This will produce `tests/objc/librubiconharness.dylib`.
 
-In order for Rubicon to find this file, it will need to be on your
-dynamic library path. You can set this by setting an environment
-variable::
+In order for Rubicon to find this file, it will need to be on your dynamic
+library path. You can set this by setting an environment variable::
 
     $ export DYLD_LIBRARY_PATH=$(pwd)/tests/objc
 

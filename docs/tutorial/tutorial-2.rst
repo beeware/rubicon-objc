@@ -5,9 +5,9 @@ Tutorial 2 - Writing your own class
 ===================================
 
 Eventually, you'll come across an Objective-C API that requires you to provide
-a class instance as an argument. For example, when using macOS and iOS GUI classes,
-you often need to define "delegate" classes to describe how a GUI element will
-respond to mouse clicks and key presses.
+a class instance as an argument. For example, when using macOS and iOS GUI
+classes, you often need to define "delegate" classes to describe how a GUI
+element will respond to mouse clicks and key presses.
 
 Let's define a `Handler` class, with two methods:
 
