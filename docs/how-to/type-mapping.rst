@@ -81,8 +81,9 @@ value will be a wrapped `ObjCDictInstance` type. This type implements a
 means you can treat the return value as if it were a dict - iterating over
 keys, values or items, retrieving objects by key, and so on.
 
+
 `NSPoint`, `NSSize`, and `NSRect`
- -------------------------------
+---------------------------------
 
 On instances of an Objective C structure, each field is exposed as a Python
 attribute. For example, if you create an instance of an `NSSize` object you can
@@ -101,11 +102,14 @@ For example if you need to make use of an actual `NSString` object in a Python
 program, you need the ability to prevent automatic conversion in to `str`.
 
 To prevent type conversion, pass `convert_result=False` as a parameter. An
-example of this in action would be to create a text string in Python::
+example of this in action would be to create a text string in Python:
+
+.. code-block:: python
 
     text_string = ObjCInstance(
         ObjCInstance(NSString.alloc(convert_result=False)).initWithString_(text, convert_result=False)
     )
 
-This is admittedly really ugly, because this gets unwrapped twice and there
-is no ObjCStringInstance yet like there is for dictionaries above.
+As you can see in the example above, the initialization of the `NSString` has to
+be unwrapped twice. This use case will be supported better in the future with
+the creation of an `ObjCStringInstance` like there is for dictionaries.
