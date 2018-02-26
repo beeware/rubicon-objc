@@ -33,6 +33,18 @@ rubiconharness = CDLL(rubiconharness_name)
 faulthandler.enable()
 
 
+class struct_int_sized(Structure):
+    _fields_ = [("x", c_char * 4)]
+
+
+class struct_oddly_sized(Structure):
+    _fields_ = [("x", c_char * 5)]
+
+
+class struct_large(Structure):
+    _fields_ = [("x", c_char * 17)]
+
+
 class RubiconTest(unittest.TestCase):
     def test_sel_by_name(self):
         self.assertEqual(SEL(b"foobar").name, b"foobar")
@@ -663,20 +675,11 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        class struct_int_sized(Structure):
-            _fields_ = [("x", c_char * 4)]
         types.register_encoding(b'{int_sized=[4c]}', struct_int_sized)
-
         self.assertEqual(example.intSizedStruct().x, b"abc")
-
-        class struct_oddly_sized(Structure):
-            _fields_ = [("x", c_char * 5)]
 
         types.register_encoding(b'{oddly_sized=[5c]}', struct_oddly_sized)
         self.assertEqual(example.oddlySizedStruct().x, b"abcd")
-
-        class struct_large(Structure):
-            _fields_ = [("x", c_char * 17)]
 
         types.register_encoding(b'{large=[17c]}', struct_large)
         self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
@@ -686,19 +689,8 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        class struct_int_sized(Structure):
-            _fields_ = [("x", c_char * 4)]
-
         self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
-
-        class struct_oddly_sized(Structure):
-            _fields_ = [("x", c_char * 5)]
-
         self.assertEqual(send_message(example, "oddlySizedStruct", restype=struct_oddly_sized).x, b"abcd")
-
-        class struct_large(Structure):
-            _fields_ = [("x", c_char * 17)]
-
         self.assertEqual(send_message(example, "largeStruct", restype=struct_large).x, b"abcdefghijklmnop")
 
     def test_object_return(self):
