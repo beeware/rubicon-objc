@@ -186,6 +186,13 @@ class objc_property_t(c_void_p):
     pass
 
 
+class objc_property_attribute_t(Structure):
+    _fields_ = [
+        ('name', c_char_p),
+        ('value', c_char_p),
+    ]
+
+
 ######################################################################
 
 # void free(void *)
@@ -199,6 +206,11 @@ libobjc.class_addIvar.argtypes = [Class, c_char_p, c_size_t, c_uint8, c_char_p]
 # BOOL class_addMethod(Class cls, SEL name, IMP imp, const char *types)
 libobjc.class_addMethod.restype = c_bool
 libobjc.class_addMethod.argtypes = [Class, SEL, IMP, c_char_p]
+
+# BOOL class_addProperty(Class cls, const char *name, const objc_property_attribute_t *attributes,
+#     unsigned int attributeCount)
+libobjc.class_addProperty.restype = c_bool
+libobjc.class_addProperty.argtypes = [Class, c_char_p, POINTER(objc_property_attribute_t), c_uint]
 
 # BOOL class_addProtocol(Class cls, Protocol *protocol)
 libobjc.class_addProtocol.restype = c_bool
@@ -439,13 +451,6 @@ libobjc.object_setIvar.restype = None
 libobjc.object_setIvar.argtypes = [objc_id, Ivar, objc_id]
 
 ######################################################################
-
-
-class objc_property_attribute_t(Structure):
-    _fields_ = [
-        ('name', c_char_p),
-        ('value', c_char_p),
-    ]
 
 
 # const char *property_getAttributes(objc_property_t property)
@@ -1153,6 +1158,14 @@ class objc_property(object):
 
         self.vartype = ctype_for_type(vartype)
 
+    def _get_property_attributes(self):
+        attrs = [
+            objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
+        ]
+        if issubclass(self.vartype, objc_id):
+            attrs.append(objc_property_attribute_t(b'&', b''))  # retain
+        return (objc_property_attribute_t * len(attrs))(*attrs)
+
     def pre_register(self, ptr, attr):
         add_ivar(ptr, '_' + attr, self.vartype)
 
@@ -1194,14 +1207,12 @@ class objc_property(object):
             [None, ObjCInstance, SEL, self.vartype],
         )
 
+        attrs = self._get_property_attributes()
+        libobjc.class_addProperty(cls, ensure_bytes(attr), attrs, len(attrs))
+
     def protocol_register(self, proto, attr):
-        attrs = [
-            objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
-        ]
-        if issubclass(self.vartype, objc_id):
-            attrs.append(objc_property_attribute_t(b'&', b''))  # retain
-        attrs_array = (objc_property_attribute_t * len(attrs))(*attrs)
-        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs_array, len(attrs), True, True)
+        attrs = self._get_property_attributes()
+        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, len(attrs), True, True)
 
 
 def objc_rawmethod(f):
