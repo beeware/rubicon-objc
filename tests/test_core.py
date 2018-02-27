@@ -12,8 +12,8 @@ from enum import Enum
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
     NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod,
-    objc_const, objc_method, objc_property, send_message, send_super, types,
+    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, get_ivar, objc_classmethod,
+    objc_const, objc_id, objc_ivar, objc_method, objc_property, send_message, send_super, set_ivar, types,
 )
 from rubicon.objc.runtime import ObjCBoundMethod, libobjc
 
@@ -835,6 +835,32 @@ class RubiconTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             class DuplicateProtocol(NSObject, protocols=[NSObjectProtocol, NSObjectProtocol]):
                 pass
+
+    def test_class_ivars(self):
+        """An Objective-C class can have instance variables."""
+
+        class Ivars(NSObject):
+            object = objc_ivar(objc_id)
+            int = objc_ivar(c_int)
+            rect = objc_ivar(NSRect)
+
+        ivars = Ivars.alloc().init()
+
+        set_ivar(ivars, 'object', at('foo').ptr)
+        set_ivar(ivars, 'int', c_int(12345))
+        set_ivar(ivars, 'rect', NSMakeRect(12, 34, 56, 78))
+
+        s = ObjCInstance(get_ivar(ivars, 'object'))
+        self.assertEqual(str(s), 'foo')
+
+        i = get_ivar(ivars, 'int')
+        self.assertEqual(i.value, 12345)
+
+        r = get_ivar(ivars, 'rect')
+        self.assertEqual(r.origin.x, 12)
+        self.assertEqual(r.origin.y, 34)
+        self.assertEqual(r.size.width, 56)
+        self.assertEqual(r.size.height, 78)
 
     def test_class_properties(self):
         "A Python class can have ObjC properties with synthesized getters and setters."

@@ -7,13 +7,13 @@ from ctypes import (
     CDLL, CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union,
     addressof, alignment, byref, c_bool, c_char_p, c_double, c_float, c_int,
     c_int32, c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_ulong,
-    c_void_p, cast, sizeof, string_at, util,
+    c_void_p, cast, memmove, sizeof, string_at, util,
 )
 
 from . import ctypes_patch
 from .types import (
     __arm__, __i386__, __x86_64__, compound_value_for_sequence,
-    ctype_for_type, ctypes_for_method_encoding, encoding_for_ctype,
+    ctype_for_encoding, ctype_for_type, ctypes_for_method_encoding, encoding_for_ctype,
     register_ctype_for_type, with_encoding, with_preferred_encoding,
 )
 
@@ -54,7 +54,7 @@ __all__ = [
     'encoding_from_annotation',
     'for_objcclass',
     'get_class',
-    'get_instance_variable',
+    'get_ivar',
     'get_metaclass',
     'get_superclass_of_object',
     'get_type_for_objcclass_map',
@@ -77,7 +77,7 @@ __all__ = [
     'register_type_for_objcclass',
     'send_message',
     'send_super',
-    'set_instance_variable',
+    'set_ivar',
     'should_use_fpret',
     'should_use_stret',
     'type_for_objcclass',
@@ -425,17 +425,14 @@ else:
 libobjc.object_getClassName.restype = c_char_p
 libobjc.object_getClassName.argtypes = [objc_id]
 
-# Ivar object_getInstanceVariable(id obj, const char *name, void **outValue)
-libobjc.object_getInstanceVariable.restype = Ivar
-libobjc.object_getInstanceVariable.argtypes = [objc_id, c_char_p, POINTER(c_void_p)]
+# Note: The following functions only work for exactly pointer-sized ivars.
+# To use non-pointer-sized ivars reliably, the memory location must be calculated manually (using ivar_getOffset)
+# and then used as a pointer. This "manual" way can be used for all ivars except weak object ivars - these must be
+# accessed through the runtime functions in order to work correctly.
 
 # id object_getIvar(id object, Ivar ivar)
 libobjc.object_getIvar.restype = objc_id
 libobjc.object_getIvar.argtypes = [objc_id, Ivar]
-
-# Ivar object_setInstanceVariable(id obj, const char *name, void *value)
-# Set argtypes based on the data type of the instance variable.
-libobjc.object_setInstanceVariable.restype = Ivar
 
 # void object_setIvar(id object, Ivar ivar, id value)
 libobjc.object_setIvar.restype = None
@@ -753,17 +750,60 @@ def add_ivar(cls, name, vartype):
     )
 
 
-def set_instance_variable(obj, varname, value, vartype):
-    "Do the equivalent of `obj.varname = value`, where value is of type vartype."
-    libobjc.object_setInstanceVariable.argtypes = [objc_id, c_char_p, vartype]
-    libobjc.object_setInstanceVariable(obj, ensure_bytes(varname), value)
+def get_ivar(obj, varname):
+    """Get the value of obj's ivar named varname.
+
+    The returned object is a ctypes data object.
+    For non-object types (everything except objc_id and subclasses), the returned data object is backed by the ivar's
+    actual memory. This means that the data object is only usable as long as the "owner" object is alive, and writes
+    to it will directly change the ivar's value.
+    For object types, the returned data object is independent of the ivar's memory. This is because object ivars may
+    be weak, and thus cannot always be accessed directly by their address.
+    """
+
+    try:
+        obj = obj._as_parameter_
+    except AttributeError:
+        pass
+
+    ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
+    vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
+
+    if isinstance(vartype, objc_id):
+        return cast(libobjc.object_getIvar(obj, ivar), vartype)
+    else:
+        return vartype.from_address(obj.value + libobjc.ivar_getOffset(ivar))
 
 
-def get_instance_variable(obj, varname, vartype):
-    "Return the value of `obj.varname`, where the value is of type vartype."
-    variable = vartype()
-    libobjc.object_getInstanceVariable(obj, ensure_bytes(varname), byref(variable))
-    return variable.value
+def set_ivar(obj, varname, value):
+    """Set obj's ivar varname to value.
+
+    value must be a ctypes data object whose type matches that of the ivar.
+    """
+
+    try:
+        obj = obj._as_parameter_
+    except AttributeError:
+        pass
+
+    ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
+    vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
+
+    if not isinstance(value, vartype):
+        raise TypeError(
+            "Incompatible type for ivar {!r}: {!r} is not a subclass of the ivar's type {!r}"
+            .format(varname, type(value), vartype)
+        )
+    elif sizeof(type(value)) != sizeof(vartype):
+        raise TypeError(
+            "Incompatible type for ivar {!r}: {!r} has size {}, but the ivar's type {!r} has size {}"
+            .format(varname, type(value), sizeof(type(value)), vartype, sizeof(vartype))
+        )
+
+    if isinstance(vartype, objc_id):
+        libobjc.object_setIvar(obj, ivar, value)
+    else:
+        memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
 
 
 ######################################################################
@@ -1086,8 +1126,7 @@ def objc_classmethod(f):
 
 
 class objc_ivar(object):
-    """Add instance variable named varname to the subclass.
-    varname should be a string.
+    """Add an instance variable of type vartype to the subclass.
     vartype is a ctypes type.
     The class must be registered AFTER adding instance variables.
     """
@@ -1927,16 +1966,16 @@ except NameError:
 
         @objc_rawmethod
         def initWithObject_(self, cmd, anObject):
-            self = send_super(self, 'init')
-            self = self.value
-            set_instance_variable(self, 'observed_object', anObject, objc_id)
-            return self
+            self = send_message(self, 'init', restype=objc_id, argtypes=[])
+            if self is not None:
+                set_ivar(self, 'observed_object', anObject)
+            return self.value
 
         @objc_rawmethod
         def dealloc(self, cmd) -> None:
-            anObject = get_instance_variable(self, 'observed_object', objc_id)
-            ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'dealloc')
+            anObject = get_ivar(self, 'observed_object')
+            ObjCInstance._cached_objects.pop(anObject.value, None)
+            send_super(self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:
@@ -1944,9 +1983,9 @@ except NameError:
             # (which would have to be explicitly started with
             # objc_startCollectorThread(), so probably not too much reason
             # to have this here, but I guess it can't hurt.)
-            anObject = get_instance_variable(self, 'observed_object', objc_id)
-            ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'finalize')
+            anObject = get_ivar(self, 'observed_object')
+            ObjCInstance._cached_objects.pop(anObject.value, None)
+            send_super(self, 'finalize', restype=None, argtypes=[])
 
 
 def objc_const(dll, name):
