@@ -4,6 +4,10 @@ Release History
 (next version)
 --------------
 
+* Added support for ``objc_property``s with non-object types.
+* Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ivars.
+* Changed the implementation of ``objc_property`` to use ivars instead of Python attributes for storage. This fixes name conflicts in some situations.
+* Fixed ``objc_property`` setters on non-macOS platforms. (cculianu)
 * Fixed various bugs in the collection ``ObjCInstance`` subclasses:
   * Fixed getting/setting/deleting items or slices with indices lower than ``-len(obj)``. Previously this crashed Python, now an ``IndexError`` is raised.
   * Fixed slices with step size 0. Previously they were ignored and 1 was incorrectly used as the step size, now an ``IndexError`` is raised.
