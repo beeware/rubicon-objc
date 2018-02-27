@@ -1141,52 +1141,67 @@ class objc_ivar(object):
 
 
 class objc_property(object):
-    def __init__(self):
-        pass
+    """Add a property to an Objective-C class.
+
+    An ivar, a getter and a setter are automatically generated.
+    If the property's type is objc_id or a subclass, the generated setter keeps the stored object retained, and
+    releases it when it is replaced.
+    """
+
+    def __init__(self, vartype=objc_id):
+        super().__init__()
+
+        self.vartype = ctype_for_type(vartype)
+
+    def pre_register(self, ptr, attr):
+        add_ivar(ptr, '_' + attr, self.vartype)
 
     def register(self, cls, attr):
-        def getter(_self) -> ObjCInstance:
-            return getattr(_self, '_' + attr, None)
+        def _objc_getter(objc_self, _cmd):
+            value = get_ivar(objc_self, '_' + attr)
+            # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
+            # If the data object has a value attribute and is not a structure or union, assume that it is
+            # a primitive and unbox it.
+            if not isinstance(value, (Structure, Union)):
+                try:
+                    value = value.value
+                except AttributeError:
+                    pass
 
-        def setter(_self, new):
-            if not hasattr(_self, '_' + attr):
-                setattr(_self, '_' + attr, None)
-            if getattr(_self, '_' + attr) is None:
-                setattr(_self, '_' + attr, new)
-                if new is not None:
-                    new.retain()
-            else:
-                getattr(_self, '_' + attr).autorelease()
-                setattr(_self, '_' + attr, new)
-                if new is not None:
-                    getattr(_self, '_' + attr).retain()
+            return value
 
-        getter_encoding = encoding_from_annotation(getter)
-        setter_encoding = encoding_from_annotation(setter)
-
-        def _objc_getter(objc_self, objc_cmd):
-            py_self = ObjCInstance(objc_self)
-            result = ns_from_py(getter(py_self))
-            if result is None:
-                return None
-            else:
-                return result.ptr.value
-
-        def _objc_setter(objc_self, objc_cmd, name):
-            py_self = ObjCInstance(objc_self)
-            setter(py_self, ObjCInstance(name))
+        def _objc_setter(objc_self, _cmd, new_value):
+            if not isinstance(new_value, self.vartype):
+                # If vartype is a primitive, then new_value may be unboxed. If that is the case, box it manually.
+                new_value = self.vartype(new_value)
+            old_value = get_ivar(objc_self, '_' + attr)
+            if issubclass(self.vartype, objc_id) and new_value:
+                # If the new value is a non-null object, retain it.
+                send_message(new_value, 'retain', restype=objc_id, argtypes=[])
+            set_ivar(objc_self, '_' + attr, new_value)
+            if issubclass(self.vartype, objc_id) and old_value:
+                # If the old value is a non-null object, release it.
+                send_message(old_value, 'release', restype=None, argtypes=[])
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.imp_keep_alive_table[attr] = add_method(cls.ptr, attr, _objc_getter, getter_encoding)
-        cls.imp_keep_alive_table[setter_name] = add_method(cls.ptr, setter_name, _objc_setter, setter_encoding)
+        cls.imp_keep_alive_table[attr] = add_method(
+            cls.ptr, attr, _objc_getter,
+            [self.vartype, ObjCInstance, SEL],
+        )
+        cls.imp_keep_alive_table[setter_name] = add_method(
+            cls.ptr, setter_name, _objc_setter,
+            [None, ObjCInstance, SEL, self.vartype],
+        )
 
     def protocol_register(self, proto, attr):
-        attrs = (objc_property_attribute_t * 2)(
-            objc_property_attribute_t(b'T', b'@'),  # Type: id
-            objc_property_attribute_t(b'&', b''),  # retain
-        )
-        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, 2, True, True)
+        attrs = [
+            objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
+        ]
+        if issubclass(self.vartype, objc_id):
+            attrs.append(objc_property_attribute_t(b'&', b''))  # retain
+        attrs_array = (objc_property_attribute_t * len(attrs))(*attrs)
+        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs_array, len(attrs), True, True)
 
 
 def objc_rawmethod(f):

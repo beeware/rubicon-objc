@@ -869,9 +869,8 @@ class RubiconTest(unittest.TestCase):
 
         class URLBox(NSObject):
 
-            # takes no type: All properties are pointers
-            url = objc_property()
-            data = objc_property()
+            url = objc_property(ObjCInstance)
+            data = objc_property(ObjCInstance)
 
             @objc_method
             def getSchemeIfPresent(self):
@@ -913,6 +912,29 @@ class RubiconTest(unittest.TestCase):
 
         box.data = None
         self.assertIsNone(box.data)
+
+    def test_class_nonobject_properties(self):
+        """An Objective-C class can have properties of non-object types."""
+
+        class Properties(NSObject):
+            object = objc_property(ObjCInstance)
+            int = objc_property(c_int)
+            rect = objc_property(NSRect)
+
+        properties = Properties.alloc().init()
+
+        properties.object = at('foo')
+        properties.int = 12345
+        properties.rect = NSMakeRect(12, 34, 56, 78)
+
+        self.assertEqual(properties.object, 'foo')
+        self.assertEqual(properties.int, 12345)
+
+        r = properties.rect
+        self.assertEqual(r.origin.x, 12)
+        self.assertEqual(r.origin.y, 34)
+        self.assertEqual(r.size.width, 56)
+        self.assertEqual(r.size.height, 78)
 
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""
