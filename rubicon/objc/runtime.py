@@ -2128,6 +2128,7 @@ class Block:
 
     def wrapper(self, instance, *args):
         return self.func(*args)
+
     def disposeHelper(self, dst):
         Block._keep_alive_blocks_.pop(self.block.value, None)
 
