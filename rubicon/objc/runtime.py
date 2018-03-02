@@ -1986,7 +1986,7 @@ class BlockLiteral(Structure):
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', c_void_p), # NB: this must be c_void_p due to polymorphic nature
+        ('invoke', c_void_p), # NB: this must be c_void_p due to variadic nature
         ('descriptor', c_void_p)
     ]
 
