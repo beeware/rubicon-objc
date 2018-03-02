@@ -811,7 +811,10 @@ class ObjCMethod(object):
                     arg = arg.value
 
                 if issubclass(argtype, objc_block):
-                    if isinstance(arg, Block):
+                    if arg is None:
+                        # allow for 'nil' block args, which some objc methods accept
+                        arg = ns_from_py(arg)
+                    elif isinstance(arg, Block):
                         arg = arg.block
                     else:
                         arg = Block(arg).block
@@ -1969,6 +1972,8 @@ class BlockDescriptor(Structure):
     _fields_ = [
         ('reserved', c_ulong),
         ('size', c_ulong),
+        ('copy_helper', c_void_p),
+        ('dispose_helper', c_void_p),
         ('signature', c_char_p),
     ]
 
@@ -2064,6 +2069,9 @@ NOTHING = object()
 
 
 class Block:
+
+    _keep_alive_blocks_ = {}
+
     def __init__(self, func, restype=NOTHING, *arg_types):
         if not callable(func):
             raise TypeError('Blocks must be callable')
@@ -2097,13 +2105,20 @@ class Block:
 
         self.literal = BlockLiteral()
         self.literal.isa = addressof(_NSConcreteGlobalBlock)
-        self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE
+        self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE | BlockConsts.HAS_COPY_DISPOSE
         self.literal.reserved = 0
         self.cfunc = self.cfunc_type(self.wrapper)
         self.literal.invoke = cast(self.cfunc, c_void_p)
         self.descriptor = BlockDescriptor()
         self.descriptor.reserved = 0
         self.descriptor.size = sizeof(BlockLiteral)
+
+        self.copy_helper_type = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
+        self.dispose_helper_type = CFUNCTYPE(c_void_p, c_void_p)
+        self.copy_helper = self.copy_helper_type(self.copyHelper)
+        self.dispose_helper = self.dispose_helper_type(self.disposeHelper)
+        self.descriptor.copy_helper = cast(self.copy_helper, c_void_p)
+        self.descriptor.dispose_helper = cast(self.dispose_helper, c_void_p)
 
         self.descriptor.signature = encoding_for_ctype(restype) + b'@?' + b''.join(
             encoding_for_ctype(arg) for arg in signature
@@ -2113,3 +2128,10 @@ class Block:
 
     def wrapper(self, instance, *args):
         return self.func(*args)
+    def disposeHelper(self, dst):
+        Block._keep_alive_blocks_.pop(self.block.value, None)
+
+    def copyHelper(self, dst, src):
+        Block._keep_alive_blocks_.pop(self.block.value, None)
+        self.block = objc_block(dst)
+        Block._keep_alive_blocks_[self.block.value] = self
