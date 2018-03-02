@@ -2065,7 +2065,7 @@ class ObjCBlockInstance(ObjCInstance):
         return self.block(*args)
 
 
-_NSConcreteGlobalBlock = (c_void_p * 32).in_dll(libc, "_NSConcreteGlobalBlock")
+_NSConcreteStackBlock = (c_void_p * 32).in_dll(libc, "_NSConcreteStackBlock")
 
 
 NOTHING = object()
@@ -2107,7 +2107,7 @@ class Block:
         self.cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
 
         self.literal = BlockLiteral()
-        self.literal.isa = addressof(_NSConcreteGlobalBlock)
+        self.literal.isa = addressof(_NSConcreteStackBlock)
         self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE | BlockConsts.HAS_COPY_DISPOSE
         self.literal.reserved = 0
         self.cfunc_wrapper = self.cfunc_type(self.wrapper)
