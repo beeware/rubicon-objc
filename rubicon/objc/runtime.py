@@ -1957,13 +1957,16 @@ def objc_const(dll, name):
 
     return ObjCInstance(objc_id.in_dll(dll, name))
 
+_cfunc_type_block_invoke  = CFUNCTYPE(c_void_p, c_void_p)
+_cfunc_type_block_dispose = CFUNCTYPE(c_void_p, c_void_p)
+_cfunc_type_block_copy    = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
 
 class ObjCBlockStruct(Structure):
     _fields_ = [
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', CFUNCTYPE(c_void_p, c_void_p)),
+        ('invoke', _cfunc_type_block_invoke),
         ('descriptor', c_void_p),
     ]
 
@@ -1972,8 +1975,8 @@ class BlockDescriptor(Structure):
     _fields_ = [
         ('reserved', c_ulong),
         ('size', c_ulong),
-        ('copy_helper', c_void_p),
-        ('dispose_helper', c_void_p),
+        ('copy_helper', _cfunc_type_block_copy),
+        ('dispose_helper', _cfunc_type_block_dispose),
         ('signature', c_char_p),
     ]
 
@@ -1983,7 +1986,7 @@ class BlockLiteral(Structure):
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', c_void_p),
+        ('invoke', c_void_p), # NB: this must be c_void_p due to polymorphic nature
         ('descriptor', c_void_p)
     ]
 
@@ -1995,8 +1998,8 @@ def create_block_descriptor_struct(has_helpers, has_signature):
     ]
     if has_helpers:
         descriptor_fields.extend([
-            ('copy_helper', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
-            ('dispose_helper', CFUNCTYPE(c_void_p, c_void_p)),
+            ('copy_helper', _cfunc_type_block_copy),
+            ('dispose_helper', _cfunc_type_block_dispose),
         ])
     if has_signature:
         descriptor_fields.extend([
@@ -2107,18 +2110,16 @@ class Block:
         self.literal.isa = addressof(_NSConcreteGlobalBlock)
         self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE | BlockConsts.HAS_COPY_DISPOSE
         self.literal.reserved = 0
-        self.cfunc = self.cfunc_type(self.wrapper)
-        self.literal.invoke = cast(self.cfunc, c_void_p)
+        self.cfunc_wrapper = self.cfunc_type(self.wrapper)
+        self.literal.invoke = cast(self.cfunc_wrapper, c_void_p)
         self.descriptor = BlockDescriptor()
         self.descriptor.reserved = 0
         self.descriptor.size = sizeof(BlockLiteral)
 
-        self.copy_helper_type = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
-        self.dispose_helper_type = CFUNCTYPE(c_void_p, c_void_p)
-        self.copy_helper = self.copy_helper_type(self.copyHelper)
-        self.dispose_helper = self.dispose_helper_type(self.disposeHelper)
-        self.descriptor.copy_helper = cast(self.copy_helper, c_void_p)
-        self.descriptor.dispose_helper = cast(self.dispose_helper, c_void_p)
+        self.cfunc_copy_helper = _cfunc_type_block_copy(self.copy_helper)
+        self.cfunc_dispose_helper = _cfunc_type_block_dispose(self.dispose_helper)
+        self.descriptor.copy_helper = self.cfunc_copy_helper
+        self.descriptor.dispose_helper = self.cfunc_dispose_helper
 
         self.descriptor.signature = encoding_for_ctype(restype) + b'@?' + b''.join(
             encoding_for_ctype(arg) for arg in signature
@@ -2129,10 +2130,16 @@ class Block:
     def wrapper(self, instance, *args):
         return self.func(*args)
 
-    def disposeHelper(self, dst):
-        Block._keep_alive_blocks_.pop(self.block.value, None)
+    def dispose_helper(self, dst):
+        Block._keep_alive_blocks_.pop(dst, None)
 
-    def copyHelper(self, dst, src):
-        Block._keep_alive_blocks_.pop(self.block.value, None)
-        self.block = objc_block(dst)
-        Block._keep_alive_blocks_[self.block.value] = self
+    def copy_helper(self, dst, src):
+        # Update our keepalive table because objc just informed us that it
+        # took ownership of a block/copied a block we are concerned with.
+        # Note that sometime later we can expect calls to dispose_helper
+        # for each of the 'dst' blocks objc told us about, but until then we
+        # need to make sure the python code they reference stays in memory,
+        # so basically put self in a class variable dictionary so it is
+        # guaranteed to stay around until dispose_helper tells us they are all
+        # gone.
+        Block._keep_alive_blocks_[dst] = self
