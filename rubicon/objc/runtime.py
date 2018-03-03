@@ -817,7 +817,11 @@ class ObjCMethod(object):
                     elif isinstance(arg, Block):
                         arg = arg.block
                     else:
-                        arg = Block(arg).block
+                        # This usage below will leverage the ctypes _as_parameter_
+                        # mechanism.
+                        # Note: We need to keep te Block instance around at least until
+                        # the objc method is called else bad things may happen!
+                        arg = Block(arg)
                 elif issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
                     arg = ns_from_py(arg)
@@ -2126,6 +2130,10 @@ class Block:
         )
         self.literal.descriptor = cast(byref(self.descriptor), c_void_p)
         self.block = cast(byref(self.literal), objc_block)
+
+    @property
+    def _as_parameter_(self):
+        return self.block
 
     def wrapper(self, instance, *args):
         return self.func(*args)
