@@ -818,9 +818,8 @@ class ObjCMethod(object):
                         arg = arg.block
                     else:
                         # This usage below will leverage the ctypes _as_parameter_
-                        # mechanism.
-                        # Note: We need to keep te Block instance around at least until
-                        # the objc method is called else bad things may happen!
+                        # mechanism.  Note: We need to keep the temp. Block instance 
+                        # around at least until the objc method is called.
                         arg = Block(arg)
                 elif issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
