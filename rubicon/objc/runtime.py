@@ -810,20 +810,7 @@ class ObjCMethod(object):
                     # Convert Python enum objects to their values
                     arg = arg.value
 
-                if issubclass(argtype, objc_block):
-                    if arg is None:
-                        # allow for 'nil' block args, which some objc methods accept
-                        arg = ns_from_py(arg)
-                    elif callable(arg) and \
-                         not isinstance(arg, Block): # <-- guard against someone someday making Block callable
-                        # Note: We need to keep the temp. Block instance
-                        # around at least until the objc method is called.
-                        # _as_parameter_ is used in the actual ctypes marshalling below.
-                        arg = Block(arg)
-                    # ^ For blocks at this point either arg is a Block instance
-                    # (making use of _as_parameter_), is None, or if it isn't either of
-                    # those two, an ArgumentError will be raised below.
-                elif issubclass(argtype, objc_id):
+                if issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
                     arg = ns_from_py(arg)
                 elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
@@ -1768,6 +1755,7 @@ def ns_from_py(pyobj):
     * ``dict``: Converted to ``NSDictionary``, with all keys and values converted recursively
     * ``list``: Converted to ``NSArray``, with all elements converted recursively
     * ``bool``, ``int``, ``float``: Converted to ``NSNumber``
+    *  ``typing.Callable``: functions/closures are converted to our ``Block`` facade (suitable to be passed to objc)
 
     Other types cause a ``TypeError``.
     """
@@ -1777,7 +1765,7 @@ def ns_from_py(pyobj):
 
     # Many Objective-C method calls here use the convert_result=False kwarg to disable automatic conversion of
     # return values, because otherwise most of the Objective-C objects would be converted back to Python objects.
-    if pyobj is None or isinstance(pyobj, ObjCInstance):
+    if pyobj is None or isinstance(pyobj, ObjCInstance) or isinstance(pyobj, Block):
         return pyobj
     elif isinstance(pyobj, str):
         return ObjCInstance(NSString.stringWithUTF8String_(pyobj.encode('utf-8'), convert_result=False))
@@ -1801,6 +1789,8 @@ def ns_from_py(pyobj):
         return ObjCInstance(NSNumber.numberWithLong_(pyobj, convert_result=False))
     elif isinstance(pyobj, float):
         return ObjCInstance(NSNumber.numberWithDouble_(pyobj, convert_result=False))
+    elif callable(pyobj):
+        return Block(pyobj)
     else:
         raise TypeError(
             "Don't know how to convert a {cls.__module__}.{cls.__qualname__} to a Foundation object"
@@ -2131,6 +2121,8 @@ class Block:
         )
         self.literal.descriptor = cast(byref(self.descriptor), c_void_p)
         self.block = cast(byref(self.literal), objc_block)
+        # below is needed so that Block is a first class object that can be marshalled
+        # to objc methods via ctypes
         self._as_parameter_ = self.block
 
     def wrapper(self, instance, *args):
