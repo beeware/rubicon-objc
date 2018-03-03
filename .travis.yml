@@ -12,12 +12,29 @@ matrix:
     - osx_image: xcode8.3
     - osx_image: xcode9.2
 language: generic
+cache:
+  directories:
+    ~/.pyenv
+env:
+  global:
+    - PY34="3.4.8"
+    - PY35="3.5.5"
+    - PY36="3.6.4"
 install:
+  # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
+  # so we upgrade pyenv to get a consistent setup in all environments.
   - brew update
-  - brew install python3
-  - python3 -m pip install tox
+  - brew upgrade pyenv
+  # pyenv's shims directory is not in the PATH by default.
+  - export PATH="$(pyenv root)/shims:${PATH}"
+  # These are the Python versions that we want to test on.
+  - pyenv install --skip-existing ${PY34}
+  - pyenv install --skip-existing ${PY35}
+  - pyenv install --skip-existing ${PY36}
+  - pyenv global ${PY36} ${PY35} ${PY34} system
+  # tox is not installed by default in some older Travis environments.
+  - python3.6 -m pip install tox
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python3 setup.py test
-  - python3 -m tox -e flake8
+  - python3.6 -m tox -e "py{34,35,36}-default"
