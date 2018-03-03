@@ -2125,6 +2125,9 @@ class Block:
         # to objc methods via ctypes
         self._as_parameter_ = self.block
 
+    def __call__(self, *args):
+        return self.func(*args)
+
     def wrapper(self, instance, *args):
         return self.func(*args)
 
