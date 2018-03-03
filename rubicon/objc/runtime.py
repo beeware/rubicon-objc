@@ -2129,10 +2129,7 @@ class Block:
         )
         self.literal.descriptor = cast(byref(self.descriptor), c_void_p)
         self.block = cast(byref(self.literal), objc_block)
-
-    @property
-    def _as_parameter_(self):
-        return self.block
+        self._as_parameter_ = self.block
 
     def wrapper(self, instance, *args):
         return self.func(*args)
