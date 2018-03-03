@@ -814,13 +814,15 @@ class ObjCMethod(object):
                     if arg is None:
                         # allow for 'nil' block args, which some objc methods accept
                         arg = ns_from_py(arg)
-                    elif isinstance(arg, Block):
-                        arg = arg.block
-                    else:
-                        # This usage below will leverage the ctypes _as_parameter_
-                        # mechanism.  Note: We need to keep the temp. Block instance 
+                    elif callable(arg) and \
+                         not isinstance(arg, Block): # <-- guard against someone someday making Block callable
+                        # Note: We need to keep the temp. Block instance
                         # around at least until the objc method is called.
+                        # _as_parameter_ is used in the actual ctypes marshalling below.
                         arg = Block(arg)
+                    # ^ For blocks at this point either arg is a Block instance
+                    # (making use of _as_parameter_), is None, or if it isn't either of
+                    # those two, an ArgumentError will be raised below.
                 elif issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
                     arg = ns_from_py(arg)
