@@ -24,7 +24,7 @@ install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
   # so we upgrade pyenv to get a consistent setup in all environments.
   - brew update
-  - brew upgrade pyenv
+  - brew outdated pyenv || brew upgrade pyenv
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
