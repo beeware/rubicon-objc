@@ -52,4 +52,4 @@ install:
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python3.6 -m tox -e "py{34,35,36}-default"
+  - python3.6 -m tox -e "py{34,35,36}-default,flake8"
