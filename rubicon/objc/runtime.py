@@ -814,8 +814,8 @@ class ObjCMethod(object):
                     if arg is None:
                         # allow for 'nil' block args, which some objc methods accept
                         arg = ns_from_py(arg)
-                    elif callable(arg) and \
-                         not isinstance(arg, Block): # <-- guard against someone someday making Block callable
+                    elif (callable(arg) and
+                          not isinstance(arg, Block)):  # <-- guard against someone someday making Block callable
                         # Note: We need to keep the temp. Block instance
                         # around at least until the objc method is called.
                         # _as_parameter_ is used in the actual ctypes marshalling below.
@@ -1962,9 +1962,11 @@ def objc_const(dll, name):
 
     return ObjCInstance(objc_id.in_dll(dll, name))
 
-_cfunc_type_block_invoke  = CFUNCTYPE(c_void_p, c_void_p)
+
+_cfunc_type_block_invoke = CFUNCTYPE(c_void_p, c_void_p)
 _cfunc_type_block_dispose = CFUNCTYPE(c_void_p, c_void_p)
-_cfunc_type_block_copy    = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
+_cfunc_type_block_copy = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
+
 
 class ObjCBlockStruct(Structure):
     _fields_ = [
@@ -1991,7 +1993,7 @@ class BlockLiteral(Structure):
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', c_void_p), # NB: this must be c_void_p due to variadic nature
+        ('invoke', c_void_p),  # NB: this must be c_void_p due to variadic nature
         ('descriptor', c_void_p)
     ]
 
