@@ -1538,12 +1538,7 @@ class ObjCClass(ObjCInstance, type):
 
         objc_class_name = name.decode('utf-8')
 
-        # Create the class object. If there is already a cached instance for ptr,
-        # it is returned and the additional arguments are ignored.
-        # Logically this can only happen when creating an ObjCClass from an existing
-        # name or pointer, not when creating a new class.
-        # If there is no cached instance for ptr, a new one is created and cached.
-        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+        new_attrs = {
             '_class_inited': False,
             'name': objc_class_name,
             'methods_ptr_count': c_uint(0),
@@ -1563,7 +1558,19 @@ class ObjCClass(ObjCInstance, type):
             # which need to be kept from being garbage-collected.
             # It does not contain any other methods, do not use it for calling methods.
             'imp_keep_alive_table': {},
-        })
+        }
+
+        # On Python 3.6 and later, the class namespace may contain a __classcell__ attribute that must be passed on
+        # to type.__new__. See https://docs.python.org/3/reference/datamodel.html#creating-the-class-object
+        if '__classcell__' in attrs:
+            new_attrs['__classcell__'] = attrs['__classcell__']
+
+        # Create the class object. If there is already a cached instance for ptr,
+        # it is returned and the additional arguments are ignored.
+        # Logically this can only happen when creating an ObjCClass from an existing
+        # name or pointer, not when creating a new class.
+        # If there is no cached instance for ptr, a new one is created and cached.
+        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), new_attrs)
 
         if not self._class_inited:
             self._class_inited = True
