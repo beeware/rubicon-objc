@@ -681,9 +681,20 @@ def send_super(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
+    # Note that in objective-c, the compiler provides this information implicitly at compile-time, but we must
+    # have the caller do it at runtime in order to get 100% correct behavior. See github issue #107.
     superclass = kwargs.get('superclass', None)
-    if superclass is not None and not isinstance(superclass, Class):
-        raise TypeError("Invalid type for 'superclass' kwarg, expected type 'Class', got: %" % (str(type(superclass))))
+    if superclass is not None:
+        if isinstance(superclass, Class):
+            pass  # ok, accept Class instances, I guess
+        elif not isinstance(superclass, str):  # expecting a string here.. complain
+            raise TypeError("Invalid type for 'superclass' kwarg, expected type str, got: %"
+                            % (str(type(superclass))))
+        else:
+            classname = superclass
+            superclass = get_class(classname)
+            if superclass.value is None:
+                raise TypeError("Could not find an obj-c class named '%s'" % (classname))
     superclass = get_superclass_of_object(receiver) if superclass is None else superclass
     super_struct = objc_super(receiver, superclass)
     selector = SEL(selName)
