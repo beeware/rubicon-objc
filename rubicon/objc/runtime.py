@@ -681,7 +681,10 @@ def send_super(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    superclass = get_superclass_of_object(receiver)
+    superclass = kwargs.get('superclass', None)
+    if superclass is not None and not isinstance(superclass, Class):
+        raise TypeError("Invalid type for 'superclass' kwarg, expected type 'Class', got: %" % (str(type(superclass))))
+    superclass = get_superclass_of_object(receiver) if superclass is None else superclass
     super_struct = objc_super(receiver, superclass)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
