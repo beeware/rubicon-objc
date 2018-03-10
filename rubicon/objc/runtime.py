@@ -1431,6 +1431,7 @@ class ObjCClass(ObjCInstance, type):
         protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
+    @classmethod
     def _new_from_name(cls, name):
         name = ensure_bytes(name)
         ptr = get_class(name)
@@ -1439,6 +1440,7 @@ class ObjCClass(ObjCInstance, type):
 
         return ptr, name
 
+    @classmethod
     def _new_from_ptr(cls, ptr):
         ptr = cast(ptr, Class)
         if ptr.value is None:
@@ -1449,6 +1451,7 @@ class ObjCClass(ObjCInstance, type):
 
         return ptr, name
 
+    @classmethod
     def _new_from_class_statement(cls, name, bases, attrs, *, protocols):
         name = ensure_bytes(name)
 
@@ -1525,13 +1528,13 @@ class ObjCClass(ObjCInstance, type):
             attrs = {}
 
             if isinstance(name_or_ptr, (bytes, str)):
-                ptr, name = cls._new_from_name(cls, name_or_ptr)
+                ptr, name = cls._new_from_name(name_or_ptr)
             else:
-                ptr, name = cls._new_from_ptr(cls, name_or_ptr)
+                ptr, name = cls._new_from_ptr(name_or_ptr)
                 if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
                     return ObjCMetaClass(ptr)
         else:
-            ptr, name, attrs = cls._new_from_class_statement(cls, name_or_ptr, bases, attrs, protocols=protocols)
+            ptr, name, attrs = cls._new_from_class_statement(name_or_ptr, bases, attrs, protocols=protocols)
 
         objc_class_name = name.decode('utf-8')
 
