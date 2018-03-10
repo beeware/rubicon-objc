@@ -688,7 +688,7 @@ def send_super(receiver, selName, *args, **kwargs):
         if isinstance(superclass, Class):
             pass  # ok, accept Class instances, I guess
         elif not isinstance(superclass, str):  # expecting a string here.. complain
-            raise TypeError("Invalid type for 'superclass' kwarg, expected type str, got: %"
+            raise TypeError("Invalid type for 'superclass' kwarg, expected type str, got: %s"
                             % (str(type(superclass))))
         else:
             classname = superclass
