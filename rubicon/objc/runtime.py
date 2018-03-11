@@ -674,12 +674,14 @@ def send_super(cls, receiver, selName, *args, **kwargs):
     may find the appropriate superclass method implementation (if any) to call. (See issue #107)
 
     As such, cls can be a string, which is the class name of the lexical scope of the caller,
-    such as given by the __class__ keyword in Python.  Eg: send_super(__class__, self, 'init')
-    would be the typical usage pattern.
+    such as given by the __class__.__name__ built-in in Python, or a Python 'class' type as
+    obtained from the __class__ built-in.
+
+    Eg: send_super(__class__, self, 'init') would be the typical usage pattern.
 
     cls may also be an ObjCClass instance or a naked Class pointer.
     """
-    if not isinstance(cls, (str, ObjCClass, Class)):
+    if not isinstance(cls, (str, ObjCClass, Class)) and not inspect.isclass(cls):
         # Kindly remind the caller that the API has changed
         raise TypeError("Missing/Invalid cls argument: {tp.__module__}.{tp.__qualname__} -- "
                         + "send_super now requires its first argument be a"
@@ -689,8 +691,11 @@ def send_super(cls, receiver, selName, *args, **kwargs):
                         .format(tp=type(cls)))
 
     if not isinstance(cls, ObjCClass):
-        # Convert class name argument to an ObjCClass from either a name or a naked Class pointer
-        cls = ObjCClass(cls)  # raises a NameError if class is not found and/or pointer was nil
+        if inspect.isclass(cls):
+            # __class__ was passed-in, convert to str for obj-c lookup
+            cls = cls.__name__
+        # Convert class name/ptr argument to an ObjCClass (from either a name or a naked Class pointer)
+        cls = ObjCClass(cls)  # raises an exception if class is not found by name and/or pointer was nil
 
     try:
         receiver = receiver._as_parameter_
