@@ -673,29 +673,25 @@ def send_super(cls, receiver, selName, *args, **kwargs):
     It basically instructs this runtime what the lexical scope was of the caller, so that it
     may find the appropriate superclass method implementation (if any) to call. (See issue #107)
 
-    As such, cls can be a string, which is the class name of the lexical scope of the caller,
-    such as given by the __class__.__name__ built-in in Python, or a Python 'class' type as
-    obtained from the __class__ built-in.
+    As such, cls should be an instance of ObjCClass, the class of the lexical scope of the caller,
+    which is conveniently obtained simply by using the Python __class__ built-in (in the context of
+    an instance method implementation of a class descending from ObjCClass -- which all your custom
+    obj-c classes will always descend from).
 
     Eg: send_super(__class__, self, 'init') would be the typical usage pattern.
 
-    cls may also be an ObjCClass instance or a naked Class pointer.
+    cls may also be a naked Class pointer.
     """
-    if not isinstance(cls, (str, ObjCClass, Class)) and not inspect.isclass(cls):
+    if isinstance(cls, Class) or type(cls) is ObjCClass:
+        pass
+    else:
         # Kindly remind the caller that the API has changed
-        raise TypeError("Missing/Invalid cls argument: {tp.__module__}.{tp.__qualname__} -- "
-                        + "send_super now requires its first argument be a"
-                        + " class name (str) or an instance of ObjCClass and/or Class."
+        raise TypeError("Missing/Invalid cls argument: '{tp.__module__}.{tp.__qualname__}' -- "
+                        .format(tp=type(cls))
+                        + "send_super now requires its first argument be an"
+                        + " ObjClass or an objc raw Class pointer."
                         + " To fix this error, use Python's __class__ keyword as the first argument to"
-                        + " send_super."
-                        .format(tp=type(cls)))
-
-    if not isinstance(cls, ObjCClass):
-        if inspect.isclass(cls):
-            # __class__ was passed-in, convert to str for obj-c lookup
-            cls = cls.__name__
-        # Convert class name/ptr argument to an ObjCClass (from either a name or a naked Class pointer)
-        cls = ObjCClass(cls)  # raises an exception if class is not found by name and/or pointer was nil
+                        + " send_super.")
 
     try:
         receiver = receiver._as_parameter_
@@ -709,10 +705,11 @@ def send_super(cls, receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    superclass = cls.superclass
-    if superclass is None:
-        raise ValueError("The specified class '{}' does not have an Objective-C superclass.".format(cls.name))
-    super_struct = objc_super(receiver, superclass.ptr)
+    super_ptr = libobjc.class_getSuperclass(cls)  # accepts either Class (ptr) or ObjCClass as argument
+    if super_ptr.value is None:
+        raise ValueError("The specified class '{}' does not have an Objective-C superclass and/or is a root class."
+                         .format(libobjc.class_getName(cls).decode('utf-8')))
+    super_struct = objc_super(receiver, super_ptr)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
