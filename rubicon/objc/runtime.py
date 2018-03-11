@@ -664,11 +664,34 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(receiver, selName, *args, **kwargs):
+def send_super(cls, receiver, selName, *args, **kwargs):
     """Send a message named selName to the super of the receiver.
 
     This is the equivalent of [super selname:args].
+
+    Since proper 'super' semantics requires lexical scoping, the cls argument is now required.
+    It basically instructs this runtime what the lexical scope was of the caller, so that it
+    may find the appropriate superclass method implementation (if any) to call. (See issue #107)
+
+    As such, cls can be a string, which is the class name of the lexical scope of the caller,
+    such as given by the __class__ keyword in Python.  Eg: send_super(__class__, self, 'init')
+    would be the typical usage pattern.
+
+    cls may also be an ObjCClass instance or a naked Class pointer.
     """
+    if not isinstance(cls, (str, ObjCClass, Class)):
+        # Kindly remind the caller that the API has changed
+        raise TypeError("Missing/Invalid cls argument: {tp.__module__}.{tp.__qualname__} -- "
+                        + "send_super now requires its first argument be a"
+                        + " class name (str) or an instance of ObjCClass and/or Class."
+                        + " To fix this error, use Python's __class__ keyword as the first argument to"
+                        + " send_super."
+                        .format(tp=type(cls)))
+
+    if not isinstance(cls, ObjCClass):
+        # Convert class name argument to an ObjCClass from either a name or a naked Class pointer
+        cls = ObjCClass(cls)  # raises a NameError if class is not found and/or pointer was nil
+
     try:
         receiver = receiver._as_parameter_
     except AttributeError:
@@ -681,22 +704,10 @@ def send_super(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    # Note that in objective-c, the compiler provides this information implicitly at compile-time, but we must
-    # have the caller do it at runtime in order to get 100% correct behavior. See github issue #107.
-    superclass = kwargs.get('superclass', None)
-    if superclass is not None:
-        if isinstance(superclass, Class):
-            pass  # ok, accept Class instances, I guess
-        elif not isinstance(superclass, str):  # expecting a string here.. complain
-            raise TypeError("Invalid type for 'superclass' kwarg, expected type str, got: %s"
-                            % (str(type(superclass))))
-        else:
-            classname = superclass
-            superclass = get_class(classname)
-            if superclass.value is None:
-                raise TypeError("Could not find an obj-c class named '%s'" % (classname))
-    superclass = get_superclass_of_object(receiver) if superclass is None else superclass
-    super_struct = objc_super(receiver, superclass)
+    superclass = cls.superclass
+    if superclass is None:
+        raise ValueError("The specified class '{}' does not have an Objective-C superclass.".format(cls.name))
+    super_struct = objc_super(receiver, superclass.ptr)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
@@ -1949,7 +1960,7 @@ except NameError:
 
         @objc_rawmethod
         def initWithObject_(self, cmd, anObject):
-            self = send_super(self, 'init')
+            self = send_super(__class__, self, 'init')
             self = self.value
             set_instance_variable(self, 'observed_object', anObject, objc_id)
             return self
@@ -1958,7 +1969,7 @@ except NameError:
         def dealloc(self, cmd) -> None:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'dealloc')
+            send_super(__class__, self, 'dealloc')
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:
@@ -1968,7 +1979,7 @@ except NameError:
             # to have this here, but I guess it can't hurt.)
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'finalize')
+            send_super(__class__, self, 'finalize')
 
 
 def objc_const(dll, name):
