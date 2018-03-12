@@ -682,14 +682,12 @@ def send_super(cls, receiver, selName, *args, **kwargs):
 
     cls may also be a naked Class pointer.
     """
-    if isinstance(cls, Class) or type(cls) is ObjCClass:
-        pass
-    else:
+    if not isinstance(cls, (ObjCClass, Class)):
         # Kindly remind the caller that the API has changed
         raise TypeError("Missing/Invalid cls argument: '{tp.__module__}.{tp.__qualname__}' -- "
                         .format(tp=type(cls))
                         + "send_super now requires its first argument be an"
-                        + " ObjClass or an objc raw Class pointer."
+                        + " ObjCClass or an objc raw Class pointer."
                         + " To fix this error, use Python's __class__ keyword as the first argument to"
                         + " send_super.")
 
