@@ -1715,9 +1715,7 @@ def py_from_ns(nsobj, *, _auto=False):
     if not isinstance(nsobj, ObjCInstance):
         return nsobj
 
-    if nsobj.isKindOfClass(NSString):
-        return str(nsobj)
-    elif nsobj.isKindOfClass(NSDecimalNumber):
+    if nsobj.isKindOfClass(NSDecimalNumber):
         return decimal.Decimal(nsobj.descriptionWithLocale(None))
     elif nsobj.isKindOfClass(NSNumber):
         # Choose the property to access based on the type encoding. The actual conversion is done by ctypes.
@@ -1739,8 +1737,10 @@ def py_from_ns(nsobj, *, _auto=False):
     elif _auto:
         # _auto is a private kwarg that is only passed when py_from_ns is called to perform an implicit conversion
         # of a method return value or argument into Python. In this case we only want to perform a few simple
-        # conversions (strings and numbers).
+        # conversions (boxed numbers to their Python equivalents).
         return nsobj
+    elif nsobj.isKindOfClass(NSString):
+        return str(nsobj)
     elif nsobj.isKindOfClass(NSData):
         # Despite the name, string_at converts the data at the address to a bytes object, not str.
         return string_at(send_message(nsobj, 'bytes', restype=POINTER(c_uint8), argtypes=[]), nsobj.length)
