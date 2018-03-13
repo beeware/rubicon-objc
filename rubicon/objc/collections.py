@@ -1,8 +1,62 @@
 from .types import NSUInteger, NSNotFound, NSRange
 from .runtime import (
-    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, ObjCInstance, for_objcclass, ns_from_py, objc_id,
+    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py, objc_id,
     send_message
 )
+
+
+@for_objcclass(NSString)
+class ObjCStrInstance(ObjCInstance):
+    """Provides Pythonic operations on NSString objects that mimic those of Python's str.
+
+    Note that str objects consist of Unicode code points, whereas NSString objects consist of UTF-16 code units.
+    These are not equivalent for code points greater than U+FFFF. For performance and simplicity, ObjCStrInstance
+    objects behave as sequences of UTF-16 code units, like NSString. (Individual UTF-16 code units are represented as
+    Python str objects of length 1.) If you need to access or iterate over code points instead of UTF-16 code units,
+    use str(nsstring) to convert the NSString to a Python str first.
+    """
+
+    def __str__(self):
+        return self.UTF8String.decode('utf-8')
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.isEqualToString(ns_from_py(other))
+        elif isinstance(other, NSString):
+            return self.isEqualToString(other)
+        else:
+            return super().__eq__(other)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    # Note: We cannot define a __hash__ for NSString objects; doing so would violate the Python convention that
+    # mutable objects should not be hashable. Although we could disallow hashing for NSMutableString objects, this
+    # would make some immutable strings unhashable as well, because immutable strings can have a runtime class that
+    # is a subclass of NSMutableString. This is not just a theoretical possibility - for example, on OS X 10.11,
+    # isinstance(NSString.string(), NSMutableString) is true.
+
+    def __len__(self):
+        return self.count
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            start, stop, step = key.indices(len(self))
+
+            if step == 1:
+                return self.substringWithRange(NSRange(start, stop-start))
+            else:
+                raise NotImplementedError('{cls.__name__} slicing with step != 1'.format(cls=type(self)))
+        else:
+            if key < 0:
+                index = len(self) + key
+            else:
+                index = key
+
+            if index not in range(len(self)):
+                raise IndexError('{cls.__name__} index out of range'.format(cls=type(self)))
+
+            return chr(self.characterAtIndex(index))
 
 
 @for_objcclass(NSArray)

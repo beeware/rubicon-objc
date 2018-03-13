@@ -1319,13 +1319,10 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        if isinstance(self, NSString):
-            return self.UTF8String.decode('utf-8')
-        else:
-            desc = self.description
-            if desc is None:
-                raise ValueError('{self.name}.description returned nil'.format(self=self))
-            return desc
+        desc = self.description
+        if desc is None:
+            raise ValueError('{self.name}.description returned nil'.format(self=self))
+        return str(desc)
 
     def __repr__(self):
         return "<%s.%s %#x: %s at %#x: %s>" % (
