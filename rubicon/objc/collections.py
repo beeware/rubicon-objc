@@ -1,4 +1,4 @@
-from .types import NSUInteger, NSNotFound, NSRange
+from .types import NSUInteger, NSNotFound, NSRange, unichar
 from .runtime import (
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py, objc_id,
     send_message
@@ -46,7 +46,11 @@ class ObjCStrInstance(ObjCInstance):
             if step == 1:
                 return self.substringWithRange(NSRange(start, stop-start))
             else:
-                raise NotImplementedError('{cls.__name__} slicing with step != 1'.format(cls=type(self)))
+                rng = range(start, stop, step)
+                chars = (unichar * len(rng))()
+                for chars_i, self_i in enumerate(rng):
+                    chars[chars_i] = ord(self[self_i])
+                return NSString.stringWithCharacters(chars, length=len(chars))
         else:
             if key < 0:
                 index = len(self) + key
