@@ -1,7 +1,7 @@
 from .types import NSUInteger, NSNotFound, NSRange, unichar
 from .runtime import (
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py, objc_id,
-    send_message
+    py_from_ns, send_message,
 )
 
 
@@ -213,7 +213,7 @@ class ObjCDictInstance(ObjCInstance):
         return self.objectForKey_(item) is not None
 
     def __eq__(self, other):
-        return dict(self) == other
+        return py_from_ns(self) == other
 
     def __ne__(self, other):
         return not self.__eq__(other)

@@ -1713,7 +1713,7 @@ def py_from_ns(nsobj, *, _auto=False):
         return nsobj
 
     if nsobj.isKindOfClass(NSDecimalNumber):
-        return decimal.Decimal(nsobj.descriptionWithLocale(None))
+        return decimal.Decimal(str(nsobj.descriptionWithLocale(None)))
     elif nsobj.isKindOfClass(NSNumber):
         # Choose the property to access based on the type encoding. The actual conversion is done by ctypes.
         # Signed and unsigned integers are in separate cases to prevent overflow with unsigned long longs.

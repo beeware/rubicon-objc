@@ -51,10 +51,10 @@ class NSDictionaryMixinTest(unittest.TestCase):
     def test_iter(self):
         d = self.make_dictionary(self.py_dict)
 
-        keys = set(self.py_dict)
+        keys = {str(k) for k in self.py_dict}
         for k in d:
-            self.assertTrue(k in keys)
-            keys.remove(k)
+            self.assertTrue(str(k) in keys)
+            keys.remove(str(k))
 
         self.assertTrue(len(keys) == 0)
 
@@ -104,17 +104,20 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
-        for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):
+        for k1, k2 in zip(sorted(a.keys(), key=str), sorted(self.py_dict.keys())):
             self.assertEqual(k1, k2)
 
     def test_values(self):
         a = self.make_dictionary(self.py_dict)
-        for v1, v2 in zip(sorted(a.values()), sorted(self.py_dict.values())):
+        for v1, v2 in zip(sorted(a.values(), key=str), sorted(self.py_dict.values())):
             self.assertEqual(v1, v2)
 
     def test_items(self):
         d = self.make_dictionary(self.py_dict)
-        for i1, i2 in zip(sorted(d.items()), sorted(self.py_dict.items())):
+        for i1, i2 in zip(
+            sorted(d.items(), key=lambda item: (str(item[0]), str(item[1]))),
+            sorted(self.py_dict.items()),
+        ):
             self.assertEqual(i1[0], i2[0])
             self.assertEqual(i1[1], i2[1])
 
@@ -206,12 +209,12 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def test_popitem(self):
         d = self.make_dictionary(self.py_dict)
 
-        keys = set(self.py_dict)
+        keys = {str(k) for k in self.py_dict}
 
         while len(d) > 0:
             key, value = d.popitem()
-            self.assertTrue(key in keys)
-            self.assertEqual(value, self.py_dict[key])
+            self.assertTrue(str(key) in keys)
+            self.assertEqual(value, self.py_dict[str(key)])
             self.assertTrue(key not in d)
 
         with self.assertRaises(KeyError):
