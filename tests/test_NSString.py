@@ -86,3 +86,12 @@ class NSStringTests(unittest.TestCase):
                     self.assertEqual(nsstr[:3:step], pystr[:3:step])
                     self.assertEqual(nsstr[2::step], pystr[2::step])
                     self.assertEqual(nsstr[1:4:step], pystr[1:4:step])
+
+    def test_nsstring_iter(self):
+        """A NSString can be iterated over."""
+
+        for pystr in type(self).TEST_STRINGS:
+            with self.subTest(pystr=pystr):
+                nsstr = ns_from_py(pystr)
+                for nschar, pychar in zip(nsstr, pystr):
+                    self.assertEqual(nschar, pychar)
