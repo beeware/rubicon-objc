@@ -37,7 +37,7 @@ class ObjCStrInstance(ObjCInstance):
     # isinstance(NSString.string(), NSMutableString) is true.
 
     def __len__(self):
-        return self.count
+        return self.length
 
     def __getitem__(self, key):
         if isinstance(key, slice):
