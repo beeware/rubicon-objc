@@ -2,8 +2,8 @@ import operator
 
 from .types import NSUInteger, NSNotFound, NSRange, unichar
 from .runtime import (
-    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py, objc_id,
-    py_from_ns, send_message,
+    NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py,
+    objc_id, py_from_ns, send_message,
 )
 
 

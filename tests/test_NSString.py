@@ -20,6 +20,7 @@ rubiconharness = CDLL(rubiconharness_name)
 
 faulthandler.enable()
 
+
 class NSStringTests(unittest.TestCase):
     TEST_STRINGS = ('', 'abcdef', 'Uñîçö∂€')
     HAYSTACK = 'abcdabcdabcdef'
@@ -139,7 +140,7 @@ class NSStringTests(unittest.TestCase):
             for start, end in type(self).RANGES:
                 with self.subTest(py_needle=py_needle, start=start, end=end):
                     ns_needle = ns_from_py(py_needle)
-    
+
                     try:
                         index = py_haystack.index(py_needle, start, end)
                     except ValueError:
@@ -147,7 +148,7 @@ class NSStringTests(unittest.TestCase):
                             ns_haystack.index(ns_needle, start, end)
                     else:
                         self.assertEqual(ns_haystack.index(ns_needle, start, end), index)
-    
+
                     try:
                         rindex = py_haystack.rindex(py_needle, start, end)
                     except ValueError:
