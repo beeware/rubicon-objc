@@ -22,6 +22,9 @@ faulthandler.enable()
 
 class NSStringTests(unittest.TestCase):
     TEST_STRINGS = ('', 'abcdef', 'Uñîçö∂€')
+    HAYSTACK = 'abcdabcdabcdef'
+    NEEDLES = ['', 'a', 'bcd', 'def', HAYSTACK, 'nope', 'dcb']
+    RANGES = [(None, None), (None, 6), (6, None), (4, 10)]
 
     def test_str_nsstring_conversion(self):
         """Python str and NSString can be converted to each other manually."""
@@ -57,6 +60,19 @@ class NSStringTests(unittest.TestCase):
         self.assertNotEqual(ns_first, py_second)
         self.assertEqual(py_second, ns_second)
         self.assertEqual(ns_second, py_second)
+
+    def test_nsstring_in(self):
+        """The in operator works on NSString."""
+
+        py_haystack = type(self).HAYSTACK
+        ns_haystack = ns_from_py(py_haystack)
+        for py_needle in type(self).NEEDLES:
+            with self.subTest(py_needle=py_needle):
+                ns_needle = ns_from_py(py_needle)
+                if py_needle in py_haystack:
+                    self.assertIn(ns_needle, ns_haystack)
+                else:
+                    self.assertNotIn(ns_needle, ns_haystack)
 
     def test_nsstring_len(self):
         """len() works on NSString."""
@@ -95,3 +111,47 @@ class NSStringTests(unittest.TestCase):
                 nsstr = ns_from_py(pystr)
                 for nschar, pychar in zip(nsstr, pystr):
                     self.assertEqual(nschar, pychar)
+
+    def test_nsstring_find_rfind(self):
+        """The find and rfind methods work on NSString."""
+
+        py_haystack = type(self).HAYSTACK
+        ns_haystack = ns_from_py(py_haystack)
+        for py_needle in type(self).NEEDLES:
+            for start, end in type(self).RANGES:
+                with self.subTest(py_needle=py_needle, start=start, end=end):
+                    ns_needle = ns_from_py(py_needle)
+                    self.assertEqual(
+                        ns_haystack.find(ns_needle, start, end),
+                        py_haystack.find(py_needle, start, end),
+                    )
+                    self.assertEqual(
+                        ns_haystack.rfind(ns_needle, start, end),
+                        py_haystack.rfind(py_needle, start, end),
+                    )
+
+    def test_nsstring_index_rindex(self):
+        """The index and rindex methods work on NSString."""
+
+        py_haystack = type(self).HAYSTACK
+        ns_haystack = ns_from_py(py_haystack)
+        for py_needle in type(self).NEEDLES:
+            for start, end in type(self).RANGES:
+                with self.subTest(py_needle=py_needle, start=start, end=end):
+                    ns_needle = ns_from_py(py_needle)
+    
+                    try:
+                        index = py_haystack.index(py_needle, start, end)
+                    except ValueError:
+                        with self.assertRaises(ValueError):
+                            ns_haystack.index(ns_needle, start, end)
+                    else:
+                        self.assertEqual(ns_haystack.index(ns_needle, start, end), index)
+    
+                    try:
+                        rindex = py_haystack.rindex(py_needle, start, end)
+                    except ValueError:
+                        with self.assertRaises(ValueError):
+                            ns_haystack.rindex(ns_needle, start, end)
+                    else:
+                        self.assertEqual(ns_haystack.rindex(ns_needle, start, end), rindex)

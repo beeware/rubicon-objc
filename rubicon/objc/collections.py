@@ -5,6 +5,11 @@ from .runtime import (
 )
 
 
+# Some useful NSStringCompareOptions.
+NSLiteralSearch = 2
+NSBackwardsSearch = 4
+
+
 @for_objcclass(NSString)
 class ObjCStrInstance(ObjCInstance):
     """Provides Pythonic operations on NSString objects that mimic those of Python's str.
@@ -36,6 +41,16 @@ class ObjCStrInstance(ObjCInstance):
     # is a subclass of NSMutableString. This is not just a theoretical possibility - for example, on OS X 10.11,
     # isinstance(NSString.string(), NSMutableString) is true.
 
+    def __contains__(self, value):
+        if not isinstance(value, (str, NSString)):
+            raise TypeError(
+                "'in <NSString>' requires str or NSString as left operand, "
+                "not {tp.__module__}.{tp.__qualname__}"
+                .format(tp=type(value))
+            )
+
+        return self.find(value) != -1
+
     def __len__(self):
         return self.length
 
@@ -61,6 +76,49 @@ class ObjCStrInstance(ObjCInstance):
                 raise IndexError('{cls.__name__} index out of range'.format(cls=type(self)))
 
             return chr(self.characterAtIndex(index))
+
+    def _find(self, sub, start=None, end=None, *, reverse):
+        if not isinstance(sub, (str, NSString)):
+            raise TypeError(
+                'must be str or NSString, not {tp.__module__}.{tp.__qualname__}'
+                .format(tp=type(sub))
+            )
+
+        start, end, _ = slice(start, end).indices(len(self))
+
+        if not sub:
+            # Special case: Python considers the empty string to be contained in every string,
+            # at the earliest position searched. NSString considers the empty string to *not* be
+            # contained in any string. This difference is handled here.
+            return end if reverse else start
+
+        options = NSLiteralSearch
+        if reverse:
+            options |= NSBackwardsSearch
+        found_range = self.rangeOfString(sub, options=options, range=NSRange(start, end-start))
+        if found_range.location == NSNotFound:
+            return -1
+        else:
+            return found_range.location
+
+    def find(self, sub, start=None, end=None):
+        return self._find(sub, start=start, end=end, reverse=False)
+
+    def rfind(self, sub, start=None, end=None):
+        return self._find(sub, start=start, end=end, reverse=True)
+
+    def _index(self, sub, start=None, end=None, *, reverse):
+        found = self._find(sub, start, end, reverse=reverse)
+        if found == -1:
+            raise ValueError('substring not found')
+        else:
+            return found
+
+    def index(self, sub, start=None, end=None):
+        return self._index(sub, start=start, end=end, reverse=False)
+
+    def rindex(self, sub, start=None, end=None):
+        return self._index(sub, start=start, end=end, reverse=True)
 
 
 @for_objcclass(NSArray)
