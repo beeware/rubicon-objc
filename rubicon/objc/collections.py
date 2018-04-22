@@ -1,3 +1,5 @@
+import operator
+
 from .types import NSUInteger, NSNotFound, NSRange, unichar
 from .runtime import (
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py, objc_id,
@@ -76,6 +78,37 @@ class ObjCStrInstance(ObjCInstance):
                 raise IndexError('{cls.__name__} index out of range'.format(cls=type(self)))
 
             return chr(self.characterAtIndex(index))
+
+    def __add__(self, other):
+        if isinstance(other, (str, NSString)):
+            return self.stringByAppendingString(other)
+        else:
+            return NotImplemented
+
+    def __radd__(self, other):
+        if isinstance(other, (str, NSString)):
+            return ns_from_py(other).stringByAppendingString(self)
+        else:
+            return NotImplemented
+
+    def __mul__(self, other):
+        try:
+            count = operator.index(other)
+        except AttributeError:
+            return NotImplemented
+
+        if count <= 0:
+            return ns_from_py('')
+        else:
+            # https://stackoverflow.com/a/4608137
+            return self.stringByPaddingToLength(
+                count * len(self),
+                withString=self,
+                startingAtIndex=0,
+            )
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
     def _find(self, sub, start=None, end=None, *, reverse):
         if not isinstance(sub, (str, NSString)):

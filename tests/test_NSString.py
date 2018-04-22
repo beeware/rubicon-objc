@@ -155,3 +155,29 @@ class NSStringTests(unittest.TestCase):
                             ns_haystack.rindex(ns_needle, start, end)
                     else:
                         self.assertEqual(ns_haystack.rindex(ns_needle, start, end), rindex)
+
+    def test_nsstring_add_radd(self):
+        """The + operator works on NSString."""
+
+        for py_left in type(self).TEST_STRINGS:
+            for py_right in type(self).TEST_STRINGS:
+                with self.subTest(py_left=py_left, py_right=py_right):
+                    ns_left = ns_from_py(py_left)
+                    ns_right = ns_from_py(py_right)
+                    py_concat = py_left + py_right
+                    ns_concat = ns_from_py(py_concat)
+                    self.assertEqual(ns_left + ns_right, ns_concat)
+                    self.assertEqual(py_left + ns_right, ns_concat)
+                    self.assertEqual(ns_left + py_right, ns_concat)
+
+    def test_nsstring_mul_rmul(self):
+        """The * operator works on NSString."""
+
+        for py_str in type(self).TEST_STRINGS:
+            for n in (-5, 0, 1, 2, 5):
+                with self.subTest(py_str=py_str, n=n):
+                    ns_str = ns_from_py(py_str)
+                    py_repeated = py_str * n
+                    ns_repeated = ns_from_py(py_repeated)
+                    self.assertEqual(ns_str * n, ns_repeated)
+                    self.assertEqual(n * ns_str, ns_repeated)
