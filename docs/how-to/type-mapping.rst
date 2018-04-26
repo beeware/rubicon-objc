@@ -93,23 +93,3 @@ When you need to pass an Objective C structure to an Objective C method,
 you can pass a tuple instead. For example, if you pass (10.0, 5.1) where a
 `NSSize` is expected, it will be converted automatically in the appropriate
 width, height for the structure.
-
-Prevent type conversion
------------------------
-
-For some use cases you may not actually want to do an automatic type conversion.
-For example if you need to make use of an actual `NSString` object in a Python
-program, you need the ability to prevent automatic conversion in to `str`.
-
-To prevent type conversion, pass `convert_result=False` as a parameter. An
-example of this in action would be to create a text string in Python:
-
-.. code-block:: python
-
-    text_string = ObjCInstance(
-        ObjCInstance(NSString.alloc(convert_result=False)).initWithString_(text, convert_result=False)
-    )
-
-As you can see in the example above, the initialization of the `NSString` has to
-be unwrapped twice. This use case will be supported better in the future with
-the creation of an `ObjCStringInstance` like there is for dictionaries.
