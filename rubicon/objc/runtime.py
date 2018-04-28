@@ -1732,9 +1732,11 @@ def py_from_ns(nsobj, *, _auto=False):
                 .format(objc_type)
             )
     elif _auto:
-        # _auto is a private kwarg that is only passed when py_from_ns is called to perform an implicit conversion
-        # of a method return value or argument into Python. In this case we only want to perform a few simple
-        # conversions (boxed numbers to their Python equivalents).
+        # If py_from_ns is called implicitly to convert an Objective-C method's return value, only the conversions
+        # before this branch are performed. If py_from_ns is called explicitly by hand, the additional conversions
+        # below this branch are performed as well.
+        # _auto is a private kwarg that is only passed when py_from_ns is called implicitly. In that case, we return
+        # early and don't attempt any other conversions.
         return nsobj
     elif nsobj.isKindOfClass(NSString):
         return str(nsobj)
