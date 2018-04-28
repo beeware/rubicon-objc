@@ -7,6 +7,12 @@ from .runtime import (
 )
 
 
+# All NSComparisonResult values.
+NSOrderedAscending = -1
+NSOrderedSame = 0
+NSOrderedDescending = 1
+
+
 # Some useful NSStringCompareOptions.
 NSLiteralSearch = 2
 NSBackwardsSearch = 4
@@ -42,6 +48,34 @@ class ObjCStrInstance(ObjCInstance):
     # would make some immutable strings unhashable as well, because immutable strings can have a runtime class that
     # is a subclass of NSMutableString. This is not just a theoretical possibility - for example, on OS X 10.11,
     # isinstance(NSString.string(), NSMutableString) is true.
+
+    def _compare(self, other, want):
+        """Helper method used to implement the comparison operators.
+
+        If other is a str or NSString, it is compared to self, and True or False is returned depending on whether the
+        result is one of the wanted values. If other is not a string, NotImplemented is returned.
+        """
+
+        if isinstance(other, str):
+            ns_other = ns_from_py(other)
+        elif isinstance(other, NSString):
+            ns_other = other
+        else:
+            return NotImplemented
+
+        return self.compare(ns_other, options=NSLiteralSearch) in want
+
+    def __lt__(self, other):
+        return self._compare(other, {NSOrderedAscending})
+
+    def __le__(self, other):
+        return self._compare(other, {NSOrderedAscending, NSOrderedSame})
+
+    def __ge__(self, other):
+        return self._compare(other, {NSOrderedSame, NSOrderedDescending})
+
+    def __gt__(self, other):
+        return self._compare(other, {NSOrderedDescending})
 
     def __contains__(self, value):
         if not isinstance(value, (str, NSString)):

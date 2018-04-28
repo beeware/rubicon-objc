@@ -62,6 +62,20 @@ class NSStringTests(unittest.TestCase):
         self.assertEqual(py_second, ns_second)
         self.assertEqual(ns_second, py_second)
 
+    def test_nsstring_compare(self):
+        """A NSString can be compared to other strings."""
+
+        for py_left in type(self).TEST_STRINGS:
+            for py_right in type(self).TEST_STRINGS:
+                with self.subTest(py_left=py_left, py_right=py_right):
+                    ns_left = ns_from_py(py_left)
+                    ns_right = ns_from_py(py_right)
+
+                    self.assertEqual(ns_left < ns_right, py_left < py_right)
+                    self.assertEqual(ns_left <= ns_right, py_left <= py_right)
+                    self.assertEqual(ns_left >= ns_right, py_left >= py_right)
+                    self.assertEqual(ns_left > ns_right, py_left > py_right)
+
     def test_nsstring_in(self):
         """The in operator works on NSString."""
 
