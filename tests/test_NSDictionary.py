@@ -53,7 +53,6 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
         keys = set(self.py_dict)
         for k in d:
-            self.assertTrue(str(k) in keys)
             keys.remove(str(k))
 
         self.assertTrue(len(keys) == 0)
