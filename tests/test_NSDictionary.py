@@ -51,7 +51,7 @@ class NSDictionaryMixinTest(unittest.TestCase):
     def test_iter(self):
         d = self.make_dictionary(self.py_dict)
 
-        keys = {str(k) for k in self.py_dict}
+        keys = set(self.py_dict)
         for k in d:
             self.assertTrue(str(k) in keys)
             keys.remove(str(k))
@@ -206,7 +206,7 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def test_popitem(self):
         d = self.make_dictionary(self.py_dict)
 
-        keys = {str(k) for k in self.py_dict}
+        keys = set(self.py_dict)
 
         while len(d) > 0:
             key, value = d.popitem()
