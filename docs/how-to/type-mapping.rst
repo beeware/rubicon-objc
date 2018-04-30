@@ -53,6 +53,33 @@ Python type name can be used as the annotation type. You can also use any of
 the `ctypes` primitive types. Rubicon also provides type definitions for common
 Objective-C typedefs, like `NSInteger`, `CGFloat`, and so on.
 
+Strings
+-------
+
+If a method calls for an `NSString` argument, you can provide a Python `str`
+for that argument. Rubicon will construct an `NSString` instance from the data
+in the `str` provided, and pass that value for the argument.
+
+If a method returns an `NSString`, the return value will be a wrapped
+`ObjCStrInstance` type. This type implements a `str`-like interface, wrapped
+around the underlying `NSString` data. This means you can treat the return
+value as if it were a string - slicing it, concatenating it with other strings,
+comparing it, and so on.
+
+Note that `ObjCStrInstance` objects behave slightly differently than Python
+`str` objects in some cases. For technical reasons, `ObjCStrInstance` objects
+are not hashable, which means they cannot be used as `dict` keys (but they
+*can* be used as `NSDictionary` keys). `ObjCStrInstance` also handles Unicode
+code points above U+FFFF differently than Python `str`, because the underlying
+`NSString` is based on UTF-16.
+
+At the moment `ObjCStrInstance` does not yet support many methods that are
+available on `str`. More methods will be implemented in the future, such as
+`replace` and `split`. However some methods will likely never be available on
+`ObjCStrInstance` as they would be too complex to reimplement, such as `format`
+and `encode`. If you need to use a method that `ObjCStrInstance` doesn't
+support, you can use `str(nsstring)` to convert it to `str`.
+
 Lists
 -----
 
