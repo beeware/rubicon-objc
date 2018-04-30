@@ -973,11 +973,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(insets.bottom, other_insets.bottom)
         self.assertEqual(insets.right, other_insets.right)
 
-    def test_cfstring_to_str(self):
-        "CFString/NSString instances can be converted to Python str."
-
-        self.assertEqual(str(at("abcdef")), "abcdef")
-
     def test_objc_const(self):
         "objc_const works."
 

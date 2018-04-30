@@ -53,8 +53,7 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
         keys = set(self.py_dict)
         for k in d:
-            self.assertTrue(k in keys)
-            keys.remove(k)
+            keys.remove(str(k))
 
         self.assertTrue(len(keys) == 0)
 
@@ -210,8 +209,8 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
         while len(d) > 0:
             key, value = d.popitem()
-            self.assertTrue(key in keys)
-            self.assertEqual(value, self.py_dict[key])
+            self.assertTrue(str(key) in keys)
+            self.assertEqual(value, self.py_dict[str(key)])
             self.assertTrue(key not in d)
 
         with self.assertRaises(KeyError):

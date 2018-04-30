@@ -1319,13 +1319,10 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        if isinstance(self, NSString):
-            return self.UTF8String.decode('utf-8')
-        else:
-            desc = self.description
-            if desc is None:
-                raise ValueError('{self.name}.description returned nil'.format(self=self))
-            return desc
+        desc = self.description
+        if desc is None:
+            raise ValueError('{self.name}.description returned nil'.format(self=self))
+        return str(desc)
 
     def __repr__(self):
         return "<%s.%s %#x: %s at %#x: %s>" % (
@@ -1725,10 +1722,8 @@ def py_from_ns(nsobj, *, _auto=False):
     if not isinstance(nsobj, ObjCInstance):
         return nsobj
 
-    if nsobj.isKindOfClass(NSString):
-        return str(nsobj)
-    elif nsobj.isKindOfClass(NSDecimalNumber):
-        return decimal.Decimal(nsobj.descriptionWithLocale(None))
+    if nsobj.isKindOfClass(NSDecimalNumber):
+        return decimal.Decimal(str(nsobj.descriptionWithLocale(None)))
     elif nsobj.isKindOfClass(NSNumber):
         # Choose the property to access based on the type encoding. The actual conversion is done by ctypes.
         # Signed and unsigned integers are in separate cases to prevent overflow with unsigned long longs.
@@ -1747,10 +1742,14 @@ def py_from_ns(nsobj, *, _auto=False):
                 .format(objc_type)
             )
     elif _auto:
-        # _auto is a private kwarg that is only passed when py_from_ns is called to perform an implicit conversion
-        # of a method return value or argument into Python. In this case we only want to perform a few simple
-        # conversions (strings and numbers).
+        # If py_from_ns is called implicitly to convert an Objective-C method's return value, only the conversions
+        # before this branch are performed. If py_from_ns is called explicitly by hand, the additional conversions
+        # below this branch are performed as well.
+        # _auto is a private kwarg that is only passed when py_from_ns is called implicitly. In that case, we return
+        # early and don't attempt any other conversions.
         return nsobj
+    elif nsobj.isKindOfClass(NSString):
+        return str(nsobj)
     elif nsobj.isKindOfClass(NSData):
         # Despite the name, string_at converts the data at the address to a bytes object, not str.
         return string_at(send_message(nsobj, 'bytes', restype=POINTER(c_uint8), argtypes=[]), nsobj.length)
