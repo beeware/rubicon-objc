@@ -664,11 +664,33 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(receiver, selName, *args, **kwargs):
+def send_super(cls, receiver, selName, *args, **kwargs):
     """Send a message named selName to the super of the receiver.
 
     This is the equivalent of [super selname:args].
+
+    Since proper 'super' semantics requires lexical scoping, the cls argument is now required.
+    It basically instructs this runtime what the lexical scope was of the caller, so that it
+    may find the appropriate superclass method implementation (if any) to call. (See issue #107)
+
+    As such, cls should be an instance of ObjCClass, the class of the lexical scope of the caller,
+    which is conveniently obtained simply by using the Python __class__ built-in (in the context of
+    an instance method implementation of a class descending from ObjCClass -- which all your custom
+    obj-c classes will always descend from).
+
+    Eg: send_super(__class__, self, 'init') would be the typical usage pattern.
+
+    cls may also be a naked Class pointer.
     """
+    if not isinstance(cls, (ObjCClass, Class)):
+        # Kindly remind the caller that the API has changed
+        raise TypeError("Missing/Invalid cls argument: '{tp.__module__}.{tp.__qualname__}' -- "
+                        .format(tp=type(cls))
+                        + "send_super now requires its first argument be an"
+                        + " ObjCClass or an objc raw Class pointer."
+                        + " To fix this error, use Python's __class__ keyword as the first argument to"
+                        + " send_super.")
+
     try:
         receiver = receiver._as_parameter_
     except AttributeError:
@@ -681,8 +703,11 @@ def send_super(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    superclass = get_superclass_of_object(receiver)
-    super_struct = objc_super(receiver, superclass)
+    super_ptr = libobjc.class_getSuperclass(cls)  # accepts either Class (ptr) or ObjCClass as argument
+    if super_ptr.value is None:
+        raise ValueError("The specified class '{}' does not have an Objective-C superclass and/or is a root class."
+                         .format(libobjc.class_getName(cls).decode('utf-8')))
+    super_struct = objc_super(receiver, super_ptr)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
@@ -1944,7 +1969,7 @@ except NameError:
 
         @objc_rawmethod
         def initWithObject_(self, cmd, anObject):
-            self = send_super(self, 'init')
+            self = send_super(__class__, self, 'init')
             self = self.value
             set_instance_variable(self, 'observed_object', anObject, objc_id)
             return self
@@ -1953,7 +1978,7 @@ except NameError:
         def dealloc(self, cmd) -> None:
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'dealloc')
+            send_super(__class__, self, 'dealloc')
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:
@@ -1963,7 +1988,7 @@ except NameError:
             # to have this here, but I guess it can't hurt.)
             anObject = get_instance_variable(self, 'observed_object', objc_id)
             ObjCInstance._cached_objects.pop(anObject, None)
-            send_super(self, 'finalize')
+            send_super(__class__, self, 'finalize')
 
 
 def objc_const(dll, name):
