@@ -53,6 +53,33 @@ Python type name can be used as the annotation type. You can also use any of
 the `ctypes` primitive types. Rubicon also provides type definitions for common
 Objective-C typedefs, like `NSInteger`, `CGFloat`, and so on.
 
+Strings
+-------
+
+If a method calls for an `NSString` argument, you can provide a Python `str`
+for that argument. Rubicon will construct an `NSString` instance from the data
+in the `str` provided, and pass that value for the argument.
+
+If a method returns an `NSString`, the return value will be a wrapped
+`ObjCStrInstance` type. This type implements a `str`-like interface, wrapped
+around the underlying `NSString` data. This means you can treat the return
+value as if it were a string - slicing it, concatenating it with other strings,
+comparing it, and so on.
+
+Note that `ObjCStrInstance` objects behave slightly differently than Python
+`str` objects in some cases. For technical reasons, `ObjCStrInstance` objects
+are not hashable, which means they cannot be used as `dict` keys (but they
+*can* be used as `NSDictionary` keys). `ObjCStrInstance` also handles Unicode
+code points above U+FFFF differently than Python `str`, because the underlying
+`NSString` is based on UTF-16.
+
+At the moment `ObjCStrInstance` does not yet support many methods that are
+available on `str`. More methods will be implemented in the future, such as
+`replace` and `split`. However some methods will likely never be available on
+`ObjCStrInstance` as they would be too complex to reimplement, such as `format`
+and `encode`. If you need to use a method that `ObjCStrInstance` doesn't
+support, you can use `str(nsstring)` to convert it to `str`.
+
 Lists
 -----
 
@@ -93,23 +120,3 @@ When you need to pass an Objective C structure to an Objective C method,
 you can pass a tuple instead. For example, if you pass (10.0, 5.1) where a
 `NSSize` is expected, it will be converted automatically in the appropriate
 width, height for the structure.
-
-Prevent type conversion
------------------------
-
-For some use cases you may not actually want to do an automatic type conversion.
-For example if you need to make use of an actual `NSString` object in a Python
-program, you need the ability to prevent automatic conversion in to `str`.
-
-To prevent type conversion, pass `convert_result=False` as a parameter. An
-example of this in action would be to create a text string in Python:
-
-.. code-block:: python
-
-    text_string = ObjCInstance(
-        ObjCInstance(NSString.alloc(convert_result=False)).initWithString_(text, convert_result=False)
-    )
-
-As you can see in the example above, the initialization of the `NSString` has to
-be unwrapped twice. This use case will be supported better in the future with
-the creation of an `ObjCStringInstance` like there is for dictionaries.

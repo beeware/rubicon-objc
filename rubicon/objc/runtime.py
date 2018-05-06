@@ -666,11 +666,33 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(receiver, selName, *args, **kwargs):
+def send_super(cls, receiver, selName, *args, **kwargs):
     """Send a message named selName to the super of the receiver.
 
     This is the equivalent of [super selname:args].
+
+    Since proper 'super' semantics requires lexical scoping, the cls argument is now required.
+    It basically instructs this runtime what the lexical scope was of the caller, so that it
+    may find the appropriate superclass method implementation (if any) to call. (See issue #107)
+
+    As such, cls should be an instance of ObjCClass, the class of the lexical scope of the caller,
+    which is conveniently obtained simply by using the Python __class__ built-in (in the context of
+    an instance method implementation of a class descending from ObjCClass -- which all your custom
+    obj-c classes will always descend from).
+
+    Eg: send_super(__class__, self, 'init') would be the typical usage pattern.
+
+    cls may also be a naked Class pointer.
     """
+    if not isinstance(cls, (ObjCClass, Class)):
+        # Kindly remind the caller that the API has changed
+        raise TypeError("Missing/Invalid cls argument: '{tp.__module__}.{tp.__qualname__}' -- "
+                        .format(tp=type(cls))
+                        + "send_super now requires its first argument be an"
+                        + " ObjCClass or an objc raw Class pointer."
+                        + " To fix this error, use Python's __class__ keyword as the first argument to"
+                        + " send_super.")
+
     try:
         receiver = receiver._as_parameter_
     except AttributeError:
@@ -683,8 +705,11 @@ def send_super(receiver, selName, *args, **kwargs):
     else:
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
-    superclass = get_superclass_of_object(receiver)
-    super_struct = objc_super(receiver, superclass)
+    super_ptr = libobjc.class_getSuperclass(cls)  # accepts either Class (ptr) or ObjCClass as argument
+    if super_ptr.value is None:
+        raise ValueError("The specified class '{}' does not have an Objective-C superclass and/or is a root class."
+                         .format(libobjc.class_getName(cls).decode('utf-8')))
+    super_struct = objc_super(receiver, super_ptr)
     selector = SEL(selName)
     restype = kwargs.get('restype', c_void_p)
     argtypes = kwargs.get('argtypes', None)
@@ -856,10 +881,18 @@ class ObjCMethod(object):
                     arg = arg.value
 
                 if issubclass(argtype, objc_block):
-                    if isinstance(arg, Block):
-                        arg = arg.block
-                    else:
-                        arg = Block(arg).block
+                    if arg is None:
+                        # allow for 'nil' block args, which some objc methods accept
+                        arg = ns_from_py(arg)
+                    elif (callable(arg) and
+                          not isinstance(arg, Block)):  # <-- guard against someone someday making Block callable
+                        # Note: We need to keep the temp. Block instance
+                        # around at least until the objc method is called.
+                        # _as_parameter_ is used in the actual ctypes marshalling below.
+                        arg = Block(arg)
+                    # ^ For blocks at this point either arg is a Block instance
+                    # (making use of _as_parameter_), is None, or if it isn't either of
+                    # those two, an ArgumentError will be raised below.
                 elif issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
                     arg = ns_from_py(arg)
@@ -1376,13 +1409,10 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        if isinstance(self, NSString):
-            return self.UTF8String.decode('utf-8')
-        else:
-            desc = self.description
-            if desc is None:
-                raise ValueError('{self.name}.description returned nil'.format(self=self))
-            return desc
+        desc = self.description
+        if desc is None:
+            raise ValueError('{self.name}.description returned nil'.format(self=self))
+        return str(desc)
 
     def __repr__(self):
         return "<%s.%s %#x: %s at %#x: %s>" % (
@@ -1488,6 +1518,7 @@ class ObjCClass(ObjCInstance, type):
         protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
+    @classmethod
     def _new_from_name(cls, name):
         name = ensure_bytes(name)
         ptr = get_class(name)
@@ -1496,6 +1527,7 @@ class ObjCClass(ObjCInstance, type):
 
         return ptr, name
 
+    @classmethod
     def _new_from_ptr(cls, ptr):
         ptr = cast(ptr, Class)
         if ptr.value is None:
@@ -1506,6 +1538,7 @@ class ObjCClass(ObjCInstance, type):
 
         return ptr, name
 
+    @classmethod
     def _new_from_class_statement(cls, name, bases, attrs, *, protocols):
         name = ensure_bytes(name)
 
@@ -1582,22 +1615,17 @@ class ObjCClass(ObjCInstance, type):
             attrs = {}
 
             if isinstance(name_or_ptr, (bytes, str)):
-                ptr, name = cls._new_from_name(cls, name_or_ptr)
+                ptr, name = cls._new_from_name(name_or_ptr)
             else:
-                ptr, name = cls._new_from_ptr(cls, name_or_ptr)
+                ptr, name = cls._new_from_ptr(name_or_ptr)
                 if not issubclass(cls, ObjCMetaClass) and libobjc.class_isMetaClass(ptr):
                     return ObjCMetaClass(ptr)
         else:
-            ptr, name, attrs = cls._new_from_class_statement(cls, name_or_ptr, bases, attrs, protocols=protocols)
+            ptr, name, attrs = cls._new_from_class_statement(name_or_ptr, bases, attrs, protocols=protocols)
 
         objc_class_name = name.decode('utf-8')
 
-        # Create the class object. If there is already a cached instance for ptr,
-        # it is returned and the additional arguments are ignored.
-        # Logically this can only happen when creating an ObjCClass from an existing
-        # name or pointer, not when creating a new class.
-        # If there is no cached instance for ptr, a new one is created and cached.
-        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), {
+        new_attrs = {
             '_class_inited': False,
             'name': objc_class_name,
             'methods_ptr_count': c_uint(0),
@@ -1617,7 +1645,19 @@ class ObjCClass(ObjCInstance, type):
             # which need to be kept from being garbage-collected.
             # It does not contain any other methods, do not use it for calling methods.
             'imp_keep_alive_table': {},
-        })
+        }
+
+        # On Python 3.6 and later, the class namespace may contain a __classcell__ attribute that must be passed on
+        # to type.__new__. See https://docs.python.org/3/reference/datamodel.html#creating-the-class-object
+        if '__classcell__' in attrs:
+            new_attrs['__classcell__'] = attrs['__classcell__']
+
+        # Create the class object. If there is already a cached instance for ptr,
+        # it is returned and the additional arguments are ignored.
+        # Logically this can only happen when creating an ObjCClass from an existing
+        # name or pointer, not when creating a new class.
+        # If there is no cached instance for ptr, a new one is created and cached.
+        self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), new_attrs)
 
         if not self._class_inited:
             self._class_inited = True
@@ -1772,10 +1812,8 @@ def py_from_ns(nsobj, *, _auto=False):
     if not isinstance(nsobj, ObjCInstance):
         return nsobj
 
-    if nsobj.isKindOfClass(NSString):
-        return str(nsobj)
-    elif nsobj.isKindOfClass(NSDecimalNumber):
-        return decimal.Decimal(nsobj.descriptionWithLocale(None))
+    if nsobj.isKindOfClass(NSDecimalNumber):
+        return decimal.Decimal(str(nsobj.descriptionWithLocale(None)))
     elif nsobj.isKindOfClass(NSNumber):
         # Choose the property to access based on the type encoding. The actual conversion is done by ctypes.
         # Signed and unsigned integers are in separate cases to prevent overflow with unsigned long longs.
@@ -1794,10 +1832,14 @@ def py_from_ns(nsobj, *, _auto=False):
                 .format(objc_type)
             )
     elif _auto:
-        # _auto is a private kwarg that is only passed when py_from_ns is called to perform an implicit conversion
-        # of a method return value or argument into Python. In this case we only want to perform a few simple
-        # conversions (strings and numbers).
+        # If py_from_ns is called implicitly to convert an Objective-C method's return value, only the conversions
+        # before this branch are performed. If py_from_ns is called explicitly by hand, the additional conversions
+        # below this branch are performed as well.
+        # _auto is a private kwarg that is only passed when py_from_ns is called implicitly. In that case, we return
+        # early and don't attempt any other conversions.
         return nsobj
+    elif nsobj.isKindOfClass(NSString):
+        return str(nsobj)
     elif nsobj.isKindOfClass(NSData):
         # Despite the name, string_at converts the data at the address to a bytes object, not str.
         return string_at(send_message(nsobj, 'bytes', restype=POINTER(c_uint8), argtypes=[]), nsobj.length)
@@ -2001,7 +2043,7 @@ except NameError:
         def dealloc(self, cmd) -> None:
             anObject = get_ivar(self, 'observed_object')
             ObjCInstance._cached_objects.pop(anObject.value, None)
-            send_super(self, 'dealloc', restype=None, argtypes=[])
+            send_super(__class__, self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:
@@ -2011,7 +2053,7 @@ except NameError:
             # to have this here, but I guess it can't hurt.)
             anObject = get_ivar(self, 'observed_object')
             ObjCInstance._cached_objects.pop(anObject.value, None)
-            send_super(self, 'finalize', restype=None, argtypes=[])
+            send_super(__class__, self, 'finalize', restype=None, argtypes=[])
 
 
 def objc_const(dll, name):
@@ -2020,12 +2062,17 @@ def objc_const(dll, name):
     return ObjCInstance(objc_id.in_dll(dll, name))
 
 
+_cfunc_type_block_invoke = CFUNCTYPE(c_void_p, c_void_p)
+_cfunc_type_block_dispose = CFUNCTYPE(c_void_p, c_void_p)
+_cfunc_type_block_copy = CFUNCTYPE(c_void_p, c_void_p, c_void_p)
+
+
 class ObjCBlockStruct(Structure):
     _fields_ = [
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', CFUNCTYPE(c_void_p, c_void_p)),
+        ('invoke', _cfunc_type_block_invoke),
         ('descriptor', c_void_p),
     ]
 
@@ -2034,6 +2081,8 @@ class BlockDescriptor(Structure):
     _fields_ = [
         ('reserved', c_ulong),
         ('size', c_ulong),
+        ('copy_helper', _cfunc_type_block_copy),
+        ('dispose_helper', _cfunc_type_block_dispose),
         ('signature', c_char_p),
     ]
 
@@ -2043,7 +2092,7 @@ class BlockLiteral(Structure):
         ('isa', c_void_p),
         ('flags', c_int),
         ('reserved', c_int),
-        ('invoke', c_void_p),
+        ('invoke', c_void_p),  # NB: this must be c_void_p due to variadic nature
         ('descriptor', c_void_p)
     ]
 
@@ -2055,8 +2104,8 @@ def create_block_descriptor_struct(has_helpers, has_signature):
     ]
     if has_helpers:
         descriptor_fields.extend([
-            ('copy_helper', CFUNCTYPE(c_void_p, c_void_p, c_void_p)),
-            ('dispose_helper', CFUNCTYPE(c_void_p, c_void_p)),
+            ('copy_helper', _cfunc_type_block_copy),
+            ('dispose_helper', _cfunc_type_block_dispose),
         ])
     if has_signature:
         descriptor_fields.extend([
@@ -2122,13 +2171,16 @@ class ObjCBlockInstance(ObjCInstance):
         return self.block(*args)
 
 
-_NSConcreteGlobalBlock = (c_void_p * 32).in_dll(libc, "_NSConcreteGlobalBlock")
+_NSConcreteStackBlock = (c_void_p * 32).in_dll(libc, "_NSConcreteStackBlock")
 
 
 NOTHING = object()
 
 
 class Block:
+
+    _keep_alive_blocks_ = {}
+
     def __init__(self, func, restype=NOTHING, *arg_types):
         if not callable(func):
             raise TypeError('Blocks must be callable')
@@ -2161,20 +2213,40 @@ class Block:
         self.cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
 
         self.literal = BlockLiteral()
-        self.literal.isa = addressof(_NSConcreteGlobalBlock)
-        self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE
+        self.literal.isa = addressof(_NSConcreteStackBlock)
+        self.literal.flags = BlockConsts.HAS_STRET | BlockConsts.HAS_SIGNATURE | BlockConsts.HAS_COPY_DISPOSE
         self.literal.reserved = 0
-        self.cfunc = self.cfunc_type(self.wrapper)
-        self.literal.invoke = cast(self.cfunc, c_void_p)
+        self.cfunc_wrapper = self.cfunc_type(self.wrapper)
+        self.literal.invoke = cast(self.cfunc_wrapper, c_void_p)
         self.descriptor = BlockDescriptor()
         self.descriptor.reserved = 0
         self.descriptor.size = sizeof(BlockLiteral)
+
+        self.cfunc_copy_helper = _cfunc_type_block_copy(self.copy_helper)
+        self.cfunc_dispose_helper = _cfunc_type_block_dispose(self.dispose_helper)
+        self.descriptor.copy_helper = self.cfunc_copy_helper
+        self.descriptor.dispose_helper = self.cfunc_dispose_helper
 
         self.descriptor.signature = encoding_for_ctype(restype) + b'@?' + b''.join(
             encoding_for_ctype(arg) for arg in signature
         )
         self.literal.descriptor = cast(byref(self.descriptor), c_void_p)
         self.block = cast(byref(self.literal), objc_block)
+        self._as_parameter_ = self.block
 
     def wrapper(self, instance, *args):
         return self.func(*args)
+
+    def dispose_helper(self, dst):
+        Block._keep_alive_blocks_.pop(dst, None)
+
+    def copy_helper(self, dst, src):
+        # Update our keepalive table because objc just informed us that it
+        # took ownership of a block/copied a block we are concerned with.
+        # Note that sometime later we can expect calls to dispose_helper
+        # for each of the 'dst' blocks objc told us about, but until then we
+        # need to make sure the python code they reference stays in memory,
+        # so basically put self in a class variable dictionary so it is
+        # guaranteed to stay around until dispose_helper tells us they are all
+        # gone.
+        Block._keep_alive_blocks_[dst] = self

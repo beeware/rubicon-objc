@@ -1013,11 +1013,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(insets.bottom, other_insets.bottom)
         self.assertEqual(insets.right, other_insets.right)
 
-    def test_cfstring_to_str(self):
-        "CFString/NSString instances can be converted to Python str."
-
-        self.assertEqual(str(at("abcdef")), "abcdef")
-
     def test_objc_const(self):
         "objc_const works."
 
@@ -1039,13 +1034,13 @@ class RubiconTest(unittest.TestCase):
             @objc_method
             def computeSize_(self, input: NSSize) -> NSSize:
                 results['size'] = True
-                sup = send_super(self, 'computeSize:', input, restype=NSSize, argtypes=[NSSize])
+                sup = send_super(__class__, self, 'computeSize:', input, restype=NSSize, argtypes=[NSSize])
                 return NSSize(input.width + self.value, sup.height)
 
             @objc_method
             def computeRect_(self, input: NSRect) -> NSRect:
                 results['rect'] = True
-                sup = send_super(self, 'computeRect:', input, restype=NSRect, argtypes=[NSRect])
+                sup = send_super(__class__, self, 'computeRect:', input, restype=NSRect, argtypes=[NSRect])
                 return NSMakeRect(
                     input.origin.y + self.value, sup.origin.x,
                     input.size.height + self.value, sup.size.width

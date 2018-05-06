@@ -4,6 +4,11 @@ Release History
 (next version)
 --------------
 
+* Added Pythonic operators and methods on ``NSString`` objects, similar to those for ``NSArray`` and ``NSDictionary``.
+  * Only a small subset of the standard ``str`` methods is supported at the moment. Additional ``str`` methods may be implemented in the future, but some methods (like ``format``) will never be supported, as they cannot be implemented efficiently based on ``NSString``.
+* Removed automatic conversion of ``NSString`` objects to ``str`` when returned from Objective-C methods. This feature made it difficult to call Objective-C methods on ``NSString`` objects, because there was no easy way to prevent the automatic conversion.
+  * In most cases, this change will not affect existing code, because ``NSString`` objects now support operations similar to ``str``.
+  * If an actual ``str`` object is required, the ``NSString`` object can be wrapped in a ``str`` call to convert it.
 * Added support for ``objc_property``s with non-object types.
 * Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ivars.
 * Changed the implementation of ``objc_property`` to use ivars instead of Python attributes for storage. This fixes name conflicts in some situations.
