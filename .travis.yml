@@ -40,6 +40,10 @@ install:
   # so we upgrade pyenv to get a consistent setup in all environments.
   - brew update
   - brew outdated pyenv || brew upgrade pyenv
+  # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
+  # (in which case the paths used in the shims point to an older, no longer installed pyenv version).
+  # By rehashing the shims we can be sure that they are always valid again.
+  - pyenv rehash
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
