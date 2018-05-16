@@ -82,10 +82,10 @@ To expose value to the Objective-C runtime, we need to make one small change,
 and explicitly declare value as an Objective-C property::
 
 
-    from rubicon.objc import NSObject, objc_method
+    from rubicon.objc import NSObject, objc_method, objc_property()
 
     class PureHandler(NSObject):
-        value = obj_property()
+        value = objc_property()
 
         @objc_method
         def initWithValue_(self, v: int):
