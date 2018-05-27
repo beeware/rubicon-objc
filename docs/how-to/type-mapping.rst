@@ -29,94 +29,99 @@ Primitives
 If a Python value needs to be passed in as a primitive, Rubicon will wrap the
 primitive:
 
-===== =============================================================
-Value C primitive
-===== ============================================================
-bool  8 bit integer (although it can only hold 2 values - 0 and 1)
-int   32 bit integer
-float double precision floating point
-===== ============================================================
+============== ============================================================
+Value          C primitive
+============== ============================================================
+:class:`bool`  8 bit integer (although it can only hold 2 values - 0 and 1)
+:class:`int`   32 bit integer
+:class:`float` double precision floating point
+============== ============================================================
 
 If a Python value needs to be passed in as an object, Rubicon will wrap the
 primitive in an object:
 
-===== =================
-Value Objective C type
-===== =================
-bool  NSNumber (bool)
-int   NSNumber (long)
-float NSNumber (double)
-===== =================
+============== ==========================
+Value          Objective C type
+============== ==========================
+:class:`bool`  :class:`NSNumber` (bool)
+:class:`int`   :class:`NSNumber` (long)
+:class:`float` :class:`NSNumber` (double)
+============== ==========================
 
 If you're declaring a method and need to annotate the type of an argument, the
 Python type name can be used as the annotation type. You can also use any of
-the `ctypes` primitive types. Rubicon also provides type definitions for common
-Objective-C typedefs, like `NSInteger`, `CGFloat`, and so on.
+the ``ctypes`` primitive types. Rubicon also provides type definitions for common
+Objective-C typedefs, like :class:`NSInteger`, :class:`CGFloat`, and so on.
 
 Strings
 -------
 
-If a method calls for an `NSString` argument, you can provide a Python `str`
-for that argument. Rubicon will construct an `NSString` instance from the data
-in the `str` provided, and pass that value for the argument.
+If a method calls for an :class:`NSString` argument, you can provide a Python
+:class:`str` for that argument. Rubicon will construct an :class:`NSString`
+instance from the data in the :class:`str` provided, and pass that value for
+the argument.
 
-If a method returns an `NSString`, the return value will be a wrapped
-`ObjCStrInstance` type. This type implements a `str`-like interface, wrapped
-around the underlying `NSString` data. This means you can treat the return
-value as if it were a string - slicing it, concatenating it with other strings,
-comparing it, and so on.
+If a method returns an :class:`NSString`, the return value will be a wrapped
+:class:`ObjCStrInstance` type. This type implements a :class:`str`-like
+interface, wrapped around the underlying :class:`NSString` data. This means
+you can treat the return value as if it were a string - slicing it,
+concatenating it with other strings, comparing it, and so on.
 
-Note that `ObjCStrInstance` objects behave slightly differently than Python
-`str` objects in some cases. For technical reasons, `ObjCStrInstance` objects
-are not hashable, which means they cannot be used as `dict` keys (but they
-*can* be used as `NSDictionary` keys). `ObjCStrInstance` also handles Unicode
-code points above U+FFFF differently than Python `str`, because the underlying
-`NSString` is based on UTF-16.
+Note that :class:`ObjCStrInstance` objects behave slightly differently than
+Python :class:`str` objects in some cases. For technical reasons,
+:class:`ObjCStrInstance` objects are not hashable, which means they cannot be
+used as :class:`dict` keys (but they *can* be used as :class:`NSDictionary`
+keys). :class:`ObjCStrInstance` also handles Unicode code points above
+``U+FFFF`` differently than Python :class:`str`, because the underlying
+:class:`NSString` is based on UTF-16.
 
-At the moment `ObjCStrInstance` does not yet support many methods that are
-available on `str`. More methods will be implemented in the future, such as
-`replace` and `split`. However some methods will likely never be available on
-`ObjCStrInstance` as they would be too complex to reimplement, such as `format`
-and `encode`. If you need to use a method that `ObjCStrInstance` doesn't
-support, you can use `str(nsstring)` to convert it to `str`.
+If you have an :class:`ObjCStrInstance` instance, and you need to pass that
+instance to a method that does a specific typecheck for `str`, you can use
+:class:`str(nsstring)` to convert the :class:`ObjCStrInstance` instance to
+:class:`str`.
+
+:class:`ObjCStrInstance` implements all the utility methods that are available
+on :class:`str`, such as ``replace`` and ``split``. These utility methods all
+return *Python* strings.
 
 Lists
 -----
 
-If a method calls for an `NSArray` or `NSMutableArray` argument, you can
-provide a Python `list` for that argument. Rubicon will construct an
-`NSMutableArray` instance from the data in the `list` provided, and pass that
-value for the argument.
+If a method calls for an :class:`NSArray` or :class:`NSMutableArray` argument,
+you can provide a Python :class:`list` for that argument. Rubicon will
+construct an :class:`NSMutableArray` instance from the data in the
+:class:`list` provided, and pass that value for the argument.
 
-If a method returns an `NSArray` or `NSMutableArray`, the return value will be
-a wrapped `ObjCListInstance` type. This type implements a `list`-like
-interface, wrapped around the underlying `NSArray` data. This means you can
-treat the return value as if it were a list - iterating over values, retrieving
-objects by index, and so on.
+If a method returns an :class:`NSArray` or :class:`NSMutableArray`, the return
+value will be a wrapped :class:`ObjCListInstance` type. This type implements a
+:class:`list`-like interface, wrapped around the underlying :class:`NSArray`
+data. This means you can treat the return value as if it were a list -
+iterating over values, retrieving objects by index, and so on.
 
 Dictionaries
 ------------
 
-If a method calls for an `NSDictionary` or `NSMutableDictionary` argument, you
-can provide a Python `dict`. Rubicon will construct an `NSMutableDictionary`
-instance from the data in the `dict` provided, and pass that value for the
-argument.
+If a method calls for an :class:`NSDictionary` or :class:`NSMutableDictionary`
+argument, you can provide a Python :class:`dict`. Rubicon will construct an
+:class:`NSMutableDictionary` instance from the data in the :class:`dict`
+provided, and pass that value for the argument.
 
-If a method returns an `NSDictionary` or `NSMutableDictionary`, the return
-value will be a wrapped `ObjCDictInstance` type. This type implements a
-`dict`-like interface, wrapped around the underlying `NSDictionary` data. This
-means you can treat the return value as if it were a dict - iterating over
-keys, values or items, retrieving objects by key, and so on.
+If a method returns an :class:`NSDictionary` or :class:`NSMutableDictionary`,
+the return value will be a wrapped :class:`ObjCDictInstance` type. This type
+implements a :class:`dict`-like interface, wrapped around the underlying
+:class:`NSDictionary` data. This means you can treat the return value as if it
+were a dict - iterating over keys, values or items, retrieving objects by key,
+and so on.
 
 
-`NSPoint`, `NSSize`, and `NSRect`
----------------------------------
+:class:`NSPoint`, :class:`NSSize`, and :class:`NSRect`
+------------------------------------------------------
 
 On instances of an Objective C structure, each field is exposed as a Python
-attribute. For example, if you create an instance of an `NSSize` object you can
-access its width and height by calling `NSSize.width`.
+attribute. For example, if you create an instance of an :class:`NSSize` object
+you can access its width and height by calling :meth:`NSSize.width`.
 
 When you need to pass an Objective C structure to an Objective C method,
 you can pass a tuple instead. For example, if you pass (10.0, 5.1) where a
-`NSSize` is expected, it will be converted automatically in the appropriate
+:class:`NSSize` is expected, it will be converted automatically in the appropriate
 width, height for the structure.
