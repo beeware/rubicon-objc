@@ -32,6 +32,9 @@ class ObjCStrInstance(ObjCInstance):
     def __str__(self):
         return self.UTF8String.decode('utf-8')
 
+    def __fspath__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         if isinstance(other, str):
             return self.isEqualToString(ns_from_py(other))

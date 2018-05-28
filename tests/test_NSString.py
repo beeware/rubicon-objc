@@ -1,4 +1,5 @@
 import faulthandler
+import os
 import unittest
 from ctypes import CDLL, util
 
@@ -61,6 +62,15 @@ class NSStringTests(unittest.TestCase):
         self.assertNotEqual(ns_first, py_second)
         self.assertEqual(py_second, ns_second)
         self.assertEqual(ns_second, py_second)
+
+    def test_nsstring_as_fspath(self):
+        """An NSString can be interpreted as a 'path-like' object"""
+
+        # os.path.dirname requires a 'path-like' object.
+        self.assertEqual(
+            os.path.dirname(ns_from_py('/path/base/leaf')),
+            '/path/base'
+        )
 
     def test_nsstring_compare(self):
         """A NSString can be compared to other strings."""
