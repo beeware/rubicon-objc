@@ -220,8 +220,14 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_encode(self):
         ns_str = ns_from_py('Uñîçö∂€ string')
-        self.assertEqual(ns_str.encode('utf-8'), b'U\xc3\xb1\xc3\xae\xc3\xa7\xc3\xb6\xe2\x88\x82\xe2\x82\xac string')
-        self.assertEqual(ns_str.encode('utf-16'), b'\xff\xfeU\x00\xf1\x00\xee\x00\xe7\x00\xf6\x00\x02"\xac  \x00s\x00t\x00r\x00i\x00n\x00g\x00')
+        self.assertEqual(
+            ns_str.encode('utf-8'),
+            b'U\xc3\xb1\xc3\xae\xc3\xa7\xc3\xb6\xe2\x88\x82\xe2\x82\xac string'
+        )
+        self.assertEqual(
+            ns_str.encode('utf-16'),
+            b'\xff\xfeU\x00\xf1\x00\xee\x00\xe7\x00\xf6\x00\x02"\xac  \x00s\x00t\x00r\x00i\x00n\x00g\x00'
+        )
 
         with self.assertRaises(UnicodeEncodeError):
             ns_str.encode('ascii')
@@ -267,7 +273,6 @@ class NSStringTests(unittest.TestCase):
         self.assertFalse(ns_from_py('abcd1234').isdigit())
 
     def test_nsstring_isidentifier(self):
-        ns_str = ns_from_py('')
         self.assertTrue(ns_from_py('def').isidentifier())
         self.assertTrue(ns_from_py('class').isidentifier())
         self.assertTrue(ns_from_py('hello').isidentifier())
