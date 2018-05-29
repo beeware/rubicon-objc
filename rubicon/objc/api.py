@@ -219,14 +219,18 @@ def convert_method_arguments(encoding, args):
     return new_args
 
 
-def objc_method(f):
-    encoding = encoding_from_annotation(f)
+class objc_method(object):
+    def __init__(self, py_method):
+        super().__init__()
 
-    def _objc_method(receiver, objc_cmd, *args):
-        py_self = ObjCInstance(receiver)
-        args = convert_method_arguments(encoding, args)
-        result = f(py_self, *args)
-        if encoding[0] is not None and issubclass(encoding[0], (objc_id, ObjCInstance)):
+        self.py_method = py_method
+        self.encoding = encoding_from_annotation(py_method)
+
+    def __call__(self, objc_self, objc_cmd, *args):
+        py_self = ObjCInstance(objc_self)
+        args = convert_method_arguments(self.encoding, args)
+        result = self.py_method(py_self, *args)
+        if self.encoding[0] is not None and issubclass(self.encoding[0], (objc_id, ObjCInstance)):
             result = ns_from_py(result)
             if result is not None:
                 result = result.ptr
@@ -235,29 +239,28 @@ def objc_method(f):
         else:
             return result
 
-    def register(cls, attr):
+    def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls, name, _objc_method, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls, name, self, self.encoding)
 
-    def protocol_register(proto, attr):
+    def protocol_register(self, proto, attr):
         name = attr.replace('_', ':')
-        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in self.encoding)
         libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, True)
 
-    _objc_method.register = register
-    _objc_method.protocol_register = protocol_register
 
-    return _objc_method
+class objc_classmethod(object):
+    def __init__(self, py_method):
+        super().__init__()
 
+        self.py_method = py_method
+        self.encoding = encoding_from_annotation(py_method)
 
-def objc_classmethod(f):
-    encoding = encoding_from_annotation(f)
-
-    def _objc_classmethod(objc_cls, objc_cmd, *args):
+    def __call__(self, objc_cls, objc_cmd, *args):
         py_cls = ObjCClass(objc_cls)
-        args = convert_method_arguments(encoding, args)
-        result = f(py_cls, *args)
-        if encoding[0] is not None and issubclass(encoding[0], (objc_id, ObjCInstance)):
+        args = convert_method_arguments(self.encoding, args)
+        result = self.py_method(py_cls, *args)
+        if self.encoding[0] is not None and issubclass(self.encoding[0], (objc_id, ObjCInstance)):
             result = ns_from_py(result)
             if result is not None:
                 result = result.ptr
@@ -266,19 +269,14 @@ def objc_classmethod(f):
         else:
             return result
 
-    def register(cls, attr):
+    def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, _objc_classmethod, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, self, self.encoding)
 
-    def protocol_register(proto, attr):
+    def protocol_register(self, proto, attr):
         name = attr.replace('_', ':')
-        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in encoding)
+        types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in self.encoding)
         libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, False)
-
-    _objc_classmethod.register = register
-    _objc_classmethod.protocol_register = protocol_register
-
-    return _objc_classmethod
 
 
 class objc_ivar(object):
@@ -366,20 +364,22 @@ class objc_property(object):
         libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, len(attrs), True, True)
 
 
-def objc_rawmethod(f):
-    encoding = encoding_from_annotation(f, offset=2)
+class objc_rawmethod(object):
+    def __init__(self, py_method):
+        super().__init__()
 
-    def register(cls, attr):
+        self.py_method = py_method
+        self.encoding = encoding_from_annotation(py_method, offset=2)
+
+    def __call__(self, *args, **kwargs):
+        return self.py_method(*args, **kwargs)
+
+    def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls, name, f, encoding)
+        cls.imp_keep_alive_table[name] = add_method(cls, name, self, self.encoding)
 
-    def protocol_register(proto, attr):
+    def protocol_register(self, proto, attr):
         raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
-
-    f.register = register
-    f.protocol_register = protocol_register
-
-    return f
 
 
 _type_for_objcclass_map = {}
