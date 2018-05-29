@@ -3,7 +3,7 @@ import unittest
 from ctypes import CDLL, util
 
 from rubicon.objc import ns_from_py, py_from_ns
-from rubicon.objc.runtime import NSString
+from rubicon.objc.api import NSString
 
 try:
     import platform

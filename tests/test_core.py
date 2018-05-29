@@ -15,7 +15,8 @@ from rubicon.objc import (
     ObjCInstance, ObjCMetaClass, ObjCProtocol, at, get_ivar, objc_classmethod,
     objc_const, objc_id, objc_ivar, objc_method, objc_property, send_message, send_super, set_ivar, types,
 )
-from rubicon.objc.runtime import ObjCBoundMethod, libobjc
+from rubicon.objc.api import ObjCBoundMethod
+from rubicon.objc.runtime import libobjc
 
 try:
     import platform

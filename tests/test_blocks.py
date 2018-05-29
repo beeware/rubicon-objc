@@ -3,7 +3,8 @@ import unittest
 from ctypes import CDLL, Structure, c_int, c_void_p, util
 
 from rubicon.objc import NSObject, ObjCBlock, ObjCClass, objc_method
-from rubicon.objc.runtime import Block, objc_block
+from rubicon.objc.api import Block
+from rubicon.objc.runtime import objc_block
 
 try:
     import platform

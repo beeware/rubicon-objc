@@ -16,7 +16,7 @@ similar to how classes can be looked up using ``ObjCClass``:
 
     >>> NSCopying = ObjCProtocol('NSCopying')
     >>> NSCopying
-    <rubicon.objc.runtime.ObjCProtocol: NSCopying at 0x7fff76543210>
+    <rubicon.objc.api.ObjCProtocol: NSCopying at 0x7fff76543210>
 
 The ``isinstance`` function can be used to check whether an object conforms to
 a protocol:
@@ -67,9 +67,9 @@ We can now use our class. The ``copy`` method (which uses our implemented
 
     >>> ua = UserAccount.alloc().initWithUsername_emailAddress_(at('person'), at('person@example.com'))
     >>> ua
-    <rubicon.objc.runtime.ObjCInstance 0x106543210: UserAccount at 0x106543220: <UserAccount: 0x106543220>>
+    <rubicon.objc.api.ObjCInstance 0x106543210: UserAccount at 0x106543220: <UserAccount: 0x106543220>>
     >>> ua.copy()
-    <rubicon.objc.runtime.ObjCInstance 0x106543210: UserAccount at 0x106543220: <UserAccount: 0x106543220>>
+    <rubicon.objc.api.ObjCInstance 0x106543210: UserAccount at 0x106543220: <UserAccount: 0x106543220>>
 
 And we can check that the class conforms to the protocol:
 

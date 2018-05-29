@@ -93,10 +93,10 @@ equivalents, `__str__()` and `__repr__()`, respectively::
     'http://pybee.org/contributing/how/first-time/'
 
     >>> repr(absolute)
-    '<rubicon.objc.runtime.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>'
+    '<rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>'
 
     >>> print(absolute)
-    <rubicon.objc.runtime.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>
+    <rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>
 
 Time to take over the world!
 ----------------------------
