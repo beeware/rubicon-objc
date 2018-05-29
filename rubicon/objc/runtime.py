@@ -22,8 +22,6 @@ __all__ = [
     'c_ptrdiff_t',
     'get_class',
     'get_ivar',
-    'get_metaclass',
-    'get_superclass_of_object',
     'libc',
     'libobjc',
     'objc_block',
@@ -510,17 +508,6 @@ def ensure_bytes(x):
 def get_class(name):
     "Return a reference to the class with the given name."
     return libobjc.objc_getClass(ensure_bytes(name))
-
-
-def get_metaclass(name):
-    "Return a reference to the metaclass for the given name."
-    return libobjc.objc_getMetaClass(ensure_bytes(name))
-
-
-def get_superclass_of_object(obj):
-    "Return a reference to the superclass of the given object."
-    cls = libobjc.object_getClass(obj)
-    return libobjc.class_getSuperclass(cls)
 
 
 # http://www.sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
