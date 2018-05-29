@@ -12,6 +12,11 @@ from . import api  # noqa: F401
 # will not take place, and Foundation collections will not support the expected methods/operators in Python!
 from . import collections  # noqa: F401
 
+from .types import (  # noqa: F401
+    CFIndex, CFRange, CGFloat, CGGlyph, CGPoint, CGPointMake, CGRect, CGRectMake, CGSize, CGSizeMake, NSEdgeInsets,
+    NSEdgeInsetsMake, NSInteger, NSMakePoint, NSMakeRect, NSMakeSize, NSPoint, NSRange, NSRect, NSSize, NSTimeInterval,
+    NSUInteger, NSZeroPoint, UIEdgeInsets, UIEdgeInsetsMake, UIEdgeInsetsZero, UniChar, unichar,
+)
 from .runtime import (  # noqa: F401
     IMP, SEL, Class, Ivar, Method, get_ivar, objc_id, objc_property_t, send_message, send_super, set_ivar,
 )
@@ -19,11 +24,4 @@ from .api import (  # noqa: F401
     Block, NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSObject, NSObjectProtocol, ObjCBlock,
     ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, ns_from_py, objc_classmethod, objc_const, objc_ivar,
     objc_method, objc_property, objc_rawmethod, py_from_ns,
-)
-from .types import (  # noqa: F401
-    CFIndex, CFRange, CGFloat, CGGlyph, CGPoint, CGPointMake, CGRect,
-    CGRectMake, CGSize, CGSizeMake, NSEdgeInsets, NSEdgeInsetsMake, NSInteger,
-    NSMakePoint, NSMakeRect, NSMakeSize, NSPoint, NSRange, NSRect, NSSize,
-    NSTimeInterval, NSUInteger, NSZeroPoint, UIEdgeInsets, UIEdgeInsetsMake,
-    UIEdgeInsetsZero, UniChar, unichar,
 )
