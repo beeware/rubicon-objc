@@ -206,105 +206,6 @@ class ObjCBoundMethod(object):
         return self.method(self.receiver, *args, **kwargs)
 
 
-def cache_method(cls, name):
-    """Returns a python representation of the named instance method,
-    either by looking it up in the cached list of methods or by searching
-    for and creating a new method object."""
-
-    supercls = cls
-    objc_method = None
-    while supercls is not None:
-        # Load the class's methods if we haven't done so yet.
-        if supercls.methods_ptr is None:
-            supercls._load_methods()
-
-        try:
-            objc_method = supercls.instance_methods[name]
-            break
-        except KeyError:
-            pass
-
-        try:
-            objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
-            break
-        except KeyError:
-            pass
-
-        supercls = supercls.superclass
-
-    if objc_method is None:
-        return None
-    else:
-        cls.instance_methods[name] = objc_method
-        return objc_method
-
-
-def cache_property_methods(cls, name):
-    """Return the accessor and mutator for the named property.
-    """
-    if name.endswith('_'):
-        # If the requested name ends with _, that's a marker that we're
-        # dealing with a method call, not a property, so we can shortcut
-        # the process.
-        methods = None
-    else:
-        # Check 1: Does the class respond to the property?
-        responds = libobjc.class_getProperty(cls, name.encode('utf-8'))
-
-        # Check 2: Does the class have an instance method to retrieve the given name
-        accessor = cache_method(cls, name)
-
-        # Check 3: Is there a setName: method to set the property with the given name
-        mutator = cache_method(cls, 'set' + name[0].title() + name[1:] + ':')
-
-        # Check 4: Is this a forced property on this class or a superclass?
-        forced = False
-        superclass = cls
-        while superclass is not None:
-            if name in superclass.forced_properties:
-                forced = True
-                break
-            superclass = superclass.superclass
-
-        # If the class responds as a property, or it has both an accessor *and*
-        # and mutator, then treat it as a property in Python.
-        if responds or (accessor and mutator) or forced:
-            methods = (accessor, mutator)
-        else:
-            methods = None
-    return methods
-
-
-def cache_property_accessor(cls, name):
-    """Returns a python representation of an accessor for the named
-    property. Existence of a property is done by looking for the write
-    selector (set<Name>:).
-    """
-    try:
-        methods = cls.instance_properties[name]
-    except KeyError:
-        methods = cache_property_methods(cls, name)
-        cls.instance_properties[name] = methods
-    if methods:
-        return methods[0]
-    return None
-
-
-def cache_property_mutator(cls, name):
-    """Returns a python representation of an accessor for the named
-    property. Existence of a property is done by looking for the write
-    selector (set<Name>:).
-    """
-    try:
-        methods = cls.instance_properties[name]
-    except KeyError:
-        methods = cache_property_methods(cls, name)
-        cls.instance_properties[name] = methods
-    if methods:
-        return methods[1]
-    return None
-
-
 def convert_method_arguments(encoding, args):
     """Used to convert Objective-C method arguments to Python values
     before passing them on to the Python-defined method.
@@ -652,7 +553,7 @@ class ObjCInstance(object):
         # If the name ends with _, we can shortcut this step, because it's
         # clear that we're dealing with a method call.
         if not name.endswith('_'):
-            method = cache_property_accessor(self.objc_class, name)
+            method = self.objc_class._cache_property_accessor(name)
             if method:
                 return ObjCBoundMethod(method, self)()
 
@@ -682,7 +583,7 @@ class ObjCInstance(object):
             return ObjCBoundMethod(method, self)
 
         # See if there's a method whose full name matches the given name.
-        method = cache_method(self.objc_class, name.replace("_", ":"))
+        method = self.objc_class._cache_method(name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
         else:
@@ -695,7 +596,7 @@ class ObjCInstance(object):
             # For attributes already in __dict__, use the default __setattr__.
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
         else:
-            method = cache_property_mutator(self.objc_class, name)
+            method = self.objc_class._cache_property_mutator(name)
             if method:
                 # Convert enums to their underlying values.
                 if isinstance(value, enum.Enum):
@@ -895,6 +796,101 @@ class ObjCClass(ObjCInstance, type):
     def __init__(self, *args, **kwargs):
         # Prevent kwargs from being passed on to type.__init__, which does not accept any kwargs in Python < 3.6.
         super().__init__(*args)
+
+    def _cache_method(self, name):
+        """Returns a python representation of the named instance method,
+        either by looking it up in the cached list of methods or by searching
+        for and creating a new method object."""
+
+        supercls = self
+        objc_method = None
+        while supercls is not None:
+            # Load the class's methods if we haven't done so yet.
+            if supercls.methods_ptr is None:
+                supercls._load_methods()
+
+            try:
+                objc_method = supercls.instance_methods[name]
+                break
+            except KeyError:
+                pass
+
+            try:
+                objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
+                break
+            except KeyError:
+                pass
+
+            supercls = supercls.superclass
+
+        if objc_method is None:
+            return None
+        else:
+            self.instance_methods[name] = objc_method
+            return objc_method
+
+    def _cache_property_methods(self, name):
+        """Return the accessor and mutator for the named property.
+        """
+        if name.endswith('_'):
+            # If the requested name ends with _, that's a marker that we're
+            # dealing with a method call, not a property, so we can shortcut
+            # the process.
+            methods = None
+        else:
+            # Check 1: Does the class respond to the property?
+            responds = libobjc.class_getProperty(self, name.encode('utf-8'))
+
+            # Check 2: Does the class have an instance method to retrieve the given name
+            accessor = self._cache_method(name)
+
+            # Check 3: Is there a setName: method to set the property with the given name
+            mutator = self._cache_method('set' + name[0].title() + name[1:] + ':')
+
+            # Check 4: Is this a forced property on this class or a superclass?
+            forced = False
+            superclass = self
+            while superclass is not None:
+                if name in superclass.forced_properties:
+                    forced = True
+                    break
+                superclass = superclass.superclass
+
+            # If the class responds as a property, or it has both an accessor *and*
+            # and mutator, then treat it as a property in Python.
+            if responds or (accessor and mutator) or forced:
+                methods = (accessor, mutator)
+            else:
+                methods = None
+        return methods
+
+    def _cache_property_accessor(self, name):
+        """Returns a python representation of an accessor for the named
+        property. Existence of a property is done by looking for the write
+        selector (set<Name>:).
+        """
+        try:
+            methods = self.instance_properties[name]
+        except KeyError:
+            methods = self._cache_property_methods(name)
+            self.instance_properties[name] = methods
+        if methods:
+            return methods[0]
+        return None
+
+    def _cache_property_mutator(self, name):
+        """Returns a python representation of an accessor for the named
+        property. Existence of a property is done by looking for the write
+        selector (set<Name>:).
+        """
+        try:
+            methods = self.instance_properties[name]
+        except KeyError:
+            methods = self._cache_property_methods(name)
+            self.instance_properties[name] = methods
+        if methods:
+            return methods[1]
+        return None
 
     def declare_property(self, name):
         self.forced_properties.add(name)
