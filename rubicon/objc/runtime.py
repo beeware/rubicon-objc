@@ -24,6 +24,7 @@ __all__ = [
     'get_ivar',
     'libc',
     'libobjc',
+    'load_or_error',
     'objc_block',
     'objc_id',
     'objc_method_description',
@@ -50,7 +51,16 @@ _lib_path = ["/usr/lib"]
 _framework_path = ["/System/Library/Frameworks"]
 
 
-def _load_or_error(name):
+def load_or_error(name):
+    """Load and return the C library with the given name.
+
+    If the library could not be found, a :class:`ValueError` is raised.
+
+    Internally, this function uses :func:`ctypes.util.find_library` to search for the library in the system-standard
+    locations. If the library cannot be found this way, it is attempted to load the library from certain hardcoded
+    locations, as a fallback for systems where ``find_library`` does not work (such as iOS).
+    """
+
     path = util.find_library(name)
     if path is not None:
         return CDLL(path)
@@ -74,9 +84,9 @@ def _load_or_error(name):
     raise ValueError("Library {!r} not found".format(name))
 
 
-libc = _load_or_error('c')
-libobjc = _load_or_error('objc')
-Foundation = _load_or_error('Foundation')
+libc = load_or_error('c')
+libobjc = load_or_error('objc')
+Foundation = load_or_error('Foundation')
 
 
 @with_encoding(b'@')
