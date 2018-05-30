@@ -10,13 +10,12 @@ from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
-    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, get_ivar, objc_classmethod,
-    objc_const, objc_id, objc_ivar, objc_method, objc_property, send_message, send_super, set_ivar, types,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
+    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
+    objc_property, send_message, send_super, types,
 )
 from rubicon.objc.api import ObjCBoundMethod
-from rubicon.objc.runtime import libobjc
+from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
 try:
     import platform
