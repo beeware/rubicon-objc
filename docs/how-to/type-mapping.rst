@@ -76,13 +76,16 @@ keys). :class:`ObjCStrInstance` also handles Unicode code points above
 :class:`NSString` is based on UTF-16.
 
 If you have an :class:`ObjCStrInstance` instance, and you need to pass that
-instance to a method that does a specific typecheck for `str`, you can use
-:class:`str(nsstring)` to convert the :class:`ObjCStrInstance` instance to
+instance to a method that does a specific typecheck for :class:`str`, you can
+use ``str(nsstring)`` to convert the :class:`ObjCStrInstance` instance to
 :class:`str`.
 
 :class:`ObjCStrInstance` implements all the utility methods that are available
-on :class:`str`, such as ``replace`` and ``split``. These utility methods all
-return *Python* strings.
+on :class:`str`, such as ``replace`` and ``split``. When these methods return
+a string, the implementation may return Python :class:`str` or
+:class:`ObjCStrInstance` instances. If you need to use the return value from
+these methods, you should always use ``str()`` to ensure you have a Python
+string.
 
 Lists
 -----
