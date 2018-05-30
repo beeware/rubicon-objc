@@ -14,7 +14,6 @@ from rubicon.objc import (
     ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
     objc_property, send_message, send_super, types,
 )
-from rubicon.objc.api import ObjCBoundMethod
 from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
 try:
@@ -439,7 +438,7 @@ class RubiconTest(unittest.TestCase):
         # Previously, it was a method.
         NSBundle = ObjCClass('NSBundle')
         NSBundle.declare_class_property('mainBundle')
-        self.assertFalse(type(NSBundle.mainBundle) == ObjCBoundMethod, 'NSBundle.mainBundle should not be a method')
+        self.assertFalse(callable(NSBundle.mainBundle), 'NSBundle.mainBundle should not be a method')
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."
