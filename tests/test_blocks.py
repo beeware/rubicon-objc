@@ -1,25 +1,9 @@
-import faulthandler
 import unittest
-from ctypes import CDLL, Structure, c_int, c_void_p, util
+from ctypes import Structure, c_int, c_void_p
 
 from rubicon.objc import NSObject, ObjCBlock, ObjCClass, objc_method
 from rubicon.objc.api import Block
 from rubicon.objc.runtime import objc_block
-
-try:
-    import platform
-    OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
-except Exception:
-    OSX_VERSION = None
-
-
-# Load the test harness library
-rubiconharness_name = util.find_library('rubiconharness')
-if rubiconharness_name is None:
-    raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-rubiconharness = CDLL(rubiconharness_name)
-
-faulthandler.enable()
 
 
 class BlockTests(unittest.TestCase):

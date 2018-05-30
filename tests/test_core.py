@@ -1,11 +1,7 @@
-import faulthandler
 import functools
 import math
 import unittest
-from ctypes import (
-    CDLL, Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast,
-    create_string_buffer, util,
-)
+from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
 from decimal import Decimal
 from enum import Enum
 
@@ -16,20 +12,7 @@ from rubicon.objc import (
 )
 from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
-try:
-    import platform
-    OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
-except Exception:
-    OSX_VERSION = None
-
-
-# Load the test harness library
-rubiconharness_name = util.find_library('rubiconharness')
-if rubiconharness_name is None:
-    raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-rubiconharness = CDLL(rubiconharness_name)
-
-faulthandler.enable()
+from . import OSX_VERSION, rubiconharness
 
 
 class struct_int_sized(Structure):
