@@ -24,7 +24,7 @@ __all__ = [
     'get_ivar',
     'libc',
     'libobjc',
-    'load_or_error',
+    'load_library',
     'objc_block',
     'objc_id',
     'objc_method_description',
@@ -51,7 +51,7 @@ _lib_path = ["/usr/lib"]
 _framework_path = ["/System/Library/Frameworks"]
 
 
-def load_or_error(name):
+def load_library(name):
     """Load and return the C library with the given name.
 
     If the library could not be found, a :class:`ValueError` is raised.
@@ -84,9 +84,9 @@ def load_or_error(name):
     raise ValueError("Library {!r} not found".format(name))
 
 
-libc = load_or_error('c')
-libobjc = load_or_error('objc')
-Foundation = load_or_error('Foundation')
+libc = load_library('c')
+libobjc = load_library('objc')
+Foundation = load_library('Foundation')
 
 
 @with_encoding(b'@')
