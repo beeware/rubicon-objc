@@ -178,92 +178,11 @@ class ObjCStrInstance(ObjCInstance):
         else:
             return found
 
-    def capitalize(self):
-        return str(self).capitalize()
-
-    def casefold(self):
-        return str(self).casefold()
-
-    def center(self, width, fillchar=' '):
-        return str(self).center(width, fillchar)
-
-    def count(self, sub, start=None, end=None):
-        return str(self).count(sub, start, end)
-
-    def encode(self, encoding='utf-8', errors='strict'):
-        return str(self).encode(encoding, errors=errors)
-
-    def endswith(self, sub, start=None, end=None):
-        return str(self).endswith(sub, start, end)
-
-    def expandtabs(self, tabsize=8):
-        return str(self).expandtabs(tabsize)
-
     def find(self, sub, start=None, end=None):
         return self._find(sub, start=start, end=end, reverse=False)
 
-    def format(self, *args, **kwargs):
-        return str(self).format(*args, **kwargs)
-
-    def format_map(self, mapping):
-        return str(self).format_map(mapping)
-
     def index(self, sub, start=None, end=None):
         return self._index(sub, start=start, end=end, reverse=False)
-
-    def isalnum(self):
-        return str(self).isalnum()
-
-    def isalpha(self):
-        return str(self).isalpha()
-
-    def isdecimal(self):
-        return str(self).isdecimal()
-
-    def isdigit(self):
-        return str(self).isdigit()
-
-    def isidentifier(self):
-        return str(self).isidentifier()
-
-    def islower(self):
-        return str(self).islower()
-
-    def isnumeric(self):
-        return str(self).isnumeric()
-
-    def isprintable(self):
-        return str(self).isprintable()
-
-    def isspace(self):
-        return str(self).isspace()
-
-    def istitle(self):
-        return str(self).istitle()
-
-    def isupper(self):
-        return str(self).isupper()
-
-    def join(self, iterable):
-        return str(self).join(iterable)
-
-    def ljust(self, width, fillchar=' '):
-        return str(self).ljust(width, fillchar)
-
-    def lower(self):
-        return str(self).lower()
-
-    def lstrip(self, chars=None):
-        return str(self).lstrip(chars)
-
-    def maketrans(self, x, *args, **kwargs):
-        return str(self).maketrans(x, *args, **kwargs)
-
-    def partition(self, sep):
-        return str(self).partition(sep)
-
-    def replace(self, old, new, count=-1):
-        return str(self).replace(old, new, count)
 
     def rfind(self, sub, start=None, end=None):
         return self._find(sub, start=start, end=end, reverse=True)
@@ -271,41 +190,14 @@ class ObjCStrInstance(ObjCInstance):
     def rindex(self, sub, start=None, end=None):
         return self._index(sub, start=start, end=end, reverse=True)
 
-    def rjust(self, width, fillchar=' '):
-        return str(self).rjust(width, fillchar)
-
-    def rpartition(self, sep):
-        return str(self).rpartition(sep)
-
-    def rsplit(self, sep=None, maxsplit=-1):
-        return str(self).rsplit(sep=sep, maxsplit=maxsplit)
-
-    def rstrip(self, chars=None):
-        return str(self).rstrip(chars)
-
-    def split(self, sep=None, maxsplit=-1):
-        return str(self).split(sep=sep, maxsplit=maxsplit)
-
-    def splitlines(self, keepends=False):
-        return str(self).splitlines()
-
-    def strip(self, chars=None):
-        return str(self).strip(chars)
-
-    def swapcase(self):
-        return str(self).swapcase()
-
-    def title(self):
-        return str(self).title()
-
-    def translate(self, table):
-        return str(self).translate(table)
-
-    def upper(self):
-        return str(self).upper()
-
-    def zfill(self, width):
-        return str(self).zfill(width)
+    # A fallback method; get the locally defined attribute if it exists;
+    # otherwise, get the attribute from the Python-converted version
+    # of the string
+    def __getattr__(self, attr):
+        try:
+            return super().__getattr__(attr)
+        except AttributeError:
+            return getattr(self.__str__(), attr)
 
 
 @for_objcclass(NSArray)
