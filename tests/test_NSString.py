@@ -28,6 +28,49 @@ class NSStringTests(unittest.TestCase):
     NEEDLES = ['', 'a', 'bcd', 'def', HAYSTACK, 'nope', 'dcb']
     RANGES = [(None, None), (None, 6), (6, None), (4, 10)]
 
+    def assert_method(self, py_value, method, *args, **kwargs):
+        ns_value = ns_from_py(py_value)
+
+        try:
+            py_method = getattr(py_value, method)
+        except AttributeError:
+            self.fail("Python type '{}' does not have method '{}'".format(type(py_value), method))
+
+        try:
+            ns_method = getattr(ns_value, method)
+        except AttributeError:
+            self.fail("Rubicon analog for type '{}' does not have method '{}'".format(type(py_value), method))
+
+        try:
+            py_result = py_method(*args, **kwargs)
+            py_exception = None
+        except Exception as e:
+            py_exception = e
+            py_result = None
+
+        try:
+            ns_result = ns_method(*args, **kwargs)
+            ns_exception = None
+        except Exception as e:
+            ns_exception = e
+            ns_result = None
+
+        if py_exception is None and ns_exception is None:
+            self.assertEqual(
+                py_result, ns_result,
+                "Different results for {}: Python = {}; ObjC = {}".format(method, py_result, ns_result)
+            )
+        elif py_exception is not None:
+            if ns_exception is not None:
+                self.assertEqual(
+                    type(py_exception), type(ns_exception),
+                    "Different exceptions for {}: Python = {}; ObjC = {}".format(method, py_result, ns_result)
+                )
+            else:
+                self.fail("Python call for {} raised {}, but ObjC did not".format(method, type(py_exception)))
+        else:
+            self.fail("ObjC call for {} raised {}, but Python did not".format(method, type(py_exception)))
+
     def test_str_nsstring_conversion(self):
         """Python str and NSString can be converted to each other manually."""
 
@@ -208,215 +251,173 @@ class NSStringTests(unittest.TestCase):
                     self.assertEqual(n * ns_str, ns_repeated)
 
     def test_nsstring_capitalize(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.capitalize(), 'Lower, upper & mixed!')
+        self.assert_method('lower, UPPER & Mixed!', 'capitalize')
 
     def test_nsstring_casefold(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.casefold(), 'lower, upper & mixed!')
+        self.assert_method('lower, UPPER & Mixed!', 'casefold')
 
     def test_nsstring_center(self):
-        ns_str = ns_from_py('hello')
-        self.assertEqual(ns_str.center(20), '       hello        ')
-        self.assertEqual(ns_str.center(20, '*'), '*******hello********')
+        self.assert_method('hello', 'center', 20)
+        self.assert_method('hello', 'center', 20, '*')
 
     def test_nsstring_count(self):
-        ns_str = ns_from_py('hello world')
-        self.assertEqual(ns_str.count('x'), 0)
-        self.assertEqual(ns_str.count('l'), 3)
-        self.assertEqual(ns_str.count('l', start=5), 1)
-        self.assertEqual(ns_str.count('l', end=8), 2)
-        self.assertEqual(ns_str.count('l', start=4, end=8), 0)
+        self.assert_method('hello world', 'count', 'x')
+        self.assert_method('hello world', 'count', 'l')
 
     def test_nsstring_encode(self):
-        ns_str = ns_from_py('Uñîçö∂€ string')
-        self.assertEqual(
-            ns_str.encode('utf-8'),
-            b'U\xc3\xb1\xc3\xae\xc3\xa7\xc3\xb6\xe2\x88\x82\xe2\x82\xac string'
-        )
-        self.assertEqual(
-            ns_str.encode('utf-16'),
-            b'\xff\xfeU\x00\xf1\x00\xee\x00\xe7\x00\xf6\x00\x02"\xac  \x00s\x00t\x00r\x00i\x00n\x00g\x00'
-        )
-
-        with self.assertRaises(UnicodeEncodeError):
-            ns_str.encode('ascii')
-        self.assertEqual(ns_str.encode('ascii', 'ignore'), b'U string')
+        self.assert_method('Uñîçö∂€ string', 'encode', 'utf-8')
+        self.assert_method('Uñîçö∂€ string', 'encode', 'utf-16')
+        self.assert_method('Uñîçö∂€ string', 'encode', 'ascii')
+        self.assert_method('Uñîçö∂€ string', 'encode', 'ascii', 'ignore')
 
     def test_nsstring_endswith(self):
-        ns_str = ns_from_py('Hello world')
-        self.assertTrue(ns_str.endswith('world'))
-        self.assertFalse(ns_str.endswith('cake'))
+        self.assert_method('world', 'endswith')
+        self.assert_method('cake', 'endswith')
 
     def test_nsstring_expandtabs(self):
-        ns_str = ns_from_py('hello\tworld')
-        self.assertEqual(ns_str.expandtabs(), 'hello   world')
-        self.assertEqual(ns_str.expandtabs(4), 'hello   world')
-        self.assertEqual(ns_str.expandtabs(10), 'hello     world')
+        self.assert_method('hello\tworld', 'expandtabs', )
+        self.assert_method('hello\tworld', 'expandtabs', 4)
+        self.assert_method('hello\tworld', 'expandtabs', 10)
 
     def test_nsstring_format(self):
-        ns_str = ns_from_py('hello {}')
-        self.assertEqual(ns_str.format('world'), 'hello world')
+        self.assert_method('hello {}', 'format', 'world')
 
     def test_nsstring_format_map(self):
-        ns_str = ns_from_py('hello {name}')
-        self.assertEqual(ns_str.format_map({'name': 'world'}), 'hello world')
+        self.assert_method('hello {name}', 'format_map', {'name': 'world'})
 
     def test_nsstring_isalnum(self):
-        self.assertTrue(ns_from_py('abcd').isalnum())
-        self.assertTrue(ns_from_py('1234').isalnum())
-        self.assertTrue(ns_from_py('abcd1234').isalnum())
+        self.assert_method('abcd', 'isalnum')
+        self.assert_method('1234', 'isalnum')
+        self.assert_method('abcd1234', 'isalnum')
 
     def test_nsstring_isalpha(self):
-        self.assertTrue(ns_from_py('abcd').isalpha())
-        self.assertFalse(ns_from_py('1234').isalpha())
-        self.assertFalse(ns_from_py('abcd1234').isalpha())
+        self.assert_method('abcd', 'isalpha')
+        self.assert_method('1234', 'isalpha')
+        self.assert_method('abcd1234', 'isalpha')
 
     def test_nsstring_isdecimal(self):
-        self.assertFalse(ns_from_py('abcd').isdecimal())
-        self.assertTrue(ns_from_py('1234').isdecimal())
-        self.assertFalse(ns_from_py('abcd1234').isdecimal())
+        self.assert_method('abcd', 'isdecimal')
+        self.assert_method('1234', 'isdecimal')
+        self.assert_method('abcd1234', 'isdecimal')
 
     def test_nsstring_isdigit(self):
-        self.assertFalse(ns_from_py('abcd').isdigit())
-        self.assertTrue(ns_from_py('1234').isdigit())
-        self.assertFalse(ns_from_py('abcd1234').isdigit())
+        self.assert_method('abcd', 'isdigit')
+        self.assert_method('1234', 'isdigit')
+        self.assert_method('abcd1234', 'isdigit')
 
     def test_nsstring_isidentifier(self):
-        self.assertTrue(ns_from_py('def').isidentifier())
-        self.assertTrue(ns_from_py('class').isidentifier())
-        self.assertTrue(ns_from_py('hello').isidentifier())
-        self.assertFalse(ns_from_py('boo!').isidentifier())
+        self.assert_method('def', 'isidentifier')
+        self.assert_method('class', 'isidentifier')
+        self.assert_method('hello', 'isidentifier')
+        self.assert_method('boo!', 'isidentifier')
 
     def test_nsstring_islower(self):
-        self.assertTrue(ns_from_py('abcd').islower())
-        self.assertFalse(ns_from_py('ABCD').islower())
-        self.assertFalse(ns_from_py('1234').islower())
-        self.assertTrue(ns_from_py('abcd1234').islower())
-        self.assertFalse(ns_from_py('ABCD1234').islower())
+        self.assert_method('abcd', 'islower')
+        self.assert_method('ABCD', 'islower')
+        self.assert_method('1234', 'islower')
+        self.assert_method('abcd1234', 'islower')
+        self.assert_method('ABCD1234', 'islower')
 
     def test_nsstring_isnumeric(self):
-        self.assertFalse(ns_from_py('abcd').isdigit())
-        self.assertTrue(ns_from_py('1234').isdigit())
-        self.assertFalse(ns_from_py('abcd1234').isdigit())
+        self.assert_method('abcd', 'isdigit')
+        self.assert_method('1234', 'isdigit')
+        self.assert_method('abcd1234', 'isdigit')
 
     def test_nsstring_isprintable(self):
-        self.assertFalse(ns_from_py('\x09').isprintable())
-        self.assertTrue(ns_from_py('Hello').isprintable())
+        self.assert_method('\x09', 'isprintable')
+        self.assert_method('Hello', 'isprintable')
 
     def test_nsstring_isspace(self):
-        self.assertTrue(ns_from_py(' ').isspace())
-        self.assertTrue(ns_from_py('   ').isspace())
-        self.assertFalse(ns_from_py('Hello world').isspace())
-        self.assertFalse(ns_from_py('Hello').isspace())
+        self.assert_method(' ', 'isspace')
+        self.assert_method('   ', 'isspace')
+        self.assert_method('Hello world', 'isspace')
+        self.assert_method('Hello', 'isspace')
 
     def test_nsstring_istitle(self):
-        self.assertTrue(ns_from_py('Hello World').istitle())
-        self.assertFalse(ns_from_py('hello world').istitle())
-        self.assertFalse(ns_from_py('Hello world').istitle())
-        self.assertFalse(ns_from_py('Hello WORLD').istitle())
-        self.assertFalse(ns_from_py('HELLO WORLD').istitle())
+        self.assert_method('Hello World', 'istitle')
+        self.assert_method('hello world', 'istitle')
+        self.assert_method('Hello world', 'istitle')
+        self.assert_method('Hello WORLD', 'istitle')
+        self.assert_method('HELLO WORLD', 'istitle')
 
     def test_nsstring_isupper(self):
-        self.assertFalse(ns_from_py('abcd').isupper())
-        self.assertTrue(ns_from_py('ABCD').isupper())
-        self.assertFalse(ns_from_py('1234').isupper())
-        self.assertFalse(ns_from_py('abcd1234').isupper())
-        self.assertTrue(ns_from_py('ABCD1234').isupper())
+        self.assert_method('abcd', 'isupper')
+        self.assert_method('ABCD', 'isupper')
+        self.assert_method('1234', 'isupper')
+        self.assert_method('abcd1234', 'isupper')
+        self.assert_method('ABCD1234', 'isupper')
 
     def test_nsstring_join(self):
-        ns_str = ns_from_py(':')
-        self.assertEqual(ns_str.join(['aa', 'bb', 'cc']), 'aa:bb:cc')
+        self.assert_method(':', 'join', ['aa', 'bb', 'cc'])
 
     def test_nsstring_ljust(self):
-        ns_str = ns_from_py('123')
-        self.assertEqual(ns_str.ljust(5), '123  ')
-        self.assertEqual(ns_str.ljust(5, '*'), '123**')
+        self.assert_method('123', 'ljust', 5)
+        self.assert_method('123', 'ljust', 5, '*')
 
     def test_nsstring_lower(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.lower(), 'lower, upper & mixed!')
+        self.assert_method('lower, UPPER & Mixed!', 'lower', )
 
     def test_nsstring_lstrip(self):
-        ns_str = ns_from_py('   hello   ')
-        self.assertEqual(ns_str.lstrip(), 'hello   ')
-
-        ns_str = ns_from_py('...hello...')
-        self.assertEqual(ns_str.lstrip('.'), 'hello...')
+        self.assert_method('   hello   ', 'lstrip', )
+        self.assert_method('...hello...', 'lstrip', )
+        self.assert_method('...hello...', 'lstrip', '.')
 
     def test_nsstring_maketrans(self):
-        ns_str = ns_from_py('hello')
-        self.assertEqual(ns_str.maketrans('lo', 'g!'), {108: 103, 111: 33})
+        self.assert_method('hello', 'maketrans', 'lo', 'g!')
 
     def test_nsstring_partition(self):
-        ns_str = ns_from_py('hello new world')
-        self.assertEqual(ns_str.partition(' '), ('hello', ' ', 'new world'))
-        self.assertEqual(ns_str.partition('l'), ('he', 'l', 'lo new world'))
+        self.assert_method('hello new world', 'partition', ' ')
+        self.assert_method('hello new world', 'partition', 'l')
 
     def test_nsstring_replace(self):
-        ns_str = ns_from_py('hello new world')
-        self.assertEqual(ns_str.replace('new', 'old'), 'hello old world')
-        self.assertEqual(ns_str.replace('l', '!'), 'he!!o new wor!d')
-        self.assertEqual(ns_str.replace('l', '!', 2), 'he!!o new world')
+        self.assert_method('hello new world', 'replace', 'new', 'old')
+        self.assert_method('hello new world', 'replace', 'l', '!')
+        self.assert_method('hello new world', 'replace', 'l', '!', 2)
 
     def test_nsstring_rjust(self):
-        ns_str = ns_from_py('123')
-        self.assertEqual(ns_str.rjust(5), '  123')
-        self.assertEqual(ns_str.rjust(5, '*'), '**123')
+        self.assert_method('123', 'rjust', 5)
+        self.assert_method('123', 'rjust', 5, '*')
 
     def test_nsstring_rpartition(self):
-        ns_str = ns_from_py('hello new world')
-        self.assertEqual(ns_str.rpartition(' '), ('hello new', ' ', 'world'))
-        self.assertEqual(ns_str.rpartition('l'), ('hello new wor', 'l', 'd'))
+        self.assert_method('hello new world', 'rpartition', ' ')
+        self.assert_method('hello new world', 'rpartition', 'l')
 
     def test_nsstring_rsplit(self):
-        ns_str = ns_from_py('hello new world')
-        self.assertEqual(ns_str.rsplit(), ['hello', 'new', 'world'])
-        self.assertEqual(ns_str.rsplit(' ', 1), ['hello new', 'world'])
-        self.assertEqual(ns_str.rsplit('l'), ['he', '', 'o new wor', 'd'])
-        self.assertEqual(ns_str.rsplit('l', 2), ['hel', 'o new wor', 'd'])
+        self.assert_method('hello new world', 'rsplit')
+        self.assert_method('hello new world', 'rsplit', ' ', 1)
+        self.assert_method('hello new world', 'rsplit', 'l')
+        self.assert_method('hello new world', 'rsplit', 'l', 2)
 
     def test_nsstring_rstrip(self):
-        ns_str = ns_from_py('   hello   ')
-        self.assertEqual(ns_str.rstrip(), '   hello')
-
-        ns_str = ns_from_py('...hello...')
-        self.assertEqual(ns_str.rstrip('.'), '...hello')
+        self.assert_method('   hello   ', 'rstrip')
+        self.assert_method('...hello...', 'rstrip')
+        self.assert_method('...hello...', 'rstrip', '.')
 
     def test_nsstring_split(self):
-        ns_str = ns_from_py('hello new world')
-        self.assertEqual(ns_str.split(), ['hello', 'new', 'world'])
-        self.assertEqual(ns_str.split(' ', 1), ['hello', 'new world'])
-        self.assertEqual(ns_str.split('l'), ['he', '', 'o new wor', 'd'])
-        self.assertEqual(ns_str.split('l', 2), ['he', '', 'o new world'])
+        self.assert_method('hello new world', 'split')
+        self.assert_method('hello new world', 'split', ' ', 1)
+        self.assert_method('hello new world', 'split', 'l')
+        self.assert_method('hello new world', 'split', 'l', 2)
 
     def test_nsstring_splitlines(self):
-        ns_str = ns_from_py('Hello\nnew\nworld\n')
-        self.assertEqual(ns_str.splitlines(), ['Hello', 'new', 'world'])
+        self.assert_method('Hello\nnew\nworld\n', 'splitlines')
 
     def test_nsstring_strip(self):
-        ns_str = ns_from_py('   hello   ')
-        self.assertEqual(ns_str.strip(), 'hello')
-
-        ns_str = ns_from_py('...hello...')
-        self.assertEqual(ns_str.strip('.'), 'hello')
+        self.assert_method('   hello   ', 'strip')
+        self.assert_method('...hello...', 'strip')
+        self.assert_method('...hello...', 'strip', '.')
 
     def test_nsstring_swapcase(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.swapcase(), 'LOWER, upper & mIXED!')
+        self.assert_method('lower, UPPER & Mixed!', 'swapcase')
 
     def test_nsstring_title(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.title(), 'Lower, Upper & Mixed!')
+        self.assert_method('lower, UPPER & Mixed!', 'title')
 
     def test_nsstring_translate(self):
-        ns_str = ns_from_py('hello')
-        self.assertEqual(ns_str.translate({108: 'g', 111: '!!'}), 'hegg!!')
+        self.assert_method('hello', 'translate', {108: 'g', 111: '!!'})
 
     def test_nsstring_upper(self):
-        ns_str = ns_from_py('lower, UPPER & Mixed!')
-        self.assertEqual(ns_str.upper(), 'LOWER, UPPER & MIXED!')
+        self.assert_method('lower, UPPER & Mixed!', 'upper')
 
     def test_nsstring_zfill(self):
-        ns_str = ns_from_py('123')
-        self.assertEqual(ns_str.zfill(5), '00123')
+        self.assert_method('123', 'zfill', 5)
