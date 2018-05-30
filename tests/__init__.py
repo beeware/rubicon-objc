@@ -1,6 +1,6 @@
 import faulthandler
 
-from ctypes import CDLL, util
+from rubicon.objc.runtime import load_library
 
 try:
     import platform
@@ -8,11 +8,9 @@ try:
 except Exception:
     OSX_VERSION = None
 
-
-# Load the test harness library
-rubiconharness_name = util.find_library('rubiconharness')
-if rubiconharness_name is None:
-    raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-rubiconharness = CDLL(rubiconharness_name)
+try:
+    rubiconharness = load_library('rubiconharness')
+except ValueError:
+    raise ValueError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
 
 faulthandler.enable()
