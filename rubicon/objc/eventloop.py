@@ -7,11 +7,12 @@ from asyncio import (
 )
 from ctypes import CFUNCTYPE, POINTER, Structure, c_int, c_void_p
 
+from .api import objc_const
 from .core_foundation import (
     CFAbsoluteTime, CFAllocatorRef, CFDataRef, CFOptionFlags, CFStringRef,
     CFTimeInterval, kCFAllocatorDefault, libcf,
 )
-from .runtime import objc_const, objc_id
+from .runtime import objc_id
 from .types import CFIndex
 
 __all__ = [

@@ -1,36 +1,18 @@
-import faulthandler
 import functools
 import math
 import unittest
-from ctypes import (
-    CDLL, Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast,
-    create_string_buffer, util,
-)
+from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
 from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
-    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, get_ivar, objc_classmethod,
-    objc_const, objc_id, objc_ivar, objc_method, objc_property, send_message, send_super, set_ivar, types,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
+    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
+    objc_property, send_message, send_super, types,
 )
-from rubicon.objc.runtime import ObjCBoundMethod, libobjc
+from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
-try:
-    import platform
-    OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
-except Exception:
-    OSX_VERSION = None
-
-
-# Load the test harness library
-rubiconharness_name = util.find_library('rubiconharness')
-if rubiconharness_name is None:
-    raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-rubiconharness = CDLL(rubiconharness_name)
-
-faulthandler.enable()
+from . import OSX_VERSION, rubiconharness
 
 
 class struct_int_sized(Structure):
@@ -439,7 +421,7 @@ class RubiconTest(unittest.TestCase):
         # Previously, it was a method.
         NSBundle = ObjCClass('NSBundle')
         NSBundle.declare_class_property('mainBundle')
-        self.assertFalse(type(NSBundle.mainBundle) == ObjCBoundMethod, 'NSBundle.mainBundle should not be a method')
+        self.assertFalse(callable(NSBundle.mainBundle), 'NSBundle.mainBundle should not be a method')
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."
