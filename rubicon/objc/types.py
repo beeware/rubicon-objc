@@ -44,7 +44,6 @@ __all__ = [
     '__arm__',
     '__i386__',
     '__x86_64__',
-    'array_for_sequence',
     'compound_value_for_sequence',
     'ctype_for_encoding',
     'ctype_for_type',
@@ -57,7 +56,6 @@ __all__ = [
     'register_encoding',
     'register_preferred_encoding',
     'split_method_encoding',
-    'struct_for_sequence',
     'unichar',
     'unregister_ctype',
     'unregister_ctype_all',
@@ -456,7 +454,7 @@ def ctypes_for_method_encoding(encoding):
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
 
-def struct_for_sequence(seq, struct_type):
+def _struct_for_sequence(seq, struct_type):
     if len(seq) != len(struct_type._fields_):
         raise ValueError(
             'Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, '
@@ -474,7 +472,7 @@ def struct_for_sequence(seq, struct_type):
     return struct_type(*values)
 
 
-def array_for_sequence(seq, array_type):
+def _array_for_sequence(seq, array_type):
     if len(seq) != array_type._length_:
         raise ValueError(
             'Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, '
