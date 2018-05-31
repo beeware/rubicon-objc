@@ -509,12 +509,8 @@ def compound_value_for_sequence(seq, tp):
 register_preferred_encoding(b'v', None)
 register_preferred_encoding(b'B', c_bool)
 
-# Note, we prefer to map b'c' to c_byte rather than c_char, because otherwise
-# ctypes converts the value into a one-character string which is generally
-# not what we want at all, especially when the b'c' represents a BOOL var.
 register_preferred_encoding(b'c', c_byte)
 register_preferred_encoding(b'C', c_ubyte)
-register_encoding(b'c', c_char)
 
 register_preferred_encoding(b's', c_short)
 register_preferred_encoding(b'S', c_ushort)
