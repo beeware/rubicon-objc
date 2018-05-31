@@ -65,7 +65,16 @@ If a method returns an :class:`NSString`, the return value will be a wrapped
 :class:`ObjCStrInstance` type. This type implements a :class:`str`-like
 interface, wrapped around the underlying :class:`NSString` data. This means
 you can treat the return value as if it were a string - slicing it,
-concatenating it with other strings, comparing it, and so on.
+concatenating it with other strings, comparing it, and so on::
+
+    # Call an Objective C method that returns a string.
+    # We're using NSBundle to give us a string version of a path
+    >>> NSBundle.mainBundle.bundlePath
+    <rubicon.objc.collections.ObjCStrInstance 0x114a94d68: __NSCFString at 0x7fec8ba7fbd0: /Users/brutus/path/to/somewhere>
+
+    # Slice the Objective C string
+    >>> NSBundle.mainBundle.bundlePath[:14]
+    <rubicon.objc.collections.ObjCStrInstance 0x114aa80f0: __NSCFString at 0x7fec8ba7fbd0: /Users/brutus/>
 
 Note that :class:`ObjCStrInstance` objects behave slightly differently than
 Python :class:`str` objects in some cases. For technical reasons,
@@ -78,14 +87,39 @@ keys). :class:`ObjCStrInstance` also handles Unicode code points above
 If you have an :class:`ObjCStrInstance` instance, and you need to pass that
 instance to a method that does a specific typecheck for :class:`str`, you can
 use ``str(nsstring)`` to convert the :class:`ObjCStrInstance` instance to
-:class:`str`.
+:class:`str`::
+
+    # Convert the Objective C string to a Python string.
+    >>> str(NSBundle.mainBundle.bundlePath)
+    '/Users/rkm/projects/beeware/venv3.6/bin'
+
+Conversely, if you have a :class:`str`, and you specifically require a
+:class:`ObjCStrInstance` instance, you can use the :meth:`at()` method to
+convert the Python instance to an :class:`ObjCStrInstance`.
+
+    >>> from rubicon.objc import at
+    # Create a Python string
+    >>> py_str = 'hello world'
+
+    # Convert to an Objective C string
+    >>> at(py_str)
+    <rubicon.objc.collections.ObjCStrInstance 0x114a94e48: __NSCFString at 0x7fec8ba7fc10: hello world>
 
 :class:`ObjCStrInstance` implements all the utility methods that are available
 on :class:`str`, such as ``replace`` and ``split``. When these methods return
 a string, the implementation may return Python :class:`str` or
 :class:`ObjCStrInstance` instances. If you need to use the return value from
 these methods, you should always use ``str()`` to ensure you have a Python
-string.
+string::
+
+    # Is the path comprised of all lowercase letters? (Hint: it isn't)
+    >>> NSBundle.mainBundle.bundlePath.islower()
+    False
+
+    # Convert string to lower case; use str() to ensure we get a Python string.
+    >>> str(NSBundle.mainBundle.bundlePath.lower())
+    '/users/rkm/projects/beeware/venv3.6/bin'
+
 
 Lists
 -----
