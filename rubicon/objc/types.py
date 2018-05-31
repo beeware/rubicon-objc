@@ -562,11 +562,6 @@ register_preferred_encoding(b'^i', POINTER(c_int))
 
 register_preferred_encoding(b'^v', c_void_p)
 
-# Anonymous structs/unions with unknown fields can't be decoded meaningfully,
-# so we treat pointers to them like void pointers.
-register_encoding(b'^{?}', c_void_p)
-register_encoding(b'^(?)', c_void_p)
-
 
 # Note CGBase.h located at
 # /System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/Headers/CGBase.h
@@ -601,12 +596,20 @@ register_preferred_encoding(_PyObjectEncoding, py_object)
 
 
 @with_preferred_encoding(b'^?')
+# Anonymous structs/unions with unknown fields can't be decoded meaningfully,
+# so we treat pointers to them as unknown pointers.
+@with_encoding(b'^{?}')
+@with_encoding(b'^(?)')
 class UnknownPointer(c_void_p):
-    """Placeholder for the b'^?' "unknown pointer" type. Not to be confused
-    with a b'^v' void pointer. Usually a b'^?' is a function pointer, but
-    because the encoding doesn't contain the function signature, you need to
-    manually create a CFUNCTYPE with the proper types, and cast this pointer
-    to it.
+    """Placeholder for the "unknown pointer" types b'^?', b'^{?}' and b'^(?)'.
+
+    Not to be confused with a b'^v' void pointer.
+
+    Usually a b'^?' is a function pointer, but because the encoding doesn't contain the function signature, you need to
+    manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
+
+    b'^{?}' and b'^(?)' are pointers to a structure or union (respectively) with unknown name and fields. Such a type
+    also cannot be used meaningfully without casting it to the correct pointer type first.
     """
 
 
