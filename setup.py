@@ -25,6 +25,7 @@ setup(
     author_email='russell@keith-magee.com',
     url='http://pybee.org/rubicon',
     packages=find_packages(exclude=['tests']),
+    python_requires='>=3.4',
     namespace_packages=['rubicon'],
     license='New BSD',
     classifiers=[
@@ -35,6 +36,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development',
     ],
