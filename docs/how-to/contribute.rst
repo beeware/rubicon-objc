@@ -20,7 +20,7 @@ coding::
 
     $ python3 -m venv venv
     $ source venv/bin/activate.sh
-    (venv) $ git clone git@github.com:pybee/rubicon-objc.git
+    (venv) $ git clone https://github.com/pybee/rubicon-objc.git
     (venv) $ cd rubicon-objc
     (venv) $ pip install -e .
 
