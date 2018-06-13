@@ -4,7 +4,7 @@
 Tutorials
 =========
 
-These tutorials are step-by step guides for using Briefcase.
+These tutorials are step-by step guides for using Rubicon.
 
 .. toctree::
    :maxdepth: 1
