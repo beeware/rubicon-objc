@@ -16,7 +16,9 @@ Set up your development environment
 
 The recommended way of setting up your development environment for Rubicon is
 to install a virtual environment, install the required dependencies and start
-coding::
+coding:
+
+.. code-block:: sh
 
     $ python3 -m venv venv
     $ source venv/bin/activate.sh
@@ -26,19 +28,24 @@ coding::
 
 In order to test the capabilities of Rubicon, the test suite contains an
 Objective-C library with some known classes. To run the test suite, you'll need
-to compile this library::
+to compile this library:
 
-    $ make
+.. code-block:: sh
 
-This will produce `tests/objc/librubiconharness.dylib`.
+    (venv) $ make
 
-In order for Rubicon to find this file, it will need to be on your dynamic
-library path. You can set this by setting an environment variable::
+This will produce ``tests/objc/librubiconharness.dylib``.
 
-    $ export DYLD_LIBRARY_PATH=$(pwd)/tests/objc
+You can then run the test suite:
 
-You can then run the test suite::
+.. code-block:: sh
 
-    $ python setup.py test
+    (venv) $ tox
+
+By default this will run the test suite multiple times, once on each Python version supported by Rubicon. This can take a while, so if you want to speed up the process while developing, you can run the tests on one Python version only:
+
+.. code-block:: sh
+
+    (venv) $ tox -e py36-default
 
 Now you are ready to start hacking on Rubicon. Have fun!
