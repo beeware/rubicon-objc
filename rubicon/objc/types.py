@@ -45,6 +45,7 @@ __all__ = [
     '__i386__',
     '__x86_64__',
     'compound_value_for_sequence',
+    'c_ptrdiff_t',
     'ctype_for_encoding',
     'ctype_for_type',
     'ctypes_for_method_encoding',
@@ -613,6 +614,7 @@ register_preferred_encoding(b'^v', c_void_p)
 # /System/Library/Frameworks/ApplicationServices.framework/Frameworks/CoreGraphics.framework/Headers/CGBase.h
 # defines CGFloat as double if __LP64__, otherwise it's a float.
 if __LP64__:
+    c_ptrdiff_t = c_long
     NSInteger = c_long
     NSUInteger = c_ulong
     CGFloat = c_double
@@ -624,6 +626,7 @@ if __LP64__:
     _NSEdgeInsetsEncoding = b'{NSEdgeInsets=dddd}'
     _PyObjectEncoding = b'^{_object=q^{_typeobject}}'
 else:
+    c_ptrdiff_t = c_int
     NSInteger = c_int
     NSUInteger = c_uint
     CGFloat = c_float

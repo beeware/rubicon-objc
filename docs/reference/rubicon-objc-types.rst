@@ -13,6 +13,10 @@ Common C type definitions
 
 These are commonly used C types from various frameworks.
 
+.. class:: c_ptrdiff_t([value])
+
+    The `ptrdiff_t <https://en.cppreference.com/w/c/types/ptrdiff_t>`__ type from ``<stddef.h>``. Equivalent to :class:`~ctypes.c_long` on 64-bit systems and :class:`~ctypes.c_int` on 32-bit systems.
+
 .. class:: NSInteger([value])
 
     The `NSInteger <https://developer.apple.com/documentation/objectivec/nsinteger?language=objc>`__ type from ``<objc/NSObjCRuntime.h>``. Equivalent to :class:`~ctypes.c_long` on 64-bit systems and :class:`~ctypes.c_int` on 32-bit systems.

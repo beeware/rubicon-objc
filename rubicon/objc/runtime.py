@@ -1,12 +1,12 @@
 import os
 from ctypes import (
     CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p, c_double, c_float,
-    c_int, c_int32, c_int64, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
+    c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
 )
 
 from . import ctypes_patch
 from .types import (
-    __arm__, __i386__, __x86_64__, ctype_for_encoding, ctype_for_type, encoding_for_ctype, with_encoding,
+    __arm__, __i386__, __x86_64__, c_ptrdiff_t, ctype_for_encoding, ctype_for_type, encoding_for_ctype, with_encoding,
     with_preferred_encoding,
 )
 
@@ -19,7 +19,6 @@ __all__ = [
     'SEL',
     'add_ivar',
     'add_method',
-    'c_ptrdiff_t',
     'get_class',
     'get_ivar',
     'libc',
@@ -37,13 +36,6 @@ __all__ = [
     'should_use_fpret',
     'should_use_stret',
 ]
-
-if sizeof(c_void_p) == 4:
-    c_ptrdiff_t = c_int32
-elif sizeof(c_void_p) == 8:
-    c_ptrdiff_t = c_int64
-else:
-    raise TypeError("Don't know a c_ptrdiff_t for %d-byte pointers" % sizeof(c_void_p))
 
 ######################################################################
 
