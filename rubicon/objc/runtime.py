@@ -86,7 +86,13 @@ def load_library(name):
 
 libc = load_library('c')
 libobjc = load_library('objc')
-Foundation = load_library('Foundation')
+try:
+    Foundation = load_library('Foundation')
+except ValueError:
+    # The Foundation framework was not found. This means we're on a non-Apple system, so try to use GNUstep instead.
+    # Because GNUstep uses the traditional Unix library structure instead of frameworks, it provides the Foundation
+    # classes in a library called gnustep-base rather than Foundation.
+    Foundation = load_library('gnustep-base')
 
 
 @with_encoding(b'@')
