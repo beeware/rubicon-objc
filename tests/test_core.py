@@ -1,36 +1,30 @@
-import faulthandler
 import functools
 import math
 import unittest
-from ctypes import (
-    CDLL, Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast,
-    create_string_buffer, util,
-)
+from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
 from decimal import Decimal
 from enum import Enum
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject,
-    NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger, ObjCClass,
-    ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod,
-    objc_const, objc_method, objc_property, send_message, send_super, types,
+    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
+    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
+    objc_property, send_message, send_super, types,
 )
-from rubicon.objc.runtime import ObjCBoundMethod, libobjc
+from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
-try:
-    import platform
-    OSX_VERSION = tuple(int(v) for v in platform.mac_ver()[0].split('.')[:2])
-except Exception:
-    OSX_VERSION = None
+from . import OSX_VERSION, rubiconharness
 
 
-# Load the test harness library
-rubiconharness_name = util.find_library('rubiconharness')
-if rubiconharness_name is None:
-    raise RuntimeError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
-rubiconharness = CDLL(rubiconharness_name)
+class struct_int_sized(Structure):
+    _fields_ = [("x", c_char * 4)]
 
-faulthandler.enable()
+
+class struct_oddly_sized(Structure):
+    _fields_ = [("x", c_char * 5)]
+
+
+class struct_large(Structure):
+    _fields_ = [("x", c_char * 17)]
 
 
 class RubiconTest(unittest.TestCase):
@@ -427,7 +421,7 @@ class RubiconTest(unittest.TestCase):
         # Previously, it was a method.
         NSBundle = ObjCClass('NSBundle')
         NSBundle.declare_class_property('mainBundle')
-        self.assertFalse(type(NSBundle.mainBundle) == ObjCBoundMethod, 'NSBundle.mainBundle should not be a method')
+        self.assertFalse(callable(NSBundle.mainBundle), 'NSBundle.mainBundle should not be a method')
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."
@@ -663,20 +657,11 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        class struct_int_sized(Structure):
-            _fields_ = [("x", c_char * 4)]
         types.register_encoding(b'{int_sized=[4c]}', struct_int_sized)
-
         self.assertEqual(example.intSizedStruct().x, b"abc")
-
-        class struct_oddly_sized(Structure):
-            _fields_ = [("x", c_char * 5)]
 
         types.register_encoding(b'{oddly_sized=[5c]}', struct_oddly_sized)
         self.assertEqual(example.oddlySizedStruct().x, b"abcd")
-
-        class struct_large(Structure):
-            _fields_ = [("x", c_char * 17)]
 
         types.register_encoding(b'{large=[17c]}', struct_large)
         self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
@@ -686,19 +671,8 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        class struct_int_sized(Structure):
-            _fields_ = [("x", c_char * 4)]
-
         self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
-
-        class struct_oddly_sized(Structure):
-            _fields_ = [("x", c_char * 5)]
-
         self.assertEqual(send_message(example, "oddlySizedStruct", restype=struct_oddly_sized).x, b"abcd")
-
-        class struct_large(Structure):
-            _fields_ = [("x", c_char * 17)]
-
         self.assertEqual(send_message(example, "largeStruct", restype=struct_large).x, b"abcdefghijklmnop")
 
     def test_object_return(self):
@@ -844,6 +818,32 @@ class RubiconTest(unittest.TestCase):
             class DuplicateProtocol(NSObject, protocols=[NSObjectProtocol, NSObjectProtocol]):
                 pass
 
+    def test_class_ivars(self):
+        """An Objective-C class can have instance variables."""
+
+        class Ivars(NSObject):
+            object = objc_ivar(objc_id)
+            int = objc_ivar(c_int)
+            rect = objc_ivar(NSRect)
+
+        ivars = Ivars.alloc().init()
+
+        set_ivar(ivars, 'object', at('foo').ptr)
+        set_ivar(ivars, 'int', c_int(12345))
+        set_ivar(ivars, 'rect', NSMakeRect(12, 34, 56, 78))
+
+        s = ObjCInstance(get_ivar(ivars, 'object'))
+        self.assertEqual(str(s), 'foo')
+
+        i = get_ivar(ivars, 'int')
+        self.assertEqual(i.value, 12345)
+
+        r = get_ivar(ivars, 'rect')
+        self.assertEqual(r.origin.x, 12)
+        self.assertEqual(r.origin.y, 34)
+        self.assertEqual(r.size.width, 56)
+        self.assertEqual(r.size.height, 78)
+
     def test_class_properties(self):
         "A Python class can have ObjC properties with synthesized getters and setters."
 
@@ -851,9 +851,8 @@ class RubiconTest(unittest.TestCase):
 
         class URLBox(NSObject):
 
-            # takes no type: All properties are pointers
-            url = objc_property()
-            data = objc_property()
+            url = objc_property(ObjCInstance)
+            data = objc_property(ObjCInstance)
 
             @objc_method
             def getSchemeIfPresent(self):
@@ -895,6 +894,29 @@ class RubiconTest(unittest.TestCase):
 
         box.data = None
         self.assertIsNone(box.data)
+
+    def test_class_nonobject_properties(self):
+        """An Objective-C class can have properties of non-object types."""
+
+        class Properties(NSObject):
+            object = objc_property(ObjCInstance)
+            int = objc_property(c_int)
+            rect = objc_property(NSRect)
+
+        properties = Properties.alloc().init()
+
+        properties.object = at('foo')
+        properties.int = 12345
+        properties.rect = NSMakeRect(12, 34, 56, 78)
+
+        self.assertEqual(properties.object, 'foo')
+        self.assertEqual(properties.int, 12345)
+
+        r = properties.rect
+        self.assertEqual(r.origin.x, 12)
+        self.assertEqual(r.origin.y, 34)
+        self.assertEqual(r.size.width, 56)
+        self.assertEqual(r.size.height, 78)
 
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""

@@ -1,9 +1,10 @@
 import operator
 
 from .types import NSUInteger, NSNotFound, NSRange, unichar
-from .runtime import (
+from .runtime import objc_id, send_message
+from .api import (
     NSArray, NSDictionary, NSMutableArray, NSMutableDictionary, NSString, ObjCInstance, for_objcclass, ns_from_py,
-    objc_id, py_from_ns, send_message,
+    py_from_ns,
 )
 
 
@@ -31,6 +32,9 @@ class ObjCStrInstance(ObjCInstance):
 
     def __str__(self):
         return self.UTF8String.decode('utf-8')
+
+    def __fspath__(self):
+        return self.__str__()
 
     def __eq__(self, other):
         if isinstance(other, str):
@@ -168,12 +172,6 @@ class ObjCStrInstance(ObjCInstance):
         else:
             return found_range.location
 
-    def find(self, sub, start=None, end=None):
-        return self._find(sub, start=start, end=end, reverse=False)
-
-    def rfind(self, sub, start=None, end=None):
-        return self._find(sub, start=start, end=end, reverse=True)
-
     def _index(self, sub, start=None, end=None, *, reverse):
         found = self._find(sub, start, end, reverse=reverse)
         if found == -1:
@@ -181,11 +179,26 @@ class ObjCStrInstance(ObjCInstance):
         else:
             return found
 
+    def find(self, sub, start=None, end=None):
+        return self._find(sub, start=start, end=end, reverse=False)
+
     def index(self, sub, start=None, end=None):
         return self._index(sub, start=start, end=end, reverse=False)
 
+    def rfind(self, sub, start=None, end=None):
+        return self._find(sub, start=start, end=end, reverse=True)
+
     def rindex(self, sub, start=None, end=None):
         return self._index(sub, start=start, end=end, reverse=True)
+
+    # A fallback method; get the locally defined attribute if it exists;
+    # otherwise, get the attribute from the Python-converted version
+    # of the string
+    def __getattr__(self, attr):
+        try:
+            return super().__getattr__(attr)
+        except AttributeError:
+            return getattr(self.__str__(), attr)
 
 
 @for_objcclass(NSArray)
