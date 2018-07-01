@@ -58,6 +58,8 @@ install:
       # so we upgrade pyenv to get a consistent setup in all environments.
       brew update
       brew outdated pyenv || brew upgrade pyenv
+    else
+      pyenv update
     fi
   # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
   # (in which case the paths used in the shims point to an older, no longer installed pyenv version).
