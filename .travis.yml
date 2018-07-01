@@ -36,7 +36,7 @@ matrix:
       addons:
         apt:
           packages:
-            - gnustep
+            - gnustep-devel
     # Linux for flake8 only
     - os: linux
       env:
