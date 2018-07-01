@@ -26,5 +26,5 @@ clean:
 	rm -rf tests/objc/*.o tests/objc/*.d tests/objc/librubiconharness.$(LIB_EXT)
 
 %.o: %.m tests/objc/*.h
-	$(CC) -x objective-c -I./tests/objc -c $(CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 
