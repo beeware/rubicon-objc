@@ -33,11 +33,15 @@ matrix:
       osx_image: xcode7.3
     # Linux with GNUstep
     - os: linux
+      addons:
+        apt:
+          packages:
+            - gnustep
+    # Linux for flake8 only
+    - os: linux
+      env:
+        - FLAKE8_ONLY=1
 language: generic
-addons:
-  apt:
-    packages:
-      - gnustep
 cache:
   directories:
     ~/.pyenv
@@ -68,7 +72,12 @@ install:
   - pyenv global ${PY36} ${PY35} ${PY34} system
   # tox is not installed by default in some older Travis environments.
   - python3.6 -m pip install tox
-  - make -f Makefile
 script:
-  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python3.6 -m tox -e "py{34,35,36}-default,flake8"
+  - |
+    if [[ "${FLAKE8_ONLY}" == "1" ]]
+    then
+      python3.6 -m tox -e "flake8"
+    else
+      make -f Makefile
+      DYLD_LIBRARY_PATH="$(pwd)/tests/objc" python3.6 -m tox -e "py{34,35,36}-default"
+    fi
