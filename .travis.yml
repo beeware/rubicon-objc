@@ -60,8 +60,8 @@ install:
       brew outdated pyenv || brew upgrade pyenv
     else
       pushd "$(pyenv root)"
-      git fetch
       git checkout master
+      git pull
       popd
     fi
   # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
