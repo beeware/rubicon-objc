@@ -20,9 +20,10 @@ import warnings
 if sys.version_info < (3, 4) or sys.version_info >= (3, 8):
     warnings.warn(
         "rubicon.objc.ctypes_patch has only been tested with Python 3.4 through 3.7. "
-        "The current version is {}. Most likely things will work properly, "
-        "but you may experience crashes if Python's internals have changed significantly."
-        .format(sys.version_info)
+        "You are using Python {v.major}.{v.minor}.{v.micro}. Most likely things will "
+        "work properly, but you may experience crashes if Python's internals have "
+        "changed significantly."
+        .format(v=sys.version_info)
     )
 
 
