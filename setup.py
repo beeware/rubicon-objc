@@ -42,4 +42,10 @@ setup(
         'Topic :: Software Development',
     ],
     test_suite='tests',
+    package_urls={
+        'Funding': 'https://pybee.org/contributing/membership/',
+        'Documentation': 'https://rubicon-objc.readthedocs.io/en/latest/',
+        'Tracker': 'https://github.com/pybee/rubicon-objc/issues',
+        'Source': 'https://github.com/pybee/rubicon-objc',
+    },
 )
