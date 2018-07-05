@@ -34,7 +34,7 @@ env:
   global:
     - PY34="3.4.8"
     - PY35="3.5.5"
-    - PY36="3.6.6"
+    - PY36="3.6.5"
     - PY37="3.7.0"
 install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
