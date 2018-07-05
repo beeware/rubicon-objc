@@ -17,7 +17,7 @@ import warnings
 
 # This module relies on the layout of a few internal Python and ctypes structures.
 # Because of this, it's possible (but not all that likely) that things will break on newer/older Python versions.
-if sys.version_info < (3, 4) or sys.version_info >= (3, 7):
+if sys.version_info < (3, 4) or sys.version_info >= (3, 8):
     warnings.warn(
         "rubicon.objc.ctypes_patch has only been tested with Python 3.4 through 3.6. "
         "The current version is {}. Most likely things will work properly, "
