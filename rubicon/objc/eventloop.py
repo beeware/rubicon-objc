@@ -1,5 +1,6 @@
 """PEP 3156 event loop based on CoreFoundation"""
 
+import sys
 import threading
 from asyncio import (
     DefaultEventLoopPolicy, SafeChildWatcher, coroutines, events, tasks,
@@ -277,6 +278,23 @@ class CFSocketHandle(events.Handle):
             libcf.CFSocketInvalidate(self._cf_socket)
 
 
+def context_callback(context, callback):
+    # Python 3.7 introduced the idea of context variables.
+    # asyncio.call_{at,later,soon} need to run any callbacks
+    # *inside* the context provided.
+    if sys.version_info >= (3, 7):
+        import contextvars
+        if context is None:
+            context = contextvars.copy_context()
+
+        def _callback(*args):
+            context.run(callback, *args)
+
+        return _callback
+    else:
+        return callback
+
+
 class CFEventLoop(unix_events.SelectorEventLoop):
     def __init__(self, lifecycle=None):
         self._lifecycle = lifecycle
@@ -425,7 +443,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         finally:
             self.stop()
 
-    def call_soon(self, callback, *args):
+    def call_soon(self, callback, *args, context=None):
         """Arrange for a callback to be called as soon as possible.
 
         This operates as a FIFO queue: callbacks are called in the
@@ -441,13 +459,13 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             loop=self,
             timeout=0,
             repeat=False,
-            callback=callback,
+            callback=context_callback(context, callback),
             args=args
         )
 
     call_soon_threadsafe = call_soon
 
-    def call_later(self, delay, callback, *args):
+    def call_later(self, delay, callback, *args, context=None):
         """Arrange for a callback to be called at a given time.
 
         Return a Handle: an opaque object with a cancel() method that
@@ -469,11 +487,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             loop=self,
             timeout=delay,
             repeat=False,
-            callback=callback,
+            callback=context_callback(context, callback),
             args=args
         )
 
-    def call_at(self, when, callback, *args):
+    def call_at(self, when, callback, *args, context=None):
         """Like call_later(), but uses an absolute time.
 
         Absolute time corresponds to the event loop's time() method.
@@ -484,7 +502,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             loop=self,
             timeout=when - self.time(),
             repeat=False,
-            callback=callback,
+            callback=context_callback(context, callback),
             args=args
         )
 
