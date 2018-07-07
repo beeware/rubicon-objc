@@ -169,9 +169,9 @@ static int _staticIntField = 11;
     return [NSString stringWithFormat:@"This is an ObjC Example object"];
 }
 
--(NSString *) duplicateString:(NSString *) in
+-(NSString *) duplicateString:(NSString *) inStr
 {
-    return [NSString stringWithFormat:@"%@%@", in, in];
+    return [NSString stringWithFormat:@"%@%@", inStr, inStr];
 }
 
 -(NSString *) smiley

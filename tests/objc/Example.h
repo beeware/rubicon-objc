@@ -83,7 +83,7 @@ extern NSString *const SomeGlobalStringConstant;
 +(int) classAmbiguous;
 
 -(NSString *) toString;
--(NSString *) duplicateString:(NSString *) in;
+-(NSString *) duplicateString:(NSString *) inStr;
 -(NSString *) smiley;
 
 -(NSNumber *) theAnswer;
