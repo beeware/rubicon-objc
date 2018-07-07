@@ -1,6 +1,9 @@
 Release History
 ===============
 
+(next version)
+--------------
+
 0.3.0
 -----
 
