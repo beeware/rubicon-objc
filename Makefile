@@ -11,7 +11,7 @@ ifeq ($(OS),Darwin)
 	LIB_EXT = dylib
 else
 	CC = gcc
-	CFLAGS =
+	CFLAGS = -I/usr/include/GNUstep -fconstant-string-class=NSConstantString
 	LDFLAGS =
 	LDLIBS = -lobjc -lgnustep-base
 	LIB_EXT = so
