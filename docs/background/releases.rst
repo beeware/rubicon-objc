@@ -1,8 +1,8 @@
 Release History
 ===============
 
-(next version)
---------------
+0.3.0
+-----
 
 * Added Pythonic operators and methods on ``NSString`` objects, similar to those for ``NSArray`` and ``NSDictionary``.
   * Only a small subset of the standard ``str`` methods is supported at the moment. Additional ``str`` methods may be implemented in the future, but some methods (like ``format``) will never be supported, as they cannot be implemented efficiently based on ``NSString``.
