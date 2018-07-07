@@ -37,8 +37,15 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development',
     ],
     test_suite='tests',
+    package_urls={
+        'Funding': 'https://pybee.org/contributing/membership/',
+        'Documentation': 'https://rubicon-objc.readthedocs.io/en/latest/',
+        'Tracker': 'https://github.com/pybee/rubicon-objc/issues',
+        'Source': 'https://github.com/pybee/rubicon-objc',
+    },
 )
