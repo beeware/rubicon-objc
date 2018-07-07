@@ -33,12 +33,14 @@ matrix:
       osx_image: xcode7.3
     # Linux with GNUstep
     - os: linux
+      dist: xenial
       addons:
         apt:
           packages:
             - gnustep-devel
     # Linux for flake8 only
     - os: linux
+      dist: xenial
       env:
         - FLAKE8_ONLY=1
 language: generic
@@ -53,8 +55,7 @@ env:
     - PY37="3.7.0"
 install:
   - |
-    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]
-    then
+    if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
       # so we upgrade pyenv to get a consistent setup in all environments.
       brew update
@@ -72,19 +73,21 @@ install:
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
-  - pyenv install --skip-existing ${PY34}
-  - pyenv install --skip-existing ${PY35}
-  - pyenv install --skip-existing ${PY36}
   - pyenv install --skip-existing ${PY37}
+  - pyenv install --skip-existing ${PY36}
+  - pyenv install --skip-existing ${PY35}
+  - pyenv install --skip-existing ${PY34}
   - pyenv global ${PY37} ${PY36} ${PY35} ${PY34} system
   # tox is not installed by default in some older Travis environments.
   - python3.6 -m pip install tox
 script:
   - |
-    if [[ "${FLAKE8_ONLY}" == "1" ]]
-    then
+    if [[ "${FLAKE8_ONLY}" == "1" ]]; then
       python3.6 -m tox -e "flake8"
-    else
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
       make -f Makefile
       DYLD_LIBRARY_PATH="$(pwd)/tests/objc" python3.6 -m tox -e "py{34,35,36,37}-default"
+    else
+      make -f Makefile
+      LD_LIBRARY_PATH="$(pwd)/tests/objc" python3.6 -m tox -e "py{34,35,36,37}-default"
     fi
