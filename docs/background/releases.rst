@@ -6,25 +6,33 @@ Release History
 
 * Added Pythonic operators and methods on ``NSString`` objects, similar to those for ``NSArray`` and ``NSDictionary``.
 * Removed automatic conversion of ``NSString`` objects to ``str`` when returned from Objective-C methods. This feature made it difficult to call Objective-C methods on ``NSString`` objects, because there was no easy way to prevent the automatic conversion.
-  * In most cases, this change will not affect existing code, because ``NSString`` objects now support operations similar to ``str``.
-  * If an actual ``str`` object is required, the ``NSString`` object can be wrapped in a ``str`` call to convert it.
-* Added support for ``objc_property``s with non-object types.
+
+    * In most cases, this change will not affect existing code, because ``NSString`` objects now support operations similar to ``str``.
+    * If an actual ``str`` object is required, the ``NSString`` object can be wrapped in a ``str`` call to convert it.
+
+* Added support for ``objc_property``\s with non-object types.
 * Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ivars.
 * Changed the implementation of ``objc_property`` to use ivars instead of Python attributes for storage. This fixes name conflicts in some situations.
 * Added the :func:`~rubicon.objc.runtime.load_library` function for loading :class:`~ctypes.CDLL`\s by their name instead of their full path.
 * Split the high-level Rubicon API (:class:`ObjCInstance`, :class:`ObjCClass`, etc.) out of :mod:`rubicon.objc.runtime` into a separate :mod:`rubicon.objc.api` module. The :mod:`~rubicon.objc.runtime` module now only contains low-level runtime interfaces like :data:`~rubicon.objc.runtime.libobjc`.
-  * This is mostly an internal change, existing code will not be affected unless it imports names directly from :mod:`rubicon.objc.runtime`.
+
+    * This is mostly an internal change, existing code will not be affected unless it imports names directly from :mod:`rubicon.objc.runtime`.
+
 * Moved :class:`~rubicon.objc.types.c_ptrdiff_t` from :mod:`rubicon.objc.runtime` to :mod:`rubicon.objc.types`.
 * Removed some rarely used names (:class:`~rubicon.objc.runtime.IMP`, :class:`~rubicon.objc.runtime.Class`, :class:`~rubicon.objc.runtime.Ivar`, :class:`~rubicon.objc.runtime.Method`, :func:`~rubicon.objc.runtime.get_ivar`, :class:`~rubicon.objc.runtime.objc_id`, :class:`~rubicon.objc.runtime.objc_property_t`, :func:`~rubicon.objc.runtime.set_ivar`) from the main :mod:`rubicon.objc` namespace.
-  * If needed, these names can be imported explicitly from the :mod:`rubicon.objc.runtime` module.
+
+    * If needed, these names can be imported explicitly from the :mod:`rubicon.objc.runtime` module.
+
 * Fixed ``objc_property`` setters on non-macOS platforms. (cculianu)
 * Fixed various bugs in the collection ``ObjCInstance`` subclasses:
-  * Fixed getting/setting/deleting items or slices with indices lower than ``-len(obj)``. Previously this crashed Python, now an ``IndexError`` is raised.
-  * Fixed slices with step size 0. Previously they were ignored and 1 was incorrectly used as the step size, now an ``IndexError`` is raised.
-  * Fixed equality checks between Objective-C arrays/dictionaries and non-sequence/mapping objects. Previously this incorrectly raised a ``TypeError``, now it returns ``False``.
-  * Fixed equality checks between Objective-C arrays and sequences of different lengths. Previously this incorrectly returned ``True`` if the shorter sequence was a prefix of the longer one, now ``False`` is returned.
-  * Fixed calling ``popitem`` on an empty Objective-C dictionary. Previously this crashed Python, now a ``KeyError`` is raised.
-  * Fixed calling ``update`` with both a mapping and keyword arguments on an Objective-C dictionary. Previously the kwargs were incorrectly ignored if a mapping was given, now both are respected.
+
+    * Fixed getting/setting/deleting items or slices with indices lower than ``-len(obj)``. Previously this crashed Python, now an ``IndexError`` is raised.
+    * Fixed slices with step size 0. Previously they were ignored and 1 was incorrectly used as the step size, now an ``IndexError`` is raised.
+    * Fixed equality checks between Objective-C arrays/dictionaries and non-sequence/mapping objects. Previously this incorrectly raised a ``TypeError``, now it returns ``False``.
+    * Fixed equality checks between Objective-C arrays and sequences of different lengths. Previously this incorrectly returned ``True`` if the shorter sequence was a prefix of the longer one, now ``False`` is returned.
+    * Fixed calling ``popitem`` on an empty Objective-C dictionary. Previously this crashed Python, now a ``KeyError`` is raised.
+    * Fixed calling ``update`` with both a mapping and keyword arguments on an Objective-C dictionary. Previously the kwargs were incorrectly ignored if a mapping was given, now both are respected.
+
 * Fixed calling methods using kwarg syntax if a superclass and subclass define methods with the same prefix, but different names. For example, if a superclass had a method ``initWithFoo:bar:`` and the subclass ``initWithFoo:spam:``, the former could not be called on instances of the subclass.
 * Fixed the internal ``ctypes_patch`` module so it no longer depends on a non-public CPython function.
 
@@ -32,10 +40,12 @@ Release History
 ------
 
 * Rewrote almost all Core Foundation-based functions to use Foundation instead.
-  * The functions ``from_value`` and ``NSDecimalNumber.from_decimal`` have been removed and replaced by ``ns_from_py``.
-  * The function ``at`` is now an alias for ``ns_from_py``.
-  * The function ``is_str`` has been removed. ``is_str(obj)`` calls should be replaced with ``isinstance(obj, NSString)``.
-  * The functions ``to_list``, ``to_number``, ``to_set``, ``to_str``, and ``to_value`` have been removed and replaced by ``py_from_ns``.
+
+    * The functions ``from_value`` and ``NSDecimalNumber.from_decimal`` have been removed and replaced by ``ns_from_py``.
+    * The function ``at`` is now an alias for ``ns_from_py``.
+    * The function ``is_str`` has been removed. ``is_str(obj)`` calls should be replaced with ``isinstance(obj, NSString)``.
+    * The functions ``to_list``, ``to_number``, ``to_set``, ``to_str``, and ``to_value`` have been removed and replaced by ``py_from_ns``.
+
 * Fixed ``declare_property`` not applying to subclasses of the class it was called on.
 * Fixed ``repr`` of ``ObjCBoundMethod`` when the wrapped method is not an ``ObjCMethod``.
 * Fixed the encodings of ``NSPoint``, ``NSSize``, and ``NSRect`` on 32-bit systems.
