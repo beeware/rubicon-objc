@@ -31,7 +31,7 @@ event loop.
 To use asyncio in a pure Core Foundation application, do the following::
 
     # Import the Event Loop Policy
-    from rubicon.objc.async import EventLoopPolicy
+    from rubicon.objc.eventloop import EventLoopPolicy
 
     # Install the event loop policy
     asyncio.set_event_loop_policy(EventLoopPolicy())
@@ -53,7 +53,7 @@ lifecycle. To do this, you pass the application instance into the call to
 ``loop.run_forever()``::
 
     # Import the Event Loop Policy and lifecycle
-    from rubicon.objc.async import EventLoopPolicy, CocoaLifecycle
+    from rubicon.objc.eventloop import EventLoopPolicy, CocoaLifecycle
 
     # Install the event loop policy
     asyncio.set_event_loop_policy(EventLoopPolicy())
@@ -82,7 +82,7 @@ Again, this will run "forever" -- until either ``loop.stop()`` is called, or
 .. ``loop.run_forever()``::
 
 ..     # Import the Event Loop Policy and lifecycle
-..     from rubicon.objc.async import EventLoopPolicy, iOSLifecycle
+..     from rubicon.objc.eventloop import EventLoopPolicy, iOSLifecycle
 
 ..     # Install the event loop policy
 ..     asyncio.set_event_loop_policy(EventLoopPolicy())
