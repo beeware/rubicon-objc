@@ -197,8 +197,8 @@ class ObjCPartialMethod(object):
             meth, order = self.methods[rest]
         except KeyError:
             raise ValueError(
-                "No method was found starting with {!r} and with selector parts {}\nKnown selector parts are:\n{}"
-                .format(self.name_start, set(kwargs), "\n".join(repr(parts) for parts in self.methods))
+                "No method was found starting with {!r} and with keywords {}\nKnown keywords are:\n{}"
+                .format(self.name_start, set(kwargs), "\n".join(repr(keywords) for keywords in self.methods))
             )
 
         meth = ObjCMethod(meth)
@@ -638,7 +638,7 @@ class ObjCInstance(object):
 
             The "interleaved" syntax currently ignores the ordering of its keyword arguments. However, in the interest of readability, the keyword arguments should always be passed in the same order as they appear in the method name.
 
-            This also means that two methods whose names which differ only in the ordering of their argument labels will conflict with each other, and can only be called reliably using "flat" syntax.
+            This also means that two methods whose names which differ only in the ordering of their keywords will conflict with each other, and can only be called reliably using "flat" syntax.
 
             As of Python 3.6, the order of keyword arguments passed to functions is preserved (:pep:`468`). In the future, once Rubicon requires Python 3.6 or newer, "interleaved" method calls will respect keyword argument order. This will fix the kind of conflict described above, but will also disallow specifying the keyword arguments out of order.
         """
@@ -858,7 +858,7 @@ class ObjCClass(ObjCInstance, type):
             'instance_properties': {},
             # Explicitly declared properties
             'forced_properties': set(),
-            # Mapping of first selector part -> ObjCPartialMethod instances
+            # Mapping of first keyword -> ObjCPartialMethod instances
             'partial_methods': {},
             # Mapping of name -> CFUNCTYPE callback function
             # This only contains the IMPs of methods created in Python,
