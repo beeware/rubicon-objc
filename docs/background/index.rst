@@ -12,5 +12,6 @@ plans for the future? That's what you'll find here!
 
    faq
    community
+   success
    releases
    roadmap

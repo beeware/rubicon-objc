@@ -12,16 +12,18 @@ workaround is necessary.
 
 import ctypes
 import sys
+import types
 import warnings
 
 # This module relies on the layout of a few internal Python and ctypes structures.
 # Because of this, it's possible (but not all that likely) that things will break on newer/older Python versions.
-if sys.version_info < (3, 4) or sys.version_info >= (3, 7):
+if sys.version_info < (3, 4) or sys.version_info >= (3, 8):
     warnings.warn(
-        "rubicon.objc.ctypes_patch has only been tested with Python 3.4 through 3.6. "
-        "The current version is {}. Most likely things will work properly, "
-        "but you may experience crashes if Python's internals have changed significantly."
-        .format(sys.version_info)
+        "rubicon.objc.ctypes_patch has only been tested with Python 3.4 through 3.7. "
+        "You are using Python {v.major}.{v.minor}.{v.micro}. Most likely things will "
+        "work properly, but you may experience crashes if Python's internals have "
+        "changed significantly."
+        .format(v=sys.version_info)
     )
 
 
@@ -72,6 +74,15 @@ class PyDictObject(ctypes.Structure):
     ]
 
 
+# The mappingproxyobject struct from "Objects/descrobject.c".
+# This structure is not officially stable across Python versions, but its layout hasn't changed since 2001.
+class mappingproxyobject(ctypes.Structure):
+    _fields_ = [
+        ("ob_base", PyObject),
+        ("mapping", ctypes.py_object),
+    ]
+
+
 # The ffi_type structure from libffi's "include/ffi.h".
 # This is a forward declaration, because the structure contains pointers to itself.
 class ffi_type(ctypes.Structure):
@@ -108,9 +119,48 @@ class StgDictObject(ctypes.Structure):
     ]
 
 
-# The PyObject_stgdict function from "Modules/_ctypes/ctypes.h".
-ctypes.pythonapi.PyType_stgdict.restype = ctypes.POINTER(StgDictObject)
-ctypes.pythonapi.PyType_stgdict.argtypes = [ctypes.py_object]
+def unwrap_mappingproxy(proxy):
+    """Return the mapping contained in a mapping proxy object."""
+
+    if not isinstance(proxy, types.MappingProxyType):
+        raise TypeError(
+            'Expected a mapping proxy object, not {tp.__module__}.{tp.__qualname__}'
+            .format(tp=type(proxy))
+        )
+
+    return mappingproxyobject.from_address(id(proxy)).mapping
+
+
+def get_stgdict_of_type(tp):
+    """Return the given ctypes type's StgDict object. If the object's dict is not a StgDict, an error is raised.
+
+    This function is roughly equivalent to the PyType_stgdict function in the ctypes source code. We cannot use that
+    function directly, because it is not part of CPython's public C API, and thus not accessible on some systems
+    (see #113).
+    """
+
+    if not isinstance(tp, type):
+        raise TypeError(
+            'Expected a type object, not {tptp.__module__}.{tptp.__qualname__}'
+            .format(tptp=type(tp))
+        )
+
+    stgdict = tp.__dict__
+    if isinstance(stgdict, types.MappingProxyType):
+        # If the type's __dict__ is wrapped in a mapping proxy, we need to unwrap it.
+        # (This appears to always be the case, so the isinstance check above could perhaps be left out, but it
+        # doesn't hurt to check.)
+        stgdict = unwrap_mappingproxy(stgdict)
+
+    # The StgDict type is not publicly exposed anywhere, so we can't use isinstance. Checking the name is the best
+    # we can do here.
+    if type(stgdict).__name__ != 'StgDict':
+        raise TypeError(
+            "The given type's dict must be a StgDict, not {tp.__module__}.{tp.__qualname__}"
+            .format(tp=type(stgdict))
+        )
+
+    return stgdict
 
 
 def make_callback_returnable(ctype):
@@ -127,7 +177,8 @@ def make_callback_returnable(ctype):
         return ctype
 
     # Extract the StgDict from the ctype.
-    stgdict_c = ctypes.pythonapi.PyType_stgdict(ctype).contents
+    stgdict = get_stgdict_of_type(ctype)
+    stgdict_c = StgDictObject.from_address(id(stgdict))
 
     # Ensure that there is no existing getfunc or setfunc on the stgdict.
     if ctypes.cast(stgdict_c.getfunc, ctypes.c_void_p).value is not None:

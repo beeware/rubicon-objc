@@ -100,7 +100,6 @@ convert the Python instance to an :class:`ObjCStrInstance`.
     >>> from rubicon.objc import at
     # Create a Python string
     >>> py_str = 'hello world'
-
     # Convert to an Objective C string
     >>> at(py_str)
     <rubicon.objc.collections.ObjCStrInstance 0x114a94e48: __NSCFString at 0x7fec8ba7fc10: hello world>

@@ -4,6 +4,9 @@ Release History
 (next version)
 --------------
 
+0.3.0
+-----
+
 * Added Pythonic operators and methods on ``NSString`` objects, similar to those for ``NSArray`` and ``NSDictionary``.
 * Removed automatic conversion of ``NSString`` objects to ``str`` when returned from Objective-C methods. This feature made it difficult to call Objective-C methods on ``NSString`` objects, because there was no easy way to prevent the automatic conversion.
 
