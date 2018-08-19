@@ -252,6 +252,40 @@ When Python code receives an Objective-C object, Rubicon will automatically conv
 Creating custom Objective-C classes and protocols
 -------------------------------------------------
 
+Custom Objective-C classes are defined using Python ``class`` syntax, by subclassing an existing :class:`ObjCClass` object:
+
+.. code-block:: python
+
+    class MySubclass(NSObject):
+        # method, property, etc. definitions go here
+
+A custom Objective-C class can only have a single superclass, since Objective-C does not support multiple inheritance. However, the class can conform to any number of protocols, which are specified by adding the ``protocols`` keyword argument to the base class list:
+
+.. code-block:: python
+
+    class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
+        # method, property, etc. definitions go here
+
+.. note::
+
+    Rubicon requires specifying a superclass when defining a custom Objective-C class. If you don't need to extend any specific class, use :class:`NSObject` as the superclass.
+
+    Although Objective-C technically allows defining classes without a base class (so-called *root classes*), this is almost never the desired behavior (attempting to do so `causes a compiler error by default <https://developer.apple.com/documentation/objectivec/objc_root_class>`_). In practice, this feature is only used in the definitions of core Objective-C classes like :class:`NSObject`. Because of this, Rubicon does not support defining Objective-C root classes.
+
+Similar syntax is used to define custom Objective-C protocols. Unlike classes, protocols can extend multiple other protocols:
+
+.. code-block:: python
+
+    class MyProtocol(NSCopying, NSMutableCopying):
+        # method, property, etc. definitions go here
+
+A custom protocol might not need to extend any other protocol at all. In this case, we need to explicitly tell Python to define an :class:`ObjCProtocol`. Normally Python detects the metaclass automatically by examining the base classes, but in this case there are none, so we need to specify the metaclass manually.
+
+.. code-block:: python
+
+    class MyProtocol(metaclass=ObjCProtocol):
+        # method, property, etc. definitions go here
+
 Defining methods
 ^^^^^^^^^^^^^^^^
 
