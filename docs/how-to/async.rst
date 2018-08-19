@@ -64,7 +64,8 @@ lifecycle. To do this, you pass the application instance into the call to
 
     appkit = cdll.LoadLibrary(util.find_library('AppKit'))
     NSApplication = ObjCClass('NSApplication')
-    app = NSApplication.sharedApplication()
+    NSApplication.declare_class_property('sharedApplication')
+    app = NSApplication.sharedApplication
 
     # Get an event loop, and run it, using the NSApplication!
     loop = asyncio.get_event_loop()
