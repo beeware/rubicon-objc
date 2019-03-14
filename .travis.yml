@@ -11,6 +11,7 @@ matrix:
     # xcode7.3: 5 minutes
     # xcode8.3: 3 minutes
     # xcode9.2: 2 minutes
+    # https://docs.travis-ci.com/user/reference/osx/#macos-version
     # This data is based on the following build, which should be similar to most builds on the repo:
     # https://travis-ci.org/pybee/rubicon-objc/builds/348992202
     # Currently, Travis allows a maximum of two concurrent Mac builds per owner:
@@ -21,21 +22,22 @@ matrix:
 
     # OSX 10.10 Yosemite
     - osx_image: xcode6.4
+    # macOS 10.13 High Sierra
+    - osx_image: xcode10.1
     # macOS 10.12 Sierra
     - osx_image: xcode9.2
     - osx_image: xcode8.3
     # OSX 10.11 El Capitan
-    - osx_image: xcode7.3
+    - osx_image: xcode8
 language: generic
 cache:
   directories:
     ~/.pyenv
 env:
   global:
-    - PY34="3.4.8"
-    - PY35="3.5.5"
-    - PY36="3.6.5"
-    - PY37="3.7.0"
+    - PY35="3.5.6"
+    - PY36="3.6.8"
+    - PY37="3.7.2"
 install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
   # so we upgrade pyenv to get a consistent setup in all environments.
@@ -48,11 +50,10 @@ install:
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
-  - pyenv install --skip-existing ${PY34}
   - pyenv install --skip-existing ${PY35}
   - pyenv install --skip-existing ${PY36}
   - pyenv install --skip-existing ${PY37}
-  - pyenv global ${PY37} ${PY36} ${PY35} ${PY34} system
+  - pyenv global ${PY37} ${PY36} ${PY35} system
   # tox is not installed by default in some older Travis environments.
   - python3.6 -m pip install tox
   - make -f Makefile
