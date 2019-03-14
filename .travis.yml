@@ -21,7 +21,7 @@ matrix:
     # test failures happen in all environments and will be quickly reported this way.
 
     # OSX 10.10 Yosemite
-    - osx_image: xcode6.4
+    # - osx_image: xcode6.4
     # macOS 10.13 High Sierra
     - osx_image: xcode10.1
     # macOS 10.12 Sierra
@@ -43,7 +43,7 @@ install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
   # so we upgrade pyenv to get a consistent setup in all environments.
   - travis_retry brew update  # for xcode6.4
-  - brew outdated pyenv || brew upgrade pyenv
+  - brew install --upgrade pyenv
   # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
   # (in which case the paths used in the shims point to an older, no longer installed pyenv version).
   # By rehashing the shims we can be sure that they are always valid again.
