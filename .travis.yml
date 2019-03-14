@@ -43,7 +43,7 @@ install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
   # so we upgrade pyenv to get a consistent setup in all environments.
   - travis_retry brew update  # for xcode6.4
-  - brew install --upgrade pyenv
+  - brew upgrade pyenv
   # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
   # (in which case the paths used in the shims point to an older, no longer installed pyenv version).
   # By rehashing the shims we can be sure that they are always valid again.
