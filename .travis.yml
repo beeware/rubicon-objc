@@ -7,29 +7,26 @@ matrix:
     # Note: The ordering of the environments is optimized so that the complete matrix runs as quickly as possible,
     # while also providing the first results as early as possible.
     # At the moment, build times for each environment are roughly as follows:
-    # xcode6.4: 13 minutes
-    # xcode7.3: 5 minutes
-    # xcode8.3: 3 minutes
-    # xcode9.2: 2 minutes
+    # xcode7.3: 16 minutes
+    # xcode8.3: 7 minutes
+    # xcode9.2: 7 minutes
+    # xcode10.1: 6 minutes
     # https://docs.travis-ci.com/user/reference/osx/#macos-version
     # This data is based on the following build, which should be similar to most builds on the repo:
     # https://travis-ci.org/pybee/rubicon-objc/builds/348992202
     # Currently, Travis allows a maximum of two concurrent Mac builds per owner:
     # https://blog.travis-ci.com/2017-09-22-macos-update
-    # With the following order, xcode6.4 will take up the first slot, and at the same time the three other
-    # environments use the second slot in sequence. xcode9.2 will finish first and provide some early results - most
+    # With the following order, xcode7.3 will take up the first slot, and at the same time the three other
+    # environments use the second slot in sequence. xcode10.1 will finish first and provide some early results - most
     # test failures happen in all environments and will be quickly reported this way.
 
-    # OSX 10.10 Yosemite
-    # - osx_image: xcode6.4
+    # OSX 10.11 El Capitan
+    - osx_image: xcode7.3
     # macOS 10.13 High Sierra
     - osx_image: xcode10.1
     # macOS 10.12 Sierra
     - osx_image: xcode9.2
     - osx_image: xcode8.3
-    # OSX 10.11 El Capitan
-    - osx_image: xcode8
-    - osx_image: xcode7.3
 language: generic
 cache:
   directories:
@@ -42,8 +39,8 @@ env:
 install:
   # The different Travis environments have different pyenv versions, and not all have the Python versions we need,
   # so we upgrade pyenv to get a consistent setup in all environments.
-  - travis_retry brew update  # for xcode6.4
-  - brew upgrade pyenv
+  - brew update
+  - brew outdated pyenv || brew upgrade pyenv
   # The existing pyenv shims from the build cache may no longer be valid, for example if pyenv was upgraded
   # (in which case the paths used in the shims point to an older, no longer installed pyenv version).
   # By rehashing the shims we can be sure that they are always valid again.
