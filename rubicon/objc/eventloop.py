@@ -217,15 +217,15 @@ class CFSocketHandle(events.Handle):
         self._fd = fd
         self._cf_socket = libcf.CFSocketCreateWithNative(
             kCFAllocatorDefault, self._fd,
-            kCFSocketReadCallBack | kCFSocketWriteCallBack |
-            kCFSocketConnectCallBack,
+            kCFSocketReadCallBack | kCFSocketWriteCallBack
+            | kCFSocketConnectCallBack,
             self._callback,
             None
         )
         libcf.CFSocketSetSocketFlags(
             self._cf_socket,
-            kCFSocketAutomaticallyReenableReadCallBack |
-            kCFSocketAutomaticallyReenableWriteCallBack
+            kCFSocketAutomaticallyReenableReadCallBack
+            | kCFSocketAutomaticallyReenableWriteCallBack
 
             # # This extra flag is to ensure that CF doesn't (destructively,
             # # because destructively is the only way to do it) retrieve
@@ -236,8 +236,8 @@ class CFSocketHandle(events.Handle):
         libcf.CFRunLoopAddSource(self._loop._cfrunloop, self._src, kCFRunLoopCommonModes)
         libcf.CFSocketDisableCallBacks(
             self._cf_socket,
-            kCFSocketReadCallBack | kCFSocketWriteCallBack |
-            kCFSocketConnectCallBack
+            kCFSocketReadCallBack | kCFSocketWriteCallBack
+            | kCFSocketConnectCallBack
         )
 
     def enable_read(self, callback, args):
