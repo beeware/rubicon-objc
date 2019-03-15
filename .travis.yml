@@ -13,7 +13,7 @@ matrix:
     # xcode10.1: 6 minutes
     # https://docs.travis-ci.com/user/reference/osx/#macos-version
     # This data is based on the following build, which should be similar to most builds on the repo:
-    # https://travis-ci.org/pybee/rubicon-objc/builds/348992202
+    # https://travis-ci.org/pybee/rubicon-objc/builds
     # Currently, Travis allows a maximum of two concurrent Mac builds per owner:
     # https://blog.travis-ci.com/2017-09-22-macos-update
     # With the following order, xcode7.3 will take up the first slot, and at the same time the three other
@@ -52,9 +52,8 @@ install:
   - pyenv install --skip-existing ${PY36}
   - pyenv install --skip-existing ${PY37}
   - pyenv global ${PY37} ${PY36} ${PY35} system
-  # tox is not installed by default in some older Travis environments.
-  - python3.6 -m pip install tox
+  - pip install --upgrade tox
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python3.6 -m tox -e "py{35,36,37}-default,flake8"
+  - tox -e "py{35,36,37}-default,flake8"
