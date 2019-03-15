@@ -25,7 +25,7 @@ setup(
     author_email='russell@keith-magee.com',
     url='http://pybee.org/rubicon',
     packages=find_packages(exclude=['tests']),
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     namespace_packages=['rubicon'],
     license='New BSD',
     classifiers=[
@@ -34,7 +34,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Objective C',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
