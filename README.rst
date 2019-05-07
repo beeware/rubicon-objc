@@ -1,6 +1,6 @@
-.. image:: http://pybee.org/project/projects/bridges/rubicon/rubicon.png
+.. image:: https://beeware.org/project/projects/bridges/rubicon/rubicon.png
     :width: 72px
-    :target: https://pybee.org/rubicon
+    :target: https://beeware.org/rubicon
 
 Rubicon-ObjC
 ============
