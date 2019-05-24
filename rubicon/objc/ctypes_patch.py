@@ -99,7 +99,9 @@ ffi_type._fields_ = [
 
 # The GETFUNC and SETFUNC typedefs from "Modules/_ctypes/ctypes.h".
 GETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.c_ssize_t)
-SETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.py_object, ctypes.c_ssize_t)
+# The return type of SETFUNC is declared here as a c_void_p instead of py_object to work around ctypes bug
+# bpo-36880 (https://bugs.python.org/issue36880). See the comment in make_callback_returnable's setfunc for details.
+SETFUNC = ctypes.PYFUNCTYPE(ctypes.c_void_p, ctypes.c_void_p, ctypes.py_object, ctypes.c_ssize_t)
 
 
 # The StgDictObject structure from "Modules/_ctypes/ctypes.h".
@@ -117,6 +119,10 @@ class StgDictObject(ctypes.Structure):
         ("getfunc", GETFUNC),
         # There are a few more fields, but we leave them out again because we don't need them.
     ]
+
+
+ctypes.pythonapi.Py_IncRef.restype = None
+ctypes.pythonapi.Py_IncRef.argtypes = [ctypes.POINTER(PyObject)]
 
 
 def unwrap_mappingproxy(proxy):
@@ -208,7 +214,18 @@ def make_callback_returnable(ctype):
             )
 
         ctypes.memmove(ptr, ctypes.addressof(value), actual_size)
-        return None
+        # Because of ctypes bug bpo-36880 (https://bugs.python.org/issue36880), returning None from a callback with
+        # restype py_object causes a reference counting error that can crash Python.
+        # To work around this bug, the restype of SETFUNC is declared as c_void_p instead.
+        # This way ctypes performs no automatic reference counting for the returned object, which avoids the bug.
+        # However, this way we have to manually convert the Python object to a pointer and adjust its reference count.
+        none_ptr = ctypes.cast(id(None), ctypes.POINTER(PyObject))
+        # The return value of a SETFUNC is expected to have an extra reference
+        # (which will be owned by the caller of the SETFUNC).
+        ctypes.pythonapi.Py_IncRef(none_ptr)
+        # The returned pointer must be returned as a plain int, not as a c_void_p,
+        # otherwise ctypes won't recognize it and will raise a TypeError.
+        return ctypes.cast(none_ptr, ctypes.c_void_p).value
 
     # Store the getfunc and setfunc as attributes on the ctype, so they don't get garbage-collected.
     ctype._rubicon_objc_ctypes_patch_getfunc = getfunc

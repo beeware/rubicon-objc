@@ -94,3 +94,29 @@ class CtypesPatchTest(unittest.TestCase):
             struct = get_struct()
             self.assertEqual(struct.spam, 123)
             self.assertEqual(struct.ham, 123)
+
+    def test_patched_type_returned_often(self):
+        """Returning a patched type very often works properly without crashing anything.
+
+        This checks that bpo-36880 is either fixed or worked around.
+        """
+
+        class TestStruct(ctypes.Structure):
+            _fields_ = [
+                ("spam", ctypes.c_int),
+                ("ham", ctypes.c_double),
+            ]
+        functype = ctypes.CFUNCTYPE(TestStruct)
+
+        ctypes_patch.make_callback_returnable(TestStruct)
+
+        # After patching, the structure can be returned from a callback.
+        @functype
+        def get_struct():
+            return TestStruct(123, 123)
+
+        for _ in range(10000):
+            # After being returned from the callback, the structure's data is intact.
+            struct = get_struct()
+            self.assertEqual(struct.spam, 123)
+            self.assertEqual(struct.ham, 123)
