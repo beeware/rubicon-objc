@@ -1,8 +1,8 @@
 Release History
 ===============
 
-0.3.1 (in development)
-----------------------
+0.3.1
+-----
 
 * Added a workaround for bpo-36880 (https://bugs.python.org/issue36880), which caused memory
 * Renamed the objc.async module to objc.eventloop to avoid keyword clashes.
