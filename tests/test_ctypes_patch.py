@@ -3,6 +3,7 @@ import unittest
 
 from rubicon.objc import ctypes_patch
 
+
 class CtypesPatchTest(unittest.TestCase):
     def test_patch_structure(self):
         """A custom structure can be patched successfully."""
@@ -17,7 +18,7 @@ class CtypesPatchTest(unittest.TestCase):
         # Before patching, the structure cannot be returned from a callback.
         with self.assertRaises(TypeError):
             @functype
-            def get_struct():
+            def get_struct_fail():
                 return TestStruct(123, 123)
 
         ctypes_patch.make_callback_returnable(TestStruct)
@@ -48,7 +49,7 @@ class CtypesPatchTest(unittest.TestCase):
         # Before patching, the pointer cannot be returned from a callback.
         with self.assertRaises(TypeError):
             @functype
-            def get_struct():
+            def get_struct_fail():
                 return pointertype(original_struct)
 
         ctypes_patch.make_callback_returnable(pointertype)
@@ -84,7 +85,7 @@ class CtypesPatchTest(unittest.TestCase):
 
         for _ in range(5):
             ctypes_patch.make_callback_returnable(TestStruct)
-    
+
             # After patching, the structure can be returned from a callback.
             @functype
             def get_struct():
