@@ -50,9 +50,11 @@ install:
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
-  - pyenv install --skip-existing ${PY35}
-  - pyenv install --skip-existing ${PY36}
-  - pyenv install --skip-existing ${PY37}
+  # The CFLAGS prefix is to set up the include path so that zlib is available to the Python build
+  # This is needed on Mojave, but doesn't hurt other versions.
+  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY35}
+  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY36}
+  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY37}
   - pyenv global ${PY37} ${PY36} ${PY35} system
   - pip install --upgrade tox
   - make -f Makefile
