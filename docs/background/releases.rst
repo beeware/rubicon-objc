@@ -6,6 +6,7 @@ Release History
 
 * Added a workaround for bpo-36880 (https://bugs.python.org/issue36880), which caused memory
 * Renamed the objc.async module to objc.eventloop to avoid keyword clashes.
+* Add support for Mojave
 * Add support for High Sierra
 * Removed support for Python 3.4
 * Removed support for Yosemite
