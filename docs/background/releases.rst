@@ -1,6 +1,8 @@
 Release History
 ===============
 
+.. towncrier release notes start
+
 0.3.1
 -----
 

@@ -9,10 +9,10 @@ Foundation library, and the `NSURL` class in that library. `NSURL` is the
 class used to represent and manipulate URLs.
 
 This tutorial assumes you've set up your environment as described in the
-:ref:`Getting started guide <get-started>`.
+:doc:`Getting started guide </how-to/get-started>`.
 
 Accessing NSURL
----------------
+===============
 
 Start Python, and get a reference to an Objective-C class. In this example,
 we're going to use the `NSURL` class, Objective-C's representation of URLs:
@@ -58,7 +58,7 @@ colons with underscores::
     >>> full = NSURL.URLWithString_relativeToURL_("contributing", base)
 
 Instance methods
-----------------
+================
 
 So far, we've been using the `+URLWithString:` static constructor. However,
 `NSURL` also provides an initializer method `-initWithString:`. To use this
@@ -99,7 +99,7 @@ equivalents, `__str__()` and `__repr__()`, respectively::
     <rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>
 
 Time to take over the world!
-----------------------------
+============================
 
 You now have access to *any* method, on *any* class, in any library, in the
 entire macOS or iOS ecosystem! If you can invoke something in Objective-C, you
@@ -110,8 +110,8 @@ can invoke it in Python - all you need to do is:
     * Use those classes as if they were written in Python.
 
 Next steps
-----------
+==========
 
 The next step is to write your own classes, and expose them into the
-Objective-C runtime. That's the subject of the :ref:`next tutorial
-<tutorial-2>`.
+Objective-C runtime. That's the subject of the :doc:`next tutorial
+<./tutorial-2>`.

@@ -48,32 +48,32 @@ Table of contents
 
 .. rst-class:: column column2
 
-:ref:`Tutorial <tutorial>`
---------------------------
+:doc:`Tutorial <./tutorial/index>`
+----------------------------------
 
 Get started with a hands-on introduction for beginners
 
 
 .. rst-class:: column column2
 
-:ref:`How-to guides <how-to>`
------------------------------
+:doc:`How-to guides <./how-to/index>`
+-------------------------------------
 
 Guides and recipes for common problems and tasks, including how to contribute
 
 
 .. rst-class:: column column2
 
-:ref:`Background <background>`
-------------------------------
+:doc:`Background <./background/index>`
+--------------------------------------
 
 Explanation and discussion of key topics and concepts
 
 
 .. rst-class:: column column2
 
-:ref:`Reference <reference>`
-----------------------------
+:doc:`Reference <./reference/index>`
+------------------------------------
 
 Technical reference - commands, modules, classes, methods
 
