@@ -38,6 +38,66 @@ jobs:
       run: |
         pip install --upgrade pip setuptools
         pip install -e .
+    - name: Inspect Xcode versions
+      run: |
+        ls -n /Applications/ | grep Xcode*
+    - name: Build test library
+      run: |
+        make
+    - name: Test
+      run: |
+        DYLD_LIBRARY_PATH=tests/objc python setup.py test
+
+  xcode-versions:
+    name: XCode version compatibility test
+    needs: smoke
+    runs-on: macOS-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        xcode-version: ["9.4.1", "10.3", "11"]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.5
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.5
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip setuptools pytest-tldr
+        pip install -e .
+    - name: Build test library for XCode ${{ matrix.xcode-version }}
+      run: |
+        sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode-version }}.app/Contents/Developer
+        make
+    - name: Test
+      run: |
+        DYLD_LIBRARY_PATH=tests/objc python setup.py test
+
+  python-versions:
+    name: Python compatibility test
+    needs: smoke
+    runs-on: macOS-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip setuptools pytest-tldr
+        pip install -e .
+    - name: Build test library
+      run: |
+        make
+    - name: Test
+      run: |
+        DYLD_LIBRARY_PATH=tests/objc python setup.py test
     - name: Build test library
       run: |
         make
