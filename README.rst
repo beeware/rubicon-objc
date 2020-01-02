@@ -6,22 +6,28 @@ Rubicon-ObjC
 ============
 
 .. image:: https://img.shields.io/pypi/pyversions/rubicon-objc.svg
-    :target: https://pypi.python.org/pypi/rubicon-objc
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Python Versions
 
 .. image:: https://img.shields.io/pypi/v/rubicon-objc.svg
-    :target: https://pypi.python.org/pypi/rubicon-objc
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Project Version
 
 .. image:: https://img.shields.io/pypi/status/rubicon-objc.svg
-    :target: https://pypi.python.org/pypi/rubicon-objc
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Project status
 
 .. image:: https://img.shields.io/pypi/l/rubicon-objc.svg
-    :target: https://github.com/pybee/rubicon-objc/blob/master/LICENSE
+   :target: https://github.com/pybee/rubicon-objc/blob/master/LICENSE
+   :alt: License
 
-.. image:: https://travis-ci.org/pybee/rubicon-objc.svg?branch=master
-    :target: https://travis-ci.org/pybee/rubicon-objc
+.. image:: https://github.com/beeware/toga/workflows/Build%20status/badge.svg
+   :target: https://github.com/beeware/toga/actions
+   :alt: Build Status
 
 .. image:: https://badges.gitter.im/pybee/general.svg
-    :target: https://gitter.im/pybee/general
+   :target: https://gitter.im/pybee/general
+   :alt: Gitter chat room
 
 Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
 
@@ -66,7 +72,7 @@ Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 
 * `@pybeeware on Twitter`_
 
-* The `pybee/general`_ channel on Gitter.
+* The `beeware/general`_ channel on Gitter.
 
 Code of Conduct
 ---------------
@@ -84,11 +90,11 @@ Contributing
 If you experience problems with this backend, `log them on GitHub`_. If you
 want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
-.. _BeeWare suite: http://pybee.org
+.. _BeeWare suite: http://beeware.org
 .. _Read The Docs: http://rubicon-objc.readthedocs.org
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
-.. _pybee/general: https://gitter.im/pybee/general
-.. _Code of Conduct: http://pybee.org/community/behavior/
-.. _log them on GitHub: https://github.com/pybee/rubicon-objc/issues
-.. _fork the code: https://github.com/pybee/rubicon-objc
-.. _submit a pull request: https://github.com/pybee/rubicon-objc/pulls
+.. _beeware/general: https://gitter.im/beeware/general
+.. _Code of Conduct: http://beeware.org/community/behavior/
+.. _log them on GitHub: https://github.com/beeware/rubicon-objc/issues
+.. _fork the code: https://github.com/beeware/rubicon-objc
+.. _submit a pull request: https://github.com/beeware/rubicon-objc/pulls
