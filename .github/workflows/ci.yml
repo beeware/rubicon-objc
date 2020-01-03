@@ -61,14 +61,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install --upgrade pip setuptools pytest-tldr
+        pip install --upgrade pip setuptools
         pip install -e .
-    - name: Build test library
-      run: |
-        make
-    - name: Test
-      run: |
-        DYLD_LIBRARY_PATH=tests/objc python setup.py test
     - name: Build test library
       run: |
         make
