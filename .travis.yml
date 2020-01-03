@@ -38,28 +38,8 @@ matrix:
     - osx_image: xcode9.2
     - osx_image: xcode8.3
 language: generic
-cache:
-  directories:
-    ~/.pyenv
 install:
-  # The different Travis environments have different pyenv versions, and not
-  # all have the Python versions we need, so we upgrade pyenv to get a
-  # consistent setup in all environments.
-  - brew update
-  - brew outdated pyenv || brew upgrade pyenv
-  # The existing pyenv shims from the build cache may no longer be valid, for
-  # example if pyenv was upgraded (in which case the paths used in the shims
-  # point to an older, no longer installed pyenv version). By rehashing the
-  # shims we can be sure that they are always valid again.
-  - pyenv rehash
-  # pyenv's shims directory is not in the PATH by default.
-  - export PATH="$(pyenv root)/shims:${PATH}"
-  # Use the most recent release of the oldest Python minor version we want to
-  # support.
-  - pyenv install --skip-existing 3.5.8
-  - pyenv global 3.5.8
-  - pip install --upgrade pip setuptools tox
+  - python3 -m pip install --upgrade pip setuptools tox
   - make -f Makefile
 script:
-  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - tox -e py35-default
+  - DYLD_LIBRARY_PATH=tests/objc python3 setup.py test
