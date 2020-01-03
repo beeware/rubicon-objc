@@ -10,7 +10,7 @@ already knows than tutorials do, and unlike documents in the tutorial they can
 stand alone.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
 
    Get started <get-started>
@@ -19,3 +19,4 @@ stand alone.
    async
    contribute-code
    contribute-docs
+   internal/index
