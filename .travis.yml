@@ -39,7 +39,7 @@ matrix:
     - osx_image: xcode8.3
 language: generic
 install:
-  - python3 -m pip install --upgrade pip setuptools tox
+  - python3 -m pip install --upgrade pip setuptools
   - make -f Makefile
 script:
   - DYLD_LIBRARY_PATH=tests/objc python3 setup.py test
