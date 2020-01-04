@@ -31,7 +31,6 @@ install:
   - pyenv global 3.5.2
   - python -m pip install --upgrade pip setuptools
   - python -m pip install --upgrade tox
-  - make -f Makefile
 script:
-  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python setup.py test
+  - make -f Makefile
+  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
