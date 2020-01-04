@@ -18,15 +18,15 @@ Rubicon-ObjC
    :alt: Project status
 
 .. image:: https://img.shields.io/pypi/l/rubicon-objc.svg
-   :target: https://github.com/pybee/rubicon-objc/blob/master/LICENSE
+   :target: https://github.com/beeware/rubicon-objc/blob/master/LICENSE
    :alt: License
 
-.. image:: https://github.com/beeware/toga/workflows/CI/badge.svg?branch=master
-   :target: https://github.com/beeware/toga/actions
+.. image:: https://github.com/beeware/rubicon-objc/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/beeware/rubicon-objc/actions
    :alt: Build Status
 
-.. image:: https://badges.gitter.im/pybee/general.svg
-   :target: https://gitter.im/pybee/general
+.. image:: https://badges.gitter.im/beeware/general.svg
+   :target: https://gitter.im/beeware/general
    :alt: Gitter chat room
 
 Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
@@ -94,7 +94,7 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 .. _Read The Docs: http://rubicon-objc.readthedocs.org
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
 .. _beeware/general: https://gitter.im/beeware/general
-.. _Code of Conduct: http://beeware.org/community/behavior/
+.. _Code of Conduct: https://beeware.org/community/behavior/
 .. _log them on GitHub: https://github.com/beeware/rubicon-objc/issues
 .. _fork the code: https://github.com/beeware/rubicon-objc
 .. _submit a pull request: https://github.com/beeware/rubicon-objc/pulls
