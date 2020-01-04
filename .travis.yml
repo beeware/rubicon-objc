@@ -44,11 +44,15 @@ cache:
 install:
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
-  # Use the most recent release of the oldest Python minor version we want to
-  # support.
+  # Diagnostic: Find out which versions of Python are availalbe.
   - pyenv install -l
-  - pyenv install --skip-existing 3.5.8
-  - pyenv global 3.5.8
+  # Rubicon supports Python 3.5 and newer.
+  # The most recent version of Python 3.5 provided by the pyenv install on
+  # macOS 10.11 is 3.5.2. There are more recent versions of Python 3.5
+  # available, but using them would mean updating pyenv, which takes 10+
+  # minutes on macOS 10.11.
+  - pyenv install --skip-existing 3.5.2
+  - pyenv global 3.5.2
   - pip install --upgrade pip setuptools tox
   - make -f Makefile
 script:
