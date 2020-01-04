@@ -53,7 +53,8 @@ install:
   # minutes on macOS 10.11.
   - pyenv install --skip-existing 3.5.2
   - pyenv global 3.5.2
-  - pip install --upgrade pip setuptools tox
+  - pip install --upgrade pip setuptools
+  - pip install --upgrade tox
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
