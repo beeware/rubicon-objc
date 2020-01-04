@@ -52,4 +52,4 @@ install:
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - tox -e py35-default
+  - tox -e py35
