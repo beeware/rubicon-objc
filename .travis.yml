@@ -46,7 +46,7 @@ install:
   - export PATH="$(pyenv root)/shims:${PATH}"
   # Use the most recent release of the oldest Python minor version we want to
   # support.
-  - pyenv versions
+  - pyenv install -l
   - pyenv install --skip-existing 3.5.8
   - pyenv global 3.5.8
   - pip install --upgrade pip setuptools tox
