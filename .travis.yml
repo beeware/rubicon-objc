@@ -33,5 +33,7 @@ install:
   - python -m pip install .
 script:
   - make -f Makefile
-  - ls -la tests/objc
-  - DYLD_LIBRARY_PATH=`pwd`tests/objc python setup.py test
+  - export
+  - export DYLD_LIBRARY_PATH=`pwd`tests/objc
+  - export
+  - python setup.py test
