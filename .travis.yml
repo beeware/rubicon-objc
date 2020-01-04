@@ -31,6 +31,8 @@ install:
   - pyenv global 3.5.2
   - python -m pip install --upgrade pip setuptools
   - python -m pip install .
+env:
+  - DYLD_LIBRARY_PATH=tests/objc
 script:
   - make -f Makefile
-  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
+  - python setup.py test
