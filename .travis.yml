@@ -33,5 +33,4 @@ install:
   - python -m pip install --upgrade tox
   - make -f Makefile
 script:
-  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python -m tox -e py35
+  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
