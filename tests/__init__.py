@@ -20,11 +20,8 @@ except ValueError:
             )
         )
     except KeyError:
-        print(os.environ)
         raise ValueError(
-            "Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH? {env})".format(
-                env=os.environ
-            )
+            "Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?)")
         )
 
 faulthandler.enable()
