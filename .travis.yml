@@ -28,15 +28,16 @@ install:
   # available, but using them would mean updating pyenv, which takes 10+
   # minutes on macOS 10.11.
   - pyenv install --skip-existing 3.5.2
-  # We use a `local` install rather than `global` to ensure that the binary
-  # that is invoked isn't in a location that triggers macOS System Integrity
-  # Protection (SIP) (see https://apple.stackexchange.com/a/216815).
   - pyenv global 3.5.2
   - python -m pip install --upgrade pip setuptools
   - python -m pip install .
 script:
   - make -f Makefile
-  - # Debug...
-  - which python
-  - cat "$(which python)"
-  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
+  # This next line *should* be:
+  #   DYLD_LIBRARY_PATH=tests/objc python setup.py test
+  # but the way Travis invokes Python through pyenv triggers macOS's System
+  # Integrity Protection (SIP) (see https://apple.stackexchange.com/a/216815).
+  # As a result, DYLD_LIBRARY_PATH isn't exposed to the Python process.
+  # Setting the variable in the subshell environment created with subprocess
+  # sets the environment variable in such a way that SIP doesn't intercept it.
+  - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
