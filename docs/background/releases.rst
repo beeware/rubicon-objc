@@ -6,12 +6,12 @@ Release History
 0.3.1
 -----
 
-* Added a workaround for bpo-36880 (https://bugs.python.org/issue36880), which caused memory
-* Renamed the objc.async module to objc.eventloop to avoid keyword clashes.
-* Add support for Mojave
-* Add support for High Sierra
-* Removed support for Python 3.4
-* Removed support for Yosemite
+* Added a workaround for `bpo-36880 <https://bugs.python.org/issue36880>`_, which caused a "deallocating None" crash when returning structs from methods very often.
+* Added support for macOS Mojave (10.14).
+* Added support for macOS High Sierra (10.13).
+* Renamed the ``rubicon.objc.async`` module to ``rubicon.objc.eventloop`` to avoid conflicts with the Python 3.6 ``async`` keyword.
+* Removed support for Python 3.4.
+* Removed support for OS X Yosemite (10.10).
 
 0.3.0
 -----
