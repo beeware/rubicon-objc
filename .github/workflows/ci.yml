@@ -77,6 +77,7 @@ jobs:
         DYLD_LIBRARY_PATH=tests/objc python setup.py test
 
   package:
+    name: Packaging checks
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
