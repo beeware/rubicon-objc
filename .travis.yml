@@ -40,4 +40,7 @@ script:
   # As a result, DYLD_LIBRARY_PATH isn't exposed to the Python process.
   # This sets the environment variable in such a way that Travis can't
   # intercept it at the shell level.
+  - which python
+  - which python3
+  - which python3.5
   - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
