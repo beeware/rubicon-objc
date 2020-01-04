@@ -30,8 +30,7 @@ install:
   - pyenv install --skip-existing 3.5.2
   - pyenv global 3.5.2
   - python -m pip install --upgrade pip setuptools
-  - python -m pip install --upgrade tox
   - python -m pip install .
 script:
   - make -f Makefile
-  - python -m tox -e py35
+  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
