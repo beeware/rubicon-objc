@@ -7,12 +7,12 @@ asychronous programming, implemented in the `asyncio`.
 
 For an introduction to the use of asynchronous programming, see `the
 documentation for the asyncio module
-<https://docs.python.org/3/library/asyncio.html>`, or `this introductory
+<https://docs.python.org/3/library/asyncio.html>`__, or `this introductory
 tutorial to asynchronous programming with asyncio
-<http://asyncio.readthedocs.io/en/latest/index.html>`.
+<http://asyncio.readthedocs.io/en/latest/index.html>`__.
 
 Integrating asyncio with CoreFoundation
----------------------------------------
+=======================================
 
 The asyncio module provides an event loop to coordinate asynchronous features.
 However, if you're running an Objective C GUI applicaiton, you probably
@@ -45,7 +45,7 @@ The last call (``loop.run_forever()``) will, as the name suggests, run forever
 event loop.
 
 Integrating asyncio with AppKit and NSApplication
--------------------------------------------------
+=================================================
 
 If you're using AppKit and NSApplication, you don't just need to start the
 CoreFoundation event loop - you need to start the full NSApplication
@@ -74,31 +74,22 @@ lifecycle. To do this, you pass the application instance into the call to
 Again, this will run "forever" -- until either ``loop.stop()`` is called, or
 ``terminate:`` is invoked on the NSApplication.
 
-.. FIXME once this actually works...
-.. Integrating asyncio with iOS and UIApplication
-.. ----------------------------------------------
+Integrating asyncio with iOS and UIApplication
+==============================================
 
-.. If you're using UIKit and UIApplication on iOS, you need to use the iOS
-.. lifecycle. To do this, you pass an ``iOSLifecycle`` object into the call to
-.. ``loop.run_forever()``::
+If you're using UIKit and UIApplication on iOS, you need to use the iOS
+lifecycle. To do this, you pass an ``iOSLifecycle`` object into the call to
+``loop.run_forever()``::
 
-..     # Import the Event Loop Policy and lifecycle
-..     from rubicon.objc.eventloop import EventLoopPolicy, iOSLifecycle
+    # Import the Event Loop Policy and lifecycle
+    from rubicon.objc.eventloop import EventLoopPolicy, iOSLifecycle
 
-..     # Install the event loop policy
-..     asyncio.set_event_loop_policy(EventLoopPolicy())
+    # Install the event loop policy
+    asyncio.set_event_loop_policy(EventLoopPolicy())
 
-..     # Get a handle to the shared NSApplication
-..     from ctypes import cdll, util
-..     from rubicon.objc import ObjCClass
+    # Get an event loop, and run it, using the NSApplication!
+    loop = asyncio.get_event_loop()
+    loop.run_forever(lifecycle=iOSLifecycle())
 
-..     appkit = cdll.LoadLibrary(util.find_library('AppKit'))
-..     NSApplication = ObjCClass('NSApplication')
-..     app = NSApplication.sharedApplication()
-
-..     # Get an event loop, and run it, using the NSApplication!
-..     loop = asyncio.get_event_loop()
-..     loop.run_forever(lifecycle=iOSLifecycle(app))
-
-.. Again, this will run "forever" -- until either ``loop.stop()`` is called, or
-.. ``terminate:`` is invoked on the NSApplication.
+Again, this will run "forever" -- until either ``loop.stop()`` is called, or
+``terminate:`` is invoked on the NSApplication.

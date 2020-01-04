@@ -24,7 +24,7 @@ matrix:
     - osx_image: xcode7.3
     # macOS 10.13 High Sierra
     - osx_image: xcode10.1
-    # macOS 10.13 Mojave
+    # macOS 10.14 Mojave
     - osx_image: xcode10.2
     # macOS 10.12 Sierra
     - osx_image: xcode9.2
@@ -50,11 +50,9 @@ install:
   # pyenv's shims directory is not in the PATH by default.
   - export PATH="$(pyenv root)/shims:${PATH}"
   # These are the Python versions that we want to test on.
-  # The CFLAGS prefix is to set up the include path so that zlib is available to the Python build
-  # This is needed on Mojave, but doesn't hurt other versions.
-  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY35}
-  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY36}
-  - CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install --skip-existing ${PY37}
+  - pyenv install --skip-existing ${PY35}
+  - pyenv install --skip-existing ${PY36}
+  - pyenv install --skip-existing ${PY37}
   - pyenv global ${PY37} ${PY36} ${PY35} system
   - pip install --upgrade tox
   - make -f Makefile

@@ -14,7 +14,8 @@ stand alone.
    :glob:
 
    Get started <get-started>
-   Mapping Python types to Objective-C <type-mapping>
-   Using and creating Objective-C protocols <protocols>
-   Using AsyncIO in your app <async>
-   Contribute to Rubicon <contribute>
+   type-mapping
+   protocols
+   async
+   contribute-code
+   contribute-docs
