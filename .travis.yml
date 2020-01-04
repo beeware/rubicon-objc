@@ -31,11 +31,12 @@ install:
   # We use a `local` install rather than `global` to ensure that the binary
   # that is invoked isn't in a location that triggers macOS System Integrity
   # Protection (SIP) (see https://apple.stackexchange.com/a/216815).
-  - pyenv local 3.5.2
+  - pyenv global 3.5.2
   - python -m pip install --upgrade pip setuptools
   - python -m pip install .
 script:
   - make -f Makefile
   - # Debug...
   - which python
+  - cat "$(which python)"
   - DYLD_LIBRARY_PATH=tests/objc python setup.py test
