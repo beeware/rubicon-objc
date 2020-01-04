@@ -33,13 +33,9 @@ install:
   - python -m pip install .
 script:
   - make -f Makefile
-  - export
-  - python -c "import os; print('1 =',os.environ.get('FOO'))"
-  - FOO=tests/objc python -c "import os; print('2 =',os.environ.get('FOO'))"
-  - FOO=tests/objc && python -c "import os; print('3 =',os.environ.get('FOO'))"
-  - export FOO=bar
-  - export
-  - python -c "import os; print('4 =', os.environ.get('FOO'))"
-  - FOO=tests/objc python -c "import os; print('5 =',os.environ.get('FOO'))"
-  - FOO=tests/objc && python -c "import os; print('6 =',os.environ.get('FOO'))"
-  - export DYLD_LIBRARY_PATH=/tests/objc && python setup.py test
+  # This next line *should* be:
+  #   DYLD_LIBRARY_PATH=tests/objc python setup.py test
+  # but Travis futzes with DYLD_LIBRARY_PATH, so that doesn't work.
+  # This sets the environment variable in such a way that Travis can't
+  # intercept it at the shell level.
+  - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
