@@ -1,28 +1,23 @@
-============================
-How to cut a Rubicon release
-============================
+==================================
+How to cut an Rubicon-ObjC release
+==================================
 
-The release infrastructure for Rubicon is semi-automated, using Github
-Actions to formally publish releases.
+The release infrastructure for Rubicon is semi-automated, using GitHub Actions
+to formally publish releases.
 
 This guide assumes that you have an ``upstream`` remote configured on your
-local clone of the Rubicon repository, pointing at the official repository.
-It also assumes that you have a local ``release`` branch that tracks
-``upstream/master``.
-
-You should have a checkout of a personal fork of the Rubicon repository; to
-configure this fork for a release, run::
+local clone of the Rubicon repository, pointing at the official repository. If
+all you have is a checkout of a personal fork of the Rubicon-ObjC repository,
+you can configure that checkout by running::
 
     $ git remote add upstream git@github.com:beeware/rubicon-objc.git
-    $ git clone upstream/master release
 
 The procedure for cutting a new release is as follows:
 
-1. Refresh your release branch::
+1. Check the contents of the upstream repository's master branch::
 
-    $ git checkout release
     $ git fetch upstream
-    $ git pull
+    $ git checkout --detach upstream/master
 
    Check that the HEAD of release now matches upstream/master.
 
@@ -43,22 +38,26 @@ The procedure for cutting a new release is as follows:
 
       to generate the updated release notes.
 
+   These two changes (the version bump and release notes update) should go
+   through the normal pull request and review process. They should generally
+   comprise the last PR merged before the release occurs.
+
 3. Tag the release, and push the tag upstream::
 
     $ git tag v1.2.3
-    $ git push upstream --tags
+    $ git push upstream v1.2.3
 
-4. Pushing the tag will start a workflow to create a draft release on Github.
-   You can `follow the progress of the workflow on Github
+4. Pushing the tag will start a workflow to create a draft release on GitHub.
+   You can `follow the progress of the workflow on GitHub
    <https://github.com/beeware/rubicon-objc/actions?query=workflow%3A%22Create+Release%22>`__;
    once the workflow completes, there should be a new `draft release
    <https://github.com/beeware/rubicon-objc/releases>`__.
 
-5. Edit the Github release. Add release notes (you can use the text generated
+5. Edit the GitHub release. Add release notes (you can use the text generated
    by towncrier). Check the pre-release checkbox (if necessary).
 
 6. Double check everything, then click Publish. This will trigger a
-   `publication workflow on Github
+   `publication workflow on GitHub
    <https://github.com/beeware/rubicon-objc/actions?query=workflow%3A%22Upload+Python+Package%22>`__.
 
 7. Wait for the `package to appear on PyPI
@@ -67,6 +66,6 @@ The procedure for cutting a new release is as follows:
 Congratulations, you've just published a release!
 
 If anything went wrong during steps 3 or 5, you will need to delete the draft
-release from Github, and push an updated tag. Once the release has successfully
+release from GitHub, and push an updated tag. Once the release has successfully
 appeared on PyPI, it cannot be changed; if you spot a problem in a published
 package, you'll need to tag a completely new release.
