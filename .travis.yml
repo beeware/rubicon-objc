@@ -40,4 +40,5 @@ script:
   # As a result, DYLD_LIBRARY_PATH isn't exposed to the Python process.
   # Setting the variable in the subshell environment created with subprocess
   # sets the environment variable in such a way that SIP doesn't intercept it.
-  - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
+  # - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
+  - DYLD_LIBRARY_PATH=tests/objc "$(pyenv which python)" setup.py test
