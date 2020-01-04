@@ -32,13 +32,23 @@ install:
   - python -m pip install --upgrade pip setuptools
   - python -m pip install .
 env:
-  - DYLD_LIBRARY_PATH=tests/objc
+  - global:
+    - DYLD_LIBRARY_PATH=tests/objc
+    - FOO=bar
 script:
   - make -f Makefile
-  - python -c "import os; print('1 =',os.environ.get('DYLD_LIBRARY_PATH'))"
-  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('2 =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - export
+  - python -c "import os; print('1a =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - python -c "import os; print('1b =',os.environ.get('FOO'))"
+  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('2a =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - FOO=tests/objc python -c "import os; print('2b =',os.environ.get('FOO'))"
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - python -c "import os; print('3 =', os.environ.get('DYLD_LIBRARY_PATH'))"
-  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('4 =',os.environ.get('DYLD_LIBRARY_PATH'))"
-  - DYLD_LIBRARY_PATH=tests/objc && python -c "import os; print('5 =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - export FOO=bar
+  - export
+  - python -c "import os; print('3a =', os.environ.get('DYLD_LIBRARY_PATH'))"
+  - python -c "import os; print('3b =', os.environ.get('FOO'))"
+  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('4a =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - FOO=tests/objc python -c "import os; print('4b =',os.environ.get('FOO'))"
+  - DYLD_LIBRARY_PATH=tests/objc && python -c "import os; print('5a =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - FOO=tests/objc && python -c "import os; print('5b =',os.environ.get('FOO'))"
   - export DYLD_LIBRARY_PATH=/tests/objc && python setup.py test
