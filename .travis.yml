@@ -36,4 +36,6 @@ install:
   - python -m pip install .
 script:
   - make -f Makefile
+  - # Debug...
+  - which python
   - DYLD_LIBRARY_PATH=tests/objc python setup.py test
