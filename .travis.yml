@@ -4,39 +4,15 @@ branches:
 os: osx
 matrix:
   include:
-    # Note: The ordering of the environments is optimized so that the complete
-    # matrix runs as quickly as possible, while also providing the first results
-    # as early as possible.
-    #
-    # At the moment, build times for each environment are roughly as follows:
-    # xcode7.3: 18 minutes
-    # xcode8.3: 9 minutes
-    # xcode9.2: 9 minutes
-    # xcode10.1: 5 minutes
-    # xcode10.2: 6 minutes
-    # https://docs.travis-ci.com/user/reference/osx/#macos-version
-    #
-    # This data is based on the following build, which should be similar to most
-    # builds on the repo:
-    # https://travis-ci.org/pybee/rubicon-objc/builds/632125322
-    #
-    # Currently, Travis allows a maximum of two concurrent Mac builds per owner:
-    # https://blog.travis-ci.com/2017-09-22-macos-update
-    #
-    # With the following order, xcode7.3 will take up the first slot, and at the
-    # same time the three other environments use the second slot in sequence.
-    # xcode10.1 will finish first and provide some early results - most test
-    # failures happen in all environments and will be quickly reported this way.
-
     # OSX 10.11 El Capitan
     - osx_image: xcode7.3
+    # macOS 10.12 Sierra
+    - osx_image: xcode9.2
+    - osx_image: xcode8.3
     # macOS 10.13 High Sierra
     - osx_image: xcode10.1
     # macOS 10.14 Mojave
     - osx_image: xcode10.2
-    # macOS 10.12 Sierra
-    - osx_image: xcode9.2
-    - osx_image: xcode8.3
 language: generic
 cache:
   directories:
@@ -53,9 +29,9 @@ install:
   # minutes on macOS 10.11.
   - pyenv install --skip-existing 3.5.2
   - pyenv global 3.5.2
-  - pip install --upgrade pip setuptools
-  - pip install --upgrade tox
+  - python -m pip install --upgrade pip setuptools
+  - python -m pip install --upgrade tox
   - make -f Makefile
 script:
   - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - tox -e py35
+  - python -m tox -e py35
