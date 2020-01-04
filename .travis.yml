@@ -33,4 +33,9 @@ install:
   - python -m pip install .
 script:
   - make -f Makefile
-  - DYLD_LIBRARY_PATH=tests/objc python setup.py test
+  - python -c "import os; print('1 =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('2 =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
+  - python -c "import os; print('3 =', os.environ.get('DYLD_LIBRARY_PATH'))"
+  - DYLD_LIBRARY_PATH=tests/objc python -c "import os; print('4 =',os.environ.get('DYLD_LIBRARY_PATH'))"
+  - python setup.py test
