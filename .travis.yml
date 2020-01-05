@@ -38,7 +38,8 @@ script:
   # but the way Travis invokes Python through pyenv triggers macOS's System
   # Integrity Protection (SIP) (see https://apple.stackexchange.com/a/216815).
   # As a result, DYLD_LIBRARY_PATH isn't exposed to the Python process.
-  # Setting the variable in the subshell environment created with subprocess
-  # sets the environment variable in such a way that SIP doesn't intercept it.
-  # - python -c "import os, subprocess; env=os.environ.copy(); env['DYLD_LIBRARY_PATH']='tests/objc'; subprocess.run('python setup.py test'.split(), env=env)"
+  # Calling `$(pyenv which python)` instead of `python` uses a direct version
+  # of the python executable rather than the pyenv shims (which take a
+  # circuitous route performing multiple exec calls through various /usr/local
+  # locations). This avoids triggering SIP, so DYLD_LIBRARY_PATH is exposed.
   - DYLD_LIBRARY_PATH=tests/objc "$(pyenv which python)" setup.py test
