@@ -27,20 +27,24 @@ The procedure for cutting a new release is as follows:
 
    2. The release notes are up to date. If they are, the `changes
       <https://github.com/beeware/rubicon-objc/tree/master/changes>`__ directory
-      should be empty, except for the template.rst. If it isn't empty,
-      run::
-
-         $ towncrier --draft
-
-      to review the release notes, and then::
-
-         $ towncrier
-
-      to generate the updated release notes.
+      should be empty, except for the ``template.rst`` file.
 
    These two changes (the version bump and release notes update) should go
    through the normal pull request and review process. They should generally
    comprise the last PR merged before the release occurs.
+
+   If the version number *hasn't* been updated, or ``changes`` directory
+   *isn't* empty, you need to create a PR (using the normal development
+   process) that contains these changes. Run::
+
+         $ towncrier --draft
+
+   to review the release notes that will be included, and then::
+
+         $ towncrier
+
+   to generate the updated release notes. Submit the PR; once it's been
+   reviewed and merged, you can restart the release process from step 1.
 
 3. Tag the release, and push the tag upstream::
 
