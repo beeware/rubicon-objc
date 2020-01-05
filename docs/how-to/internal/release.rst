@@ -10,7 +10,7 @@ local clone of the Rubicon repository, pointing at the official repository. If
 all you have is a checkout of a personal fork of the Rubicon-ObjC repository,
 you can configure that checkout by running::
 
-    $ git remote add upstream git@github.com:beeware/rubicon-objc.git
+    $ git remote add upstream https://github.com/beeware/rubicon-objc.git
 
 The procedure for cutting a new release is as follows:
 
