@@ -28,7 +28,11 @@ jobs:
       env:
         GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        beefore --username github-actions --repository ${{ github.repository }} --pull-request ${{ github.event.number }} --commit ${{ github.event.pull_request.head.sha }} ${{ matrix.task }} .
+        if [ -z "${{ github.event.number }}" ]; then
+          beefore ${{ matrix.task }} .
+        else
+          beefore --username github-actions --repository ${{ github.repository }} --pull-request ${{ github.event.number }} --commit ${{ github.event.pull_request.head.sha }} ${{ matrix.task }} .
+        fi
 
   smoke:
     name: Smoke test (3.5)
