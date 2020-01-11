@@ -32,7 +32,7 @@ install:
   - python -m pip install --upgrade pip setuptools
   - python -m pip install .
 script:
-  - make -f Makefile
+  - make
   # This next line *should* be:
   #   DYLD_LIBRARY_PATH=tests/objc python setup.py test
   # but the way Travis invokes Python through pyenv triggers macOS's System
