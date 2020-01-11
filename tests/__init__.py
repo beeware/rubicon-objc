@@ -21,7 +21,7 @@ except ValueError:
         )
     except KeyError:
         raise ValueError(
-            "Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?)"
+            "Couldn't load Rubicon test harness library; DYLD_LIBRARY_PATH has not been set."
         )
 
 faulthandler.enable()
