@@ -90,8 +90,8 @@ Contributing
 If you experience problems with this backend, `log them on GitHub`_. If you
 want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
-.. _BeeWare suite: http://beeware.org
-.. _Read The Docs: http://rubicon-objc.readthedocs.org
+.. _BeeWare suite: https://beeware.org
+.. _Read The Docs: https://rubicon-objc.readthedocs.org
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
 .. _beeware/general: https://gitter.im/beeware/general
 .. _Code of Conduct: https://beeware.org/community/behavior/
