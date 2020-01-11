@@ -1,6 +1,6 @@
-==================================
-How to cut an Rubicon-ObjC release
-==================================
+=================================
+How to cut a Rubicon-ObjC release
+=================================
 
 The release infrastructure for Rubicon is semi-automated, using GitHub Actions
 to formally publish releases.
