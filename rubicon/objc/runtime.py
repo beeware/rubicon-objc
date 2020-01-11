@@ -81,7 +81,7 @@ def load_library(name):
         except OSError:
             pass
 
-    raise ValueError("Library {name!r} not found".format(name=name))
+    raise ValueError("Library {!r} not found".format(name))
 
 
 libc = load_library('c')
