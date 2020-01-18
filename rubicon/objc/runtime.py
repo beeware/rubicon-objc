@@ -83,17 +83,23 @@ Foundation = load_library('Foundation')
 
 @with_encoding(b'@')
 class objc_id(c_void_p):
-    """The `id <https://developer.apple.com/documentation/objectivec/id?language=objc>`__ type from ``<objc/objc.h>``."""
+    """The `id <https://developer.apple.com/documentation/objectivec/id?language=objc>`__ type
+    from ``<objc/objc.h>``.
+    """
 
 
 @with_encoding(b'@?')
 class objc_block(objc_id):
-    """The low-level type of block pointers. This does not correspond to a specific C type, because block pointer types in Objective-C are expressed using special syntax (similar to function pointers) and do not have a type name."""
+    """The low-level type of block pointers. This does not correspond to a specific C type, because block pointer types
+    in Objective-C are expressed using special syntax (similar to function pointers) and do not have a type name.
+    """
 
 
 @with_preferred_encoding(b':')
 class SEL(c_void_p):
-    """The `SEL <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__ type from ``<objc/objc.h>``."""
+    """The `SEL <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__ type
+    from ``<objc/objc.h>``.
+    """
 
     @property
     def name(self):
@@ -105,7 +111,9 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        """The constructor can be called with a :class:`bytes` or :class:`str` object to obtain a selector with that value. (The normal arguments supported by :class:`~ctypes.c_void_p` are still accepted.)"""
+        """The constructor can be called with a :class:`bytes` or :class:`str` object to obtain a selector
+        with that value. (The normal arguments supported by :class:`~ctypes.c_void_p` are still accepted.)
+        """
 
         if isinstance(init, (bytes, str)):
             self = libobjc.sel_registerName(ensure_bytes(init))
@@ -128,30 +136,43 @@ class SEL(c_void_p):
 
 @with_preferred_encoding(b'#')
 class Class(objc_id):
-    """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__ type from ``<objc/objc.h>``."""
+    """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__ type
+    from ``<objc/objc.h>``.
+    """
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/objective_c_runtime/imp?language=objc>`__ type from ``<objc/objc.h>``.
+    """The `IMP <https://developer.apple.com/documentation/objectivec/objective_c_runtime/imp?language=objc>`__ type
+    from ``<objc/objc.h>``.
 
-    An :class:`IMP` cannot be called directly --- it must be cast to the correct :func:`~ctypes.CFUNCTYPE` first, to provide the necessary information about its signature.
+    An :class:`IMP` cannot be called directly --- it must be cast to the correct :func:`~ctypes.CFUNCTYPE` first,
+    to provide the necessary information about its signature.
     """
 
 
 class Method(c_void_p):
-    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__ type from ``<objc/runtime.h>``."""
+    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__ type
+    from ``<objc/runtime.h>``.
+    """
 
 
 class Ivar(c_void_p):
-    """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?language=objc>`__ type from ``<objc/runtime.h>``."""
+    """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?language=objc>`__ type
+    from ``<objc/runtime.h>``.
+    """
 
 
 class objc_property_t(c_void_p):
-    """The `objc_property_t <https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc>`__ type from ``<objc/runtime.h>``."""
+    """The `objc_property_t <https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc>`__
+    type from ``<objc/runtime.h>``.
+    """
 
 
 class objc_property_attribute_t(Structure):
-    """The `objc_property_attribute_t <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__ structure from ``<objc/runtime.h>``."""
+    """The `objc_property_attribute_t
+    <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__ structure
+    from ``<objc/runtime.h>``.
+    """
 
     _fields_ = [
         ('name', c_char_p),
@@ -395,7 +416,8 @@ except AttributeError:
     def object_isClass(obj):
         """Return whether the given Objective-C object is a class (or a metaclass).
 
-        This is the emulated version of the object_isClass runtime function, for systems older than OS X 10.10 or iOS 8, where the real function doesn't exist yet.
+        This is the emulated version of the object_isClass runtime function, for systems older than OS X 10.10
+        or iOS 8, where the real function doesn't exist yet.
         """
 
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
@@ -440,7 +462,9 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """The `objc_method_description <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__ structure from ``<objc/runtime.h>``."""
+    """The `objc_method_description
+    <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__ structure
+    from ``<objc/runtime.h>``."""
 
     _fields_ = [
         ('name', SEL),
@@ -533,7 +557,8 @@ def ensure_bytes(x):
 def get_class(name):
     """Get the Objective-C class with the given name as a :class:`Class` object.
 
-    If no class with the given name is loaded, ``None`` is returned, and the Objective-C runtime will log a warning message.
+    If no class with the given name is loaded, ``None`` is returned, and the Objective-C runtime will log
+    a warning message.
     """
 
     return libobjc.objc_getClass(ensure_bytes(name))
@@ -543,7 +568,9 @@ def get_class(name):
 # http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
-    """Return whether a method returning the given type must be called using ``objc_msgSend_stret`` on the current system."""
+    """Return whether a method returning the given type must be called using ``objc_msgSend_stret``
+    on the current system.
+    """
 
     if type(restype) != type(Structure):
         # Not needed when restype is not a structure.
@@ -567,7 +594,9 @@ def should_use_stret(restype):
 
 # http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
-    """Return whether a method returning the given type must be called using ``objc_msgSend_fpret`` on the current system."""
+    """Return whether a method returning the given type must be called using ``objc_msgSend_fpret``
+    on the current system.
+    """
 
     if __x86_64__:
         # On x86_64: Use only for long double.
@@ -585,11 +614,14 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
 
-    :param receiver: The object on which to call the method. This may be an Objective-C object (as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`), or an Objective-C class name (as a :class:`str` or :class:`bytes`).
+    :param receiver: The object on which to call the method. This may be an Objective-C object
+        (as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`),
+        or an Objective-C class name (as a :class:`str` or :class:`bytes`).
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list (i. e. all arguments are treated as C varargs).
+    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list
+        (i. e. all arguments are treated as C varargs).
     """
 
     try:
@@ -636,7 +668,9 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
 
 
 class objc_super(Structure):
-    """The `objc_super <https://developer.apple.com/documentation/objectivec/objc_super?language=objc>`__ structure from ``<objc/message.h>``."""
+    """The `objc_super <https://developer.apple.com/documentation/objectivec/objc_super?language=objc>`__ structure
+    from ``<objc/message.h>``.
+    """
 
     _fields_ = [
         ('receiver', objc_id),
@@ -646,22 +680,33 @@ class objc_super(Structure):
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
 def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
-    """In the context of the given class, call a superclass method on the receiver with the given selector and arguments.
+    """In the context of the given class, call a superclass method on the receiver
+    with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[super sel:args]`` in the class ``cls``.
 
-    In practice, the first parameter should always be the special variable ``__class__``, and the second parameter should be ``self``. A typical :func:`send_super` call would be ``send_super(__class__, self, 'init')`` for example.
+    In practice, the first parameter should always be the special variable ``__class__``,
+    and the second parameter should be ``self``.
+    A typical :func:`send_super` call would be ``send_super(__class__, self, 'init')`` for example.
 
-    The special variable ``__class__`` is defined by Python and stands for the class object that is being created by the current ``class`` block. The exact reasons why ``__class__`` must be passed manually are somewhat technical, and are not directly relevant to users of :func:`send_super`. For a full explanation, see issue `pybee/rubicon-objc#107 <https://github.com/pybee/rubicon-objc/issues/107>`__ and PR `pybee/rubicon-objc#108 <https://github.com/pybee/rubicon-objc/pull/108>`__.
+    The special variable ``__class__`` is defined by Python and stands for the class object that is being created
+    by the current ``class`` block. The exact reasons why ``__class__`` must be passed manually are somewhat technical,
+    and are not directly relevant to users of :func:`send_super`. For a full explanation,
+    see issue `pybee/rubicon-objc#107 <https://github.com/pybee/rubicon-objc/issues/107>`__
+    and PR `pybee/rubicon-objc#108 <https://github.com/pybee/rubicon-objc/pull/108>`__.
 
-    Although it is possible to pass other values than ``__class__`` and ``self`` for the first two parameters, this is strongly discouraged. Doing so is not supported by the Objective-C language, and relies on implementation details of the superclasses.
+    Although it is possible to pass other values than ``__class__`` and ``self`` for the first two parameters,
+    this is strongly discouraged. Doing so is not supported by the Objective-C language,
+    and relies on implementation details of the superclasses.
 
     :param cls: The class in whose context the ``super`` call is happening, as an :class:`ObjCClass` or :class:`Class`.
-    :param receiver: The object on which to call the method, as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`.
+    :param receiver: The object on which to call the method, as an :class:`ObjCInstance`, :class:`objc_id`,
+        or :class:`~ctypes.c_void_p`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list (i. e. all arguments are treated as C varargs).
+    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list
+        (i. e. all arguments are treated as C varargs).
     """
 
     # Unwrap ObjCClass to Class if necessary
@@ -722,7 +767,8 @@ def add_method(cls, selector, method, encoding):
     :param cls: The Objective-C class to which to add the method, as an :class:`ObjCClass` or :class:`Class`.
     :param selector: The name for the new method, as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param method: The method implementation, as a Python callable or a C function address.
-    :param encoding: The method's signature (return type and argument types) as a :class:`list`. The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
+    :param encoding: The method's signature (return type and argument types) as a :class:`list`.
+        The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
     """
 
     signature = [ctype_for_type(tp) for tp in encoding]

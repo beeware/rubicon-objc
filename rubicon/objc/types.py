@@ -654,8 +654,8 @@ class UnknownPointer(c_void_p):
 
     Not to be confused with a ``^v`` void pointer.
 
-    Usually a ``^?`` is a function pointer, but because the encoding doesn't contain the function signature, you need to
-    manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
+    Usually a ``^?`` is a function pointer, but because the encoding doesn't contain the function signature,
+    you need to manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
 
     ``^{?}`` and ``^(?)`` are pointers to a structure or union (respectively) with unknown name and fields. Such a type
     also cannot be used meaningfully without casting it to the correct pointer type first.
