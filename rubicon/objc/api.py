@@ -113,7 +113,7 @@ class ObjCMethod(object):
         The passed arguments are automatically converted to the expected argument types as needed:
 
         * :class:`enum.Enum` objects are replaced by their :attr:`~enum.Enum.value` before further conversion
-        * For parameters that expect a block, Python callables are converted to :class:`Block`\s
+        * For parameters that expect a block, Python callables are converted to :class:`Block`\\s
         * For parameters that expect an Objective-C object, Python objects are converted using :func:`ns_from_py`
         * For parameters that expect a C structure, Python sequences are converted
           using :func:`~rubicon.objc.types.compound_value_for_sequence`.
@@ -541,7 +541,7 @@ def unregister_type_for_objcclass(objcclass):
 def get_type_for_objcclass_map():
     """Get a copy of all currently registered :class:`ObjCInstance` subclasses as a mapping.
 
-    Keys are Objective-C class addresses as :class:`int`\s.
+    Keys are Objective-C class addresses as :class:`int`\\s.
     """
 
     return dict(_type_for_objcclass_map)
@@ -577,7 +577,7 @@ class ObjCInstance(object):
 
         :class:`ObjCInstance` objects are cached --- this means that for every Objective-C object
         there can be at most one :class:`ObjCInstance` object. Rubicon will automatically create
-        new :class:`ObjCInstance`\s or return existing ones as needed.
+        new :class:`ObjCInstance`\\s or return existing ones as needed.
 
         The returned object's Python class is not always exactly :class:`ObjCInstance`. For example,
         if the passed pointer refers to a class or a metaclass, an instance of :class:`ObjCClass`
@@ -903,7 +903,7 @@ class ObjCClass(ObjCInstance, type):
         and is used to create a new Objective-C class from Python (see :ref:`custom-classes-and-protocols`).
         The bases list must contain exactly one :class:`ObjCClass` to be extended by the new class.
         An optional ``protocols`` keyword argument is also accepted,
-        which must be a sequence of :class:`ObjCProtocol`\s for the new class to adopt.
+        which must be a sequence of :class:`ObjCProtocol`\\s for the new class to adopt.
         """
 
         if (bases is None) ^ (attrs is None):
@@ -1137,7 +1137,7 @@ class ObjCClass(ObjCInstance, type):
 
         If the given object is not an Objective-C object, ``False`` is returned.
 
-        This method allows using :class:`ObjCClass`\es as the second argument of :func:`isinstance`:
+        This method allows using :class:`ObjCClass`\\es as the second argument of :func:`isinstance`:
         ``isinstance(obj, NSString)`` is equivalent to ``obj.isKindOfClass(NSString)``.
         """
 
@@ -1151,7 +1151,7 @@ class ObjCClass(ObjCInstance, type):
 
         If the given object is not an Objective-C class, :class:`TypeError` is raised.
 
-        This method allows using :class:`ObjCClass`\es as the second argument of :func:`issubclass`:
+        This method allows using :class:`ObjCClass`\\es as the second argument of :func:`issubclass`:
         ``issubclass(cls, NSValue)`` is equivalent to ``obj.isSubclassOfClass(NSValue)``.
         """
 
@@ -1464,7 +1464,7 @@ class ObjCProtocol(ObjCInstance):
 
         If the given object is not an Objective-C object, ``False`` is returned.
 
-        This method allows using :class:`ObjCProtocol`\s as the second argument of :func:`isinstance`:
+        This method allows using :class:`ObjCProtocol`\\s as the second argument of :func:`isinstance`:
         ``isinstance(obj, NSCopying)`` is equivalent to ``obj.conformsToProtocol(NSCopying)``.
         """
 
@@ -1478,7 +1478,7 @@ class ObjCProtocol(ObjCInstance):
 
         If the given object is not an Objective-C class or protocol, :class:`TypeError` is raised.
 
-        This method allows using :class:`ObjCProtocol`\s as the second argument of :func:`issubclass`:
+        This method allows using :class:`ObjCProtocol`\\s as the second argument of :func:`issubclass`:
         ``issubclass(cls, NSCopying)`` is equivalent to ``cls.conformsToProtocol(NSCopying)``,
         and ``issubclass(proto, NSCopying)`` is equivalent to ``protocol_conformsToProtocol(proto, NSCopying))``.
         """
@@ -1697,7 +1697,7 @@ class Block:
 
         The return type and parameter types can be specified using the ``restype`` and ``arg_types`` parameters.
         If these are not given, the types must instead be present as annotations on the callable object,
-        in the same form as used for :func:`objc_method`\s.
+        in the same form as used for :func:`objc_method`\\s.
         """
 
         if not callable(func):
