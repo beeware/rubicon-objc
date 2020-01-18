@@ -1,5 +1,3 @@
-.. _tutorial-2:
-
 ===================================
 Tutorial 2 - Writing your own class
 ===================================
@@ -70,7 +68,7 @@ Having declared the class, you can then instantiate and use it::
     18.5
 
 Objective-C properties
-----------------------
+======================
 
 When we defined the initializer for `Handler`, we stored the provided value
 as the `value` attribute of the class. However, as this attribute wasn't
@@ -96,7 +94,7 @@ This doesn't change anything about how you access or modify the attribute - it
 just means that Objective-C code will be able to see the attribute as well.
 
 Class naming
-------------
+============
 
 In this revised example, you'll note that we also used a different class name
 - `PureHandler`. This was deliberate, because Objective-C doesn't have any
@@ -114,7 +112,7 @@ You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.
 
 What, no `__init__()`?
-----------------------
+======================
 
 You'll also notice that our example code *doesn't* have an `__init__()` method
 like you'd normally expect of Python code. As we're defining an Objective-C
@@ -123,6 +121,6 @@ defining initializer methods that are visible to the Objective-C runtime, and
 invoking them over that bridge.
 
 Next steps
-----------
+==========
 
 ???

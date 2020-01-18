@@ -1,8 +1,6 @@
-.. _contribute:
-
-============================
-How to contribute to Rubicon
-============================
+=================================
+How to contribute code to Rubicon
+=================================
 
 If you experience problems with Rubicon, `log them on GitHub`_. If you want
 to contribute code, please `fork the code`_ and `submit a pull request`_.

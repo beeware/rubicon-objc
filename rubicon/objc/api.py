@@ -130,8 +130,8 @@ class ObjCMethod(object):
                     if arg is None:
                         # allow for 'nil' block args, which some objc methods accept
                         arg = ns_from_py(arg)
-                    elif (callable(arg) and
-                          not isinstance(arg, Block)):  # <-- guard against someone someday making Block callable
+                    elif (callable(arg)
+                          and not isinstance(arg, Block)):  # <-- guard against someone someday making Block callable
                         # Note: We need to keep the temp. Block instance
                         # around at least until the objc method is called.
                         # _as_parameter_ is used in the actual ctypes marshalling below.
@@ -154,8 +154,8 @@ class ObjCMethod(object):
         except ArgumentError as error:
             # Add more useful info to argument error exceptions, then reraise.
             error.args = (
-                error.args[0] +
-                ' (selector = {self.name}, argtypes = {self.argtypes}, encoding = {self.encoding})'
+                error.args[0]
+                + ' (selector = {self.name}, argtypes = {self.argtypes}, encoding = {self.encoding})'
                 .format(self=self),
             )
             raise

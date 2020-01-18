@@ -23,9 +23,9 @@ setup(
     long_description=long_description,
     author='Russell Keith-Magee',
     author_email='russell@keith-magee.com',
-    url='http://pybee.org/rubicon',
+    url='http://beeware.org/rubicon',
     packages=find_packages(exclude=['tests']),
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     namespace_packages=['rubicon'],
     license='New BSD',
     classifiers=[
@@ -34,7 +34,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Objective C',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -42,10 +41,10 @@ setup(
         'Topic :: Software Development',
     ],
     test_suite='tests',
-    package_urls={
-        'Funding': 'https://pybee.org/contributing/membership/',
+    project_urls={
+        'Funding': 'https://beeware.org/contributing/membership/',
         'Documentation': 'https://rubicon-objc.readthedocs.io/en/latest/',
-        'Tracker': 'https://github.com/pybee/rubicon-objc/issues',
-        'Source': 'https://github.com/pybee/rubicon-objc',
+        'Tracker': 'https://github.com/beeware/rubicon-objc/issues',
+        'Source': 'https://github.com/beeware/rubicon-objc',
     },
 )
