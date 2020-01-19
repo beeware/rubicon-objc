@@ -660,7 +660,7 @@ class ObjCInstance(object):
 
     def __repr__(self):
         """Get a debugging representation of ``self``, which includes the Objective-C object's address, class,
-        and ``deubgDescription``.
+        and ``debugDescription``.
         """
 
         return "<%s.%s %#x: %s at %#x: %s>" % (
