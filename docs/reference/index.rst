@@ -7,6 +7,7 @@ Reference
 
     rubicon-objc
     rubicon-objc-api
+    rubicon-objc-eventloop
     rubicon-objc-runtime
     rubicon-objc-types
 
