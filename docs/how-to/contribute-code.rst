@@ -44,6 +44,6 @@ By default this will run the test suite multiple times, once on each Python vers
 
 .. code-block:: sh
 
-    (venv) $ tox -e py36-default
+    (venv) $ tox -e py37
 
 Now you are ready to start hacking on Rubicon. Have fun!
