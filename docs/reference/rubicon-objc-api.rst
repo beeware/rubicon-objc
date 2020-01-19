@@ -191,6 +191,14 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
 
         Python-style mapping interface.
 
+        .. note::
+
+            Unlike most Python mappings, :class:`NSDictionary`'s :attr:`keys`, :attr:`values`, and :attr:`items` methods don't return dynamic views of the dictionary's keys, values, and items.
+
+            :attr:`keys` and :attr:`values` return lists that are created each time the methods are called, which can have an effect on performance and memory usage for large dictionaries. To avoid this, you can cache the return values of :attr:`keys` and :attr:`values`, or convert the :class:`NSDictionary` to a Python :class:`dict` beforehand.
+
+            :attr:`items` is currently implemented as a generator, meaning that it returns a single-use iterator. If you need to iterate over :attr:`items` more than once or perform other operations on it, you should convert it to a Python :class:`set` or :class:`list` first.
+
 .. class::
     NSMutableDictionary
 
