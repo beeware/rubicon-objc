@@ -80,6 +80,10 @@ Standard Objective-C and Foundation classes
 
 The following classes from the `Objective-C runtime <https://developer.apple.com/documentation/objectivec?language=objc>`__ and the `Foundation <https://developer.apple.com/documentation/foundation?language=objc>`__ framework are provided as :class:`ObjCClass`\es for convenience. (Other classes not listed here can be looked up by passing a class name to the :class:`ObjCClass` constructor.)
 
+.. note::
+
+    None of the following classes have a usable Python-style constructor - for example, you *cannot* call ``NSString("hello")`` to create an Objective-C string from a Python string. To create instances of these classes, you should use :func:`ns_from_py` (also called :func:`at`): ``ns_from_py("hello")`` returns a :class:`NSString` instance with the value ``hello``.
+
 .. class::
     NSObject
 
