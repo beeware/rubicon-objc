@@ -91,9 +91,12 @@ objects, which are automatically converted to their Objective-C counterparts.
 For example, a Python :class:`str` is converted to an ``NSString``,
 :class:`bytes` to ``NSData``, etc. Collections are also supported:
 :class:`list` and :class:`dict` are converted to ``NSArray`` and
-``NSDictionary``, and their elements are converted recursively using the same
-rules. (These conversions can also be performed manually using the
-:func:`~rubicon.objc.api.at` function.)
+``NSDictionary``, and their elements are converted recursively.
+
+.. note::
+
+    All of these conversions can also be performed manually - see
+    :ref:`manual_conversions` for details.
 
 Return value conversion and wrapping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -104,11 +107,22 @@ Primitive values returned from methods are converted using the usual
 
 Objective-C objects are automatically returned as
 :class:`~rubicon.objc.api.ObjCInstance` objects, so you can call methods on
-them and access their properties. For a few standard Foundation classes,
-Rubicon also provides Python-style methods and operators:
+them and access their properties. In some cases, Rubicon also provides
+additional Python methods on Objective-C objects -
+see :ref:`python_style_apis_for_objc` for details.
+
+.. _python_style_apis_for_objc:
+
+Python-style APIs and methods for Objective-C objects
+-----------------------------------------------------
+
+For some standard Foundation classes, such as lists and dictionaries,
+Rubicon provides additional Python methods to make them behave more like their
+Python counterparts. This allows using Foundation objects in place of regular
+Python objects, so that you do not need to convert them manually.
 
 Strings
-"""""""
+^^^^^^^
 
 :class:`~rubicon.objc.api.NSString` objects behave almost exactly like Python
 :class:`str` objects - they can be sliced, concatenated, compared, etc. with
@@ -188,7 +202,7 @@ for your needs.
     :class:`str`, because the former is based on UTF-16.
 
 Lists
-"""""
+^^^^^
 
 :class:`~rubicon.objc.api.NSArray` objects behave like any other Python
 sequence - they can be indexed, sliced, etc. and standard operations like
@@ -266,7 +280,7 @@ Sequence methods like ``index`` and ``pop`` are also supported:
     :ref:`argument_conversion`.
 
 Dictionaries
-""""""""""""
+^^^^^^^^^^^^
 
 :class:`~rubicon.objc.api.NSDictionary` objects behave like any other Python
 mapping - their items can be accessed and standard operations like :func:`len`
@@ -331,3 +345,26 @@ Mapping methods like ``keys`` and ``values`` are also supported:
     Python objects stored in an :class:`~rubicon.objc.api.NSDictionary` are
     converted to Objective-C objects using the rules described in
     :ref:`argument_conversion`.
+
+.. _manual_conversions:
+
+Manual conversions
+------------------
+
+If necessary, you can also manually call Rubicon's type conversion functions, to convert objects between Python and Objective-C when Rubicon doesn't do so automatically.
+
+Converting from Python to Objective-C
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The function :func:`~rubicon.objc.api.ns_from_py` (also available as :func:`~rubicon.objc.api.at` for short) can convert most standard Python objects to Foundation equivalents. For a full list of possible conversions, see the reference documentation for :func:`~rubicon.objc.api.ns_from_py`.
+
+These conversions are performed automatically when a Python object is passed into an Objective-C method parameter that expects an object - in that case you do not need to call :func:`~rubicon.objc.api.ns_from_py` manually (see :ref:`argument_conversion`).
+
+Converting from Objective-C to Python
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The function :func:`~rubicon.objc.api.py_from_ns` can convert many common Foundation objects to Python equivalents. For a full list of possible conversions, see the reference documentation for :func:`~rubicon.objc.api.py_from_ns`.
+
+These conversions are not performed automatically by Rubicon. For example, if an Objective-C method returns an ``NSString``, Rubicon will return it as an :class:`~rubicon.objc.api.ObjCInstance` (with some additional Python methods - see :ref:`python_style_apis_for_objc`). Using :func:`~rubicon.objc.api.py_from_ns`, you can convert the ``NSString`` to a real Python ``str``.
+
+When converting collections, such as ``NSArray`` or ``NSDictionary``, :func:`~rubicon.objc.api.py_from_ns` will convert them recursively to a pure Python object. For example, if ``nsarray`` is an ``NSArray`` containing ``NSString``\s, ``py_from_ns(nsarray)`` will return a ``list`` of ``str``\s. In most cases, that is the desired behavior, but you can also avoid this recursive conversion by passing the Foundation collection into a Python collection constructor: for example ``list(nsarray)`` will return a ``list`` of ``NSString``\s.

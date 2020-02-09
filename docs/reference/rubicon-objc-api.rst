@@ -110,9 +110,21 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
 
 .. class::
     NSNumber
+
+    The `NSNumber <https://developer.apple.com/documentation/foundation/nsnumber?language=objc>`__ class from ``<Foundation/NSValue.h>``.
+
+    .. note::
+
+        This class can be converted to and from standard Python primitives (``bool``, ``int``, ``float``) using :func:`py_from_ns` and :func:`ns_from_py`.
+
+.. class::
     NSDecimalNumber
 
-    The `NSNumber <https://developer.apple.com/documentation/foundation/nsnumber?language=objc>`__ and `NSDecimalNumber <https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc>`__ classes from ``<Foundation/NSValue.h>`` and ``<Foundation/NSDecimalNumber.h>``.
+    The `NSDecimalNumber <https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc>`__ class from ``<Foundation/NSDecimalNumber.h>``.
+
+    .. note::
+
+        This class can be converted to and from Python ``decimal.Decimal`` using :func:`py_from_ns` and :func:`ns_from_py`.
 
 .. class::
     NSString
@@ -122,6 +134,8 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
     This class also supports all methods that :class:`str` does.
 
     .. note::
+
+        This class can be converted to and from Python ``str`` using :func:`py_from_ns` and :func:`ns_from_py`. You can also call ``str(nsstring)`` to convert a ``NSString`` to ``str``.
 
         :class:`NSString` objects consist of UTF-16 code units, unlike :class:`str`, which consists of Unicode code points. All :class:`NSString` indices and iteration are based on UTF-16, even when using the Python-style operations/methods. If indexing or iteration based on code points is required, convert the :class:`NSString` to :class:`str` first.
 
@@ -139,10 +153,22 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
 
     The `NSData <https://developer.apple.com/documentation/foundation/nsdata?language=objc>`__ class from ``<Foundation/NSData.h>``.
 
+    .. note::
+
+        This class can be converted to and from Python ``bytes`` using :func:`py_from_ns` and :func:`ns_from_py`.
+
 .. class::
     NSArray
 
     The `NSArray <https://developer.apple.com/documentation/foundation/nsarray?language=objc>`__ class from ``<Foundation/NSArray.h>``.
+
+    .. note::
+
+        This class can be converted to and from Python ``list`` using :func:`py_from_ns` and :func:`ns_from_py`.
+
+        ``py_from_ns(nsarray)`` will recursively convert ``nsarray``'s elements to Python objects, where possible. To avoid this recursive conversion, use ``list(nsarray)`` instead.
+
+        ``ns_from_py(pylist)`` will recursively convert ``pylist``'s elements to Objective-C. As there is no way to store Python object references as Objective-C objects yet, this recursive conversion cannot be avoided. If any of ``pylist``'s elements cannot be converted to Objective-C, an error is raised.
 
     .. method::
         __getitem__(index)
@@ -162,6 +188,10 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
 
     The `NSMutableArray <https://developer.apple.com/documentation/foundation/nsmutablearray?language=objc>`__ class from ``<Foundation/NSArray.h>``.
 
+    .. note::
+
+        This class can be converted to and from Python exactly like its superclass ``NSArray``.
+
     .. method::
         __setitem__(index, value)
         __delitem__(index)
@@ -179,6 +209,14 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
     NSDictionary
 
     The `NSDictionary <https://developer.apple.com/documentation/foundation/nsdictionary?language=objc>`__ class from ``<Foundation/NSDictionary.h>``.
+
+    .. note::
+
+        This class can be converted to and from Python ``dict`` using :func:`py_from_ns` and :func:`ns_from_py`.
+
+        ``py_from_ns(nsdict)`` will recursively convert ``nsdict``'s keys and values to Python objects, where possible. To avoid the recursive conversion of the values, use ``{py_from_ns(k): v for k, v in nsdict.items()}``. The conversion of the keys cannot be avoided, because Python ``dict`` keys need to be hashable, which :class:`ObjCInstance` is not. If any of the keys convert to a Python object that is not hashable, an error is raised (regardless of which conversion method you use).
+
+        ``ns_from_py(pydict)`` will recursively convert ``pydict``'s keys and values to Objective-C. As there is no way to store Python object references as Objective-C objects yet, this recursive conversion cannot be avoided. If any of ``pydict``'s keys or values cannot be converted to Objective-C, an error is raised.
 
     .. method::
         __getitem__(key)
@@ -207,6 +245,10 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
     NSMutableDictionary
 
     The `NSMutableDictionary <https://developer.apple.com/documentation/foundation/nsmutabledictionary?language=objc>`__ class from ``<Foundation/NSDictionary.h>``.
+
+    .. note::
+
+        This class can be converted to and from Python exactly like its superclass ``NSDictionary``.
 
     .. method::
         __setitem__(key, value)
