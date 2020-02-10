@@ -90,8 +90,18 @@ class objc_id(c_void_p):
 
 @with_encoding(b'@?')
 class objc_block(objc_id):
-    """The low-level type of block pointers. This does not correspond to a specific C type, because block pointer types
-    in Objective-C are expressed using special syntax (similar to function pointers) and do not have a type name.
+    """The low-level type of block pointers.
+
+    This type tells Rubicon's internals that the object in question is a block and not just a regular Objective-C
+    object, which affects method argument and return value conversions. For more details, see :ref:`objc_blocks`.
+
+    .. note::
+
+        This type does not correspond to an actual C type or Objective-C class. Although the internal structure of
+        block objects is documented, as well as the fact that they are Objective-C objects, they do not have a
+        documented type or class name and are not fully defined in any header file.
+
+        Aside from the special conversion behavior, this type is equivalent to :class:`objc_id`.
     """
 
 

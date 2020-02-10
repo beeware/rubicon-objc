@@ -380,10 +380,63 @@ Defining properties and ivars
 .. autofunction:: get_ivar
 .. autofunction:: set_ivar
 
+.. _objc_blocks:
+
 Objective-C blocks
 ------------------
 
+Blocks are the Objective-C equivalent of function objects, so Rubicon provides ways to call Objective-C blocks from Python and to pass Python callables to Objective-C as blocks.
+
+Automatic conversion
+^^^^^^^^^^^^^^^^^^^^
+
+If an Objective-C method returns a block (according to its type encoding), Rubicon will convert the return value to a special :class:`ObjCInstance` that can be called in Python:
+
+.. code-block:: python
+
+    block = an_objc_instance.methodReturningABlock()
+    res = block(arg, ...)
+
+Similarly, if an Objective-C method has a parameter that expects a block, you can pass in a Python callable object, and it will be converted to an Objective-C block. In this case, the callable object needs to have parameter and return type annotations, so that Rubicon can expose this type information to the Objective-C runtime:
+
+.. code-block:: python
+
+    def result_handler(res: objc_id) -> None:
+        print(ObjCInstance(res))
+    
+    an_objc_instance.doSomethingWithResultHandler(result_handler)
+
+If you are writing a custom Objective-C method (see :ref:`custom-classes-and-protocols`), you can annotate parameter or return types using :class:`~rubicon.objc.runtime.objc_block` so that Rubicon converts them appropriately:
+
+.. code-block:: python
+
+    class AnObjCClass(NSObject):
+        @objc_method
+        def methodReturningABlock() -> objc_block:
+            def the_block(arg: NSInteger) -> NSUInteger:
+                return abs(arg)
+            return the_block
+
+        @objc_method
+        def doSomethingWithResultHandler_(result_handler: objc_block) -> None:
+            res = SomeClass.someMethod()
+            result_handler(res)
+
+.. note::
+
+    These automatic conversions are mostly equivalent to the manual conversions described in the next section. There are internal technical differences between automatic and manual conversions, but they are not noticeable to most users.
+
+    The internals of automatic conversion and :class:`objc_block` handling may change in the future, so if you need more control over the block conversion process, you should use the manual conversions described in the next section.
+
+Manual conversion
+^^^^^^^^^^^^^^^^^
+
+These classes are used to manually convert blocks to Python callables and vice versa. You may need to use them to perform these conversions outside of Objective-C method calls, or if you need more control over the block's type signature.
+
 .. autoclass:: ObjCBlock(pointer, [return_type, *arg_types])
+
+    .. automethod:: __call__
+
 .. autoclass:: Block(func, [restype, *argtypes])
 
 Defining custom subclasses of :class:`ObjCInstance`

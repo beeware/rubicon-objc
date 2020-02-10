@@ -1633,17 +1633,28 @@ class BlockConsts:
 class ObjCBlock:
     """Python wrapper for an Objective-C block object.
 
-    This class can be called explicitly to wrap an Objective-C block pointer so that it can be called from Python.
-    In general, this conversion cannot be performed automatically, because there is no way to determine at runtime
-    whether an Objective-C object is a block.
+    This class is used to manually wrap an Objective-C block so that it can be called from Python. Usually Rubicon will
+    do this automatically, if the block object was returned from an Objective-C method whose return type is declared
+    to be a block type. If this automatic detection fails, for example if the method's return type is generic ``id``,
+    Rubicon has no way to tell that the object in question is a block rather than a regular Objective-C object.
+    In that case, the object needs to be manually wrapped using :class:`ObjCBlock`.
     """
 
     def __init__(self, pointer, return_type=AUTO, *arg_types):
-        """The constructor takes a block pointer as an :class:`ObjCInstance` or :class:`~rubicon.objc.runtime.objc_id`.
+        """The constructor takes a block object, which can be either an :class:`ObjCInstance`, or a raw
+        :class:`~rubicon.objc.runtime.objc_id` pointer.
 
-        The ``return_type`` and ``arg_types`` parameters can optionally be used to specify the block's return type
-        and parameter types. In most cases this information can be determined at runtime,
-        in which case these parameters are not needed.
+        .. note::
+
+            :class:`~rubicon.objc.runtime.objc_block` is also accepted, because it is a subclass of
+            :class:`~rubicon.objc.runtime.objc_id`). Normally you do not need to make use of this,
+            because in most cases Rubicon will automatically convert :class:`~rubicon.objc.runtime.objc_block`\\s
+            to a callable object.
+
+        In most cases, Rubicon can automatically determine the block's return type and parameter types.
+        If a block object doesn't have return/parameter type information at runtime, Rubicon will raise an error when
+        attempting to convert it. In that case, you need to explicitly pass the correct return type and parameter types
+        to :class:`ObjCBlock` using the ``return_type`` and ``arg_types`` parameters.
         """
 
         if isinstance(pointer, ObjCInstance):
@@ -1673,6 +1684,12 @@ class ObjCBlock:
         return representation
 
     def __call__(self, *args):
+        """Invoke the block object with the given arguments.
+
+        The arguments and return value are converted from/to Python objects according to the default ``ctypes`` rules,
+        based on the block's return and parameter types.
+        """
+
         return self.struct.contents.invoke(self.pointer, *args)
 
 
@@ -1688,16 +1705,33 @@ NOTHING = object()
 
 
 class Block:
-    """A wrapper that exposes a Python callable object to Objective-C as a block."""
+    """A wrapper that exposes a Python callable object to Objective-C as a block.
+
+    .. note::
+
+        :class:`Block` instances are currently *not* callable from Python, unlike :class:`ObjCBlock`.
+    """
 
     _keep_alive_blocks_ = {}
 
     def __init__(self, func, restype=NOTHING, *arg_types):
         """The constructor accepts any Python callable object.
 
-        The return type and parameter types can be specified using the ``restype`` and ``arg_types`` parameters.
-        If these are not given, the types must instead be present as annotations on the callable object,
-        in the same form as used for :func:`objc_method`\\s.
+        If the callable has parameter and return type annotations, they are used as the block's parameter and return
+        types. This allows using :class:`Block` as a decorator:
+
+        .. code-block:: python
+
+            @Block
+            def the_block(arg: NSInteger) -> NSUInteger:
+                return abs(arg)
+
+        For callables without type annotations, the parameter and return types need to be passed to the :class:`Block`
+        constructor in the ``restype`` and ``arg_types`` arguments:
+
+        .. code-block:: python
+
+            the_block = Block(abs, NSUInteger, NSInteger)
         """
 
         if not callable(func):
