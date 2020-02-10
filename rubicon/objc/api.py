@@ -356,6 +356,13 @@ class objc_ivar(object):
 class objc_property(object):
     """Defines a property in a custom Objective-C class or protocol.
 
+    This class should be called in the body of an Objective-C subclass or protocol, for example:
+
+    .. code-block:: python
+
+        class MySubclass(NSObject):
+            counter = objc_property(NSInteger)
+
     The property type may be any :mod:`ctypes` type, as well as any of the Python types
     accepted by :func:`~rubicon.objc.types.ctype_for_type`.
 
