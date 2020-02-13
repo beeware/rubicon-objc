@@ -64,11 +64,26 @@ def encoding_from_annotation(f, offset=1):
 
 
 class ObjCMethod(object):
-    """This represents an unbound Objective-C method (really an IMP)."""
+    """An unbound Objective-C method. This is Rubicon's high-level equivalent of :class:`~rubicon.objc.runtime.Method`.
+
+    :class:`ObjCMethod` objects normally don't need to be used directly. To call a method on an Objective-C object,
+    you should use the method call syntax supported by :class:`ObjCInstance`,
+    or the :func:`~rubicon.objc.runtime.send_message` function.
+
+    .. note::
+
+        This is *not* the same class as the one used for *bound* Objective-C methods,
+        as returned from :meth:`ObjCInstance.__getattr__`. Currently, Rubicon doesn't provide any documented way
+        to get an unbound :class:`ObjCMethod` object for an instance method of an :class:`ObjCClass`.
+    """
 
     def __init__(self, method):
-        """Initialize with an Objective-C Method pointer.  We then determine
-        the return type and argument type information of the method."""
+        """The constructor takes a :class:`~rubicon.objc.runtime.Method` object,
+        whose information is used to create an :class:`ObjCMethod`.
+        This can be used to call or introspect a :class:`~rubicon.objc.runtime.Method` pointer
+        received from the Objective-C runtime.
+        """
+
         self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
         self.pyname = self.name.replace(b':', b'_')
@@ -93,9 +108,26 @@ class ObjCMethod(object):
         return self.func
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
-        """Call the method with the given id and arguments.  You do not need
-        to pass in the selector as an argument since it will be automatically
-        provided."""
+        """Call the method on an object with the given arguments.
+
+        The passed arguments are automatically converted to the expected argument types as needed:
+
+        * :class:`enum.Enum` objects are replaced by their :attr:`~enum.Enum.value` before further conversion
+        * For parameters that expect a block, Python callables are converted to :class:`Block`\\s
+        * For parameters that expect an Objective-C object, Python objects are converted using :func:`ns_from_py`
+        * For parameters that expect a C structure, Python sequences are converted
+          using :func:`~rubicon.objc.types.compound_value_for_sequence`.
+        * Finally, :mod:`ctypes` applies its normal function argument conversions.
+
+        The above argument conversions (except those performed by :mod:`ctypes`) can be disabled
+        by setting the ``convert_args`` keyword argument to ``False``.
+
+        The method's return value is also :ref:`converted automatically <auto-objc-python-conversion>`.
+        This conversion can be disabled by setting the ``convert_result`` keyword argument to ``False``.
+
+        The ``_cmd`` selector argument does *not* need to be passed in manually ---
+        the method's :attr:`selector` is automatically added between the receiver and the method arguments.
+        """
         f = self.get_callable()
 
         if convert_args:
@@ -121,7 +153,7 @@ class ObjCMethod(object):
                 elif issubclass(argtype, objc_id):
                     # Convert Python objects to Foundation objects
                     arg = ns_from_py(arg)
-                elif isinstance(arg, collections.abc.Iterable) and issubclass(argtype, (Structure, Array)):
+                elif isinstance(arg, collections.abc.Sequence) and issubclass(argtype, (Structure, Array)):
                     arg = compound_value_for_sequence(arg, argtype)
 
                 converted_args.append(arg)
@@ -176,8 +208,8 @@ class ObjCPartialMethod(object):
             meth, order = self.methods[rest]
         except KeyError:
             raise ValueError(
-                "No method was found starting with {!r} and with selector parts {}\nKnown selector parts are:\n{}"
-                .format(self.name_start, set(kwargs), "\n".join(repr(parts) for parts in self.methods))
+                "No method was found starting with {!r} and with keywords {}\nKnown keywords are:\n{}"
+                .format(self.name_start, set(kwargs), "\n".join(repr(keywords) for keywords in self.methods))
             )
 
         meth = ObjCMethod(meth)
@@ -220,6 +252,19 @@ def convert_method_arguments(encoding, args):
 
 
 class objc_method(object):
+    """Exposes the decorated method as an Objective-C instance method in a custom class or protocol.
+
+    In a custom Objective-C class, decorating a method with :func:`@objc_method <objc_method>`
+    makes it available to Objective-C: a corresponding Objective-C method is created in the new Objective-C class,
+    whose implementation calls the decorated Python method. The Python method receives all arguments
+    (including ``self``) from the Objective-C method call, and its return value is passed back to Objective-C.
+
+    In a custom Objective-C protocol, the behavior is similar, but the method body is ignored,
+    since Objective-C protocol methods have no implementations. By convention, the method body in this case
+    should be empty (``pass``). (Since the method is never called, you could put any other code there as well,
+    but doing so is misleading and discouraged.)
+    """
+
     def __init__(self, py_method):
         super().__init__()
 
@@ -250,6 +295,12 @@ class objc_method(object):
 
 
 class objc_classmethod(object):
+    """Exposes the decorated method as an Objective-C class method in a custom class or protocol.
+
+    This decorator behaves exactly like :func:`@objc_method <objc_method>`, except that the decorated method
+    becomes a class method, so it is exposed on the Objective-C class rather than its instances.
+    """
+
     def __init__(self, py_method):
         super().__init__()
 
@@ -280,10 +331,18 @@ class objc_classmethod(object):
 
 
 class objc_ivar(object):
-    """Add an instance variable of type vartype to the subclass.
-    vartype is a ctypes type.
-    The class must be registered AFTER adding instance variables.
+    """Defines an ivar in a custom Objective-C class.
+
+    If you want to store additional data on a custom Objective-C class, it is recommended to use properties
+    (:func:`objc_property`) instead of ivars. Properties are a more modern and high-level Objective-C feature,
+    which automatically deal with reference counting for objects, and creation of getters and setters.
+
+    The ivar type may be any :mod:`ctypes` type.
+
+    Unlike properties, the contents of an ivar cannot be accessed or modified using Python attribute syntax.
+    Instead, the :func:`get_ivar` and :func:`set_ivar` functions need to be used.
     """
+
     def __init__(self, vartype):
         self.vartype = vartype
 
@@ -295,11 +354,27 @@ class objc_ivar(object):
 
 
 class objc_property(object):
-    """Add a property to an Objective-C class.
+    """Defines a property in a custom Objective-C class or protocol.
 
-    An ivar, a getter and a setter are automatically generated.
-    If the property's type is objc_id or a subclass, the generated setter keeps the stored object retained, and
-    releases it when it is replaced.
+    This class should be called in the body of an Objective-C subclass or protocol, for example:
+
+    .. code-block:: python
+
+        class MySubclass(NSObject):
+            counter = objc_property(NSInteger)
+
+    The property type may be any :mod:`ctypes` type, as well as any of the Python types
+    accepted by :func:`~rubicon.objc.types.ctype_for_type`.
+
+    Defining a property automatically defines a corresponding getter and setter.
+    Following standard Objective-C naming conventions, for a property ``name`` the getter is called ``name``
+    and the setter is called ``setName:``.
+
+    In a custom Objective-C class, implementations for the getter and setter are also generated,
+    which store the property's value in an ivar called ``_name``. If the property has an object type,
+    the generated setter keeps the stored object retained, and releases it when it is replaced.
+
+    In a custom Objective-C protocol, only the metadata for the property is generated.
     """
 
     def __init__(self, vartype=objc_id):
@@ -365,6 +440,22 @@ class objc_property(object):
 
 
 class objc_rawmethod(object):
+    """Exposes the decorated method as an Objective-C instance method in a custom class,
+    with fewer convenience features than :func:`objc_method`.
+
+    This decorator behaves similarly to :func:`@objc_method <objc_method>`. However, unlike with :func:`objc_method`,
+    no automatic conversions are performed (aside from those by :mod:`ctypes`).
+    This means that all parameter and return types must be provided as :mod:`ctypes` types
+    (no :func:`~rubicon.objc.types.ctype_for_type` conversion is performed), all arguments are passed in their raw form
+    as received from :mod:`ctypes`, and the return value must be understood by :mod:`ctypes`.
+
+    In addition, the implicit ``_cmd`` parameter is exposed to the Python method, which is not the case
+    when using :func:`objc_method`. This means that the decorated Python method must always have
+    an additional ``_cmd`` parameter after ``self``; if it is missing, there will be errors at runtime
+    due to mismatched argument counts. Like ``self``, ``_cmd`` never needs to be annotated,
+    and any annotations on it are ignored.
+    """
+
     def __init__(self, py_method):
         super().__init__()
 
@@ -386,11 +477,15 @@ _type_for_objcclass_map = {}
 
 
 def type_for_objcclass(objcclass):
-    """Look up the ObjCInstance subclass used to represent instances of the given Objective-C class in Python.
+    """Look up the :class:`ObjCInstance` subclass used to represent instances of the given Objective-C class in Python.
 
-    If the exact Objective-C class is not registered, each superclass is also checked, defaulting to ObjCInstance
-    if none of the classes in the superclass chain is registered. Afterwards, all searched superclasses are registered
-    for the ObjCInstance subclass that was found.
+    If the exact Objective-C class is not registered, each superclass is also checked,
+    defaulting to :class:`ObjCInstance` if none of the classes in the superclass chain is registered.
+    Afterwards, all searched superclasses are registered for the :class:`ObjCInstance` subclass that was found.
+    (This speeds up future lookups, and ensures that previously computed mappings are not changed
+    by unrelated registrations.)
+
+    This method is mainly intended for internal use by Rubicon, but is exposed in the public API for completeness.
     """
 
     if isinstance(objcclass, ObjCClass):
@@ -415,7 +510,18 @@ def type_for_objcclass(objcclass):
 
 
 def register_type_for_objcclass(pytype, objcclass):
-    """Register a conversion from an Objective-C class to an ObjCInstance subclass."""
+    """Register a conversion from an Objective-C class to an :class:`ObjCInstance` subclass.
+
+    After a call of this function, when Rubicon wraps an Objective-C object that is an instance of ``objcclass``
+    (or a subclass), the Python object will have the class ``pytype`` rather than :class:`ObjCInstance`.
+    See :func:`type_for_objcclass` for a full description of the lookup process.
+
+    .. warning::
+
+        This function should only be called if no instances of ``objcclass`` (or a subclass)
+        have been wrapped by Rubicon yet. If the function is called later, it will not fully take effect:
+        the types of existing instances do not change, and mappings for subclasses of ``objcclass`` are not updated.
+    """
 
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
@@ -424,7 +530,14 @@ def register_type_for_objcclass(pytype, objcclass):
 
 
 def unregister_type_for_objcclass(objcclass):
-    """Unregister a conversion from an Objective-C class to an ObjCInstance subclass"""
+    """Unregister a conversion from an Objective-C class to an :class:`ObjCInstance` subclass.
+
+    .. warning::
+
+        This function should only be called if no instances of ``objcclass`` (or a subclass)
+        have been wrapped by Rubicon yet. If the function is called later, it will not fully take effect:
+        the types of existing instances do not change, and mappings for subclasses of ``objcclass`` are not removed.
+    """
 
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
@@ -433,16 +546,18 @@ def unregister_type_for_objcclass(objcclass):
 
 
 def get_type_for_objcclass_map():
-    """Get a copy of all currently registered ObjCInstance subclasses as a mapping.
-    Keys are Objective-C class addresses as integers.
+    """Get a copy of all currently registered :class:`ObjCInstance` subclasses as a mapping.
+
+    Keys are Objective-C class addresses as :class:`int`\\s.
     """
 
     return dict(_type_for_objcclass_map)
 
 
 def for_objcclass(objcclass):
-    """Decorator for registering a conversion from an Objective-C class to an ObjCInstance subclass.
-    This is equivalent to calling register_type_for_objcclass.
+    """Decorator for registering a conversion from an Objective-C class to an :class:`ObjCInstance` subclass.
+
+    This is equivalent to calling :func:`register_type_for_objcclass` on the decorated class.
     """
 
     def _for_objcclass(pytype):
@@ -459,11 +574,29 @@ class ObjCInstance(object):
 
     @property
     def objc_class(self):
+        """The Objective-C object's class, as an :class:`ObjCClass`."""
+
         return ObjCClass(libobjc.object_getClass(self))
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
-        """Create a new ObjCInstance or return a previously created one
-        for the given object_ptr which should be an Objective-C id."""
+        """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or anything that can be cast to one,
+        such as a :class:`~ctypes.c_void_p`, or an existing :class:`ObjCInstance`.
+
+        :class:`ObjCInstance` objects are cached --- this means that for every Objective-C object
+        there can be at most one :class:`ObjCInstance` object. Rubicon will automatically create
+        new :class:`ObjCInstance`\\s or return existing ones as needed.
+
+        The returned object's Python class is not always exactly :class:`ObjCInstance`. For example,
+        if the passed pointer refers to a class or a metaclass, an instance of :class:`ObjCClass`
+        or :class:`ObjCMetaClass` is returned as appropriate. Additional custom :class:`ObjCInstance` subclasses
+        may be defined and registered using :func:`register_type_for_objcclass`.
+        Creating an :class:`ObjCInstance` from a ``nil`` pointer returns ``None``.
+
+        Rubicon currently does not perform any automatic memory management on the Objective-C object
+        wrapped in an :class:`ObjCInstance`. It is the user's responsibility to ``retain`` and ``release``
+        wrapped objects as needed, like in Objective-C code without automatic reference counting.
+        """
+
         # Make sure that object_ptr is wrapped in an objc_id.
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
@@ -525,12 +658,18 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
+        """Return ``self.description`` converted to a Python :class:`str`."""
+
         desc = self.description
         if desc is None:
             raise ValueError('{self.name}.description returned nil'.format(self=self))
         return str(desc)
 
     def __repr__(self):
+        """Get a debugging representation of ``self``, which includes the Objective-C object's address, class,
+        and ``debugDescription``.
+        """
+
         return "<%s.%s %#x: %s at %#x: %s>" % (
             type(self).__module__,
             type(self).__qualname__,
@@ -541,7 +680,48 @@ class ObjCInstance(object):
         )
 
     def __getattr__(self, name):
-        """Returns a callable method object with the given name."""
+        """Allows accessing Objective-C properties and methods using Python attribute syntax.
+
+        If ``self`` has a Python attribute with the given name, its value is returned.
+
+        If there is an Objective-C property with the given name, its value is returned using its getter method.
+        An attribute is considered a property if any of the following are true:
+
+        * A property with the name is present on the class (i. e. declared using ``@property`` in the source code)
+        * There is both a getter and setter method for the name
+        * The name has been declared as a property using :meth:`ObjCClass.declare_property`
+
+        Otherwise, a method matching the given name is looked up. :class:`ObjCInstance` understands two syntaxes
+        for calling Objective-C methods:
+
+        * "Flat" syntax: the Objective-C method name is spelled out in the attribute name,
+          with all colons replaced with underscores, and all arguments are passed as positional arguments.
+          For example, the Objective-C method call ``[self initWithWidth:w height:h]``
+          translates to ``self.initWithWidth_height_(w, h)``.
+        * "Interleaved" syntax: the Objective-C method name is split up between the attribute name
+          and the keyword arguments passed to the returned method. For example, the Objective-C method call
+          ``[self initWithRed:r green:g blue:b]`` translates to ``self.initWithRed(r, green=g, blue=b)``.
+
+        The "interleaved" syntax is usually preferred, since it looks more similar to normal Objective-C syntax.
+        However, the "flat" syntax is also fully supported. Certain method names require the "flat" syntax,
+        for example if two arguments have the same label (e. g. ``performSelector:withObject:withObject:``),
+        which is not supported by Python's keyword argument syntax.
+
+        .. warning::
+
+            The "interleaved" syntax currently ignores the ordering of its keyword arguments.
+            However, in the interest of readability, the keyword arguments should always be passed
+            in the same order as they appear in the method name.
+
+            This also means that two methods whose names which differ only in the ordering of their keywords
+            will conflict with each other, and can only be called reliably using "flat" syntax.
+
+            As of Python 3.6, the order of keyword arguments passed to functions is preserved (:pep:`468`).
+            In the future, once Rubicon requires Python 3.6 or newer, "interleaved" method calls
+            will respect keyword argument order. This will fix the kind of conflict described above,
+            but will also disallow specifying the keyword arguments out of order.
+        """
+
         # Search for named instance method in the class object and if it
         # exists, return callable object with self as hidden argument.
         # Note: you should give self and not self.ptr as a parameter to
@@ -592,6 +772,12 @@ class ObjCInstance(object):
             )
 
     def __setattr__(self, name, value):
+        """Allows modifying Objective-C properties using Python syntax.
+
+        If ``self`` has a Python attribute with the given name, it is set. Otherwise, the name should refer
+        to an Objective-C property, whose setter method is called with ``value``.
+        """
+
         if name in self.__dict__:
             # For attributes already in __dict__, use the default __setattr__.
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
@@ -614,11 +800,15 @@ class ObjCInstance(object):
 # the type constructor would be called before ObjCInstance's, and there
 # would be no opportunity to pass extra arguments.
 class ObjCClass(ObjCInstance, type):
-    """Python wrapper for an Objective-C class."""
+    """Python wrapper for an Objective-C class.
+
+    :class:`ObjCClass` is a subclass of :class:`ObjCInstance` and supports the same syntaxes for calling methods
+    and accessing properties.
+    """
 
     @property
     def superclass(self):
-        """The superclass of this class, or None if this is a root class (such as NSObject)."""
+        """The superclass of this class, or ``None`` if this is a root class (such as :class:`NSObject`)."""
 
         super_ptr = libobjc.class_getSuperclass(self)
         if super_ptr.value is None:
@@ -706,16 +896,21 @@ class ObjCClass(ObjCInstance, type):
         return ptr, name, attrs
 
     def __new__(cls, name_or_ptr, bases=None, attrs=None, *, protocols=()):
-        """Create a new ObjCClass instance or return a previously created instance for the given Objective-C class.
+        """The constructor accepts either the name of an Objective-C class to look up
+        (as :class:`str` or :class:`bytes`), or a pointer to an existing class object
+        (in any form accepted by :class:`ObjCInstance`).
 
-        If called with a single class pointer argument, an ObjCClass for that class pointer is returned.
-        If called with a single str or bytes argument, the Objective-C with that name is returned.
+        If given a pointer, it must refer to an Objective-C class; pointers to other objects are not accepted.
+        (Use :class:`ObjCInstance` to wrap a pointer that might also refer to other kinds of objects.)
+        If the pointer refers to a metaclass, an instance of :class:`ObjCMetaClass` is returned instead.
+        Creating an :class:`ObjCClass` from a ``Nil`` pointer returns ``None``.
 
-        If called with three arguments, they must a name, a superclass list, and a namespace dict. A new Objective-C
-        class with those properties is created and returned. This form is usually called implicitly when subclassing
-        another ObjCClass.
-        In the three-argument form, an optional protocols keyword argument is also accepted. If present, it must be
-        a sequence of ObjCProtocol objects that the new class should adopt.
+        :class:`ObjCClass` can also be called like :class:`type`, with three arguments
+        (name, bases list, namespace mapping). This form is called implicitly by Python's ``class`` syntax,
+        and is used to create a new Objective-C class from Python (see :ref:`custom-classes-and-protocols`).
+        The bases list must contain exactly one :class:`ObjCClass` to be extended by the new class.
+        An optional ``protocols`` keyword argument is also accepted,
+        which must be a sequence of :class:`ObjCProtocol`\\s for the new class to adopt.
         """
 
         if (bases is None) ^ (attrs is None):
@@ -754,7 +949,7 @@ class ObjCClass(ObjCInstance, type):
             'instance_properties': {},
             # Explicitly declared properties
             'forced_properties': set(),
-            # Mapping of first selector part -> ObjCPartialMethod instances
+            # Mapping of first keyword -> ObjCPartialMethod instances
             'partial_methods': {},
             # Mapping of name -> CFUNCTYPE callback function
             # This only contains the IMPs of methods created in Python,
@@ -893,9 +1088,41 @@ class ObjCClass(ObjCInstance, type):
         return None
 
     def declare_property(self, name):
+        """Declare the instance method ``name`` to be a property getter.
+
+        This causes the attribute named ``name`` on instances of this class to be treated as a property
+        rather than a method --- accessing it returns the property's value, without requiring an explicit method call.
+        See :class:`ObjCInstance.__getattr__` for a full description of how attribute access behaves for properties.
+
+        Most properties do not need to be declared explicitly using this method, as they are detected automatically
+        by :class:`ObjCInstance.__getattr__`. This method only needs to be used for properties that are read-only
+        and don't have a ``@property`` declaration in the source code, because Rubicon cannot tell such properties
+        apart from normal zero-argument methods.
+
+        .. note::
+
+            In the standard Apple SDKs, some properties are introduced as regular methods in one system version,
+            and then declared as properties in a later system version. For example, the ``description`` method/property
+            of :class:`NSObject` was declared as a regular method `up to OS X 10.9
+            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.9.sdk/usr/include/objc/NSObject.h#L40>`__,
+            but changed to a property `as of OS X 10.10
+            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.10.sdk/usr/include/objc/NSObject.h#L43>`__.
+
+            Such properties cause compatibility issues when accessed from Rubicon: ``obj.description()`` works on 10.9
+            but is a :class:`TypeError` on 10.10, whereas ``obj.description`` works on 10.10
+            but returns a method object on 10.9. To solve this issue, the property can be declared explicitly
+            using ``NSObject.declare_property('description')``, so that it can always be accessed
+            using ``obj.description``.
+        """  # noqa: E501 # The links in the docstring above are too long to wrap to 120 chars.
+
         self.forced_properties.add(name)
 
     def declare_class_property(self, name):
+        """Declare the class method ``name`` to be a property getter.
+
+        This is equivalent to ``self.objc_class.declare_property(name)``.
+        """
+
         self.objc_class.forced_properties.add(name)
 
     def __repr__(self):
@@ -913,12 +1140,28 @@ class ObjCClass(ObjCInstance, type):
         libc.free(self.methods_ptr)
 
     def __instancecheck__(self, instance):
+        """Check whether the given object is an instance of this class.
+
+        If the given object is not an Objective-C object, ``False`` is returned.
+
+        This method allows using :class:`ObjCClass`\\es as the second argument of :func:`isinstance`:
+        ``isinstance(obj, NSString)`` is equivalent to ``obj.isKindOfClass(NSString)``.
+        """
+
         if isinstance(instance, ObjCInstance):
             return bool(instance.isKindOfClass(self))
         else:
             return False
 
     def __subclasscheck__(self, subclass):
+        """Check whether the given class is a subclass of this class.
+
+        If the given object is not an Objective-C class, :class:`TypeError` is raised.
+
+        This method allows using :class:`ObjCClass`\\es as the second argument of :func:`issubclass`:
+        ``issubclass(cls, NSValue)`` is equivalent to ``obj.isSubclassOfClass(NSValue)``.
+        """
+
         if isinstance(subclass, ObjCClass):
             return bool(subclass.isSubclassOfClass(self))
         else:
@@ -965,9 +1208,25 @@ class ObjCClass(ObjCInstance, type):
 
 
 class ObjCMetaClass(ObjCClass):
-    """Python wrapper for an Objective-C metaclass."""
+    """Python wrapper for an Objective-C metaclass.
+
+    :class:`ObjCMetaClass` is a subclass of :class:`ObjCClass` and supports almost exactly the same operations
+    and methods. However, there is usually no need to look up a metaclass manually.
+    The main reason why :class:`ObjCMetaClass` is a separate class is to differentiate it from :class:`ObjCClass`
+    in the :func:`repr`. (Otherwise there would be no way to tell classes and metaclasses apart,
+    since metaclasses are also classes, and have exactly the same name as their corresponding class.)
+    """
 
     def __new__(cls, name_or_ptr):
+        """The constructor accepts either the name of an Objective-C metaclass to look up
+        (as :class:`str` or :class:`bytes`), or a pointer to an existing metaclass object
+        (in any form accepted by :class:`ObjCInstance`).
+
+        If given a pointer, it must refer to an Objective-C metaclass; pointers to other objects are not accepted.
+        (Use :class:`ObjCInstance` to wrap a pointer that might also refer to other kinds of objects.)
+        Creating an :class:`ObjCMetaClass` from a ``Nil`` pointer returns ``None``.
+        """
+
         if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
             ptr = libobjc.objc_getMetaClass(name)
@@ -1007,15 +1266,15 @@ def py_from_ns(nsobj, *, _auto=False):
 
     Currently supported types:
 
-    * ``objc_id``, ``Class``: Wrapped in an ``ObjCInstance`` and converted as below
-    * ``NSString``: Converted to ``str``
-    * ``NSData``: Converted to ``bytes``
-    * ``NSDecimalNumber``: Converted to ``decimal.Decimal``
-    * ``NSDictionary``: Converted to ``dict``, with all keys and values converted recursively
-    * ``NSArray``: Converted to ``list``, with all elements converted recursively
-    * ``NSNumber``: Converted to a ``bool``, ``int`` or ``float`` based on the type of its contents
+    * :class:`~rubicon.objc.runtime.objc_id`: Wrapped in an :class:`ObjCInstance` and converted as below
+    * :class:`NSString`: Converted to :class:`str`
+    * :class:`NSData`: Converted to :class:`bytes`
+    * :class:`NSDecimalNumber`: Converted to :class:`decimal.Decimal`
+    * :class:`NSDictionary`: Converted to :class:`dict`, with all keys and values converted recursively
+    * :class:`NSArray`: Converted to :class:`list`, with all elements converted recursively
+    * :class:`NSNumber`: Converted to a :class:`bool`, :class:`int` or :class:`float` based on the type of its contents
 
-    Other objects are returned unmodified as an ``ObjCInstance``.
+    Other objects are returned unmodified as an :class:`ObjCInstance`.
     """
 
     if isinstance(nsobj, (objc_id, Class)):
@@ -1065,21 +1324,21 @@ def py_from_ns(nsobj, *, _auto=False):
 def ns_from_py(pyobj):
     """Convert a Python object into an equivalent Foundation object. The returned object is autoreleased.
 
-    This function is also available under the name ``at``, because its functionality is very similar to that of the
+    This function is also available under the name :func:`at`, because its functionality is very similar to that of the
     Objective-C ``@`` operator and literals.
 
     Currently supported types:
 
-    * ``None``, ``ObjCInstance``: Returned as-is
-    * ``enum.Enum``: Replaced by their ``value`` and converted as below
-    * ``str``: Converted to ``NSString``
-    * ``bytes``: Converted to ``NSData``
-    * ``decimal.Decimal``: Converted to ``NSDecimalNumber``
-    * ``dict``: Converted to ``NSDictionary``, with all keys and values converted recursively
-    * ``list``: Converted to ``NSArray``, with all elements converted recursively
-    * ``bool``, ``int``, ``float``: Converted to ``NSNumber``
+    * ``None``, :class:`ObjCInstance`: Returned as-is
+    * :class:`enum.Enum`: Replaced by their :attr:`~enum.Enum.value` and converted as below
+    * :class:`str`: Converted to :class:`NSString`
+    * :class:`bytes`: Converted to :class:`NSData`
+    * :class:`decimal.Decimal`: Converted to :class:`NSDecimalNumber`
+    * :class:`dict`: Converted to :class:`NSDictionary`, with all keys and values converted recursively
+    * :class:`list`: Converted to :class:`NSArray`, with all elements converted recursively
+    * :class:`bool`, :class:`int`, :class:`float`: Converted to :class:`NSNumber`
 
-    Other types cause a ``TypeError``.
+    Other types cause a :class:`TypeError`.
     """
 
     if isinstance(pyobj, enum.Enum):
@@ -1127,19 +1386,33 @@ class ObjCProtocol(ObjCInstance):
 
     @property
     def name(self):
-        """The name of this protocol."""
+        """The name of this protocol, as a :class:`str`."""
 
         return libobjc.protocol_getName(self).decode('utf-8')
 
     @property
     def protocols(self):
-        """The superprotocols of this protocol."""
+        """The protocols that this protocol extends."""
 
         out_count = c_uint()
         protocols_ptr = libobjc.protocol_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
     def __new__(cls, name_or_ptr, bases=None, ns=None):
+        """The constructor accepts either the name of an Objective-C protocol to look up
+        (as :class:`str` or :class:`bytes`), or a pointer to an existing protocol object
+        (in any form accepted by :class:`ObjCInstance`).
+
+        If given a pointer, it must refer to an Objective-C protocol; pointers to other objects are not accepted.
+        (Use :class:`ObjCInstance` to wrap a pointer that might also refer to other kinds of objects.)
+        Creating an :class:`ObjCProtocol` from a ``nil`` pointer returns ``None``.
+
+        :class:`ObjCProtocol` can also be called like :class:`type`, with three arguments
+        (name, bases list, namespace mapping). This form is called implicitly by Python's ``class`` syntax,
+        and is used to create a new Objective-C protocol from Python (see :ref:`custom-classes-and-protocols`).
+        The bases list can contain any number of :class:`ObjCProtocol` objects to be extended by the new protocol.
+        """
+
         if (bases is None) ^ (ns is None):
             raise TypeError('ObjCProtocol arguments 2 and 3 must be given together')
 
@@ -1194,12 +1467,29 @@ class ObjCProtocol(ObjCInstance):
             cls=type(self), self=self)
 
     def __instancecheck__(self, instance):
+        """Check whether the given object conforms to this protocol.
+
+        If the given object is not an Objective-C object, ``False`` is returned.
+
+        This method allows using :class:`ObjCProtocol`\\s as the second argument of :func:`isinstance`:
+        ``isinstance(obj, NSCopying)`` is equivalent to ``obj.conformsToProtocol(NSCopying)``.
+        """
+
         if isinstance(instance, ObjCInstance):
             return bool(instance.conformsToProtocol(self))
         else:
             return False
 
     def __subclasscheck__(self, subclass):
+        """Check whether the given class or protool conforms to this protocol.
+
+        If the given object is not an Objective-C class or protocol, :class:`TypeError` is raised.
+
+        This method allows using :class:`ObjCProtocol`\\s as the second argument of :func:`issubclass`:
+        ``issubclass(cls, NSCopying)`` is equivalent to ``cls.conformsToProtocol(NSCopying)``,
+        and ``issubclass(proto, NSCopying)`` is equivalent to ``protocol_conformsToProtocol(proto, NSCopying))``.
+        """
+
         if isinstance(subclass, ObjCClass):
             return bool(subclass.conformsToProtocol(self))
         elif isinstance(subclass, ObjCProtocol):
@@ -1266,7 +1556,11 @@ except NameError:
 
 
 def objc_const(dll, name):
-    """Create an ObjCInstance from a global pointer variable in a DLL."""
+    """Create an :class:`ObjCInstance` from a global pointer variable in a :class:`~ctypes.CDLL`.
+
+    This function is most commonly used to access constant object pointers defined by a library/framework, such as
+    `NSCocoaErrorDomain <https://developer.apple.com/documentation/foundation/nscocoaerrordomain?language=objc>`__.
+    """
 
     return ObjCInstance(objc_id.in_dll(dll, name))
 
@@ -1344,7 +1638,32 @@ class BlockConsts:
 
 
 class ObjCBlock:
+    """Python wrapper for an Objective-C block object.
+
+    This class is used to manually wrap an Objective-C block so that it can be called from Python. Usually Rubicon will
+    do this automatically, if the block object was returned from an Objective-C method whose return type is declared
+    to be a block type. If this automatic detection fails, for example if the method's return type is generic ``id``,
+    Rubicon has no way to tell that the object in question is a block rather than a regular Objective-C object.
+    In that case, the object needs to be manually wrapped using :class:`ObjCBlock`.
+    """
+
     def __init__(self, pointer, return_type=AUTO, *arg_types):
+        """The constructor takes a block object, which can be either an :class:`ObjCInstance`, or a raw
+        :class:`~rubicon.objc.runtime.objc_id` pointer.
+
+        .. note::
+
+            :class:`~rubicon.objc.runtime.objc_block` is also accepted, because it is a subclass of
+            :class:`~rubicon.objc.runtime.objc_id`). Normally you do not need to make use of this,
+            because in most cases Rubicon will automatically convert :class:`~rubicon.objc.runtime.objc_block`\\s
+            to a callable object.
+
+        In most cases, Rubicon can automatically determine the block's return type and parameter types.
+        If a block object doesn't have return/parameter type information at runtime, Rubicon will raise an error when
+        attempting to convert it. In that case, you need to explicitly pass the correct return type and parameter types
+        to :class:`ObjCBlock` using the ``return_type`` and ``arg_types`` parameters.
+        """
+
         if isinstance(pointer, ObjCInstance):
             pointer = pointer.ptr
         self.pointer = pointer
@@ -1372,6 +1691,12 @@ class ObjCBlock:
         return representation
 
     def __call__(self, *args):
+        """Invoke the block object with the given arguments.
+
+        The arguments and return value are converted from/to Python objects according to the default ``ctypes`` rules,
+        based on the block's return and parameter types.
+        """
+
         return self.struct.contents.invoke(self.pointer, *args)
 
 
@@ -1387,10 +1712,35 @@ NOTHING = object()
 
 
 class Block:
+    """A wrapper that exposes a Python callable object to Objective-C as a block.
+
+    .. note::
+
+        :class:`Block` instances are currently *not* callable from Python, unlike :class:`ObjCBlock`.
+    """
 
     _keep_alive_blocks_ = {}
 
     def __init__(self, func, restype=NOTHING, *arg_types):
+        """The constructor accepts any Python callable object.
+
+        If the callable has parameter and return type annotations, they are used as the block's parameter and return
+        types. This allows using :class:`Block` as a decorator:
+
+        .. code-block:: python
+
+            @Block
+            def the_block(arg: NSInteger) -> NSUInteger:
+                return abs(arg)
+
+        For callables without type annotations, the parameter and return types need to be passed to the :class:`Block`
+        constructor in the ``restype`` and ``arg_types`` arguments:
+
+        .. code-block:: python
+
+            the_block = Block(abs, NSUInteger, NSInteger)
+        """
+
         if not callable(func):
             raise TypeError('Blocks must be callable')
 

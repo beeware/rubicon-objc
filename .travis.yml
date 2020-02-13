@@ -54,8 +54,7 @@ install:
   - pyenv install --skip-existing ${PY36}
   - pyenv install --skip-existing ${PY37}
   - pyenv global ${PY37} ${PY36} ${PY35} system
-  - pip install --upgrade tox
+  - python3 -m pip install --upgrade tox
   - make -f Makefile
 script:
-  - export DYLD_LIBRARY_PATH=`pwd`/tests/objc
-  - tox -e "py{35,36,37},flake8"
+  - python3 -m tox -e "py{35,36,37},flake8"

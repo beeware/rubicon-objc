@@ -554,10 +554,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
 class EventLoopPolicy(events.AbstractEventLoopPolicy):
     """Rubicon event loop policy
+
     In this policy, each thread has its own event loop. However, we only
     automatically create an event loop by default for the main thread; other
     threads by default have no event loop.
     """
+
     def __init__(self):
         self._lifecycle = None
         self._default_loop = None
@@ -599,7 +601,7 @@ class EventLoopPolicy(events.AbstractEventLoopPolicy):
     def get_child_watcher(self):
         """Get the watcher for child processes.
 
-        If not yet set, a SafeChildWatcher object is automatically created.
+        If not yet set, a :class:`~asyncio.SafeChildWatcher` object is automatically created.
         """
         if self._watcher is None:
             self._init_watcher()
@@ -627,7 +629,7 @@ class CFLifecycle:
 
 
 class CocoaLifecycle:
-    """A lifecycle manager for Cocoa (NSApplication) apps."""
+    """A lifecycle manager for Cocoa (``NSApplication``) apps."""
     def __init__(self, application):
         self._application = application
 
@@ -639,7 +641,8 @@ class CocoaLifecycle:
 
 
 class iOSLifecycle:
-    """A lifecycle manager for iOS (UIApplication) apps."""
+    """A lifecycle manager for iOS (``UIApplication``) apps."""
+
     def start(self):
         pass
 
