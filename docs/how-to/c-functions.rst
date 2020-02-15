@@ -89,8 +89,8 @@ Most real examples of C functions are more complicated than ``puts``, but the ba
 
 Each C library only needs to be imported/loaded once, and the ``restype`` and ``argtypes`` only need to be set once per function. This is usually done at module level near the beginning of the module, similar to Python imports.
 
-Inline functions: ``NSLocationInRange``
----------------------------------------
+Inline functions (e. g. ``NSLocationInRange``)
+----------------------------------------------
 
 Regular C functions can be called as explained above, but there is also a second kind of C function that needs to be handled differently: inline functions. Unlike regular C functions, inline functions cannot be called through a library object at runtime. Instead, their implementation is only provided as source code in a header file.
 
@@ -128,8 +128,8 @@ You can then put this translated function into your Python code and call it in p
         def NSLocationInRange(loc, range):
             return loc >= range.location and loc - range.location < range.length
 
-Global variables and constants: ``NSFoundationVersionNumber``
--------------------------------------------------------------
+Global variables and constants (e. g. ``NSFoundationVersionNumber``)
+--------------------------------------------------------------------
 
 Some C libraries expose not just functions, but also global variables. An example of this is the Foundation framework, which defines the global variable ``NSFoundationVersionNumber`` in ``<Foundation/NSObjCRuntime.h>``:
 
