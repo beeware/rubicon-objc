@@ -63,7 +63,7 @@ Once you have opened the relevant header file in a text editor, you need to sear
 
     int puts(const char *);
 
-This means that ``puts`` returns an ``int`` and takes a single argument of type ``const char *`` (a C string). This translates to the following Python ``ctypes`` code:
+This means that ``puts`` returns an ``int`` and takes a single argument of type ``const char *`` (a pointer to one or more characters, i. e. a C string). This translates to the following Python ``ctypes`` code:
 
 .. code-block:: python
 
@@ -71,7 +71,9 @@ This means that ``puts`` returns an ``int`` and takes a single argument of type 
     >>> libc.puts.restype = c_int
     >>> libc.puts.argtypes = [c_char_p]
 
-Now that we have provided all of the necessary type information, we can call ``libc.puts``:
+Now that we have provided all of the necessary type information, we can call ``libc.puts``.
+
+For the ``c_char_p`` argument, we pass a byte string with the message we want to print out. ``ctypes`` automatically converts the byte string object to a ``c_char_p`` (``char *``) as the C funcion expects it. The string specifically needs to be a byte string (``bytes``), because C's ``char *`` strings are byte-based, unlike normal Python strings (``str``), which are Unicode-based.
 
 .. code-block:: python
 
