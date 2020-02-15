@@ -75,15 +75,14 @@ Now that we have provided all of the necessary type information, we can call ``l
 
 .. code-block:: python
 
-    >>> libc.puts(b"Hello!")
+    >>> res = libc.puts(b"Hello!")
     Hello!
-    10
 
 .. note::
 
-    The ``10`` is the return value of ``puts``, which is printed out by the Python REPL; you can ignore it. (A non-negative return value from ``puts`` indicates that the call was successful.)
+    If you're running this code from an editor or IDE and don't see ``Hello!`` printed out, try running the code from a Python REPL in a terminal window instead. Some editors/IDEs, such as Python's IDLE, can only capture and display output produced by high-level Python functions (such as ``print``), but not output from low-level C functions (such as ``puts``).
 
-    If you're running this code from an editor or IDE and you see only the ``10`` and not the ``Hello!``, try running the code from a Python REPL in a terminal window instead. Some editors/IDEs, such as Python's IDLE, can only capture and display output produced by high-level Python functions (such as ``print``), but not output from low-level C functions (such as ``puts``).
+    The return value of ``puts`` is ignored in this example, because it isn't significant here.
 
 Most real examples of C functions are more complicated than ``puts``, but the basic procedure for calling them is the same: import or load the function's C library, set the function's return type and argument types based on the relevant header, and then call the function as needed.
 
