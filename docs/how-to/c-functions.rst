@@ -84,7 +84,9 @@ For the ``c_char_p`` argument, we pass a byte string with the message we want to
 
     If you're running this code from an editor or IDE and don't see ``Hello!`` printed out, try running the code from a Python REPL in a terminal window instead. Some editors/IDEs, such as Python's IDLE, can only capture and display output produced by high-level Python functions (such as ``print``), but not output from low-level C functions (such as ``puts``).
 
-    The return value of ``puts`` is ignored in this example, because it isn't significant here.
+    The return value of ``puts`` is ignored in this example. It indicates whether or not the call was successful. If ``puts`` succeeds, it returns a non-negative integer (the exact value is not significant and has no defined meaning). If ``puts`` encounters an error, it returns the ``EOF`` constant (on Apple OSes, this is ``-1``).
+
+    The ``puts`` function generally doesn't fail, except for edge cases that are unlikely to happen in practice. With most other C functions, you need to be more careful about checking the return value, to make sure that errors from the function call are detected and handled. Unlike in Python, if you forget to check whether a C function call failed, any errors from that call are silently ignored, which often leads to bad behavior or crashes.
 
 Most real examples of C functions are more complicated than ``puts``, but the basic procedure for calling them is the same: import or load the function's C library, set the function's return type and argument types based on the relevant header, and then call the function as needed.
 
