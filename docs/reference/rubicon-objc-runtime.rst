@@ -10,6 +10,8 @@ In most cases there is no need to use this module directly --- the :mod:`rubicon
 
 .. contents::
 
+.. _predefined-c-libraries:
+
 C libraries
 -----------
 
