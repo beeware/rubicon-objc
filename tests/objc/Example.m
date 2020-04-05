@@ -233,9 +233,6 @@ static int _staticIntField = 11;
         .callback = NULL,
         .s = simple,
         .next = NULL,
-        .bitfield0 = 0,
-        .bitfield1 = 1,
-        .bitfield2 = 2,
     };
 }
 
