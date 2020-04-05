@@ -14,9 +14,6 @@ struct complex {
 	void (*callback)(void);
 	struct simple s;
 	struct complex *next;
-	unsigned int bitfield0:8;
-	unsigned int bitfield1:16;
-	unsigned int bitfield2:8;
 };
 
 /* objc_msgSend on i386, x86_64, ARM64; objc_msgSend_stret on ARM32. */
