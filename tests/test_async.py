@@ -45,7 +45,7 @@ class AsyncRunTests(unittest.TestCase):
         start = time.time()
         self.loop.create_task(do_stuff(results1, 3))
         self.loop.create_task(do_stuff(results2, 4))
-        self.loop.create_task(stop_loop(self.loop, 0.5))
+        self.loop.create_task(stop_loop(self.loop, 0.6))
         self.loop.run_forever()
         end = time.time()
 
@@ -54,7 +54,7 @@ class AsyncRunTests(unittest.TestCase):
         # The run duration is controlled by the stop task.
         self.assertEqual(results1, [0, 1, 2])
         self.assertEqual(results2, [0, 1, 2, 3])
-        self.assertGreaterEqual(end - start, 0.5)
+        self.assertGreaterEqual(end - start, 0.6)
 
 
 class AsyncCallTests(unittest.TestCase):

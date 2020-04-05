@@ -1,4 +1,5 @@
 import faulthandler
+import os
 
 from rubicon.objc.runtime import load_library
 
@@ -11,6 +12,16 @@ except Exception:
 try:
     rubiconharness = load_library('rubiconharness')
 except ValueError:
-    raise ValueError("Couldn't load Rubicon test harness library. Have you set DYLD_LIBRARY_PATH?")
+    try:
+        DYLD_LIBRARY_PATH = os.environ['DYLD_LIBRARY_PATH']
+        raise ValueError(
+            "Couldn't load Rubicon test harness library (DYLD_LIBRARY_PATH={DYLD_LIBRARY_PATH!r})".format(
+                DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH
+            )
+        )
+    except KeyError:
+        raise ValueError(
+            "Couldn't load Rubicon test harness library; DYLD_LIBRARY_PATH has not been set."
+        )
 
 faulthandler.enable()
