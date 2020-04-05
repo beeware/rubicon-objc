@@ -1,9 +1,8 @@
-import io
 import re
 
 from setuptools import setup
 
-with io.open('./rubicon/objc/__init__.py', encoding='utf8') as version_file:
+with open('./rubicon/objc/__init__.py', encoding='utf8') as version_file:
     version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file.read(), re.M)
     if version_match:
         version = version_match.group(1)
