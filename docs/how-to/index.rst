@@ -17,6 +17,7 @@ stand alone.
    type-mapping
    protocols
    async
+   c-functions
    contribute-code
    contribute-docs
    internal/index

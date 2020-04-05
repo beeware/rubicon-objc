@@ -20,6 +20,10 @@ from . import api  # noqa: F401
 # will not take place, and Foundation collections will not support the expected methods/operators in Python!
 from . import collections  # noqa: F401
 
+# Note to developers: when modifying any of the import lists below, please:
+# * Keep each list in alphabetical order
+# * Update the corresponding list in the documentation at docs/reference/rubicon-objc.rst
+# Thank you!
 from .types import (  # noqa: F401
     CFIndex, CFRange, CGFloat, CGGlyph, CGPoint, CGPointMake, CGRect, CGRectMake, CGSize, CGSizeMake, NSEdgeInsets,
     NSEdgeInsetsMake, NSInteger, NSMakePoint, NSMakeRect, NSMakeSize, NSPoint, NSRange, NSRect, NSSize, NSTimeInterval,
