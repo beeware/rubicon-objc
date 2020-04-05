@@ -23,7 +23,7 @@ setup(
     long_description=long_description,
     author='Russell Keith-Magee',
     author_email='russell@keith-magee.com',
-    url='http://beeware.org/rubicon',
+    url='https://beeware.org/rubicon',
     packages=find_packages(exclude=['tests']),
     python_requires='>=3.5',
     namespace_packages=['rubicon'],
