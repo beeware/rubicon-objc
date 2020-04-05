@@ -619,7 +619,7 @@ class RubiconTest(unittest.TestCase):
 
         types.unregister_encoding_all(b'{simple=ii}')
         types.unregister_encoding_all(b'{simple}')
-        types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}}')
         types.unregister_encoding_all(b'{complex}')
 
         # Look up the method, so the return/argument types are decoded and the structs are registered.
@@ -630,7 +630,7 @@ class RubiconTest(unittest.TestCase):
 
         simple = struct_simple(123, 456)
         ret = Example.doStuffWithStruct_(simple)
-        struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}b8b16b8}')
+        struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}}')
         self.assertIsInstance(ret, struct_complex)
         self.assertEqual(struct_complex, types.ctype_for_encoding(b'{complex}'))
         self.assertEqual(list(ret.field_0), [1, 2, 3, 4])
@@ -638,15 +638,12 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(ret.field_2.field_0, 123)
         self.assertEqual(ret.field_2.field_1, 456)
         self.assertEqual(cast(ret.field_3, c_void_p).value, None)
-        self.assertEqual(ret.field_4, 0)
-        self.assertEqual(ret.field_5, 1)
-        self.assertEqual(ret.field_6, 2)
 
     def test_sequence_arg_to_struct(self):
         "Sequence arguments are converted to structures."
         Example = ObjCClass('Example')
 
-        ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None, 0, 0, 0))
+        ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None))
         struct_simple = types.ctype_for_encoding(b'{simple=ii}')
         self.assertIsInstance(ret, struct_simple)
         self.assertEqual(ret.field_0, 987)
