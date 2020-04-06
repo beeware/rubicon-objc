@@ -6,6 +6,7 @@ include CHANGELOG.rst
 include CONTRIBUTING.md
 include Makefile
 include tox.ini
+recursive-include changes *.rst
 include docs/Makefile
 include docs/make.bat
 include docs/requirements_docs.txt
