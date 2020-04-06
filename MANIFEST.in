@@ -12,4 +12,5 @@ include docs/make.bat
 include docs/requirements_docs.txt
 include docs/spelling_wordlist
 recursive-include docs *.png *.py *.rst
+prune docs/_build
 recursive-include tests *.h *.m *.py
