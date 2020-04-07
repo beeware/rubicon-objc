@@ -10,18 +10,8 @@ except Exception:
     OSX_VERSION = None
 
 try:
-    rubiconharness = load_library('rubiconharness')
+    rubiconharness = load_library(os.path.abspath('tests/objc/librubiconharness.dylib'))
 except ValueError:
-    try:
-        DYLD_LIBRARY_PATH = os.environ['DYLD_LIBRARY_PATH']
-        raise ValueError(
-            "Couldn't load Rubicon test harness library (DYLD_LIBRARY_PATH={DYLD_LIBRARY_PATH!r})".format(
-                DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH
-            )
-        )
-    except KeyError:
-        raise ValueError(
-            "Couldn't load Rubicon test harness library; DYLD_LIBRARY_PATH has not been set."
-        )
+    raise ValueError("Couldn't load Rubicon test harness library. Did you remember to run make?")
 
 faulthandler.enable()

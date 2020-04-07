@@ -33,13 +33,4 @@ install:
   - python -m pip install .
 script:
   - make
-  # This next line *should* be:
-  #   DYLD_LIBRARY_PATH=tests/objc python setup.py test
-  # but the way Travis invokes Python through pyenv triggers macOS's System
-  # Integrity Protection (SIP) (see https://apple.stackexchange.com/a/216815).
-  # As a result, DYLD_LIBRARY_PATH isn't exposed to the Python process.
-  # Calling `$(pyenv which python)` instead of `python` uses a direct version
-  # of the python executable rather than the pyenv shims (which take a
-  # circuitous route performing multiple exec calls through various /usr/local
-  # locations). This avoids triggering SIP, so DYLD_LIBRARY_PATH is exposed.
-  - DYLD_LIBRARY_PATH=tests/objc "$(pyenv which python)" setup.py test
+  - python setup.py test
