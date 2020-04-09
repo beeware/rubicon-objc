@@ -4,6 +4,7 @@
 {% endif %}
 {% if sections[section] %}
 {% for category, val in definitions.items() if category in sections[section]%}
+
 {{ definitions[category]['name'] }}
 {{ underline * definitions[category]['name']|length }}
 
@@ -16,13 +17,10 @@
 {% endif %}
 {% if sections[section][category]|length == 0 %}
 No significant changes.
-
-{% else %}
 {% endif %}
-
 {% endfor %}
 {% else %}
-No significant changes.
 
+No significant changes.
 {% endif %}
 {% endfor %}

@@ -1,15 +1,16 @@
-include LICENSE
-include README.rst
+# Note: See the PyPA documentation for a list of file names that are included/excluded by default:
+# https://packaging.python.org/guides/using-manifest-in/#how-files-are-included-in-an-sdist
+# Please only add entries here for files that are *not* already handled by default.
+
 include CHANGELOG.rst
 include CONTRIBUTING.md
-include tox.ini
 include Makefile
-recursive-include tests *.py
-recursive-include tests *.h
-recursive-include tests *.m
-recursive-include docs *.bat
-recursive-include docs *.png
-recursive-include docs *.py
-recursive-include docs *.rst
-recursive-include docs *.txt
-recursive-include docs Makefile
+include tox.ini
+recursive-include changes *.rst
+include docs/Makefile
+include docs/make.bat
+include docs/requirements_docs.txt
+include docs/spelling_wordlist
+recursive-include docs *.png *.py *.rst
+prune docs/_build
+recursive-include tests *.h *.m *.py
