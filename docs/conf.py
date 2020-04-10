@@ -282,5 +282,7 @@ spelling_ignore_pypi_package_names = True
 # so that Sphinx autodoc is able to import and inspect rubicon.objc even on systems without an Objective-C runtime.
 # For more details, see the docstring of _mocked_modules/ctypes/__init__.py.
 sys.path.insert(0, os.path.abspath('_mocked_modules'))
+sys.modules.pop("ctypes", None)
+sys.modules.pop("ctypes.util", None)
 import ctypes.util
 del sys.path[0]
