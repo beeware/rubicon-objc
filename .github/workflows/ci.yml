@@ -53,7 +53,7 @@ jobs:
         make
     - name: Test
       run: |
-        DYLD_LIBRARY_PATH=tests/objc python setup.py test
+        python setup.py test
 
   python-versions:
     name: Python compatibility test
@@ -78,7 +78,7 @@ jobs:
         make
     - name: Test
       run: |
-        DYLD_LIBRARY_PATH=tests/objc python setup.py test
+        python setup.py test
 
   package:
     name: Packaging checks
