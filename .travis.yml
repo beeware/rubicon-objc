@@ -29,8 +29,8 @@ install:
   # minutes on macOS 10.11.
   - pyenv install --skip-existing 3.5.2
   - pyenv global 3.5.2
-  - python -m pip install --upgrade pip setuptools
-  - python -m pip install .
+  - python -m pip install --upgrade pip
+  - python -m pip install --upgrade setuptools
+  - python -m pip install tox
 script:
-  - make
-  - python setup.py test
+  - tox -e py
