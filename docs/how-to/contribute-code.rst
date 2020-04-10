@@ -34,16 +34,19 @@ to compile this library:
 
 This will produce ``tests/objc/librubiconharness.dylib``.
 
-You can then run the test suite:
+You can then run the full test suite:
 
 .. code-block:: sh
 
     (venv) $ tox
 
-By default this will run the test suite multiple times, once on each Python version supported by Rubicon. This can take a while, so if you want to speed up the process while developing, you can run the tests on one Python version only:
+By default this will run the test suite multiple times, once on each Python
+version supported by Rubicon, as well as running some pre-commit checks of
+code style and validity. This can take a while, so if you want to speed up
+the process while developing, you can run the tests on one Python version only:
 
 .. code-block:: sh
 
-    (venv) $ tox -e py37
+    (venv) $ tox -e py3.7
 
 Now you are ready to start hacking on Rubicon. Have fun!
