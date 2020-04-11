@@ -24,26 +24,27 @@ coding:
     (venv) $ cd rubicon-objc
     (venv) $ pip install -e .
 
-In order to test the capabilities of Rubicon, the test suite contains an
-Objective-C library with some known classes. To run the test suite, you'll need
-to compile this library:
-
-.. code-block:: sh
-
-    (venv) $ make
-
-This will produce ``tests/objc/librubiconharness.dylib``.
-
-You can then run the test suite:
+You can then run the full test suite:
 
 .. code-block:: sh
 
     (venv) $ tox
 
-By default this will run the test suite multiple times, once on each Python version supported by Rubicon. This can take a while, so if you want to speed up the process while developing, you can run the tests on one Python version only:
+By default this will run the test suite multiple times, once on each Python
+version supported by Rubicon, as well as running some pre-commit checks of
+code style and validity. This can take a while, so if you want to speed up
+the process while developing, you can run the tests on one Python version only:
+
+.. code-block:: sh
+
+    (venv) $ tox -e py
+
+Or, to run using a specific version of Python:
 
 .. code-block:: sh
 
     (venv) $ tox -e py37
+
+substituting the version number that you want to target.
 
 Now you are ready to start hacking on Rubicon. Have fun!

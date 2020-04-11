@@ -20,18 +20,9 @@ the other index files for clues.
 Build documentation locally
 ---------------------------
 
-Go to the documentation folder::
+To build the documentation locally, run::
 
-    $ cd docs
+    $ tox -e docs
 
-Install Sphinx with the helpers and extensions we use::
-
-    $ pip install -r requirements_rtd.txt
-
-Create the static files: ::
-
-    $ make html
-
-Check for any errors and,if possible, fix them.
-The output of the file should be in the ``_build/html`` folder.
-Open the file you changed in the browser.
+The output of the file should be in the ``build/sphinx/html`` folder. If there are
+any markup problems, they'll raise an error.
