@@ -25,4 +25,4 @@ To build the documentation locally, run::
     $ tox -e docs
 
 The output of the file should be in the ``_build/html`` folder. If there are
-any markup problems, they'll raise as an error.
+any markup problems, they'll raise an error.

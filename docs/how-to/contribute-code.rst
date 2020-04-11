@@ -47,6 +47,13 @@ the process while developing, you can run the tests on one Python version only:
 
 .. code-block:: sh
 
-    (venv) $ tox -e py3.7
+    (venv) $ tox -e py37
+
+Or, to run using the version of Python that is in your current virtual
+environment:
+
+.. code-block:: sh
+
+    (venv) $ tox -e py
 
 Now you are ready to start hacking on Rubicon. Have fun!
