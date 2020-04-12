@@ -10,7 +10,7 @@ except Exception:
     OSX_VERSION = None
 
 try:
-    rubiconharness = load_library(os.path.abspath('tests/objc/librubiconharness.dylib'))
+    rubiconharness = load_library(os.path.abspath('tests/objc/build/librubiconharness.dylib'))
 except ValueError:
     raise ValueError("Couldn't load Rubicon test harness library. Did you remember to run make?")
 
