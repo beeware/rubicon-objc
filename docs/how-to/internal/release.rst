@@ -37,11 +37,11 @@ The procedure for cutting a new release is as follows:
    *isn't* empty, you need to create a PR (using the normal development
    process) that contains these changes. Run::
 
-         $ towncrier --draft
+         $ tox -e towncrier -- --draft
 
    to review the release notes that will be included, and then::
 
-         $ towncrier
+         $ tox -e towncrier
 
    to generate the updated release notes. Submit the PR; once it's been
    reviewed and merged, you can restart the release process from step 1.
