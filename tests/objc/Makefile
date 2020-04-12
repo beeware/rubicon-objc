@@ -1,12 +1,17 @@
+OBJCC = clang
+OBJCLD_SHARED = $(OBJCC) -shared
+
+OBJCLDFLAGS = -fobjc-link-runtime
+
 OBJ_FILES=Thing.o Example.o BaseExample.o Blocks.o
 
 all: librubiconharness.dylib
 
 librubiconharness.dylib: $(OBJ_FILES)
-	clang -dynamiclib -fobjc-link-runtime $(OBJ_FILES) -o librubiconharness.dylib
+	$(OBJCLD_SHARED) $(OBJCLDFLAGS) $(OBJ_FILES) $(OBJCLDLIBS) -o $@
 
 clean:
-	rm -rf *.o *.d librubiconharness.dylib
+	$(RM) -r *.o *.d librubiconharness.dylib
 
 %.o: %.m *.h
-	clang -x objective-c -c $< -o $@
+	$(OBJCC) $(OBJCFLAGS) -c $< -o $@
