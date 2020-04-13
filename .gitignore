@@ -10,9 +10,6 @@ distribute-*
 env
 local
 .tox
-*.o
-*.d
-*.dylib
 
 # OS X
 .DS_Store

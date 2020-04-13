@@ -4,7 +4,6 @@
 
 include CHANGELOG.rst
 include CONTRIBUTING.md
-include Makefile
 include tox.ini
 recursive-include changes *.rst
 include docs/Makefile
@@ -13,4 +12,5 @@ include docs/requirements_docs.txt
 include docs/spelling_wordlist
 recursive-include docs *.png *.py *.rst
 prune docs/_build
+include tests/objc/Makefile
 recursive-include tests *.h *.m *.py
