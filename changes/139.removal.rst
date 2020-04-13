@@ -1,0 +1,3 @@
+Removed the i386 architecture from the test matrix.
+It is still supported on a best-effort basis,
+but compatibility is not tested automatically.

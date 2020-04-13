@@ -1,0 +1,6 @@
+Introduced GitHub Actions workflows for CI and release automation.
+GitHub Actions is now used to test on macOS 10.15,
+and Travis CI is used to test on older macOS versions.
+To shorten CI build times,
+the full range of supported Python versions is now only tested on macOS 10.15 with GitHub Actions.
+The older macOS versions on Travis CI only run the tests on the oldest supported version (currently 3.5).
