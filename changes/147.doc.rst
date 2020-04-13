@@ -1,0 +1,1 @@
+Added a :doc:`how-to guide for calling regular C functions </how-to/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`. 

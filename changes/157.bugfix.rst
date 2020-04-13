@@ -1,0 +1,5 @@
+Removed unit test that attempted to pass a struct with bit fields into a C function by value.
+Although this has worked in the past on x86 and x86_64,
+:mod:`ctypes` never officially supported this,
+and started generating an error in Python 3.7.6 and 3.8.1
+(see `bpo-39295 <https://bugs.python.org/issue39295>`_).

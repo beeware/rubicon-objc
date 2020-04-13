@@ -1,0 +1,2 @@
+Changed tests to no longer rely on ``DYLD_LIBRARY_PATH``,
+which caused issues with macOS System Integrity Protection and Hardened Runtime in some situations.

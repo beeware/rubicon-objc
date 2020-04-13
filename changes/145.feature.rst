@@ -1,0 +1,1 @@
+Added macOS 10.15 (Catalina) to the test matrix.
