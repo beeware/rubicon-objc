@@ -331,6 +331,21 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.accessBaseIntField(), 8888)
         self.assertEqual(obj.accessIntField(), 9999)
 
+    def test_method_incorrect_argument_count(self):
+        """Attempting to call a method with an incorrect number of arguments throws an exception."""
+
+        Example = ObjCClass('Example')
+        obj = Example.alloc().init()
+
+        with self.assertRaises(TypeError):
+            obj.accessIntField("extra argument 1")
+
+        with self.assertRaises(TypeError):
+            obj.mutateIntFieldWithValue_()
+
+        with self.assertRaises(TypeError):
+            obj.mutateIntFieldWithValue_(123, "extra argument")
+
     def test_method_send(self):
         "An instance method can be invoked with send_message."
         Example = ObjCClass('Example')

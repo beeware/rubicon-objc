@@ -130,6 +130,12 @@ class ObjCMethod(object):
         """
         f = self.get_callable()
 
+        if len(args) != len(self.argtypes) - 2:
+            raise TypeError(
+                'Method {} takes {} arguments, but got {} arguments'
+                .format(self.name, len(args), len(self.argtypes) - 2)
+            )
+
         if convert_args:
             converted_args = []
             for argtype, arg in zip(self.argtypes[2:], args):
