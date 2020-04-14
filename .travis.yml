@@ -33,4 +33,4 @@ install:
   - python -m pip install --upgrade setuptools
   - python -m pip install tox
 script:
-  - tox -e py
+  - python -m tox -e py
