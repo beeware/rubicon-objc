@@ -664,12 +664,22 @@ class ObjCInstance(object):
         return self
 
     def __str__(self):
-        """Return ``self.description`` converted to a Python :class:`str`."""
+        """Get a human-readable representation of ``self``.
+
+        By default, ``self.description`` converted to a Python string is returned.
+        If ``self.description`` is ``nil``, ``self.debugDescription`` converted to a Python is returned instead.
+        If that is also ``nil``, ``repr(self)`` is returned as a fallback.
+        """
 
         desc = self.description
-        if desc is None:
-            raise ValueError('{self.name}.description returned nil'.format(self=self))
-        return str(desc)
+        if desc is not None:
+            return str(desc)
+
+        desc = self.debugDescription
+        if desc is not None:
+            return str(desc)
+
+        return repr(self)
 
     def __repr__(self):
         """Get a debugging representation of ``self``, which includes the Objective-C object's address, class,

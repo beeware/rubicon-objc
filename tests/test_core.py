@@ -738,6 +738,27 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
+    def test_objcinstance_str_repr(self):
+        """An ObjCInstance's str and repr contain the object's description and debugDescription, respectively."""
+
+        DescriptionTester = ObjCClass("DescriptionTester")
+        py_description_string = "normal description string"
+        py_debug_description_string = "debug description string"
+        tester = DescriptionTester.alloc().initWithDescriptionString(
+            py_description_string,
+            debugDescriptionString=py_debug_description_string,
+        )
+        self.assertEqual(str(tester), py_description_string)
+        self.assertIn(py_debug_description_string, repr(tester))
+
+    def test_objcinstance_str_repr_with_nil_descriptions(self):
+        """An ObjCInstance's str and repr work even if description and debugDescription are nil."""
+
+        DescriptionTester = ObjCClass("DescriptionTester")
+        tester = DescriptionTester.alloc().initWithDescriptionString(None, debugDescriptionString=None)
+        self.assertIsNot(str(tester), None)
+        self.assertIsNot(repr(tester), None)
+
     def test_duplicate_class_registration(self):
         "If you define a class name twice in the same runtime, you get an error."
 
