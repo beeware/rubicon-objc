@@ -9,6 +9,8 @@ to contribute code, please `fork the code`_ and `submit a pull request`_.
 .. _fork the code: https://github.com/pybee/rubicon-objc
 .. _submit a pull request: https://github.com/pybee/rubicon-objc/pulls
 
+.. _setup-dev-environment:
+
 Set up your development environment
 ===================================
 
@@ -45,6 +47,8 @@ Or, to run using a specific version of Python:
 
     (venv) $ tox -e py37
 
-substituting the version number that you want to target.
+substituting the version number that you want to target. You can also specify
+one of the pre-commit checks `flake8`, `docs` or `package` to check code
+formatting, documentation syntax and packaging metadata, respectively.
 
 Now you are ready to start hacking on Rubicon. Have fun!

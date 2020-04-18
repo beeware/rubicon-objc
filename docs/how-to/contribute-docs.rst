@@ -20,7 +20,8 @@ the other index files for clues.
 Build documentation locally
 ---------------------------
 
-To build the documentation locally, run::
+To build the documentation locally, :ref:`set up a development environment
+<setup-dev-environment>`, and run:
 
     $ tox -e docs
 
