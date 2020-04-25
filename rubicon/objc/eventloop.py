@@ -637,7 +637,7 @@ class CocoaLifecycle:
         self._application.run()
 
     def stop(self):
-        self._application.terminate()
+        self._application.terminate(None)
 
 
 class iOSLifecycle:
