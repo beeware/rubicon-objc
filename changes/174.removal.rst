@@ -1,0 +1,4 @@
+Disallowed passing class names as :class:`str`/:class:`bytes` as the ``receiver`` argument of :func:`~rubicon.objc.runtime.send_message`.
+If you need to send a message to a class object (i. e. call a class method),
+use :class:`~rubicon.objc.api.ObjCClass` or :func:`~rubicon.objc.runtime.get_class` to look up the class,
+and pass the resulting :class:`~rubicon.objc.api.ObjCClass` or :class:`~rubicon.objc.runtime.Class` object as the receiver.

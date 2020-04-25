@@ -624,9 +624,7 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
 
-    :param receiver: The object on which to call the method. This may be an Objective-C object
-        (as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`),
-        or an Objective-C class name (as a :class:`str` or :class:`bytes`).
+    :param receiver: The object on which to call the method, as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
@@ -641,8 +639,6 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
 
     if isinstance(receiver, objc_id):
         pass
-    elif isinstance(receiver, (str, bytes)):
-        receiver = cast(get_class(receiver), objc_id)
     elif type(receiver) == c_void_p:
         receiver = cast(receiver, objc_id)
     else:
