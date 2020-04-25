@@ -142,6 +142,7 @@ class CFTimerHandle(events.TimerHandle):
         # Create a CF-compatible callback for a timer event
         def cf_timer_callback(cftimer, extra):
             callback(*args)
+            self._loop._timers.discard(self)
         return CFRunLoopTimerCallBack(cf_timer_callback)
 
     def __init__(self, *, loop, timeout, repeat, callback, args):
