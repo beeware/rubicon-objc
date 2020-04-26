@@ -222,7 +222,7 @@ class ObjCListInstance(ObjCInstance):
             return self.objectAtIndex(index)
 
     def __len__(self):
-        return send_message(self.ptr, 'count', restype=NSUInteger)
+        return send_message(self.ptr, 'count', restype=NSUInteger, argtypes=[])
 
     def __iter__(self):
         for i in range(len(self)):
@@ -247,7 +247,7 @@ class ObjCListInstance(ObjCInstance):
         return len([x for x in self if x == value])
 
     def copy(self):
-        return ObjCInstance(send_message(self, 'copy', restype=objc_id))
+        return ObjCInstance(send_message(self, 'copy', restype=objc_id, argtypes=[]))
 
 
 @for_objcclass(NSMutableArray)
@@ -373,7 +373,7 @@ class ObjCDictInstance(ObjCInstance):
             yield key, self.objectForKey_(key)
 
     def copy(self):
-        return ObjCInstance(send_message(self, 'copy', restype=objc_id))
+        return ObjCInstance(send_message(self, 'copy', restype=objc_id, argtypes=[]))
 
 
 @for_objcclass(NSMutableDictionary)

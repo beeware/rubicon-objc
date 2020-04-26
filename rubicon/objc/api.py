@@ -659,7 +659,7 @@ class ObjCInstance(object):
             # The observer is retained by the object we associate it to.  We release
             # the observer now so that it will be deallocated when the associated
             # object is deallocated.
-            send_message(observer, 'release')
+            send_message(observer, 'release', restype=None, argtypes=[])
 
         return self
 

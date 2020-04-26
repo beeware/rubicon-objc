@@ -619,7 +619,7 @@ def should_use_fpret(restype):
         return False
 
 
-def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
+def send_message(receiver, selector, *args, restype, argtypes):
     """Call a method on the receiver with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
@@ -627,9 +627,8 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
     :param receiver: The object on which to call the method, as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
-    :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list
-        (i. e. all arguments are treated as C varargs).
+    :param restype: The return type of the method.
+    :param argtypes: The argument types of the method, as a :class:`list`.
     """
 
     try:
@@ -645,8 +644,6 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
         raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
 
     selector = SEL(selector)
-    if argtypes is None:
-        argtypes = []
 
     # Choose the correct version of objc_msgSend based on return type.
     # Use libobjc['name'] instead of libobjc.name to get a new function object

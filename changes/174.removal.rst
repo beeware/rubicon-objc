@@ -1,4 +1,19 @@
-Disallowed passing class names as :class:`str`/:class:`bytes` as the ``receiver`` argument of :func:`~rubicon.objc.runtime.send_message`.
-If you need to send a message to a class object (i. e. call a class method),
-use :class:`~rubicon.objc.api.ObjCClass` or :func:`~rubicon.objc.runtime.get_class` to look up the class,
-and pass the resulting :class:`~rubicon.objc.api.ObjCClass` or :class:`~rubicon.objc.runtime.Class` object as the receiver.
+Tightened the API of :func:`~rubicon.objc.runtime.send_message`,
+removing some previously allowed shortcuts that were rarely used,
+or likely to be used by accident in an unsafe way.
+
+.. note::
+
+    In most cases,
+    Rubicon's high-level method call syntax provided by :class:`~rubicon.objc.api.ObjCInstance` can be used instead of :func:`~rubicon.objc.runtime.send_message`.
+    This syntax is almost always more convenient to use, more readable and less error-prone.
+    :func:`~rubicon.objc.runtime.send_message` should only be used in cases not supported by the high-level syntax.
+
+* Disallowed passing class names as :class:`str`/:class:`bytes` as the ``receiver`` argument of :func:`~rubicon.objc.runtime.send_message`.
+  If you need to send a message to a class object (i. e. call a class method),
+  use :class:`~rubicon.objc.api.ObjCClass` or :func:`~rubicon.objc.runtime.get_class` to look up the class,
+  and pass the resulting :class:`~rubicon.objc.api.ObjCClass` or :class:`~rubicon.objc.runtime.Class` object as the receiver.
+* Removed default values for :func:`~rubicon.objc.runtime.send_message`'s ``restype`` and ``argtypes`` keyword arguments.
+  Every :func:`~rubicon.objc.runtime.send_message` call now needs to have its return and argument types set explicitly.
+  This ensures that all arguments and the return value are converted correctly between (Objective-)C and Python.
+

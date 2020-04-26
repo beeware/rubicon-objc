@@ -352,14 +352,14 @@ class RubiconTest(unittest.TestCase):
 
         obj = Example.alloc().init()
 
-        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int), 22)
-        self.assertEqual(send_message(obj, "accessIntField", restype=c_int), 33)
+        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 22)
+        self.assertEqual(send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 33)
 
         send_message(obj, "mutateBaseIntFieldWithValue:", 8888, restype=None, argtypes=[c_int])
         send_message(obj, "mutateIntFieldWithValue:", 9999, restype=None, argtypes=[c_int])
 
-        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int), 8888)
-        self.assertEqual(send_message(obj, "accessIntField", restype=c_int), 9999)
+        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 8888)
+        self.assertEqual(send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 9999)
 
     def test_static_field(self):
         "A static field on a class can be accessed and mutated"
@@ -683,9 +683,18 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        self.assertEqual(send_message(example, "intSizedStruct", restype=struct_int_sized).x, b"abc")
-        self.assertEqual(send_message(example, "oddlySizedStruct", restype=struct_oddly_sized).x, b"abcd")
-        self.assertEqual(send_message(example, "largeStruct", restype=struct_large).x, b"abcdefghijklmnop")
+        self.assertEqual(
+            send_message(example, "intSizedStruct", restype=struct_int_sized, argtypes=[]).x,
+            b"abc",
+        )
+        self.assertEqual(
+            send_message(example, "oddlySizedStruct", restype=struct_oddly_sized, argtypes=[]).x,
+            b"abcd",
+        )
+        self.assertEqual(
+            send_message(example, "largeStruct", restype=struct_large, argtypes=[]).x,
+            b"abcdefghijklmnop",
+        )
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"
