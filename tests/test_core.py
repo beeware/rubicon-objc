@@ -346,6 +346,35 @@ class RubiconTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             obj.mutateIntFieldWithValue_(123, "extra argument")
 
+    def test_method_incorrect_argument_count_send(self):
+        """Attempting to call a method with send_message with an incorrect number of arguments throws an exception."""
+
+        Example = ObjCClass('Example')
+        obj = Example.alloc().init()
+
+        with self.assertRaises(TypeError):
+            send_message(obj, 'accessIntField', 'extra argument 1', restype=c_int, argtypes=[])
+
+        with self.assertRaises(TypeError):
+            send_message(obj, 'mutateIntFieldWithValue:', restype=None, argtypes=[c_int])
+
+        with self.assertRaises(TypeError):
+            send_message(obj, 'mutateIntFieldWithValue:', 123, 'extra_argument', restype=None, argtypes=[c_int])
+
+    def test_method_varargs_send(self):
+        """A variadic method can be called using send_message."""
+
+        NSString = ObjCClass('NSString')
+        formatted = send_message(
+            NSString,
+            'stringWithFormat:',
+            at('This is a %@ with %@'),
+            varargs=[at('string'), at('placeholders')],
+            restype=objc_id,
+            argtypes=[objc_id],
+        )
+        self.assertEqual(str(ObjCInstance(formatted)), 'This is a string with placeholders')
+
     def test_method_send(self):
         "An instance method can be invoked with send_message."
         Example = ObjCClass('Example')

@@ -619,16 +619,27 @@ def should_use_fpret(restype):
         return False
 
 
-def send_message(receiver, selector, *args, restype, argtypes):
+def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     """Call a method on the receiver with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
+
+    .. note::
+
+        Some Objective-C methods take variadic arguments (varargs), for example `+[NSString stringWithFormat:]
+        <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
+        When using :func:`send_message`, variadic arguments are not passed as regular arguments in the ``args`` list,
+        but as a separate ``varargs`` parameter.
+
+        This protects against accidentally passing too many arguments into a method and having the extra arguments
+        treated as varargs, even though the method doesn't actually take varargs.
 
     :param receiver: The object on which to call the method, as an :class:`ObjCInstance` or :class:`objc_id`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a :class:`list`.
+    :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
     """
 
     try:
@@ -644,6 +655,15 @@ def send_message(receiver, selector, *args, restype, argtypes):
 
     selector = SEL(selector)
 
+    if len(args) != len(argtypes):
+        raise TypeError(
+            "Inconsistent number of arguments ({}) and argument types ({})"
+            .format(len(args), len(argtypes))
+        )
+
+    if varargs is None:
+        varargs = []
+
     # Choose the correct version of objc_msgSend based on return type.
     # Use libobjc['name'] instead of libobjc.name to get a new function object
     # that is independent of the one on the objc library.
@@ -653,17 +673,17 @@ def send_message(receiver, selector, *args, restype, argtypes):
         send = libobjc['objc_msgSend_fpret']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
+        result = send(receiver, selector, *args, *varargs)
     elif should_use_stret(restype):
         send = libobjc['objc_msgSend_stret']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
+        result = send(receiver, selector, *args, *varargs)
     else:
         send = libobjc['objc_msgSend']
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
+        result = send(receiver, selector, *args, *varargs)
         if restype == c_void_p:
             result = c_void_p(result)
     return result

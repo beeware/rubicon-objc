@@ -1,5 +1,5 @@
 Tightened the API of :func:`~rubicon.objc.runtime.send_message`,
-removing some previously allowed shortcuts that were rarely used,
+removing some previously allowed shortcuts and features that were rarely used,
 or likely to be used by accident in an unsafe way.
 
 .. note::
@@ -23,4 +23,17 @@ or likely to be used by accident in an unsafe way.
 * Removed default values for :func:`~rubicon.objc.runtime.send_message`'s ``restype`` and ``argtypes`` keyword arguments.
   Every :func:`~rubicon.objc.runtime.send_message` call now needs to have its return and argument types set explicitly.
   This ensures that all arguments and the return value are converted correctly between (Objective-)C and Python.
+* Disallowed passing more argument values than there are argument types in ``argtypes``.
+  This was previously allowed to support calling variadic methods -
+  any arguments beyond the types set in ``argtypes`` would be passed as varargs.
+  However,
+  this feature was easy to misuse by accident,
+  as it allowed passing extra arguments to *any* method,
+  even though most Objective-C methods are not variadic.
+  Extra arguments passed this way were silently ignored without causing an error or a crash.
+
+  To prevent accidentally passing too many arguments like this,
+  the number of arguments now has to exactly match the number of ``argtypes``.
+  Variadic methods can still be called,
+  but the varargs now need to be passed as a list into the separate ``varargs`` keyword arugment.
 
