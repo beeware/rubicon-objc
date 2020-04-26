@@ -665,27 +665,23 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
         varargs = []
 
     # Choose the correct version of objc_msgSend based on return type.
+    if should_use_fpret(restype):
+        send_name = 'objc_msgSend_fpret'
+    elif should_use_stret(restype):
+        send_name = 'objc_msgSend_stret'
+    else:
+        send_name = 'objc_msgSend'
+
     # Use libobjc['name'] instead of libobjc.name to get a new function object
     # that is independent of the one on the objc library.
     # This way multiple threads sending messages don't overwrite
     # each other's function signatures.
-    if should_use_fpret(restype):
-        send = libobjc['objc_msgSend_fpret']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args, *varargs)
-    elif should_use_stret(restype):
-        send = libobjc['objc_msgSend_stret']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args, *varargs)
-    else:
-        send = libobjc['objc_msgSend']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args, *varargs)
-        if restype == c_void_p:
-            result = c_void_p(result)
+    send = libobjc[send_name]
+    send.restype = restype
+    send.argtypes = [objc_id, SEL] + argtypes
+    result = send(receiver, selector, *args, *varargs)
+    if restype == c_void_p:
+        result = c_void_p(result)
     return result
 
 
