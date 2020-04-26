@@ -142,12 +142,12 @@ class CFTimerHandle(events.TimerHandle):
         # Create a CF-compatible callback for a timer event
         def cf_timer_callback(cftimer, extra):
             callback(*args)
-            # Deregister the callback after it's been performed
+            # Deregister the callback after it has been performed.
             self._loop._timers.discard(self)
 
         return CFRunLoopTimerCallBack(cf_timer_callback)
 
-    def __init__(self, *, loop, timeout, repeat, callback, args):
+    def __init__(self, *, loop, timeout, callback, args):
         super().__init__(
             libcf.CFAbsoluteTimeGetCurrent() + timeout,
             self._cf_timer_callback(callback, args),
@@ -156,7 +156,6 @@ class CFTimerHandle(events.TimerHandle):
         )
 
         self._timeout = timeout
-        self._repeat = repeat
 
         # Retain a reference to the Handle
         self._loop._timers.add(self)
@@ -461,7 +460,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         return CFTimerHandle(
             loop=self,
             timeout=0,
-            repeat=False,
             callback=context_callback(context, callback),
             args=args
         )
@@ -489,7 +487,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         return CFTimerHandle(
             loop=self,
             timeout=delay,
-            repeat=False,
             callback=context_callback(context, callback),
             args=args
         )
@@ -504,7 +501,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         return CFTimerHandle(
             loop=self,
             timeout=when - self.time(),
-            repeat=False,
             callback=context_callback(context, callback),
             args=args
         )
