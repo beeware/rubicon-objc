@@ -624,7 +624,7 @@ def send_message(receiver, selector, *args, restype, argtypes):
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
 
-    :param receiver: The object on which to call the method, as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`.
+    :param receiver: The object on which to call the method, as an :class:`ObjCInstance` or :class:`objc_id`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
@@ -636,12 +636,11 @@ def send_message(receiver, selector, *args, restype, argtypes):
     except AttributeError:
         pass
 
-    if isinstance(receiver, objc_id):
-        pass
-    elif type(receiver) == c_void_p:
-        receiver = cast(receiver, objc_id)
-    else:
-        raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
+    if not isinstance(receiver, objc_id):
+        raise TypeError(
+            "Receiver must be an ObjCInstance or objc_id, not {tp.__module__}.{tp.__qualname__}"
+            .format(tp=type(receiver))
+        )
 
     selector = SEL(selector)
 

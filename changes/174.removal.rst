@@ -13,6 +13,13 @@ or likely to be used by accident in an unsafe way.
   If you need to send a message to a class object (i. e. call a class method),
   use :class:`~rubicon.objc.api.ObjCClass` or :func:`~rubicon.objc.runtime.get_class` to look up the class,
   and pass the resulting :class:`~rubicon.objc.api.ObjCClass` or :class:`~rubicon.objc.runtime.Class` object as the receiver.
+* Disallowed passing :class:`~ctypes.c_void_p` objects as the ``receiver`` argument of :func:`~rubicon.objc.runtime.send_message`.
+  The ``receiver`` argument now has to be of type :class:`~rubicon.objc.runtime.objc_id`,
+  or one of its subclasses (such as :class:`~rubicon.objc.runtime.Class`),
+  or one of its high-level equivalents (such as :class:`~rubicon.objc.api.ObjCInstance`).
+  This is the case for all Objective-C objects returned by Rubicon's high-level and low-level APIs.
+  If you need to send a message to an object pointer stored as :class:`~ctypes.c_void_p`,
+  :func:`~ctypes.cast` it to :class:`~rubicon.objc.runtime.objc_id` first.
 * Removed default values for :func:`~rubicon.objc.runtime.send_message`'s ``restype`` and ``argtypes`` keyword arguments.
   Every :func:`~rubicon.objc.runtime.send_message` call now needs to have its return and argument types set explicitly.
   This ensures that all arguments and the return value are converted correctly between (Objective-)C and Python.
