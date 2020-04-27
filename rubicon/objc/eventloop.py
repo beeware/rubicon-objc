@@ -6,14 +6,10 @@ from asyncio import (
     DefaultEventLoopPolicy, SafeChildWatcher, coroutines, events, tasks,
     unix_events,
 )
-from ctypes import CFUNCTYPE, POINTER, Structure, c_int, c_void_p
+from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_ulong, c_void_p
 
 from .api import objc_const
-from .core_foundation import (
-    CFAbsoluteTime, CFAllocatorRef, CFDataRef, CFOptionFlags, CFStringRef,
-    CFTimeInterval, kCFAllocatorDefault, libcf,
-)
-from .runtime import objc_id
+from .runtime import load_library, objc_id
 from .types import CFIndex
 
 __all__ = [
@@ -26,6 +22,15 @@ __all__ = [
 # CoreFoundation types and constants needed for async handlers
 ###########################################################################
 
+libcf = load_library('CoreFoundation')
+
+CFAllocatorRef = objc_id
+kCFAllocatorDefault = None
+
+CFDataRef = objc_id
+CFOptionFlags = c_ulong
+CFStringRef = objc_id
+
 CFRunLoopRef = objc_id
 CFRunLoopMode = CFStringRef
 CFRunLoopSourceRef = objc_id
@@ -37,6 +42,9 @@ CFSocketRef = objc_id
 CFSocketCallbackType = c_int
 CFSocketCallback = CFUNCTYPE(None, CFSocketRef, CFSocketCallbackType, CFDataRef, c_void_p, c_void_p)
 CFSocketNativeHandle = c_int
+
+CFTimeInterval = c_double
+CFAbsoluteTime = CFTimeInterval
 
 
 class CFRunLoopTimerContext(Structure):
@@ -84,6 +92,9 @@ libcf.CFRunLoopAddSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoop
 
 libcf.CFRunLoopAddTimer.restype = None
 libcf.CFRunLoopAddTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMode]
+
+libcf.CFRunLoopGetMain.restype = CFRunLoopRef
+libcf.CFRunLoopGetMain.argtypes = []
 
 libcf.CFRunLoopRemoveSource.restype = None
 libcf.CFRunLoopRemoveSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoopMode]
