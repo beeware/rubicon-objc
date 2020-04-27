@@ -651,7 +651,7 @@ class ObjCInstance(object):
             # the ObjCInstance corresponding to the object from the cached objects
             # dictionary, effectively destroying the ObjCInstance.
             observer = send_message(
-                send_message('DeallocationObserver', 'alloc', restype=objc_id, argtypes=[]),
+                send_message(get_class('DeallocationObserver'), 'alloc', restype=objc_id, argtypes=[]),
                 'initWithObject:', self, restype=objc_id, argtypes=[objc_id]
             )
             libobjc.objc_setAssociatedObject(self, observer, observer, 0x301)
@@ -659,7 +659,7 @@ class ObjCInstance(object):
             # The observer is retained by the object we associate it to.  We release
             # the observer now so that it will be deallocated when the associated
             # object is deallocated.
-            send_message(observer, 'release')
+            send_message(observer, 'release', restype=None, argtypes=[])
 
         return self
 

@@ -619,19 +619,45 @@ def should_use_fpret(restype):
         return False
 
 
-def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
+def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     """Call a method on the receiver with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
 
-    :param receiver: The object on which to call the method. This may be an Objective-C object
-        (as an :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`),
-        or an Objective-C class name (as a :class:`str` or :class:`bytes`).
+    .. note::
+
+        Some Objective-C methods take variadic arguments (varargs), for example `+[NSString stringWithFormat:]
+        <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
+        When using :func:`send_message`, variadic arguments are treated differently from regular arguments:
+        they are not passed as normal function arguments in ``*args``, but as a list in a separate ``varargs``
+        keyword argument.
+
+        This explicit separation of regular and variadic arguments protects against accidentally passing too many
+        arguments into a method. By default these extra arguments would be considered varargs and passed on to the
+        method, even if the method in question doesn't take varargs. Because of how the Objective-C runtime and most
+        C calling conventions work, this error would otherwise be silently ignored.
+
+        The types of varargs are not included in the ``argtypes`` list. Instead, the values are automatically
+        converted to C types using the default :mod:`ctypes` argument conversion rules. To ensure that all varargs are
+        converted to the expected C types, it is recommended to manually convert all varargs to :mod:`ctypes` types
+        instead of relying on automatic conversions. For example:
+
+        .. code-block:: python
+
+            send_message(
+                NSString, "stringWithFormat:",
+                at("%i %s %@"),
+                restype=objc_id, argtypes=[objc_id],
+                varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
+            )
+
+    :param receiver: The object on which to call the method, as an :class:`ObjCInstance` or :class:`objc_id`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
-    :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list
-        (i. e. all arguments are treated as C varargs).
+    :param restype: The return type of the method.
+    :param argtypes: The argument types of the method, as a :class:`list`.
+    :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
+        These arguments are converted according to the default :mod:`ctypes` conversion rules.
     """
 
     try:
@@ -639,41 +665,41 @@ def send_message(receiver, selector, *args, restype=c_void_p, argtypes=None):
     except AttributeError:
         pass
 
-    if isinstance(receiver, objc_id):
-        pass
-    elif isinstance(receiver, (str, bytes)):
-        receiver = cast(get_class(receiver), objc_id)
-    elif type(receiver) == c_void_p:
-        receiver = cast(receiver, objc_id)
-    else:
-        raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
+    if not isinstance(receiver, objc_id):
+        raise TypeError(
+            "Receiver must be an ObjCInstance or objc_id, not {tp.__module__}.{tp.__qualname__}"
+            .format(tp=type(receiver))
+        )
 
     selector = SEL(selector)
-    if argtypes is None:
-        argtypes = []
+
+    if len(args) != len(argtypes):
+        raise TypeError(
+            "Inconsistent number of arguments ({}) and argument types ({})"
+            .format(len(args), len(argtypes))
+        )
+
+    if varargs is None:
+        varargs = []
 
     # Choose the correct version of objc_msgSend based on return type.
+    if should_use_fpret(restype):
+        send_name = 'objc_msgSend_fpret'
+    elif should_use_stret(restype):
+        send_name = 'objc_msgSend_stret'
+    else:
+        send_name = 'objc_msgSend'
+
     # Use libobjc['name'] instead of libobjc.name to get a new function object
     # that is independent of the one on the objc library.
     # This way multiple threads sending messages don't overwrite
     # each other's function signatures.
-    if should_use_fpret(restype):
-        send = libobjc['objc_msgSend_fpret']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
-    elif should_use_stret(restype):
-        send = libobjc['objc_msgSend_stret']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
-    else:
-        send = libobjc['objc_msgSend']
-        send.restype = restype
-        send.argtypes = [objc_id, SEL] + argtypes
-        result = send(receiver, selector, *args)
-        if restype == c_void_p:
-            result = c_void_p(result)
+    send = libobjc[send_name]
+    send.restype = restype
+    send.argtypes = [objc_id, SEL] + argtypes
+    result = send(receiver, selector, *args, *varargs)
+    if restype == c_void_p:
+        result = c_void_p(result)
     return result
 
 
