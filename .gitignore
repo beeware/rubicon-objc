@@ -10,7 +10,6 @@ distribute-*
 env
 local
 .tox
-pip-wheel-metadata
 
 # OS X
 .DS_Store
