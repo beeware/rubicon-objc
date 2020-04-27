@@ -628,11 +628,28 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
 
         Some Objective-C methods take variadic arguments (varargs), for example `+[NSString stringWithFormat:]
         <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
-        When using :func:`send_message`, variadic arguments are not passed as regular arguments in the ``args`` list,
-        but as a separate ``varargs`` parameter.
+        When using :func:`send_message`, variadic arguments are treated differently from regular arguments:
+        they are not passed as normal function arguments in ``*args``, but as a list in a separate ``varargs``
+        keyword argument.
 
-        This protects against accidentally passing too many arguments into a method and having the extra arguments
-        treated as varargs, even though the method doesn't actually take varargs.
+        This explicit separation of regular and variadic arguments protects against accidentally passing too many
+        arguments into a method. By default these extra arguments would be considered varargs and passed on to the
+        method, even if the method in question doesn't take varargs. Because of how the Objective-C runtime and most
+        C calling conventions work, this error would otherwise be silently ignored.
+
+        The types of varargs are not included in the ``argtypes`` list. Instead, the values are automatically
+        converted to C types using the default :mod:`ctypes` argument conversion rules. To ensure that all varargs are
+        converted to the expected C types, it is recommended to manually convert all varargs to :mod:`ctypes` types
+        instead of relying on automatic conversions. For example:
+
+        .. code-block:: python
+
+            send_message(
+                NSString, "stringWithFormat:",
+                at("%i %s %@"),
+                restype=objc_id, argtypes=[objc_id],
+                varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
+            )
 
     :param receiver: The object on which to call the method, as an :class:`ObjCInstance` or :class:`objc_id`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
@@ -640,6 +657,7 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a :class:`list`.
     :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
+        These arguments are converted according to the default :mod:`ctypes` conversion rules.
     """
 
     try:
