@@ -1,7 +1,6 @@
-from ctypes import c_double, c_ulong, cdll
-from ctypes.util import find_library
+from ctypes import c_double, c_ulong
 
-from .runtime import objc_id
+from .runtime import load_library, objc_id
 
 __all__ = [
     'CFAbsoluteTime',
@@ -15,7 +14,7 @@ __all__ = [
     'libcf',
 ]
 
-libcf = cdll.LoadLibrary(find_library('CoreFoundation'))
+libcf = load_library('CoreFoundation')
 
 CFAllocatorRef = objc_id
 kCFAllocatorDefault = None
