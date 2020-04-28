@@ -12,7 +12,11 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        task: ['flake8', 'package', 'docs']
+        task:
+        - 'flake8'
+        - 'towncrier-check'
+        - 'docs'
+        - 'package'
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python
