@@ -63,9 +63,14 @@ Objective-C classes
 
         The method's return type, as a :mod:`ctypes` type, or ``None`` for ``void`` methods.
 
-    .. attribute:: argtypes
+    .. attribute:: imp_argtypes
 
         The method's argument types, as a sequence of :mod:`ctypes` types. The types of the implicit ``self`` and ``_cmd`` parameters, :class:`~rubicon.objc.runtime.objc_id` and :class:`~rubicon.objc.runtime.SEL`, are included here.
+
+    .. attribute:: method_argtypes
+
+        The method's argument types, as a sequence of :mod:`ctypes` types. This is identical to :attr:`imp_argtypes`,
+        except that the types of the implicit ``self`` and ``_cmd`` parameters are not included.
 
 Standard Objective-C and Foundation classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

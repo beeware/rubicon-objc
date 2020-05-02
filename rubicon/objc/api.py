@@ -87,7 +87,9 @@ class ObjCMethod(object):
         self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
         self.encoding = libobjc.method_getTypeEncoding(method)
-        self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
+        self.restype, *self.imp_argtypes = ctypes_for_method_encoding(self.encoding)
+        assert self.imp_argtypes[:2] == [objc_id, SEL]
+        self.method_argtypes = self.imp_argtypes[2:]
 
     def __repr__(self):
         return "<ObjCMethod: %s %s>" % (self.name, self.encoding)
@@ -114,15 +116,15 @@ class ObjCMethod(object):
         the method's :attr:`selector` is automatically added between the receiver and the method arguments.
         """
 
-        if len(args) != len(self.argtypes) - 2:
+        if len(args) != len(self.method_argtypes):
             raise TypeError(
                 'Method {} takes {} arguments, but got {} arguments'
-                .format(self.name, len(args), len(self.argtypes) - 2)
+                .format(self.name, len(args), len(self.method_argtypes))
             )
 
         if convert_args:
             converted_args = []
-            for argtype, arg in zip(self.argtypes[2:], args):
+            for argtype, arg in zip(self.method_argtypes, args):
                 if isinstance(arg, enum.Enum):
                     # Convert Python enum objects to their values
                     arg = arg.value
@@ -153,13 +155,13 @@ class ObjCMethod(object):
         try:
             result = send_message(
                 receiver, self.selector, *converted_args,
-                restype=self.restype, argtypes=self.argtypes[2:],
+                restype=self.restype, argtypes=self.method_argtypes,
             )
         except ArgumentError as error:
             # Add more useful info to argument error exceptions, then reraise.
             error.args = (
                 error.args[0]
-                + ' (selector = {self.name}, argtypes = {self.argtypes}, encoding = {self.encoding})'
+                + ' (selector = {self.name}, argtypes = {self.method_argtypes}, encoding = {self.encoding})'
                 .format(self=self),
             )
             raise
