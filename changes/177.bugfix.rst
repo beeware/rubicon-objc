@@ -1,0 +1,2 @@
+Fixed :func:`~rubicon.objc.runtime.send_message` not accepting :class:`~rubicon.objc.runtime.SEL` objects for the
+``selector`` parameter. The documentation stated that this is allowed, but actually doing so caused a type error.

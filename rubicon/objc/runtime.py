@@ -671,7 +671,8 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
             .format(tp=type(receiver))
         )
 
-    selector = SEL(selector)
+    if not isinstance(selector, SEL):
+        selector = SEL(selector)
 
     if len(args) != len(argtypes):
         raise TypeError(
