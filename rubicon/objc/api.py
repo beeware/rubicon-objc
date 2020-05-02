@@ -89,23 +89,9 @@ class ObjCMethod(object):
         self.pyname = self.name.replace(b':', b'_')
         self.encoding = libobjc.method_getTypeEncoding(method)
         self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
-        self.imp = libobjc.method_getImplementation(method)
-        self.func = None
-
-    def get_prototype(self):
-        """Returns a ctypes CFUNCTYPE for the method."""
-        return CFUNCTYPE(self.restype, *self.argtypes)
 
     def __repr__(self):
         return "<ObjCMethod: %s %s>" % (self.name, self.encoding)
-
-    def get_callable(self):
-        """Returns a python-callable version of the method's IMP."""
-        if not self.func:
-            self.func = cast(self.imp, self.get_prototype())
-            self.func.restype = self.restype
-            self.func.argtypes = self.argtypes
-        return self.func
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method on an object with the given arguments.
@@ -128,7 +114,6 @@ class ObjCMethod(object):
         The ``_cmd`` selector argument does *not* need to be passed in manually ---
         the method's :attr:`selector` is automatically added between the receiver and the method arguments.
         """
-        f = self.get_callable()
 
         if len(args) != len(self.argtypes) - 2:
             raise TypeError(
@@ -167,7 +152,10 @@ class ObjCMethod(object):
             converted_args = args
 
         try:
-            result = f(receiver, self.selector, *converted_args)
+            result = send_message(
+                receiver, self.selector, *converted_args,
+                restype=self.restype, argtypes=self.argtypes[2:],
+            )
         except ArgumentError as error:
             # Add more useful info to argument error exceptions, then reraise.
             error.args = (
