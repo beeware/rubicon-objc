@@ -86,7 +86,6 @@ class ObjCMethod(object):
 
         self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
-        self.pyname = self.name.replace(b':', b'_')
         self.encoding = libobjc.method_getTypeEncoding(method)
         self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
 
