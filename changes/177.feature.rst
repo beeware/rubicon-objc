@@ -1,4 +1,4 @@
-Changed :class:`~rubicon.objc.api.ObjCMethod` to call methods using :func:`~rubicon.objc.runtime.send_message`
+Changed ``ObjCMethod``` to call methods using :func:`~rubicon.objc.runtime.send_message`
 instead of calling :class:`~rubicon.objc.runtime.IMP`\s directly. This is mainly an internal change and should not
 affect most existing code, although it may improve compatibility with Objective-C code that makes heavy use of runtime
 reflection and method manipulation (such as swizzling).

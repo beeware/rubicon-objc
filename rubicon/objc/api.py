@@ -32,7 +32,6 @@ __all__ = [
     'ObjCClass',
     'ObjCInstance',
     'ObjCMetaClass',
-    'ObjCMethod',
     'ObjCProtocol',
     'Protocol',
     'at',
