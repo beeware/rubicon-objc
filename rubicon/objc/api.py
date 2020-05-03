@@ -3,7 +3,7 @@ import decimal
 import enum
 import inspect
 from ctypes import (
-    CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
+    CFUNCTYPE, POINTER, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
     c_uint8, c_ulong, c_void_p, cast, sizeof, string_at
 )
 
@@ -152,27 +152,18 @@ class ObjCMethod(object):
         else:
             converted_args = args
 
-        try:
-            result = send_message(
-                receiver, self.selector, *converted_args,
-                restype=self.restype, argtypes=self.method_argtypes,
-            )
-        except ArgumentError as error:
-            # Add more useful info to argument error exceptions, then reraise.
-            error.args = (
-                error.args[0]
-                + ' (selector = {self.name}, argtypes = {self.method_argtypes}, encoding = {self.encoding})'
-                .format(self=self),
-            )
-            raise
-        else:
-            if not convert_result:
-                return result
+        result = send_message(
+            receiver, self.selector, *converted_args,
+            restype=self.restype, argtypes=self.method_argtypes,
+        )
 
-            # Convert result to python type if it is a instance or class pointer.
-            if self.restype is not None and issubclass(self.restype, objc_id):
-                result = py_from_ns(result, _auto=True)
+        if not convert_result:
             return result
+
+        # Convert result to python type if it is a instance or class pointer.
+        if self.restype is not None and issubclass(self.restype, objc_id):
+            result = py_from_ns(result, _auto=True)
+        return result
 
 
 class ObjCPartialMethod(object):
