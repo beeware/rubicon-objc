@@ -47,34 +47,6 @@ Objective-C classes
 
 .. autoclass:: ObjCMetaClass(name_or_ptr)
 
-.. autoclass:: ObjCMethod
-
-    .. automethod:: __call__
-
-    .. attribute:: selector
-
-        The method's selector, as a :class:`~rubicon.objc.runtime.SEL`.
-
-    .. attribute:: encoding
-
-        The method's signature type encoding, as :class:`bytes`.
-
-    .. attribute:: restype
-
-        The method's return type, as a :mod:`ctypes` type, or ``None`` for ``void`` methods.
-
-    .. attribute:: argtypes
-
-        The method's argument types, as a sequence of :mod:`ctypes` types. The types of the implicit ``self`` and ``_cmd`` parameters, :class:`~rubicon.objc.runtime.objc_id` and :class:`~rubicon.objc.runtime.SEL`, are included here.
-
-    .. attribute:: imp
-
-        The method's implementation function pointer, as an :class:`~rubicon.objc.runtime.IMP`.
-
-        .. note::
-
-            This function pointer cannot be called directly, as it does not carry any type information. To call the method, call the :class:`ObjCMethod` object itself (see :meth:`__call__`), and not its :attr:`imp`. This way Rubicon determines the correct argument and return types automatically, checks the types of the passed arguments, and converts the arguments and return value as needed.
-
 Standard Objective-C and Foundation classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

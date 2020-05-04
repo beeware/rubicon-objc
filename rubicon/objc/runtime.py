@@ -1,7 +1,7 @@
 import os
 from ctypes import (
-    CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p, c_double, c_float,
-    c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
+    ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
+    c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
 )
 
 from . import ctypes_patch
@@ -671,7 +671,8 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
             .format(tp=type(receiver))
         )
 
-    selector = SEL(selector)
+    if not isinstance(selector, SEL):
+        selector = SEL(selector)
 
     if len(args) != len(argtypes):
         raise TypeError(
@@ -697,7 +698,18 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     send = libobjc[send_name]
     send.restype = restype
     send.argtypes = [objc_id, SEL] + argtypes
-    result = send(receiver, selector, *args, *varargs)
+
+    try:
+        result = send(receiver, selector, *args, *varargs)
+    except ArgumentError as error:
+        # Add more useful info to argument error exceptions, then reraise.
+        error.args = (
+            error.args[0]
+            + ' (selector = {selector}, argtypes = {argtypes})'
+            .format(selector=selector, argtypes=argtypes),
+        )
+        raise
+
     if restype == c_void_p:
         result = c_void_p(result)
     return result

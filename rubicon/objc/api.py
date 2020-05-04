@@ -3,7 +3,7 @@ import decimal
 import enum
 import inspect
 from ctypes import (
-    CFUNCTYPE, POINTER, ArgumentError, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
+    CFUNCTYPE, POINTER, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
     c_uint8, c_ulong, c_void_p, cast, sizeof, string_at
 )
 
@@ -32,7 +32,6 @@ __all__ = [
     'ObjCClass',
     'ObjCInstance',
     'ObjCMetaClass',
-    'ObjCMethod',
     'ObjCProtocol',
     'Protocol',
     'at',
@@ -86,26 +85,13 @@ class ObjCMethod(object):
 
         self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
-        self.pyname = self.name.replace(b':', b'_')
         self.encoding = libobjc.method_getTypeEncoding(method)
-        self.restype, *self.argtypes = ctypes_for_method_encoding(self.encoding)
-        self.imp = libobjc.method_getImplementation(method)
-        self.func = None
-
-    def get_prototype(self):
-        """Returns a ctypes CFUNCTYPE for the method."""
-        return CFUNCTYPE(self.restype, *self.argtypes)
+        self.restype, *self.imp_argtypes = ctypes_for_method_encoding(self.encoding)
+        assert self.imp_argtypes[:2] == [objc_id, SEL]
+        self.method_argtypes = self.imp_argtypes[2:]
 
     def __repr__(self):
         return "<ObjCMethod: %s %s>" % (self.name, self.encoding)
-
-    def get_callable(self):
-        """Returns a python-callable version of the method's IMP."""
-        if not self.func:
-            self.func = cast(self.imp, self.get_prototype())
-            self.func.restype = self.restype
-            self.func.argtypes = self.argtypes
-        return self.func
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method on an object with the given arguments.
@@ -128,17 +114,16 @@ class ObjCMethod(object):
         The ``_cmd`` selector argument does *not* need to be passed in manually ---
         the method's :attr:`selector` is automatically added between the receiver and the method arguments.
         """
-        f = self.get_callable()
 
-        if len(args) != len(self.argtypes) - 2:
+        if len(args) != len(self.method_argtypes):
             raise TypeError(
                 'Method {} takes {} arguments, but got {} arguments'
-                .format(self.name, len(args), len(self.argtypes) - 2)
+                .format(self.name, len(args), len(self.method_argtypes))
             )
 
         if convert_args:
             converted_args = []
-            for argtype, arg in zip(self.argtypes[2:], args):
+            for argtype, arg in zip(self.method_argtypes, args):
                 if isinstance(arg, enum.Enum):
                     # Convert Python enum objects to their values
                     arg = arg.value
@@ -166,24 +151,18 @@ class ObjCMethod(object):
         else:
             converted_args = args
 
-        try:
-            result = f(receiver, self.selector, *converted_args)
-        except ArgumentError as error:
-            # Add more useful info to argument error exceptions, then reraise.
-            error.args = (
-                error.args[0]
-                + ' (selector = {self.name}, argtypes = {self.argtypes}, encoding = {self.encoding})'
-                .format(self=self),
-            )
-            raise
-        else:
-            if not convert_result:
-                return result
+        result = send_message(
+            receiver, self.selector, *converted_args,
+            restype=self.restype, argtypes=self.method_argtypes,
+        )
 
-            # Convert result to python type if it is a instance or class pointer.
-            if self.restype is not None and issubclass(self.restype, objc_id):
-                result = py_from_ns(result, _auto=True)
+        if not convert_result:
             return result
+
+        # Convert result to python type if it is a instance or class pointer.
+        if self.restype is not None and issubclass(self.restype, objc_id):
+            result = py_from_ns(result, _auto=True)
+        return result
 
 
 class ObjCPartialMethod(object):

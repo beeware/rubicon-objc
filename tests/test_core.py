@@ -390,6 +390,14 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 8888)
         self.assertEqual(send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 9999)
 
+    def test_send_sel(self):
+        """send_message accepts a SEL object as the selector parameter."""
+        Example = ObjCClass('Example')
+
+        obj = Example.alloc().init()
+
+        self.assertEqual(send_message(obj, SEL("accessIntField"), restype=c_int, argtypes=[]), 33)
+
     def test_static_field(self):
         "A static field on a class can be accessed and mutated"
         Example = ObjCClass('Example')
