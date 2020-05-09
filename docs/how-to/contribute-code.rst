@@ -5,9 +5,9 @@ How to contribute code to Rubicon
 If you experience problems with Rubicon, `log them on GitHub`_. If you want
 to contribute code, please `fork the code`_ and `submit a pull request`_.
 
-.. _log them on Github: https://github.com/pybee/rubicon-objc/issues
-.. _fork the code: https://github.com/pybee/rubicon-objc
-.. _submit a pull request: https://github.com/pybee/rubicon-objc/pulls
+.. _log them on Github: https://github.com/beeware/rubicon-objc/issues
+.. _fork the code: https://github.com/beeware/rubicon-objc
+.. _submit a pull request: https://github.com/beeware/rubicon-objc/pulls
 
 .. _setup-dev-environment:
 
@@ -22,7 +22,10 @@ coding:
 
     $ python3 -m venv venv
     $ source venv/bin/activate.sh
-    (venv) $ git clone https://github.com/pybee/rubicon-objc.git
+    (venv) $ pip install --upgrade pip
+    (venv) $ pip install --upgrade setuptools
+    (venv) $ pip install tox
+    (venv) $ git clone https://github.com/beeware/rubicon-objc.git
     (venv) $ cd rubicon-objc
     (venv) $ pip install -e .
 

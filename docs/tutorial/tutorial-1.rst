@@ -32,7 +32,7 @@ Let's create an instance of an `NSURL` object. The `NSURL` documentation
 describes a static constructor `+URLWithString:`; we can invoke this
 constructor as::
 
-    >>> base = NSURL.URLWithString("http://pybee.org/")
+    >>> base = NSURL.URLWithString("https://beeware.org/")
 
 That is, the name of the method in Python is identical to the method in
 Objective-C. The first argument is declared as being an `NSString *`; Rubicon
@@ -54,7 +54,7 @@ can't repeat a keyword argument in a method call. In this case, you can use a
 "long form" of the method to explicitly invoke a descriptor by replacing
 colons with underscores::
 
-    >>> base = NSURL.URLWithString_("http://pybee.org/")
+    >>> base = NSURL.URLWithString_("https://beeware.org/")
     >>> full = NSURL.URLWithString_relativeToURL_("contributing", base)
 
 Instance methods
@@ -65,7 +65,7 @@ So far, we've been using the `+URLWithString:` static constructor. However,
 method, you first have to instruct the Objective-C runtime to allocate memory
 for the instance, then invoke the initializer:
 
-    >>> base = NSURL.alloc().initWithString("http://pybee.org/")
+    >>> base = NSURL.alloc().initWithString("https://beeware.org/")
 
 Now that you have an instance of `NSURL`, you'll want to manipulate it.
 `NSURL` describes an `absoluteURL` property; this property can be
@@ -81,22 +81,22 @@ If you want to output an object at the console, you can use the Objective-C
 property `description`, or for debugging output, `debugDescription`::
 
     >>> longer.description
-    'http://pybee.org/contributing/how/first-time/'
+    'https://beeware.org/contributing/how/first-time/'
 
     >>> longer.debugDescription
-    'http://pybee.org/contributing/how/first-time/>'
+    'https://beeware.org/contributing/how/first-time/>'
 
 Internally, `description` and `debugDescription` are hooked up to their Python
 equivalents, `__str__()` and `__repr__()`, respectively::
 
     >>> str(absolute)
-    'http://pybee.org/contributing/how/first-time/'
+    'https://beeware.org/contributing/how/first-time/'
 
     >>> repr(absolute)
-    '<rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>'
+    '<rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: https://beeware.org/contributing/>'
 
     >>> print(absolute)
-    <rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: http://pybee.org/contributing/>
+    <rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: https://beeware.org/contributing/>
 
 Time to take over the world!
 ============================
