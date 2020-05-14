@@ -15,18 +15,18 @@ Set up your development environment
 ===================================
 
 The recommended way of setting up your development environment for Rubicon is
-to install a virtual environment, install the required dependencies and start
-coding:
+to clone the repository, create a virtual environment, and install the required
+dependencies:
 
 .. code-block:: sh
 
+    $ git clone https://github.com/beeware/rubicon-objc.git
+    $ cd rubicon-objc
     $ python3 -m venv venv
-    $ source venv/bin/activate.sh
+    $ source venv/bin/activate
     (venv) $ pip install --upgrade pip
     (venv) $ pip install --upgrade setuptools
     (venv) $ pip install tox
-    (venv) $ git clone https://github.com/beeware/rubicon-objc.git
-    (venv) $ cd rubicon-objc
     (venv) $ pip install -e .
 
 You can then run the full test suite:
