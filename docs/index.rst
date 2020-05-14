@@ -83,16 +83,11 @@ Technical reference - commands, modules, classes, methods
 Community
 =========
 
-Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
+Rubicon is part of the `BeeWare suite <https://beeware.org>`__. You can talk to the community through:
 
- * `@pybeeware on Twitter`_
+ * `@pybeeware on Twitter <https://twitter.com/pybeeware>`__
 
- * `pybee/general on Gitter`_
-
-.. _BeeWare suite: http://pybee.org
-.. _Read The Docs: https://rubicon-objc.readthedocs.io
-.. _@pybeeware on Twitter: https://twitter.com/pybeeware
-.. _pybee/general on Gitter: https://gitter.im/pybee/general
+ * `beeware/general on Gitter <https://gitter.im/beeware/general>`_
 
 
 .. toctree::

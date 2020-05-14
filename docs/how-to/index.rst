@@ -13,7 +13,7 @@ stand alone.
    :maxdepth: 2
    :glob:
 
-   Get started <get-started>
+   get-started
    type-mapping
    protocols
    async
