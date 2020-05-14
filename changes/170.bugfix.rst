@@ -1,1 +1,1 @@
-Correct the invocation of NSApplication.terminate() when the lifecycle is ended.
+Corrected the invocation of ``NSApplication.terminate()`` when the :class:`~rubicon.objc.eventloop.CocoaLifecycle` is ended.
