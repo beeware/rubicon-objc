@@ -1,1 +1,1 @@
-Added detailed :doc:`reference documentation </reference/index>` for all public APIs of :mod:`rubicon-objc`.
+Added detailed :doc:`reference documentation </reference/index>` for all public APIs of :mod:`rubicon.objc`.
