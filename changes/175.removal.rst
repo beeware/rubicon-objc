@@ -1,3 +1,0 @@
-Removed the ``rubicon.objc.core_foundation`` module. This was an internal module with few remaining contents and should
-not have any external uses. If you need to call Core Foundation functions in your code, please load the framework
-yourself using ``load_library('CoreFoundation')`` and define the types and functions that you need.

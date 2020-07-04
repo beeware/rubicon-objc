@@ -1,1 +1,0 @@
-Fixed various minor issues in the build and packaging metadata.

@@ -1,2 +1,0 @@
-Added a ``varargs`` keyword argument to :func:`~rubicon.objc.runtime.send_message` to allow calling variadic methods
-more safely.

@@ -1,1 +1,0 @@
-Corrected a slow memory leak caused every time an asyncio timed event handler triggered.

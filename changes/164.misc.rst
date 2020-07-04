@@ -1,1 +1,0 @@
-Made various improvements to the Makefile for the native test harness library.

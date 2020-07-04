@@ -1,1 +1,0 @@
-Updated generated Sphinx Makefile and make.bat files.

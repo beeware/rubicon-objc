@@ -1,1 +1,0 @@
-Removed the ``ObjCMethod`` class from the public API, as there was no good way to use it from external code.

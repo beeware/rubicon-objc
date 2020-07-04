@@ -1,3 +1,0 @@
-Fixed Objective-C method calls in "flat" syntax accepting more arguments than the method has.
-The extra arguments were previously silently ignored,
-now an exception is raised if too many arguments are passed.

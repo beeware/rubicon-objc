@@ -1,1 +1,0 @@
-Fixed :func:`ObjCInstance.__str__ <rubicon.objc.api.ObjCInstance.__str__>` throwing an exception if the object's Objective-C ``description`` is ``nil``.
