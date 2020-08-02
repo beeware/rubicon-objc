@@ -398,7 +398,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         return self._running
 
     def run(self):
-        """Internal implementatin of run using the CoreFoundation event loop."""
+        """Internal implementation of run using the CoreFoundation event loop."""
         recursive = self.is_running()
         if not recursive and hasattr(events, "_get_running_loop") and events._get_running_loop():
             raise RuntimeError('Cannot run the event loop while another loop is running')
@@ -455,6 +455,30 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             self.run()
         finally:
             self.stop()
+
+    def run_forever_cooperatively(self, lifecycle=None):
+        """A non-blocking version of run_forever.
+
+        This may seem like nonsense; however, an iOS app is not expected to
+        invoke a blocking "main event loop" method. As a result, we need to
+        be able to *start* Python event loop handling, but then return control
+        to the main app to start the actual event loop.
+
+        The implementation is effectively all the parts of a call to
+        ``run_forever()``, but without any of the shutdown/cleanup logic.
+        """
+        self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
+
+        if self.is_running():
+            raise RuntimeError(
+                "Recursively calling run_forever is forbidden. "
+                "To recursively run the event loop, call run().")
+
+        self._running = True
+        if hasattr(events, "_set_running_loop"):
+            events._set_running_loop(self)
+
+        self._lifecycle.start()
 
     def call_soon(self, callback, *args, context=None):
         """Arrange for a callback to be called as soon as possible.
