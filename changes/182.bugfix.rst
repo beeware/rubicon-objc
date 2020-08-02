@@ -1,0 +1,2 @@
+A cooperative entry point for starting event loop has been added. This corrects
+a problem seen when using Python 3.8 on iOS.
