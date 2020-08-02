@@ -457,7 +457,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             self.stop()
 
     def run_forever_cooperatively(self, lifecycle=None):
-        """A non-blocking version of run_forever.
+        """A non-blocking version of :meth:`run_forever`.
 
         This may seem like nonsense; however, an iOS app is not expected to
         invoke a blocking "main event loop" method. As a result, we need to
@@ -465,7 +465,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         to the main app to start the actual event loop.
 
         The implementation is effectively all the parts of a call to
-        ``run_forever()``, but without any of the shutdown/cleanup logic.
+        :meth:`run_forever()`, but without any of the shutdown/cleanup logic.
         """
         self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
 
