@@ -619,6 +619,47 @@ def should_use_fpret(restype):
         return False
 
 
+_msg_send_cache = {}
+
+
+def _msg_send_for_types(restype, argtypes):
+    """Get the appropriate variant of ``objc_msgSend`` for calling a method with the given return and argument types.
+
+    :param restype: The return type of the method to be called.
+    :param argtypes: The argument types of the method to be called, excluding the self and _cmd arguments.
+    :return: A C function for ``objc_msgSend`` or one of its variants, with its return and argument types configured
+        correctly based on the ``restype`` and ``argtypes`` arguments.
+        The ``restype`` and ``argtypes`` attributes of the returned function *must not* be modified.
+    """
+
+    try:
+        # Looking up a C function is relatively slow, so use an existing cached function if possible.
+        return _msg_send_cache[(restype, *argtypes)]
+    except KeyError:
+        # Choose the correct version of objc_msgSend based on return type.
+        if should_use_fpret(restype):
+            send_name = 'objc_msgSend_fpret'
+        elif should_use_stret(restype):
+            send_name = 'objc_msgSend_stret'
+        else:
+            send_name = 'objc_msgSend'
+
+        # Looking up a C function via attribute access (e. g. libobjc.objc_msgSend)
+        # always returns the same function object.
+        # Because we need to set the function object's restype and argtypes, this would not be thread safe,
+        # and it also makes it impossible to cache multiple differently configured copies of the same function
+        # like we do here.
+        # Instead, we look up the C function using subscript syntax (e. g. libobjc['objc_msgSend']),
+        # which returns a new function object every time.
+        send = libobjc[send_name]
+        send.restype = restype
+        send.argtypes = [objc_id, SEL] + argtypes
+
+        # Cache the fully set up objc_msgSend function object to speed up future calls with the same types.
+        _msg_send_cache[(restype, *argtypes)] = send
+        return send
+
+
 def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     """Call a method on the receiver with the given selector and arguments.
 
@@ -683,21 +724,7 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     if varargs is None:
         varargs = []
 
-    # Choose the correct version of objc_msgSend based on return type.
-    if should_use_fpret(restype):
-        send_name = 'objc_msgSend_fpret'
-    elif should_use_stret(restype):
-        send_name = 'objc_msgSend_stret'
-    else:
-        send_name = 'objc_msgSend'
-
-    # Use libobjc['name'] instead of libobjc.name to get a new function object
-    # that is independent of the one on the objc library.
-    # This way multiple threads sending messages don't overwrite
-    # each other's function signatures.
-    send = libobjc[send_name]
-    send.restype = restype
-    send.argtypes = [objc_id, SEL] + argtypes
+    send = _msg_send_for_types(restype, argtypes)
 
     try:
         result = send(receiver, selector, *args, *varargs)
