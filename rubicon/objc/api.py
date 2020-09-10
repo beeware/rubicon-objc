@@ -749,17 +749,12 @@ class ObjCInstance(object):
         else:
             method = None
 
-        if method is not None:
-            # If the partial method can only resolve to one method that takes no arguments,
-            # return that method directly, instead of a mostly useless partial method.
-            if set(method.methods) == {frozenset()}:
-                method, _ = method.methods[frozenset()]
-                method = ObjCMethod(method)
+        if method is None or set(method.methods) == {frozenset()}:
+            # Find a method whose full name matches the given name if no partial method was found,
+            # or the partial method can only resolve to a single method that takes no arguments.
+            # The latter case avoids returning partial methods in cases where a regular method works just as well.
+            method = self.objc_class._cache_method(name.replace("_", ":"))
 
-            return ObjCBoundMethod(method, self)
-
-        # See if there's a method whose full name matches the given name.
-        method = self.objc_class._cache_method(name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
         else:
