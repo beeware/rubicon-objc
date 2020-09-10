@@ -108,8 +108,9 @@ class ObjCMethod(object):
         The above argument conversions (except those performed by :mod:`ctypes`) can be disabled
         by setting the ``convert_args`` keyword argument to ``False``.
 
-        The method's return value is also :ref:`converted automatically <auto-objc-python-conversion>`.
-        This conversion can be disabled by setting the ``convert_result`` keyword argument to ``False``.
+        If the method returns an Objective-C object, it is automatically converted to an :class:`ObjCInstance`.
+        This conversion can be disabled by setting the ``convert_result`` keyword argument to ``False``,
+        in which case the object is returned as a raw :class:`~rubicon.objc.runtime.objc_id` value.
 
         The ``_cmd`` selector argument does *not* need to be passed in manually ---
         the method's :attr:`selector` is automatically added between the receiver and the method arguments.
@@ -161,7 +162,7 @@ class ObjCMethod(object):
 
         # Convert result to python type if it is a instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = py_from_ns(result, _auto=True)
+            result = ObjCInstance(result)
         return result
 
 
@@ -230,7 +231,7 @@ def convert_method_arguments(encoding, args):
     new_args = []
     for e, a in zip(encoding[3:], args):
         if issubclass(e, (objc_id, ObjCInstance)):
-            new_args.append(py_from_ns(a, _auto=True))
+            new_args.append(ObjCInstance(a))
         else:
             new_args.append(a)
     return new_args
@@ -1256,7 +1257,7 @@ NSMutableDictionary = ObjCClass('NSMutableDictionary')
 Protocol = ObjCClass('Protocol')
 
 
-def py_from_ns(nsobj, *, _auto=False):
+def py_from_ns(nsobj):
     """Convert a Foundation object into an equivalent Python object if possible.
 
     Currently supported types:
@@ -1296,13 +1297,6 @@ def py_from_ns(nsobj, *, _auto=False):
                 'NSNumber containing unsupported type {!r} cannot be converted to a Python object'
                 .format(objc_type)
             )
-    elif _auto:
-        # If py_from_ns is called implicitly to convert an Objective-C method's return value, only the conversions
-        # before this branch are performed. If py_from_ns is called explicitly by hand, the additional conversions
-        # below this branch are performed as well.
-        # _auto is a private kwarg that is only passed when py_from_ns is called implicitly. In that case, we return
-        # early and don't attempt any other conversions.
-        return nsobj
     elif nsobj.isKindOfClass(NSString):
         return str(nsobj)
     elif nsobj.isKindOfClass(NSData):

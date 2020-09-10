@@ -1,7 +1,7 @@
 import unittest
 
 from rubicon.objc import (
-    NSArray, NSMutableArray, NSObject, ObjCClass, objc_method, objc_property,
+    NSArray, NSMutableArray, NSObject, ObjCClass, objc_method, objc_property, py_from_ns,
 )
 from rubicon.objc.collections import ObjCListInstance
 
@@ -276,13 +276,13 @@ class PythonObjectTest(unittest.TestCase):
 
         # If it's set through a method call, it becomes an objc instance
         obj2 = PrimitiveListAttrContainer.alloc().initWithList_([4, 5, 6])
-        self.assertEqual(obj2.data, [4, 5, 6])
         self.assertIsInstance(obj2.data, ObjCListInstance)
+        self.assertEqual(py_from_ns(obj2.data), [4, 5, 6])
 
         # If it's set by direct attribute access, it becomes a Python object.
         obj2.data = [7, 8, 9]
-        self.assertEqual(obj2.data, [7, 8, 9])
         self.assertIsInstance(obj2.data, list)
+        self.assertEqual(obj2.data, [7, 8, 9])
 
     def test_primitive_list_property(self):
         class PrimitiveListContainer(NSObject):
@@ -299,16 +299,16 @@ class PythonObjectTest(unittest.TestCase):
                 return self
 
         obj1 = PrimitiveListContainer.alloc().init()
-        self.assertEqual(obj1.data, [1, 2, 3])
         self.assertIsInstance(obj1.data, ObjCListInstance)
+        self.assertEqual(py_from_ns(obj1.data), [1, 2, 3])
 
         obj2 = PrimitiveListContainer.alloc().initWithList_([4, 5, 6])
-        self.assertEqual(obj2.data, [4, 5, 6])
         self.assertIsInstance(obj2.data, ObjCListInstance)
+        self.assertEqual(py_from_ns(obj2.data), [4, 5, 6])
 
         obj2.data = [7, 8, 9]
-        self.assertEqual(obj2.data, [7, 8, 9])
         self.assertIsInstance(obj2.data, ObjCListInstance)
+        self.assertEqual(py_from_ns(obj2.data), [7, 8, 9])
 
     def test_object_list_attribute(self):
         class ObjectListAttrContainer(NSObject):
@@ -373,5 +373,5 @@ class PythonObjectTest(unittest.TestCase):
         obj = MultitypeListContainer.alloc().init()
 
         obj.data = [4, True, 'Hello', example]
-        self.assertEqual(obj.data, [4, True, 'Hello', example])
         self.assertIsInstance(obj.data, ObjCListInstance)
+        self.assertEqual(py_from_ns(obj.data), [4, True, 'Hello', example])

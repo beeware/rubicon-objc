@@ -262,17 +262,6 @@ Converting objects between Objective-C and Python
 
     Alias for :func:`ns_from_py`.
 
-.. _auto-objc-python-conversion:
-
-Automatic conversion of Objective-C objects to Python
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-When Python code receives an Objective-C object, Rubicon will automatically convert certain kinds of objects to their Python counterparts, using a subset of the conversions performed by :func:`py_from_ns`:
-
-* :class:`~rubicon.objc.runtime.objc_id` objects are converted to :class:`ObjCInstance` before further conversion
-* :class:`NSDecimalNumber` objects are converted to :class:`decimal.Decimal`
-* :class:`NSNumber` objects are converted to :class:`bool`, :class:`int`, or :class:`float` based on their contents
-
 .. _custom-classes-and-protocols:
 
 Creating custom Objective-C classes and protocols
@@ -338,7 +327,7 @@ Parameter and return types
 
 The argument and return types of a Python-created Objective-C method are determined based on the Python method's type annotations. The annotations may contain any :mod:`ctypes` type, as well as any of the Python types accepted by :func:`~rubicon.objc.types.ctype_for_type`. If a parameter or the return type is not specified, it defaults to :class:`ObjCInstance`. The ``self`` parameter is special-cased --- its type is always :class:`ObjCInstance`, even if annotated otherwise. To annotate a method as returning ``void``, set its return type to ``None``.
 
-Before being passed to the Python method, the arguments are :ref:`converted automatically <auto-objc-python-conversion>`. If the method returns an Objective-C object, it is converted using :func:`ns_from_py` before being returned to Objective-C. These automatic conversions can be disabled by using :func:`objc_rawmethod` instead of :func:`objc_method`.
+Before being passed to the Python method, any object parameters (:class:`~rubicon.objc.runtime.objc_id`) are automatically converted to :class:`ObjCInstance`. If the method returns an Objective-C object, it is converted using :func:`ns_from_py` before being returned to Objective-C. These automatic conversions can be disabled by using :func:`objc_rawmethod` instead of :func:`objc_method`.
 
 The implicit ``_cmd`` parameter is not passed to the Python method, as it is normally redundant and not needed. If needed, the ``_cmd`` parameter can be accessed by using :func:`objc_rawmethod` instead of :func:`objc_method`.
 
