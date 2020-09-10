@@ -562,7 +562,20 @@ class ObjCInstance(object):
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
 
-        return ObjCClass(libobjc.object_getClass(self))
+        # This property is used inside __getattr__, so any attribute accesses must be done through
+        # super(...).__getattribute__ to prevent infinite recursion.
+        try:
+            return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
+        except AttributeError:
+            # This assumes that objects never change their class after they are seen by Rubicon.
+            # Technically this might not always be true, because the Objective-C runtime provides a function
+            # object_setClass that can change an object's class after creation, and some code also manipulates objects'
+            # isa pointers directly (although the latter is no longer officially supported by Apple).
+            # This is only extremely rarely done in practice though, and then usually only during object
+            # creation/initialization, so it's basically safe to assume that an object's class will never change
+            # after it's been wrapped in an ObjCInstance.
+            super(ObjCInstance, type(self)).__setattr__(self, "_objc_class", ObjCClass(libobjc.object_getClass(self)))
+            return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or anything that can be cast to one,
