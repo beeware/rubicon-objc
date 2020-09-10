@@ -173,7 +173,7 @@ class ObjCPartialMethod(object):
         super().__init__()
 
         self.name_start = name_start
-        self.methods = {}
+        self.methods = {}  # Initialized in ObjCClass._load_methods
 
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(cls=type(self), self=self)
@@ -191,14 +191,14 @@ class ObjCPartialMethod(object):
             rest = frozenset(kwargs) | frozenset(("",))
 
         try:
-            meth, order = self.methods[rest]
+            name, order = self.methods[rest]
         except KeyError:
             raise ValueError(
                 "No method was found starting with {!r} and with keywords {}\nKnown keywords are:\n{}"
                 .format(self.name_start, set(kwargs), "\n".join(repr(keywords) for keywords in self.methods))
             )
 
-        meth = ObjCMethod(meth)
+        meth = receiver.objc_class._cache_method(name)
         args += [kwargs[name] for name in order]
         return meth(receiver, *args)
 
@@ -1195,7 +1195,7 @@ class ObjCClass(ObjCInstance, type):
 
             # order is rest without the dummy "" part
             order = rest[:-1]
-            partial.methods[frozenset(rest)] = (method, order)
+            partial.methods[frozenset(rest)] = (name, order)
 
 
 class ObjCMetaClass(ObjCClass):
