@@ -1642,7 +1642,7 @@ class ObjCBlock:
     In that case, the object needs to be manually wrapped using :class:`ObjCBlock`.
     """
 
-    def __init__(self, pointer, return_type=AUTO, *arg_types):
+    def __init__(self, pointer, restype=AUTO, *argtypes):
         """The constructor takes a block object, which can be either an :class:`ObjCInstance`, or a raw
         :class:`~rubicon.objc.runtime.objc_id` pointer.
 
@@ -1656,7 +1656,7 @@ class ObjCBlock:
         In most cases, Rubicon can automatically determine the block's return type and parameter types.
         If a block object doesn't have return/parameter type information at runtime, Rubicon will raise an error when
         attempting to convert it. In that case, you need to explicitly pass the correct return type and parameter types
-        to :class:`ObjCBlock` using the ``return_type`` and ``arg_types`` parameters.
+        to :class:`ObjCBlock` using the ``restype`` and ``argtypes`` parameters.
         """
 
         if isinstance(pointer, ObjCInstance):
@@ -1667,14 +1667,14 @@ class ObjCBlock:
         self.has_signature = self.struct.contents.flags & BlockConsts.HAS_SIGNATURE
         self.descriptor = cast_block_descriptor(self)
         self.signature = self.descriptor.contents.signature if self.has_signature else None
-        if return_type is AUTO:
-            if arg_types:
-                raise ValueError('Cannot use arg_types with return_type AUTO')
+        if restype is AUTO:
+            if argtypes:
+                raise ValueError('Cannot use argtypes with restype AUTO')
             if not self.has_signature:
                 raise ValueError('Cannot use AUTO types for blocks without signatures')
-            return_type, *arg_types = ctypes_for_method_encoding(self.signature)
-        self.struct.contents.invoke.restype = ctype_for_type(return_type)
-        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in arg_types)
+            restype, *argtypes = ctypes_for_method_encoding(self.signature)
+        self.struct.contents.invoke.restype = ctype_for_type(restype)
+        self.struct.contents.invoke.argtypes = (objc_id, ) + tuple(ctype_for_type(arg_type) for arg_type in argtypes)
 
     def __repr__(self):
         representation = '<ObjCBlock@{}'.format(hex(addressof(self.pointer)))
@@ -1716,7 +1716,7 @@ class Block:
 
     _keep_alive_blocks_ = {}
 
-    def __init__(self, func, restype=NOTHING, *arg_types):
+    def __init__(self, func, restype=NOTHING, *argtypes):
         """The constructor accepts any Python callable object.
 
         If the callable has parameter and return type annotations, they are used as the block's parameter and return
@@ -1729,7 +1729,7 @@ class Block:
                 return abs(arg)
 
         For callables without type annotations, the parameter and return types need to be passed to the :class:`Block`
-        constructor in the ``restype`` and ``arg_types`` arguments:
+        constructor in the ``restype`` and ``argtypes`` arguments:
 
         .. code-block:: python
 
@@ -1742,11 +1742,11 @@ class Block:
         self.func = func
 
         if restype is NOTHING:
-            if arg_types:
+            if argtypes:
                 # This can't happen unless the caller does something hacky, but guard against it just in case.
-                raise ValueError('Cannot pass arg_types without a restype')
+                raise ValueError('Cannot pass argtypes without a restype')
 
-            # No explicit restype/arg_types were passed into the constructor,
+            # No explicit restype/argtypes were passed into the constructor,
             # so try to extract them from the function's type annotations.
 
             try:
@@ -1764,7 +1764,7 @@ class Block:
                 )
 
             restype = signature.return_annotation
-            arg_types = []
+            argtypes = []
             for name, param in signature.parameters.items():
                 if param.annotation == inspect.Parameter.empty:
                     raise ValueError(
@@ -1772,9 +1772,9 @@ class Block:
                         + ' - please add one, or pass return and argument types directly into Block'
                     )
 
-                arg_types.append(param.annotation)
+                argtypes.append(param.annotation)
 
-        signature = tuple(ctype_for_type(tp) for tp in arg_types)
+        signature = tuple(ctype_for_type(tp) for tp in argtypes)
 
         restype = ctype_for_type(restype)
 
