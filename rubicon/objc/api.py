@@ -1746,14 +1746,6 @@ class Block:
         if restype is NOTHING:
             try:
                 restype = argspec.annotations['return']
-            except KeyError:
-                raise ValueError(
-                    'Block callables must be fully annotated or an explicit '
-                    'return type must be specified.'
-                )
-
-        if not arg_types:
-            try:
                 arg_types = list(argspec.annotations[varname] for varname in argspec.args)
             except KeyError:
                 raise ValueError(

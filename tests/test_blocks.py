@@ -116,3 +116,20 @@ class BlockTests(unittest.TestCase):
 
         returned_block = instance.roundTrip_(block)
         self.assertEqual(returned_block(8, 9), 17)
+
+    def test_block_round_trip_no_arguments(self):
+        """A block that takes no arguments can be created with both ways of specifying types."""
+
+        BlockRoundTrip = ObjCClass("BlockRoundTrip")
+        instance = BlockRoundTrip.alloc().init()
+
+        @Block
+        def block_1() -> c_int:
+            return 42
+
+        returned_block_1 = instance.roundTripNoArgs(block_1)
+        self.assertEqual(returned_block_1(), 42)
+
+        block_2 = Block(lambda: 42, c_int)
+        returned_block_2 = instance.roundTripNoArgs(block_2)
+        self.assertEqual(returned_block_2(), 42)

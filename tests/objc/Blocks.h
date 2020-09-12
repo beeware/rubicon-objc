@@ -38,4 +38,5 @@ typedef struct
 
 @interface BlockRoundTrip : NSObject
 - (int (^)(int, int))roundTrip:(int (^)(int, int))blockArgument;
+- (int (^)(void))roundTripNoArgs:(int (^)(void))blockArgument;
 @end

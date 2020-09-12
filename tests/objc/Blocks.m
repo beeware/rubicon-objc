@@ -67,4 +67,9 @@
     return blockArgument;
 }
 
+- (int (^)(void)) roundTripNoArgs:(int (^)(void))blockArgument
+{
+    return blockArgument;
+}
+
 @end
