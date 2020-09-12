@@ -133,3 +133,26 @@ class BlockTests(unittest.TestCase):
         block_2 = Block(lambda: 42, c_int)
         returned_block_2 = instance.roundTripNoArgs(block_2)
         self.assertEqual(returned_block_2(), 42)
+
+    def test_block_bound_method(self):
+        """A bound method with type annotations can be wrapped in a block."""
+
+        class Handler(object):
+            def no_args(self) -> c_int:
+                return 42
+
+            def two_args(self, x: c_int, y: c_int) -> c_int:
+                return x + y
+
+        handler = Handler()
+        no_args_block = Block(handler.no_args)
+        two_args_block = Block(handler.two_args)
+
+        BlockRoundTrip = ObjCClass("BlockRoundTrip")
+        instance = BlockRoundTrip.alloc().init()
+
+        returned_no_args_block = instance.roundTripNoArgs(no_args_block)
+        self.assertEqual(returned_no_args_block(), 42)
+
+        returned_two_args_block = instance.roundTrip(two_args_block)
+        self.assertEqual(returned_two_args_block(12, 34), 46)

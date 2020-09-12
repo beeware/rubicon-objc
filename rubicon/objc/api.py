@@ -1741,17 +1741,39 @@ class Block:
 
         self.func = func
 
-        argspec = inspect.getfullargspec(inspect.unwrap(func))
-
         if restype is NOTHING:
+            if arg_types:
+                # This can't happen unless the caller does something hacky, but guard against it just in case.
+                raise ValueError('Cannot pass arg_types without a restype')
+
+            # No explicit restype/arg_types were passed into the constructor,
+            # so try to extract them from the function's type annotations.
+
             try:
-                restype = argspec.annotations['return']
-                arg_types = list(argspec.annotations[varname] for varname in argspec.args)
-            except KeyError:
+                signature = inspect.signature(func)
+            except (TypeError, ValueError):
                 raise ValueError(
-                    'Block callables must be fully annotated or explicit '
-                    'argument types must be specified.'
+                    'Could not retrieve function signature information - '
+                    'please pass return and argument types directly into Block'
                 )
+
+            if signature.return_annotation == inspect.Signature.empty:
+                raise ValueError(
+                    'Function has no return type annotation - '
+                    'please add one, or pass return and argument types directly into Block'
+                )
+
+            restype = signature.return_annotation
+            arg_types = []
+            for name, param in signature.parameters.items():
+                if param.annotation == inspect.Parameter.empty:
+                    raise ValueError(
+                        'Function has no argument type annotation for parameter ' + repr(name)
+                        + ' - please add one, or pass return and argument types directly into Block'
+                    )
+
+                arg_types.append(param.annotation)
+
         signature = tuple(ctype_for_type(tp) for tp in arg_types)
 
         restype = ctype_for_type(restype)

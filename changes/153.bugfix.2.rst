@@ -1,0 +1,2 @@
+Fixed handling of type annotations when passing a bound Python method into
+:class:`~rubicon.objc.api.Block`.
