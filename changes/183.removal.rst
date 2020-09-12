@@ -1,5 +1,5 @@
 Removed automatic conversion of Objective-C numbers (``NSNumber`` and
-``NSDecmialNumber``) to Python numbers when received from Objective-C
+``NSDecimalNumber``) to Python numbers when received from Objective-C
 (i. e. returned from an Objective-C method or property or passed into an
 Objective-C method implemented in Python). This automatic conversion
 significantly slowed down every Objective-C method call that returns an object,
