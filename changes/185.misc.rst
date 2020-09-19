@@ -1,0 +1,14 @@
+Changed the way :class:`~rubicon.objc.api.ObjCInstance`\s are cached.
+The custom ``DeallocationObserver`` class is no longer used to manage the cache
+for most objects - instead the cache has been made a weak value dictionary,
+meaning that entries are automatically removed if they are no longer referenced
+from Python.
+
+:class:`~rubicon.objc.api.ObjCInstance`\s with custom Python attributes are
+still managed using strong references and ``DeallocationObserver``, because
+these attributes are only stored on the Python side and not on the Objective-C
+object, so they could otherwise be lost if an object has only Objective-C
+references and no Python references. The ``DeallocationObserver`` for an
+:class:`~rubicon.objc.api.ObjCInstance` is now only created once it has a
+custom Python attribute added to it, which improves the performance of wrapping
+most other objects that don't use custom Python attributes.

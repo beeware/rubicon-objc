@@ -1,4 +1,5 @@
 import functools
+import gc
 import math
 import unittest
 from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
@@ -1150,3 +1151,63 @@ class RubiconTest(unittest.TestCase):
         outSize = obj.testThing(15)
         self.assertEqual(outSize.width, 5)
         self.assertEqual(outSize.height, 45)
+
+    def test_objcinstance_python_attribute(self):
+        """Python attributes can be added to an ObjCInstance."""
+        
+        Thing = ObjCClass("Thing")
+        thing = Thing.alloc().init()
+
+        # Use objects that don't have an obvious Objective-C equivalent,
+        # to ensure that the actual Python objects are being stored,
+        # and not converted Objective-C versions.
+        thing.python_object_1 = range(2, 8)
+        thing.python_object_2 = type
+        self.assertEqual(thing.python_object_1, range(2, 8))
+        self.assertEqual(thing.python_object_2, type)
+
+    def test_objcinstance_python_attribute_keep_alive(self):
+        """Python attributes on an ObjCInstance are kept even if the object temporarily has no Python references."""
+
+        Example = ObjCClass("Example")
+        example = Example.alloc().init()
+        Thing = ObjCClass("Thing")
+        thing = Thing.alloc().init()
+
+        # Use objects that don't have an obvious Objective-C equivalent,
+        # to ensure that the actual Python objects are being stored,
+        # and not converted Objective-C versions.
+        python_object_1 = range(2, 8)
+        python_object_2 = type
+
+        # Remember the objects' IDs to allow checking that the objects retrieved later are identical
+        # without keeping an actual reference to the objects.
+        python_object_1_id = id(python_object_1)
+        python_object_2_id = id(python_object_2)
+
+        # Add our Python attributes to the Objective-C object.
+        thing.python_object_1 = python_object_1
+        thing.python_object_2 = python_object_2
+
+        # Store the object in an Objective-C property.
+        # This creates a reference in Objective-C, but not in Python.
+        example.setThing(thing)
+
+        # Delete all of our Python references to the ObjCInstance and the objects stored on it.
+        del python_object_1
+        del python_object_2
+        del thing
+
+        # Try to force Python to destroy any no longer referenced objects.
+        gc.collect()
+
+        # Get our object back from Objective-C.
+        thing = example.thing
+
+        # Check that our Python attributes are still there.
+        self.assertEqual(thing.python_object_1, range(2, 8))
+        self.assertEqual(thing.python_object_2, type)
+
+        # Check that these are exactly the same objects that we stored before.
+        self.assertEqual(id(thing.python_object_1), python_object_1_id)
+        self.assertEqual(id(thing.python_object_2), python_object_2_id)

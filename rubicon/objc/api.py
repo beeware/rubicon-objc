@@ -2,6 +2,7 @@ import collections.abc
 import decimal
 import enum
 import inspect
+import weakref
 from ctypes import (
     CFUNCTYPE, POINTER, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
     c_uint8, c_ulong, c_void_p, cast, sizeof, string_at
@@ -556,7 +557,21 @@ def for_objcclass(objcclass):
 class ObjCInstance(object):
     """Python wrapper for an Objective-C instance."""
 
-    _cached_objects = {}
+    # Cache dictionary containing every currently existing ObjCInstance object,
+    # with the key being the memory address (as an integer) of the Objective-C object that it wraps.
+    # Because this is a weak value dictionary,
+    # entries are automatically removed if the ObjCInstance is no longer referenced from Python.
+    # (The object may still have references in Objective-C,
+    # and a new ObjCInstance might be created for it if it is wrapped again later.)
+    _cached_objects = weakref.WeakValueDictionary()
+
+    # Some ObjCInstance objects must be kept alive for as long as their corresponding Objective-C object exists
+    # (see the _ensure_keep_alive method).
+    # Such objects are inserted into this regular (non-weak) dictionary,
+    # in addition to the weak _cached_objects dictionary.
+    # Entries are removed from this dictionary only once the corresponding Objective-C object is deallocated.
+    # This is done using the DeallocationObserver class.
+    _keep_alive_objects = {}
 
     @property
     def objc_class(self):
@@ -582,7 +597,7 @@ class ObjCInstance(object):
         such as a :class:`~ctypes.c_void_p`, or an existing :class:`ObjCInstance`.
 
         :class:`ObjCInstance` objects are cached --- this means that for every Objective-C object
-        there can be at most one :class:`ObjCInstance` object. Rubicon will automatically create
+        there can be at most one :class:`ObjCInstance` object at any time. Rubicon will automatically create
         new :class:`ObjCInstance`\\s or return existing ones as needed.
 
         The returned object's Python class is not always exactly :class:`ObjCInstance`. For example,
@@ -604,13 +619,12 @@ class ObjCInstance(object):
         if not object_ptr.value:
             return None
 
-        # Check if we've already created a Python ObjCInstance for this
-        # object_ptr id and if so, then return it.  A single ObjCInstance will
-        # be created for any object pointer when it is first encountered.
-        # This same ObjCInstance will then persist until the object is
-        # deallocated.
-        if object_ptr.value in cls._cached_objects:
+        # If an ObjCInstance already exists for the Objective-C object,
+        # reuse it instead of creating a second ObjCInstance for the same object.
+        try:
             return cls._cached_objects[object_ptr.value]
+        except KeyError:
+            pass
 
         # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
         if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
@@ -633,26 +647,6 @@ class ObjCInstance(object):
         # Store new object in the dictionary of cached objects, keyed
         # by the (integer) memory address pointed to by the object_ptr.
         cls._cached_objects[object_ptr.value] = self
-
-        # Classes are never deallocated, so they don't need a DeallocationObserver.
-        # This is also necessary to make the definition of DeallocationObserver work -
-        # otherwise creating the ObjCClass for DeallocationObserver would try to
-        # instantiate a DeallocationObserver itself.
-        if not object_isClass(object_ptr):
-            # Create a DeallocationObserver and associate it with this object.
-            # When the Objective-C object is deallocated, the observer will remove
-            # the ObjCInstance corresponding to the object from the cached objects
-            # dictionary, effectively destroying the ObjCInstance.
-            observer = send_message(
-                send_message(get_class('DeallocationObserver'), 'alloc', restype=objc_id, argtypes=[]),
-                'initWithObject:', self, restype=objc_id, argtypes=[objc_id]
-            )
-            libobjc.objc_setAssociatedObject(self, observer, observer, 0x301)
-
-            # The observer is retained by the object we associate it to.  We release
-            # the observer now so that it will be deallocated when the associated
-            # object is deallocated.
-            send_message(observer, 'release', restype=None, argtypes=[])
 
         return self
 
@@ -775,6 +769,32 @@ class ObjCInstance(object):
                 type(self).__module__, type(self).__qualname__, self.objc_class.name, name)
             )
 
+    def _ensure_keep_alive(self) -> None:
+        """Ensure that this :class:`ObjCInstance` is kept alive as long as its Objective-C object exists."""
+
+        # Check first if this ObjCInstance is already kept alive,
+        # in which case we don't need to do anything.
+        if self.ptr.value not in ObjCInstance._keep_alive_objects:
+            ObjCInstance._keep_alive_objects[self.ptr.value] = self
+
+            # Create a DeallocationObserver and associate it with the Objective-C object.
+            # When the Objective-C object is deallocated, the observer will remove
+            # this ObjCInstance from the _keep_alive_objects dictionary.
+            # This will cause the ObjCInstance to be destroyed,
+            # assuming that there are no other references to it from Python
+            # (which shouldn't happen - if Python code has a reference to an ObjCInstance,
+            # it's expected to also retain a reference to the Objective-C object).
+            observer = send_message(
+                send_message(get_class('DeallocationObserver'), 'alloc', restype=objc_id, argtypes=[]),
+                'initWithObject:', self, restype=objc_id, argtypes=[objc_id]
+            )
+            libobjc.objc_setAssociatedObject(self, observer, observer, 0x301)
+            # The observer is now retained by the object we associate it to.
+            # We now release our own reference to the observer,
+            # so that the only remaining reference is released
+            # when the associated object is deallocated.
+            send_message(observer, 'release', restype=None, argtypes=[])
+
     def __setattr__(self, name, value):
         """Allows modifying Objective-C properties using Python syntax.
 
@@ -793,6 +813,15 @@ class ObjCInstance(object):
                     value = value.value
                 ObjCBoundMethod(method, self)(value)
             else:
+                # Add a new Python attribute.
+                # These attributes are currently only stored on the Python ObjCInstance object
+                # and not on the actual Objective-C object.
+                # To ensure that the attributes aren't lost when the ObjCInstance has no more Python references
+                # (but the Objective-C object still has Objective-C references
+                # and may be wrapped in an ObjCInstance again in the future),
+                # every ObjCInstance with additional Python attributes is "kept alive" on the Python side.
+                # This prevents the ObjCInstance from being destroyed while the Objective-C object still exists.
+                self._ensure_keep_alive()
                 super(ObjCInstance, type(self)).__setattr__(self, name, value)
 
 
@@ -1505,10 +1534,11 @@ NSObjectProtocol = ObjCProtocol('NSObject')
 
 
 # Instances of DeallocationObserver are associated with every
-# Objective-C object that gets wrapped inside an ObjCInstance.
+# ObjCInstance that needs to be kept alive, which is the case
+# when the ObjCInstance has had additional Python attributes added to it.
 # Their sole purpose is to watch for when the Objective-C object
-# is deallocated, and then remove the object from the dictionary
-# of cached ObjCInstance objects kept by the ObjCInstance class.
+# is deallocated, and then remove the object from the
+# ObjCInstance._keep_alive_objects dictionary.
 #
 # The methods of the class defined below are decorated with
 # rawmethod() instead of method() because DeallocationObservers
@@ -1538,7 +1568,7 @@ except NameError:
         @objc_rawmethod
         def dealloc(self, cmd) -> None:
             anObject = get_ivar(self, 'observed_object')
-            ObjCInstance._cached_objects.pop(anObject.value, None)
+            ObjCInstance._keep_alive_objects.pop(anObject.value, None)
             send_super(__class__, self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
@@ -1548,7 +1578,7 @@ except NameError:
             # objc_startCollectorThread(), so probably not too much reason
             # to have this here, but I guess it can't hurt.)
             anObject = get_ivar(self, 'observed_object')
-            ObjCInstance._cached_objects.pop(anObject.value, None)
+            ObjCInstance._keep_alive_objects.pop(anObject.value, None)
             send_super(__class__, self, 'finalize', restype=None, argtypes=[])
 
 
