@@ -8,7 +8,7 @@ from enum import Enum
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
     ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
-    objc_property, send_message, send_super, types,
+    objc_property, py_from_ns, send_message, send_super, types,
 )
 from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
@@ -616,12 +616,16 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(example.smiley(), "%-)")
 
     def test_number_return(self):
-        "If a method or field returns a NSNumber, it is converted back to native types"
+        "If a method or field returns a NSNumber, it is not automatically converted to a Python number."
         Example = ObjCClass('Example')
         example = Example.alloc().init()
 
-        self.assertEqual(example.theAnswer(), 42)
-        self.assertAlmostEqual(example.twopi(), 2.0 * math.pi, 5)
+        answer = example.theAnswer()
+        self.assertIsInstance(answer, ObjCInstance)
+        self.assertEqual(py_from_ns(answer), 42)
+        tau = example.twopi()
+        self.assertIsInstance(tau, ObjCInstance)
+        self.assertAlmostEqual(py_from_ns(tau), 2.0 * math.pi, 5)
 
     def test_float_method(self):
         "A method with a float argument can be handled."
@@ -662,8 +666,8 @@ class RubiconTest(unittest.TestCase):
         example = Example.alloc().init()
 
         result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
-        self.assertEqual(result, Decimal('6.0'))
-        self.assertIsInstance(result, Decimal, 'Result should be a Decimal')
+        self.assertIsInstance(result, ObjCClass('NSDecimalNumber'))
+        self.assertEqual(py_from_ns(result), Decimal('6.0'))
 
     def test_auto_struct_creation(self):
         "Structs from method signatures are created automatically."
@@ -1089,7 +1093,7 @@ class RubiconTest(unittest.TestCase):
         class StructReturnHandler(Thing):
             @objc_method
             def initWithValue_(self, value):
-                self.value = value
+                self.value = py_from_ns(value)
                 return self
 
             @objc_method

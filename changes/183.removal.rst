@@ -1,0 +1,20 @@
+Removed automatic conversion of Objective-C numbers (``NSNumber`` and
+``NSDecimalNumber``) to Python numbers when received from Objective-C
+(i. e. returned from an Objective-C method or property or passed into an
+Objective-C method implemented in Python). This automatic conversion
+significantly slowed down every Objective-C method call that returns an object,
+even though the conversion doesn't apply to most method calls. If you have code
+that receives an Objective-C number and needs to use it as a Python number,
+please convert it explicitly using :func:`~rubicon.objc.api.py_from_ns` or an
+appropriate Objective-C method.
+
+As a side effect, ``NSNumber`` and ``NSDecimalNumber`` values stored in
+Objective-C collections (``NSArray``, ``NSDictionary``) are also no longer
+automatically unwrapped when retrieved from the collection, even when using
+Python syntax to access the collection. For example, if ``arr`` is a
+``NSArray`` of integer ``NSNumber``s, ``arr[0]`` now returns an Objective-C
+``NSNumber`` and not a Python ``int`` as before. If you need the contents of an
+Objective-C collection as Python values, you can use
+:func:`~rubicon.objc.api.py_from_ns` to convert either single values
+(e. g. ``py_from_ns(arr[0])``) or the entire collection
+(e. g. ``py_from_ns(arr)``).

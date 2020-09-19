@@ -108,8 +108,9 @@ class ObjCMethod(object):
         The above argument conversions (except those performed by :mod:`ctypes`) can be disabled
         by setting the ``convert_args`` keyword argument to ``False``.
 
-        The method's return value is also :ref:`converted automatically <auto-objc-python-conversion>`.
-        This conversion can be disabled by setting the ``convert_result`` keyword argument to ``False``.
+        If the method returns an Objective-C object, it is automatically converted to an :class:`ObjCInstance`.
+        This conversion can be disabled by setting the ``convert_result`` keyword argument to ``False``,
+        in which case the object is returned as a raw :class:`~rubicon.objc.runtime.objc_id` value.
 
         The ``_cmd`` selector argument does *not* need to be passed in manually ---
         the method's :attr:`selector` is automatically added between the receiver and the method arguments.
@@ -161,7 +162,7 @@ class ObjCMethod(object):
 
         # Convert result to python type if it is a instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = py_from_ns(result, _auto=True)
+            result = ObjCInstance(result)
         return result
 
 
@@ -172,7 +173,7 @@ class ObjCPartialMethod(object):
         super().__init__()
 
         self.name_start = name_start
-        self.methods = {}
+        self.methods = {}  # Initialized in ObjCClass._load_methods
 
     def __repr__(self):
         return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(cls=type(self), self=self)
@@ -190,14 +191,14 @@ class ObjCPartialMethod(object):
             rest = frozenset(kwargs) | frozenset(("",))
 
         try:
-            meth, order = self.methods[rest]
+            name, order = self.methods[rest]
         except KeyError:
             raise ValueError(
                 "No method was found starting with {!r} and with keywords {}\nKnown keywords are:\n{}"
                 .format(self.name_start, set(kwargs), "\n".join(repr(keywords) for keywords in self.methods))
             )
 
-        meth = ObjCMethod(meth)
+        meth = receiver.objc_class._cache_method(name)
         args += [kwargs[name] for name in order]
         return meth(receiver, *args)
 
@@ -230,7 +231,7 @@ def convert_method_arguments(encoding, args):
     new_args = []
     for e, a in zip(encoding[3:], args):
         if issubclass(e, (objc_id, ObjCInstance)):
-            new_args.append(py_from_ns(a, _auto=True))
+            new_args.append(ObjCInstance(a))
         else:
             new_args.append(a)
     return new_args
@@ -561,7 +562,20 @@ class ObjCInstance(object):
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
 
-        return ObjCClass(libobjc.object_getClass(self))
+        # This property is used inside __getattr__, so any attribute accesses must be done through
+        # super(...).__getattribute__ to prevent infinite recursion.
+        try:
+            return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
+        except AttributeError:
+            # This assumes that objects never change their class after they are seen by Rubicon.
+            # Technically this might not always be true, because the Objective-C runtime provides a function
+            # object_setClass that can change an object's class after creation, and some code also manipulates objects'
+            # isa pointers directly (although the latter is no longer officially supported by Apple).
+            # This is only extremely rarely done in practice though, and then usually only during object
+            # creation/initialization, so it's basically safe to assume that an object's class will never change
+            # after it's been wrapped in an ObjCInstance.
+            super(ObjCInstance, type(self)).__setattr__(self, "_objc_class", ObjCClass(libobjc.object_getClass(self)))
+            return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or anything that can be cast to one,
@@ -748,17 +762,12 @@ class ObjCInstance(object):
         else:
             method = None
 
-        if method is not None:
-            # If the partial method can only resolve to one method that takes no arguments,
-            # return that method directly, instead of a mostly useless partial method.
-            if set(method.methods) == {frozenset()}:
-                method, _ = method.methods[frozenset()]
-                method = ObjCMethod(method)
+        if method is None or set(method.methods) == {frozenset()}:
+            # Find a method whose full name matches the given name if no partial method was found,
+            # or the partial method can only resolve to a single method that takes no arguments.
+            # The latter case avoids returning partial methods in cases where a regular method works just as well.
+            method = self.objc_class._cache_method(name.replace("_", ":"))
 
-            return ObjCBoundMethod(method, self)
-
-        # See if there's a method whose full name matches the given name.
-        method = self.objc_class._cache_method(name.replace("_", ":"))
         if method:
             return ObjCBoundMethod(method, self)
         else:
@@ -1199,7 +1208,7 @@ class ObjCClass(ObjCInstance, type):
 
             # order is rest without the dummy "" part
             order = rest[:-1]
-            partial.methods[frozenset(rest)] = (method, order)
+            partial.methods[frozenset(rest)] = (name, order)
 
 
 class ObjCMetaClass(ObjCClass):
@@ -1256,7 +1265,7 @@ NSMutableDictionary = ObjCClass('NSMutableDictionary')
 Protocol = ObjCClass('Protocol')
 
 
-def py_from_ns(nsobj, *, _auto=False):
+def py_from_ns(nsobj):
     """Convert a Foundation object into an equivalent Python object if possible.
 
     Currently supported types:
@@ -1296,13 +1305,6 @@ def py_from_ns(nsobj, *, _auto=False):
                 'NSNumber containing unsupported type {!r} cannot be converted to a Python object'
                 .format(objc_type)
             )
-    elif _auto:
-        # If py_from_ns is called implicitly to convert an Objective-C method's return value, only the conversions
-        # before this branch are performed. If py_from_ns is called explicitly by hand, the additional conversions
-        # below this branch are performed as well.
-        # _auto is a private kwarg that is only passed when py_from_ns is called implicitly. In that case, we return
-        # early and don't attempt any other conversions.
-        return nsobj
     elif nsobj.isKindOfClass(NSString):
         return str(nsobj)
     elif nsobj.isKindOfClass(NSData):
