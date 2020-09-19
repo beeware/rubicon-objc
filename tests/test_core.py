@@ -1154,7 +1154,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_python_attribute(self):
         """Python attributes can be added to an ObjCInstance."""
-        
+
         Thing = ObjCClass("Thing")
         thing = Thing.alloc().init()
 
