@@ -1,0 +1,4 @@
+Fixed incorrect behavior of :class:`~rubicon.objc.api.Block` when trying to
+create a block with no arguments and using explicit types. This previously
+caused an incorrect exception about missing argument types; now a no-arg block
+is created as expected.
