@@ -271,7 +271,7 @@ class objc_method(object):
         else:
             return result
 
-    def register(self, cls, attr):
+    def class_register(self, cls, attr):
         name = attr.replace("_", ":")
         add_method(cls, name, self, self.encoding)
 
@@ -307,9 +307,9 @@ class objc_classmethod(object):
         else:
             return result
 
-    def register(self, cls, attr):
+    def class_register(self, cls, attr):
         name = attr.replace("_", ":")
-        add_method(cls.objc_class, name, self, self.encoding)
+        add_method(libobjc.object_getClass(cls), name, self, self.encoding)
 
     def protocol_register(self, proto, attr):
         name = attr.replace('_', ':')
@@ -333,7 +333,7 @@ class objc_ivar(object):
     def __init__(self, vartype):
         self.vartype = vartype
 
-    def pre_register(self, ptr, attr):
+    def class_register(self, ptr, attr):
         return add_ivar(ptr, attr, self.vartype)
 
     def protocol_register(self, proto, attr):
@@ -377,10 +377,9 @@ class objc_property(object):
             attrs.append(objc_property_attribute_t(b'&', b''))  # retain
         return (objc_property_attribute_t * len(attrs))(*attrs)
 
-    def pre_register(self, ptr, attr):
+    def class_register(self, ptr, attr):
         add_ivar(ptr, '_' + attr, self.vartype)
 
-    def register(self, cls, attr):
         def _objc_getter(objc_self, _cmd):
             value = get_ivar(objc_self, '_' + attr)
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
@@ -410,16 +409,16 @@ class objc_property(object):
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
         add_method(
-            cls.ptr, attr, _objc_getter,
+            ptr, attr, _objc_getter,
             [self.vartype, ObjCInstance, SEL],
         )
         add_method(
-            cls.ptr, setter_name, _objc_setter,
+            ptr, setter_name, _objc_setter,
             [None, ObjCInstance, SEL, self.vartype],
         )
 
         attrs = self._get_property_attributes()
-        libobjc.class_addProperty(cls, ensure_bytes(attr), attrs, len(attrs))
+        libobjc.class_addProperty(ptr, ensure_bytes(attr), attrs, len(attrs))
 
     def protocol_register(self, proto, attr):
         attrs = self._get_property_attributes()
@@ -452,7 +451,7 @@ class objc_rawmethod(object):
     def __call__(self, *args, **kwargs):
         return self.py_method(*args, **kwargs)
 
-    def register(self, cls, attr):
+    def class_register(self, cls, attr):
         name = attr.replace("_", ":")
         add_method(cls, name, self, self.encoding)
 
@@ -918,10 +917,14 @@ class ObjCClass(ObjCInstance, type):
             if not libobjc.class_addProtocol(ptr, proto):
                 raise RuntimeError('Failed to adopt protocol {}'.format(proto.name))
 
-        # Pre-Register all the instance variables
+        # Register all methods, properties, ivars, etc.
         for attr, obj in attrs.items():
-            if hasattr(obj, 'pre_register'):
-                obj.pre_register(ptr, attr)
+            try:
+                class_register = obj.class_register
+            except AttributeError:
+                pass
+            else:
+                class_register(ptr, attr)
 
         # Register the ObjC class
         libobjc.objc_registerClassPair(ptr)
@@ -970,7 +973,6 @@ class ObjCClass(ObjCInstance, type):
         objc_class_name = name.decode('utf-8')
 
         new_attrs = {
-            '_class_inited': False,
             'name': objc_class_name,
             'methods_ptr_count': c_uint(0),
             'methods_ptr': None,
@@ -997,22 +999,6 @@ class ObjCClass(ObjCInstance, type):
         # name or pointer, not when creating a new class.
         # If there is no cached instance for ptr, a new one is created and cached.
         self = super().__new__(cls, ptr, objc_class_name, (ObjCInstance,), new_attrs)
-
-        if not self._class_inited:
-            self._class_inited = True
-
-            # Register all the methods, class methods, etc
-            registered_something = False
-            for attr, obj in attrs.items():
-                if hasattr(obj, "register"):
-                    registered_something = True
-                    obj.register(self, attr)
-
-            # If anything was registered, reload the methods of this class
-            # (and the metaclass, because there may be new class methods).
-            if registered_something:
-                self._load_methods()
-                self.objc_class._load_methods()
 
         return self
 
