@@ -273,7 +273,7 @@ class objc_method(object):
 
     def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls, name, self, self.encoding)
+        add_method(cls, name, self, self.encoding)
 
     def protocol_register(self, proto, attr):
         name = attr.replace('_', ':')
@@ -309,7 +309,7 @@ class objc_classmethod(object):
 
     def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls.objc_class, name, self, self.encoding)
+        add_method(cls.objc_class, name, self, self.encoding)
 
     def protocol_register(self, proto, attr):
         name = attr.replace('_', ':')
@@ -409,11 +409,11 @@ class objc_property(object):
 
         setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
 
-        cls.imp_keep_alive_table[attr] = add_method(
+        add_method(
             cls.ptr, attr, _objc_getter,
             [self.vartype, ObjCInstance, SEL],
         )
-        cls.imp_keep_alive_table[setter_name] = add_method(
+        add_method(
             cls.ptr, setter_name, _objc_setter,
             [None, ObjCInstance, SEL, self.vartype],
         )
@@ -454,7 +454,7 @@ class objc_rawmethod(object):
 
     def register(self, cls, attr):
         name = attr.replace("_", ":")
-        cls.imp_keep_alive_table[name] = add_method(cls, name, self, self.encoding)
+        add_method(cls, name, self, self.encoding)
 
     def protocol_register(self, proto, attr):
         raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
@@ -984,11 +984,6 @@ class ObjCClass(ObjCInstance, type):
             'forced_properties': set(),
             # Mapping of first keyword -> ObjCPartialMethod instances
             'partial_methods': {},
-            # Mapping of name -> CFUNCTYPE callback function
-            # This only contains the IMPs of methods created in Python,
-            # which need to be kept from being garbage-collected.
-            # It does not contain any other methods, do not use it for calling methods.
-            'imp_keep_alive_table': {},
         }
 
         # On Python 3.6 and later, the class namespace may contain a __classcell__ attribute that must be passed on
