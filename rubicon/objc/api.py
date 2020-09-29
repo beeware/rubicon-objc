@@ -1488,7 +1488,7 @@ class ObjCProtocol(ObjCInstance):
             return False
 
     def __subclasscheck__(self, subclass):
-        """Check whether the given class or protool conforms to this protocol.
+        """Check whether the given class or protocol conforms to this protocol.
 
         If the given object is not an Objective-C class or protocol, :class:`TypeError` is raised.
 
