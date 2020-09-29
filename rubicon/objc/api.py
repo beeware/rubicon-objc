@@ -271,14 +271,14 @@ class objc_method(object):
         else:
             return result
 
-    def class_register(self, cls, attr):
-        name = attr.replace("_", ":")
-        add_method(cls, name, self, self.encoding)
+    def class_register(self, class_ptr, attr_name):
+        name = attr_name.replace("_", ":")
+        add_method(class_ptr, name, self, self.encoding)
 
-    def protocol_register(self, proto, attr):
-        name = attr.replace('_', ':')
+    def protocol_register(self, proto_ptr, attr_name):
+        name = attr_name.replace('_', ':')
         types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in self.encoding)
-        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, True)
+        libobjc.protocol_addMethodDescription(proto_ptr, SEL(name), types, True, True)
 
 
 class objc_classmethod(object):
@@ -307,14 +307,14 @@ class objc_classmethod(object):
         else:
             return result
 
-    def class_register(self, cls, attr):
-        name = attr.replace("_", ":")
-        add_method(libobjc.object_getClass(cls), name, self, self.encoding)
+    def class_register(self, class_ptr, attr_name):
+        name = attr_name.replace("_", ":")
+        add_method(libobjc.object_getClass(class_ptr), name, self, self.encoding)
 
-    def protocol_register(self, proto, attr):
-        name = attr.replace('_', ':')
+    def protocol_register(self, proto_ptr, attr_name):
+        name = attr_name.replace('_', ':')
         types = b''.join(encoding_for_ctype(ctype_for_type(tp)) for tp in self.encoding)
-        libobjc.protocol_addMethodDescription(proto, SEL(name), types, True, False)
+        libobjc.protocol_addMethodDescription(proto_ptr, SEL(name), types, True, False)
 
 
 class objc_ivar(object):
@@ -333,10 +333,10 @@ class objc_ivar(object):
     def __init__(self, vartype):
         self.vartype = vartype
 
-    def class_register(self, ptr, attr):
-        return add_ivar(ptr, attr, self.vartype)
+    def class_register(self, class_ptr, attr_name):
+        return add_ivar(class_ptr, attr_name, self.vartype)
 
-    def protocol_register(self, proto, attr):
+    def protocol_register(self, proto_ptr, attr_name):
         raise TypeError('Objective-C protocols cannot have ivars')
 
 
@@ -377,11 +377,11 @@ class objc_property(object):
             attrs.append(objc_property_attribute_t(b'&', b''))  # retain
         return (objc_property_attribute_t * len(attrs))(*attrs)
 
-    def class_register(self, ptr, attr):
-        add_ivar(ptr, '_' + attr, self.vartype)
+    def class_register(self, class_ptr, attr_name):
+        add_ivar(class_ptr, '_' + attr_name, self.vartype)
 
         def _objc_getter(objc_self, _cmd):
-            value = get_ivar(objc_self, '_' + attr)
+            value = get_ivar(objc_self, '_' + attr_name)
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
             # If the data object has a value attribute and is not a structure or union, assume that it is
             # a primitive and unbox it.
@@ -397,32 +397,32 @@ class objc_property(object):
             if not isinstance(new_value, self.vartype):
                 # If vartype is a primitive, then new_value may be unboxed. If that is the case, box it manually.
                 new_value = self.vartype(new_value)
-            old_value = get_ivar(objc_self, '_' + attr)
+            old_value = get_ivar(objc_self, '_' + attr_name)
             if issubclass(self.vartype, objc_id) and new_value:
                 # If the new value is a non-null object, retain it.
                 send_message(new_value, 'retain', restype=objc_id, argtypes=[])
-            set_ivar(objc_self, '_' + attr, new_value)
+            set_ivar(objc_self, '_' + attr_name, new_value)
             if issubclass(self.vartype, objc_id) and old_value:
                 # If the old value is a non-null object, release it.
                 send_message(old_value, 'release', restype=None, argtypes=[])
 
-        setter_name = 'set' + attr[0].upper() + attr[1:] + ':'
+        setter_name = 'set' + attr_name[0].upper() + attr_name[1:] + ':'
 
         add_method(
-            ptr, attr, _objc_getter,
+            class_ptr, attr_name, _objc_getter,
             [self.vartype, ObjCInstance, SEL],
         )
         add_method(
-            ptr, setter_name, _objc_setter,
+            class_ptr, setter_name, _objc_setter,
             [None, ObjCInstance, SEL, self.vartype],
         )
 
         attrs = self._get_property_attributes()
-        libobjc.class_addProperty(ptr, ensure_bytes(attr), attrs, len(attrs))
+        libobjc.class_addProperty(class_ptr, ensure_bytes(attr_name), attrs, len(attrs))
 
-    def protocol_register(self, proto, attr):
+    def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
-        libobjc.protocol_addProperty(proto, ensure_bytes(attr), attrs, len(attrs), True, True)
+        libobjc.protocol_addProperty(proto_ptr, ensure_bytes(attr_name), attrs, len(attrs), True, True)
 
 
 class objc_rawmethod(object):
@@ -451,11 +451,11 @@ class objc_rawmethod(object):
     def __call__(self, *args, **kwargs):
         return self.py_method(*args, **kwargs)
 
-    def class_register(self, cls, attr):
-        name = attr.replace("_", ":")
-        add_method(cls, name, self, self.encoding)
+    def class_register(self, class_ptr, attr_name):
+        name = attr_name.replace("_", ":")
+        add_method(class_ptr, name, self, self.encoding)
 
-    def protocol_register(self, proto, attr):
+    def protocol_register(self, proto_ptr, attr_name):
         raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
 
 
@@ -918,13 +918,13 @@ class ObjCClass(ObjCInstance, type):
                 raise RuntimeError('Failed to adopt protocol {}'.format(proto.name))
 
         # Register all methods, properties, ivars, etc.
-        for attr, obj in attrs.items():
+        for attr_name, obj in attrs.items():
             try:
                 class_register = obj.class_register
             except AttributeError:
                 pass
             else:
-                class_register(ptr, attr)
+                class_register(ptr, attr_name)
 
         # Register the ObjC class
         libobjc.objc_registerClassPair(ptr)
@@ -1460,9 +1460,9 @@ class ObjCProtocol(ObjCInstance):
                 libobjc.protocol_addProtocol(ptr, proto)
 
             # Register all methods and properties.
-            for attr, obj in ns.items():
+            for attr_name, obj in ns.items():
                 if hasattr(obj, 'protocol_register'):
-                    obj.protocol_register(ptr, attr)
+                    obj.protocol_register(ptr, attr_name)
 
             # Register the protocol object
             libobjc.objc_registerProtocol(ptr)
