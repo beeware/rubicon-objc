@@ -1,0 +1,1 @@
+Refactored some parts of the internal logic for defining Objective-C classes from Python.
