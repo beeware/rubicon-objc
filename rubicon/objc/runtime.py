@@ -834,6 +834,18 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
     return result
 
 
+# Collection of the ctypes C function pointer objects of the implementations of all Python-defined Objective-C methods.
+# When an Objective-C method implemented in Python is created, the Python callable that implements the method
+# is wrapped as a C function pointer using ctypes. This C function pointer object must be kept alive manually
+# from Python for as long as the C function pointer is in use. Objective-C method implementations almost always remain
+# referenced until the process terminates, so the function pointer objects are never removed again
+# from this collection after they are added.
+# (There are rare cases where method implementations might become unreferenced early,
+# for example if a method is swizzled and the old implementation is never called again, but it's impossible to detect
+# when this happens and is rare enough that it's not worth handling.)
+_keep_alive_imps = []
+
+
 def add_method(cls, selector, method, encoding):
     """Add a new instance method to the given class.
 
@@ -844,6 +856,10 @@ def add_method(cls, selector, method, encoding):
     :param method: The method implementation, as a Python callable or a C function address.
     :param encoding: The method's signature (return type and argument types) as a :class:`list`.
         The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
+    :return: The ctypes C function pointer object that was created for the method's implementation.
+        This return value can be ignored. (In version 0.4.0 and older, callers were required to manually
+        keep a reference to this function pointer object to ensure that it isn't garbage-collected.
+        Rubicon now does this automatically.)
     """
 
     signature = [ctype_for_type(tp) for tp in encoding]
@@ -859,6 +875,7 @@ def add_method(cls, selector, method, encoding):
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
     libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
+    _keep_alive_imps.append(imp)
     return imp
 
 
