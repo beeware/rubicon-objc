@@ -1,6 +1,6 @@
-sphinx
-sphinxcontrib-spelling
 pyenchant
+sphinx
 sphinx-autobuild
 sphinx-rtd-theme
 sphinx-tabs
+sphinxcontrib-spelling
