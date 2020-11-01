@@ -84,7 +84,7 @@ class AsyncCallTests(unittest.TestCase):
 
         # The co-routine will be queued after 0.2 seconds.
         self.assertGreaterEqual(end - start, 0.2)
-        self.assertLess(end - start, 0.35)
+        self.assertLess(end - start, 0.4)
 
     def test_call_at(self):
         start = time.time()
@@ -95,7 +95,7 @@ class AsyncCallTests(unittest.TestCase):
 
         # The co-routine will be queued after 0.2 seconds.
         self.assertGreaterEqual(end - start, 0.2)
-        self.assertLess(end - start, 0.35)
+        self.assertLess(end - start, 0.4)
 
 
 class AsyncReaderWriterTests(unittest.TestCase):
