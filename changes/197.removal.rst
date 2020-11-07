@@ -1,0 +1,11 @@
+Removed macOS 10.12 through 10.14 from our automatic test matrix,
+due to pricing changes in one of our CI services (Travis CI).
+OS X 10.11 is still included in the test matrix for now,
+but will probably be removed relatively soon.
+Automatic tests on macOS 10.15 and 11.0 are unaffected
+as they run on a different CI service (GitHub Actions).
+
+Rubicon will continue to support macOS 10.14 and earlier on a best-effort
+basis, even though compatibility is no longer tested automatically.
+If you encounter any bugs or other problems with Rubicon on these older macOS
+versions, please report them!
