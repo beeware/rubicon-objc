@@ -164,6 +164,12 @@ class ObjCMethod(object):
         # Convert result to python type if it is a instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
             result = ObjCInstance(result)
+            
+        # Mark for release if we acquire ownership of an object. Do not autorelease here because
+        # we might retain a Python reference while the Obj-C reference goes out of scope.
+        if any(self.name.startswith(prefix) for prefix in (b'alloc', b'new', b'copy', b'mutableCopy')):
+            result._needs_release = True
+
         return result
 
 
@@ -641,6 +647,7 @@ class ObjCInstance(object):
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
+        super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
         if isinstance(object_ptr, objc_block):
             super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
@@ -648,6 +655,13 @@ class ObjCInstance(object):
         cls._cached_objects[object_ptr.value] = self
 
         return self
+
+    def __del__(self):
+        # Autorelease all objects which we own, except for autorelease pools.
+        # We use autorelease instead of release here to prevent instances without a Python
+        # reference but with an Obj-C reference from being released too early.
+        if self._needs_release and self.objc_class.name != 'NSAutoreleasePool':
+            self.autorelease()
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
