@@ -164,7 +164,7 @@ class ObjCMethod(object):
         # Convert result to python type if it is a instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
             result = ObjCInstance(result)
-            
+
         # Mark for release if we acquire ownership of an object. Do not autorelease here because
         # we might retain a Python reference while the Obj-C reference goes out of scope.
         if any(self.name.startswith(prefix) for prefix in (b'alloc', b'new', b'copy', b'mutableCopy')):
