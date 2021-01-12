@@ -657,11 +657,9 @@ class ObjCInstance(object):
         return self
 
     def __del__(self):
-        # Autorelease all objects which we own, except for autorelease pools.
-        # We use autorelease instead of release here to prevent instances without a Python
-        # reference but with an Obj-C reference from being released too early.
+        # Release all objects which we own, except for autorelease pools.
         if self._needs_release and self.objc_class.name != 'NSAutoreleasePool':
-            send_message(self, "autorelease", restype=objc_id, argtypes=[])
+            send_message(self, "release", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
