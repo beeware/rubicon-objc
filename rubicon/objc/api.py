@@ -661,7 +661,7 @@ class ObjCInstance(object):
         # We use autorelease instead of release here to prevent instances without a Python
         # reference but with an Obj-C reference from being released too early.
         if self._needs_release and self.objc_class.name != 'NSAutoreleasePool':
-            self.autorelease()
+            send_message(self, "autorelease", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
