@@ -167,7 +167,7 @@ class ObjCMethod(object):
 
         # Mark for release if we acquire ownership of an object. Do not autorelease here because
         # we might retain a Python reference while the Obj-C reference goes out of scope.
-        if any(self.name.startswith(prefix) for prefix in (b'alloc', b'new', b'copy', b'mutableCopy')):
+        if self.name.startswith((b'alloc', b'new', b'copy', b'mutableCopy')):
             result._needs_release = True
 
         return result
