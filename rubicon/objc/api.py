@@ -657,8 +657,8 @@ class ObjCInstance(object):
         return self
 
     def __del__(self):
-        # Release all objects which we own, except for autorelease pools.
-        if self._needs_release and self.objc_class.name != 'NSAutoreleasePool':
+
+        if self._needs_release:
             send_message(self, "release", restype=objc_id, argtypes=[])
 
     def __str__(self):
