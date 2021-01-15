@@ -656,6 +656,17 @@ class ObjCInstance(object):
 
         return self
 
+    def release(self):
+        """
+        Manually decrement the reference count of the corresponding objc object
+
+        The objc object is sent a dealloc message when its reference count reaches 0. Calling
+        this method manually should not be necessary, the object will be automatically
+        released when the Python object is deallocated.
+        """
+        self._needs_release = False
+        send_message(self, "release", restype=objc_id, argtypes=[])
+
     def __del__(self):
         """
         Release the corresponding objc instance if we own it, i.e., if it was returned by
