@@ -657,6 +657,11 @@ class ObjCInstance(object):
         return self
 
     def __del__(self):
+        """
+        Release the corresponding objc instance if we own it, i.e., if it was returned by
+        by a method starting with 'alloc', 'new', 'copy', or 'mutableCopy' and it wasn't
+        already explicitly released by calling :meth:`release`.
+        """
 
         if self._needs_release:
             send_message(self, "release", restype=objc_id, argtypes=[])
