@@ -667,6 +667,17 @@ class ObjCInstance(object):
         self._needs_release = False
         send_message(self, "release", restype=objc_id, argtypes=[])
 
+    def autorelease(self):
+        """
+        Decrements the receiver’s reference count at the end of the current autorelease pool block
+
+        The objc object is sent a dealloc message when its reference count reaches 0. If called,
+        the object will not be released when the Python object is deallocated.
+        """
+        self._needs_release = False
+        result = send_message(self, "autorelease", restype=objc_id, argtypes=[])
+        return ObjCInstance(result)
+
     def __del__(self):
         """
         Release the corresponding objc instance if we own it, i.e., if it was returned by
