@@ -656,6 +656,17 @@ class ObjCInstance(object):
 
         return self
 
+    def retain(self):
+        """
+        Manually increment the reference count of the corresponding objc object
+
+        The objc object is sent a dealloc message when its reference count reaches 0.
+        Use this method to retain objects which we don't own.
+        """
+        self._needs_release = True
+        result = send_message(self, "retain", restype=objc_id, argtypes=[])
+        return ObjCInstance(result)
+
     def release(self):
         """
         Manually decrement the reference count of the corresponding objc object
