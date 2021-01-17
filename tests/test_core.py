@@ -167,7 +167,6 @@ class RubiconTest(unittest.TestCase):
         random_obj = NSObject.alloc().init()
         with self.assertRaises(ValueError):
             ObjCClass(random_obj.ptr)
-        del random_obj  # will release random_obj
 
     def test_objcmetaclass_requires_metaclass(self):
         """ObjCMetaClass only accepts metaclass pointers."""
@@ -175,8 +174,6 @@ class RubiconTest(unittest.TestCase):
         random_obj = NSObject.alloc().init()
         with self.assertRaises(ValueError):
             ObjCMetaClass(random_obj.ptr)
-
-        del random_obj  # will release random_obj
 
         with self.assertRaises(ValueError):
             ObjCMetaClass(NSObject.ptr)
@@ -187,8 +184,6 @@ class RubiconTest(unittest.TestCase):
         random_obj = NSObject.alloc().init()
         with self.assertRaises(ValueError):
             ObjCProtocol(random_obj.ptr)
-
-        del random_obj  # will release random_obj
 
     def test_objcclass_superclass(self):
         """An ObjCClass's superclass can be looked up."""
