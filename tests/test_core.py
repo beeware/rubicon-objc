@@ -1208,3 +1208,64 @@ class RubiconTest(unittest.TestCase):
         # Check that these are exactly the same objects that we stored before.
         self.assertEqual(id(thing.python_object_1), python_object_1_id)
         self.assertEqual(id(thing.python_object_2), python_object_2_id)
+
+    def test_objcinstance_release_owned(self):
+
+        # Create an object which we own.
+        obj = NSObject.alloc().init()
+
+        # Check that it is marked for release.
+        self.assertTrue(obj._needs_release)
+
+        # Explicitly release the object.
+        obj.release()
+
+        # Check that we no longer need to release it.
+        self.assertFalse(obj._needs_release)
+
+        # Delete it and make sure that we don't segfault on garbage collection.
+        del obj
+        gc.collect()
+
+    def test_objcinstance_autorelease_owned(self):
+
+        # Create an object which we own.
+        obj = NSObject.alloc().init()
+
+        # Check that it is marked for release.
+        self.assertTrue(obj._needs_release)
+
+        # Explicitly release the object.
+        res = obj.autorelease()
+
+        # Check that autorelease call returned the object itself.
+        self.assertIs(obj, res)
+
+        # Check that we no longer need to release it.
+        self.assertFalse(obj._needs_release)
+
+        # Delete it and make sure that we don't segfault on garbage collection.
+        del obj
+        gc.collect()
+
+    def test_objcinstance_retain_release(self):
+        NSString = ObjCClass('NSString')
+
+        # Create an object which we don't own.
+        string = NSString.stringWithString('test')
+
+        # Check that it is not marked for release.
+        self.assertFalse(string._needs_release)
+
+        # Explicitly retain the object.
+        res = string.retain()
+
+        # Check that autorelease call returned the object itself.
+        self.assertIs(string, res)
+
+        # Manually release the object.
+        string.release()
+
+        # Delete it and make sure that we don't segfault on garbage collection.
+        del string
+        gc.collect()
