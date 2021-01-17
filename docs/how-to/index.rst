@@ -15,6 +15,7 @@ stand alone.
 
    get-started
    type-mapping
+   memory-management
    protocols
    async
    c-functions
