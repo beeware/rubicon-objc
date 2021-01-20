@@ -7,12 +7,11 @@ will automatically track where variables are referenced and free memory when
 the reference count drops to zero whereas Objective-C uses explicit reference
 counting to manage memory. The methods ``retain``, ``release`` and
 ``autorelease`` are used to increase and decrease the reference counts as
-described in the `Apple developer documentation`_. When enabling automatic
-reference counting (ARC), the appropriate calls for memory management will be
-inserted for you at compile-time. However, since Rubicon Objective-C operates
-at runtime, it cannot make use of ARC.
-
-.. _Apple developer documentation: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/MemoryMgmt.html
+described in the `Apple developer documentation
+<https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/MemoryMgmt.html>`__.
+When enabling automatic reference counting (ARC), the appropriate calls for
+memory management will be inserted for you at compile-time. However, since
+Rubicon Objective-C operates at runtime, it cannot make use of ARC.
 
 You won’t have to manage reference counts in Python, Rubicon Objective-C will
 do that work for you. It does so by tracking when you gain ownership of an
