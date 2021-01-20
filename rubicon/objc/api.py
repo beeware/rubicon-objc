@@ -661,8 +661,9 @@ class ObjCInstance(object):
         Manually decrement the reference count of the corresponding objc object
 
         The objc object is sent a dealloc message when its reference count reaches 0. Calling
-        this method manually should not be necessary, the object will be automatically
-        released when the Python object is deallocated.
+        this method manually should not be necessary, unless the object was explicitly
+        ``retain``\\ed before. Objects returned from ``.alloc().init...(...)`` and similar calls
+        are released automatically by Rubicon when the corresponding Python object is deallocated.
         """
         self._needs_release = False
         send_message(self, "release", restype=objc_id, argtypes=[])
