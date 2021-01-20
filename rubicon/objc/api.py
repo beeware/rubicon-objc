@@ -683,7 +683,7 @@ class ObjCInstance(object):
         """
         Release the corresponding objc instance if we own it, i.e., if it was returned by
         by a method starting with 'alloc', 'new', 'copy', or 'mutableCopy' and it wasn't
-        already explicitly released by calling :meth:`release`.
+        already explicitly released by calling :meth:`release` or :meth:`autorelease`.
         """
 
         if self._needs_release:
