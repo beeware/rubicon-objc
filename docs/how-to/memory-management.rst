@@ -20,7 +20,11 @@ whose name begins with "alloc", "new", "copy", or "mutableCopy". Rubicon
 Objective-C will then insert a ``release`` call when the Python variable that
 corresponds to the Objective-C instance is deallocated.
 
-You will only need to pay attention to reference counting in case of **weak
+An exception to this is when you manually ``retain`` an object. Rubicon
+Objective-C will not keep track of such retain calls and you will be
+responsible to insert appropriate ``release`` calls yourself.
+
+You will also need to pay attention to reference counting in case of **weak
 references**. In Objective-C, creating a **weak reference** means that the
 reference count of the object is not incremented and the object will still be
 deallocated when no strong references remain. Any weak references to the object
