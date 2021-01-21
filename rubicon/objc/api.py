@@ -164,6 +164,12 @@ class ObjCMethod(object):
         # Convert result to python type if it is a instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
             result = ObjCInstance(result)
+
+        # Mark for release if we acquire ownership of an object. Do not autorelease here because
+        # we might retain a Python reference while the Obj-C reference goes out of scope.
+        if self.name.startswith((b'alloc', b'new', b'copy', b'mutableCopy')):
+            result._needs_release = True
+
         return result
 
 
@@ -641,6 +647,7 @@ class ObjCInstance(object):
             self = super().__new__(cls)
         super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
         super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
+        super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
         if isinstance(object_ptr, objc_block):
             super(ObjCInstance, type(self)).__setattr__(self, "block", ObjCBlock(object_ptr))
         # Store new object in the dictionary of cached objects, keyed
@@ -648,6 +655,39 @@ class ObjCInstance(object):
         cls._cached_objects[object_ptr.value] = self
 
         return self
+
+    def release(self):
+        """
+        Manually decrement the reference count of the corresponding objc object
+
+        The objc object is sent a dealloc message when its reference count reaches 0. Calling
+        this method manually should not be necessary, unless the object was explicitly
+        ``retain``\\ed before. Objects returned from ``.alloc().init...(...)`` and similar calls
+        are released automatically by Rubicon when the corresponding Python object is deallocated.
+        """
+        self._needs_release = False
+        send_message(self, "release", restype=objc_id, argtypes=[])
+
+    def autorelease(self):
+        """
+        Decrements the receiver’s reference count at the end of the current autorelease pool block
+
+        The objc object is sent a dealloc message when its reference count reaches 0. If called,
+        the object will not be released when the Python object is deallocated.
+        """
+        self._needs_release = False
+        result = send_message(self, "autorelease", restype=objc_id, argtypes=[])
+        return ObjCInstance(result)
+
+    def __del__(self):
+        """
+        Release the corresponding objc instance if we own it, i.e., if it was returned by
+        by a method starting with 'alloc', 'new', 'copy', or 'mutableCopy' and it wasn't
+        already explicitly released by calling :meth:`release` or :meth:`autorelease`.
+        """
+
+        if self._needs_release:
+            send_message(self, "release", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
