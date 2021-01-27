@@ -540,6 +540,17 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             args=args
         )
 
+    def _handle_signal(self, sig):
+        """Internal helper that is the actual signal handler."""
+
+        handle = self._signal_handlers.get(sig)
+        if handle is None:
+            return  # Assume it's some race condition.
+        if handle._cancelled:
+            self.remove_signal_handler(sig)  # Remove it properly.
+        else:
+            self.call_soon(handle._callback)
+
     def time(self):
         """Return the time according to the event loop's clock.
 
