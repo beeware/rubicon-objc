@@ -1,0 +1,1 @@
+Fix calling of signal handlers added to the asyncio loop with CFRunLoop integration.
