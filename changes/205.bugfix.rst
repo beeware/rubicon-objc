@@ -1,0 +1,1 @@
+Allow restarting a stopped event loop.
