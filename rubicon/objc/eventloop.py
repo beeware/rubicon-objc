@@ -444,7 +444,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
     def run_forever(self, lifecycle=None):
         """Run until stop() is called."""
-        self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
+        if not self._lifecycle:
+            self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
 
         if self.is_running():
             raise RuntimeError(
@@ -467,7 +468,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         The implementation is effectively all the parts of a call to
         :meth:`run_forever()`, but without any of the shutdown/cleanup logic.
         """
-        self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
+        if not self._lifecycle:
+            self._set_lifecycle(lifecycle if lifecycle else CFLifecycle(self._cfrunloop))
 
         if self.is_running():
             raise RuntimeError(
