@@ -7,7 +7,7 @@ dist
 build
 _build
 distribute-*
-env
+venv*/
 local
 .tox
 
