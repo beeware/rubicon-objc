@@ -75,7 +75,7 @@ Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 * `Discord <https://discord.com/channels/836455665257021440/836455665257021443>`__
   (`Click here for an invitation to the server <https://beeware.org/bee/chat/>`__)
 
-* The Toga `Github Discussions forum <https://github.com/beeware/rubicon-objc/discussions>`__
+* The Rubicon-ObjC `Github Discussions forum <https://github.com/beeware/rubicon-objc/discussions>`__
 
 Code of Conduct
 ---------------
