@@ -540,17 +540,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             args=args
         )
 
-    def _handle_signal(self, sig):
-        """Internal helper that is the actual signal handler."""
-
-        handle = self._signal_handlers.get(sig)
-        if handle is None:
-            return  # Assume it's some race condition.
-        if handle._cancelled:
-            self.remove_signal_handler(sig)  # Remove it properly.
-        else:
-            self.call_soon(handle._callback)
-
     def time(self):
         """Return the time according to the event loop's clock.
 
@@ -595,6 +584,22 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             raise RuntimeError("You can't set a lifecycle on a loop that's already running.")
         self._lifecycle = lifecycle
         self._policy._lifecycle = lifecycle
+
+    def _add_callback(self, handle):
+        """Add a callback to be invoked ASAP.
+
+        The inherited behavior uses a self-pipe to wake up the event loop
+        in a thread-safe fashion, which causes the logic in run_once() to
+        empty the list of handlers that are awaiting invocation.
+
+        CFEventLoop doesn't use run_once(), so adding handlers to
+        self._ready results in handlers that aren't invoked. Instead, we
+        create a 0-interval timer to invoke the callback as soon as
+        possible.
+        """
+        if handle._cancelled:
+            return
+        self.call_soon(handle._callback, *handle._args)
 
 
 class EventLoopPolicy(events.AbstractEventLoopPolicy):
