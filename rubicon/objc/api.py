@@ -5,7 +5,7 @@ import inspect
 import weakref
 from ctypes import (
     CFUNCTYPE, POINTER, Array, Structure, Union, addressof, byref, c_bool, c_char_p, c_int, c_uint,
-    c_uint8, c_ulong, c_void_p, cast, sizeof, string_at
+    c_uint8, c_ulong, c_void_p, cast, sizeof, string_at, py_object,
 )
 
 from .types import (
@@ -570,14 +570,6 @@ class ObjCInstance(object):
     # and a new ObjCInstance might be created for it if it is wrapped again later.)
     _cached_objects = weakref.WeakValueDictionary()
 
-    # Some ObjCInstance objects must be kept alive for as long as their corresponding Objective-C object exists
-    # (see the _ensure_keep_alive method).
-    # Such objects are inserted into this regular (non-weak) dictionary,
-    # in addition to the weak _cached_objects dictionary.
-    # Entries are removed from this dictionary only once the corresponding Objective-C object is deallocated.
-    # This is done using the DeallocationObserver class.
-    _keep_alive_objects = {}
-
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
@@ -596,6 +588,10 @@ class ObjCInstance(object):
             # after it's been wrapped in an ObjCInstance.
             super(ObjCInstance, type(self)).__setattr__(self, "_objc_class", ObjCClass(libobjc.object_getClass(self)))
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
+
+    @staticmethod
+    def _associated_attr_key_for_name(name):
+        return SEL("rubicon.objc.py_attr.{}".format(name))
 
     def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or anything that can be cast to one,
@@ -803,36 +799,20 @@ class ObjCInstance(object):
 
         if method:
             return ObjCBoundMethod(method, self)
-        else:
+
+        # Check if the attribute name corresponds to an instance attribute defined at
+        # runtime from Python. Return it if yes, raise an AttributeError otherwise.
+        key = self._associated_attr_key_for_name(name)
+        pyo_wrapper = libobjc.objc_getAssociatedObject(self, key)
+
+        if pyo_wrapper.value is None:
             raise AttributeError('%s.%s %s has no attribute %s' % (
                 type(self).__module__, type(self).__qualname__, self.objc_class.name, name)
             )
+        address = get_ivar(pyo_wrapper, "wrapped_pointer")
+        pyo = cast(address.value, py_object)
 
-    def _ensure_keep_alive(self) -> None:
-        """Ensure that this :class:`ObjCInstance` is kept alive as long as its Objective-C object exists."""
-
-        # Check first if this ObjCInstance is already kept alive,
-        # in which case we don't need to do anything.
-        if self.ptr.value not in ObjCInstance._keep_alive_objects:
-            ObjCInstance._keep_alive_objects[self.ptr.value] = self
-
-            # Create a DeallocationObserver and associate it with the Objective-C object.
-            # When the Objective-C object is deallocated, the observer will remove
-            # this ObjCInstance from the _keep_alive_objects dictionary.
-            # This will cause the ObjCInstance to be destroyed,
-            # assuming that there are no other references to it from Python
-            # (which shouldn't happen - if Python code has a reference to an ObjCInstance,
-            # it's expected to also retain a reference to the Objective-C object).
-            observer = send_message(
-                send_message(get_class('DeallocationObserver'), 'alloc', restype=objc_id, argtypes=[]),
-                'initWithObject:', self, restype=objc_id, argtypes=[objc_id]
-            )
-            libobjc.objc_setAssociatedObject(self, observer, observer, 0x301)
-            # The observer is now retained by the object we associate it to.
-            # We now release our own reference to the observer,
-            # so that the only remaining reference is released
-            # when the associated object is deallocated.
-            send_message(observer, 'release', restype=None, argtypes=[])
+        return pyo.value
 
     def __setattr__(self, name, value):
         """Allows modifying Objective-C properties using Python syntax.
@@ -852,16 +832,38 @@ class ObjCInstance(object):
                     value = value.value
                 ObjCBoundMethod(method, self)(value)
             else:
-                # Add a new Python attribute.
-                # These attributes are currently only stored on the Python ObjCInstance object
-                # and not on the actual Objective-C object.
-                # To ensure that the attributes aren't lost when the ObjCInstance has no more Python references
-                # (but the Objective-C object still has Objective-C references
-                # and may be wrapped in an ObjCInstance again in the future),
-                # every ObjCInstance with additional Python attributes is "kept alive" on the Python side.
-                # This prevents the ObjCInstance from being destroyed while the Objective-C object still exists.
-                self._ensure_keep_alive()
-                super(ObjCInstance, type(self)).__setattr__(self, name, value)
+
+                # Wrap the Python object in a WrappedPyObject instance.
+                # A reference will be retained as long as the WrappedPyObject is alive.
+
+                wrapper = send_message(
+                    send_message(get_class('WrappedPyObject'), 'alloc',
+                                 restype=objc_id, argtypes=[]),
+                    'initWithObjectId:', id(value), restype=objc_id, argtypes=[objc_id]
+                )
+
+                # Set the Python value as an associated object. This will release
+                # any previous wrapper object with the same key.
+                key = self._associated_attr_key_for_name(name)
+                libobjc.objc_setAssociatedObject(self, key, wrapper, 0x301)
+
+                # Release the wrapper object, it will be retained by the association.
+                send_message(wrapper, 'release', restype=objc_id, argtypes=[])
+
+    def __delattr__(self, name):
+        if name in self.__dict__:
+            # For attributes already in __dict__, use the default __delattr__.
+            super(ObjCInstance, type(self)).__delattr__(self, name)
+        else:
+            key = self._associated_attr_key_for_name(name)
+            # Check for instance attributes defined at runtime.
+            pyo_wrapper = libobjc.objc_getAssociatedObject(self, key)
+            if pyo_wrapper.value is None:
+                raise AttributeError('%s.%s %s has no attribute %s' % (
+                    type(self).__module__, type(self).__qualname__, self.objc_class.name, name)
+                )
+            # If set, clear the instance attribute / associated object.
+            libobjc.objc_setAssociatedObject(self, key, None, 0x301)
 
 
 # The inheritance order is important here.
@@ -1554,42 +1556,52 @@ class ObjCProtocol(ObjCInstance):
 NSObjectProtocol = ObjCProtocol('NSObject')
 
 
-# Instances of DeallocationObserver are associated with every
-# ObjCInstance that needs to be kept alive, which is the case
-# when the ObjCInstance has had additional Python attributes added to it.
-# Their sole purpose is to watch for when the Objective-C object
-# is deallocated, and then remove the object from the
-# ObjCInstance._keep_alive_objects dictionary.
+# When a Python object is assigned to a new ObjCInstance attribute, the Python
+# object should be kept alive for the lifetime of the ObjCInstance. This is
+# done by wrapping the Python object as a WrappedPyObject that increments
+# the reference count during assignment and decrements it when the WrappedPyObject
+# and the owning ObjCInstance are deallocated.
 #
 # The methods of the class defined below are decorated with
-# rawmethod() instead of method() because DeallocationObservers
+# rawmethod() instead of method() because WrappedPyObject
 # are created inside of ObjCInstance's __new__ method and we have
 # to be careful to not create another ObjCInstance here (which
 # happens when the usual method decorator turns the self argument
 # into an ObjCInstance), or else get trapped in an infinite recursion.
 
-# Try to reuse an existing DeallocationObserver class.
+# Try to reuse an existing WrappedPyObject class.
 # This allows reloading the module without having to restart
-# the interpreter, although any changes to DeallocationObserver
+# the interpreter, although any changes to WrappedPyObject
 # itself are only applied after a restart of course.
-try:
-    DeallocationObserver = ObjCClass("DeallocationObserver")
-except NameError:
-    class DeallocationObserver(NSObject):
 
-        observed_object = objc_ivar(objc_id)
+
+# Dictionary to keep references to wrapped Python objects. This prevents them
+# from being collected if there are otherwise only Objective-C references left
+# to the object.
+_keep_alive_objects = {}
+
+
+try:
+    WrappedPyObject = ObjCClass("WrappedPyObject")
+except NameError:
+    class WrappedPyObject(NSObject):
+
+        wrapped_pointer = objc_ivar(c_void_p)
 
         @objc_rawmethod
-        def initWithObject_(self, cmd, anObject):
+        def initWithObjectId_(self, cmd, address):
             self = send_message(self, 'init', restype=objc_id, argtypes=[])
             if self is not None:
-                set_ivar(self, 'observed_object', anObject)
+                pyo = cast(address, py_object)
+                _keep_alive_objects[(self.value, address.value)] = pyo.value
+                set_ivar(self, 'wrapped_pointer', address)
             return self.value
 
         @objc_rawmethod
         def dealloc(self, cmd) -> None:
-            anObject = get_ivar(self, 'observed_object')
-            ObjCInstance._keep_alive_objects.pop(anObject.value, None)
+            address = get_ivar(self, 'wrapped_pointer')
+            if address.value:
+                del _keep_alive_objects[(self.value, address.value)]
             send_super(__class__, self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
@@ -1598,8 +1610,9 @@ except NameError:
             # (which would have to be explicitly started with
             # objc_startCollectorThread(), so probably not too much reason
             # to have this here, but I guess it can't hurt.)
-            anObject = get_ivar(self, 'observed_object')
-            ObjCInstance._keep_alive_objects.pop(anObject.value, None)
+            address = get_ivar(self, 'wrapped_pointer')
+            if address.value:
+                del _keep_alive_objects[(self.value, address.value)]
             send_super(__class__, self, 'finalize', restype=None, argtypes=[])
 
 
