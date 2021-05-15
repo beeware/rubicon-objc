@@ -72,8 +72,7 @@ Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 
 * `@pybeeware on Twitter <https://twitter.com/pybeeware>`__
 
-* `Discord <https://discord.com/channels/836455665257021440/836455665257021443>`__
-  (`Click here for an invitation to the server <https://beeware.org/bee/chat/>`__)
+* `Discord <https://beeware.org/bee/chat/>`__
 
 * The Rubicon-ObjC `Github Discussions forum <https://github.com/beeware/rubicon-objc/discussions>`__
 
