@@ -25,9 +25,9 @@ Rubicon-ObjC
    :target: https://github.com/beeware/rubicon-objc/actions
    :alt: Build Status
 
-.. image:: https://badges.gitter.im/beeware/general.svg
-   :target: https://gitter.im/beeware/general
-   :alt: Gitter chat room
+.. image:: https://img.shields.io/discord/836455665257021440?label=Discord%20Chat&logo=discord&style=plastic
+   :target: https://beeware.org/bee/chat/
+   :alt: Discord server
 
 Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
 
@@ -70,9 +70,11 @@ Community
 
 Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 
-* `@pybeeware on Twitter`_
+* `@pybeeware on Twitter <https://twitter.com/pybeeware>`__
 
-* The `beeware/general`_ channel on Gitter.
+* `Discord <https://beeware.org/bee/chat/>`__
+
+* The Rubicon-ObjC `Github Discussions forum <https://github.com/beeware/rubicon-objc/discussions>`__
 
 Code of Conduct
 ---------------
@@ -92,8 +94,6 @@ want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
 .. _BeeWare suite: https://beeware.org
 .. _Read The Docs: https://rubicon-objc.readthedocs.org
-.. _@pybeeware on Twitter: https://twitter.com/pybeeware
-.. _beeware/general: https://gitter.im/beeware/general
 .. _Code of Conduct: https://beeware.org/community/behavior/
 .. _log them on GitHub: https://github.com/beeware/rubicon-objc/issues
 .. _fork the code: https://github.com/beeware/rubicon-objc
