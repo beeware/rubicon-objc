@@ -5,6 +5,7 @@ import unittest
 from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
 from decimal import Decimal
 from enum import Enum
+import weakref
 
 from rubicon.objc import (
     SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
@@ -14,6 +15,9 @@ from rubicon.objc import (
 from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar
 
 from . import OSX_VERSION, rubiconharness
+
+
+NSAutoreleasePool = ObjCClass("NSAutoreleasePool")
 
 
 class struct_int_sized(Structure):
@@ -1163,6 +1167,13 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(thing.python_object_1, range(2, 8))
         self.assertEqual(thing.python_object_2, type)
 
+        # Test deleting Python attribute.
+
+        del thing.python_object_1
+
+        with self.assertRaises(AttributeError):
+            thing.python_object_1
+
     def test_objcinstance_python_attribute_keep_alive(self):
         """Python attributes on an ObjCInstance are kept even if the object temporarily has no Python references."""
 
@@ -1208,6 +1219,44 @@ class RubiconTest(unittest.TestCase):
         # Check that these are exactly the same objects that we stored before.
         self.assertEqual(id(thing.python_object_1), python_object_1_id)
         self.assertEqual(id(thing.python_object_2), python_object_2_id)
+
+    def test_objcinstance_python_attribute_freed(self):
+        """Python attributes on an ObjCInstance are freed after the instance is released."""
+
+        # create NSAutoreleasePool to clean up any leftover Obj-C instances
+        pool = NSAutoreleasePool.alloc().init()
+
+        obj = NSObject.alloc().init()
+
+        # Use a custom object as attribute value so that we can keep a weak reference.
+
+        class TestO:
+            pass
+
+        python_object = TestO()
+
+        wr_python_object = weakref.ref(python_object)
+
+        # Add our Python attribute to the Objective-C object.
+        obj.python_object = python_object
+
+        # Delete all of Python references to the Python object.
+        del python_object
+
+        # Try to force Python to destroy any no longer referenced objects.
+        gc.collect()
+
+        # Check that our Python attributes are still there.
+        self.assertIs(obj.python_object, wr_python_object())
+
+        # Delete ObjCInstances and check that all Python objects are freed.
+
+        del obj
+        del pool
+
+        gc.collect()
+
+        self.assertIsNone(wr_python_object())
 
     def test_objcinstance_release_owned(self):
 
