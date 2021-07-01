@@ -924,7 +924,7 @@ def get_ivar(obj, varname, weak=False):
     if weak:
         value = libobjc.objc_loadWeakRetained(obj.value + libobjc.ivar_getOffset(ivar))
         return libobjc.objc_autoreleaseReturnValue(value)
-    elif isinstance(vartype, objc_id):
+    elif issubclass(vartype, objc_id):
         return cast(libobjc.object_getIvar(obj, ivar), vartype)
     else:
         return vartype.from_address(obj.value + libobjc.ivar_getOffset(ivar))
@@ -957,7 +957,7 @@ def set_ivar(obj, varname, value, weak=False):
 
     if weak:
         libobjc.objc_storeWeak(obj.value + libobjc.ivar_getOffset(ivar), value)
-    elif isinstance(vartype, objc_id):
+    elif issubclass(vartype, objc_id):
         libobjc.object_setIvar(obj, ivar, value)
     else:
         memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
