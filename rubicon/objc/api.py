@@ -390,10 +390,13 @@ class objc_property(object):
         return (objc_property_attribute_t * len(attrs))(*attrs)
 
     def class_register(self, class_ptr, attr_name):
-        add_ivar(class_ptr, '_' + attr_name, self.vartype)
+
+        ivar_name = '_' + attr_name
+
+        add_ivar(class_ptr, ivar_name, self.vartype)
 
         def _objc_getter(objc_self, _cmd):
-            value = get_ivar(objc_self, '_' + attr_name, weak=self.weak)
+            value = get_ivar(objc_self, ivar_name, weak=self.weak)
 
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
             # If the data object has a value attribute and is not a structure or union, assume that it is
@@ -412,7 +415,7 @@ class objc_property(object):
                 new_value = self.vartype(new_value)
 
             if issubclass(self.vartype, objc_id) and not self.weak:
-                old_value = get_ivar(objc_self, '_' + attr_name, weak=self.weak)
+                old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
 
                 if new_value.value == old_value.value:
                     # old and new value are the same, nothing to do
@@ -422,7 +425,7 @@ class objc_property(object):
                 # If the new value is a non-null object, retain it.
                 send_message(new_value, 'retain', restype=objc_id, argtypes=[])
 
-            set_ivar(objc_self, '_' + attr_name, new_value, weak=self.weak)
+            set_ivar(objc_self, ivar_name, new_value, weak=self.weak)
 
             if not self.weak and issubclass(self.vartype, objc_id) and old_value:
                 # If the old value is a non-null object, release it.
@@ -450,11 +453,12 @@ class objc_property(object):
 
             # Clean up ivar.
             if self.weak:
-                ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(objc_self), ('_' + attr_name).encode())
+                # Clean up weak reference.
+                ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(objc_self), ivar_name.encode())
                 libobjc.objc_storeWeak(objc_self.value + libobjc.ivar_getOffset(ivar), None)
             elif issubclass(self.vartype, objc_id):
-                # If the old value is a non-null object, release it. The is no need to set the actual ivar to nil.
-                old_value = get_ivar(objc_self, '_' + attr_name, weak=self.weak)
+                # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
+                old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
                 send_message(old_value, 'release', restype=None, argtypes=[])
 
             # Invoke original dealloc.
