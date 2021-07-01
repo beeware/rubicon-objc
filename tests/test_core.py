@@ -1003,6 +1003,47 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.width, 56)
         self.assertEqual(r.size.height, 78)
 
+    def test_class_properties_lifecycle_strong(self):
+
+        class StrongProperties(NSObject):
+            object = objc_property(ObjCInstance)
+
+        pool = NSAutoreleasePool.alloc().init()
+
+        properties = StrongProperties.alloc().init()
+
+        obj = NSObject.alloc().init()
+        obj_pointer = obj.ptr.value  # store the object pointer for future use
+
+        properties.object = obj
+
+        del obj
+        del pool
+        gc.collect()
+
+        # assert that the object was retained by the property
+        self.assertEqual(properties.object.ptr.value, obj_pointer)
+
+    def test_class_properties_lifecycle_weak(self):
+
+        class WeakProperties(NSObject):
+            object = objc_property(ObjCInstance, weak=True)
+
+        pool = NSAutoreleasePool.alloc().init()
+
+        properties = WeakProperties.alloc().init()
+
+        obj = NSObject.alloc().init()
+        properties.object = obj
+
+        self.assertIs(properties.object, obj)
+
+        del obj
+        del pool
+        gc.collect()
+
+        self.assertIsNone(properties.object)
+
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""
 
