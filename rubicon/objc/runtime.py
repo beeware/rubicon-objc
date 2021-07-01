@@ -361,6 +361,10 @@ libobjc.method_setImplementation.argtypes = [Method, IMP]
 libobjc.objc_allocateClassPair.restype = Class
 libobjc.objc_allocateClassPair.argtypes = [Class, c_char_p, c_size_t]
 
+# id objc_autoreleaseReturnValue(id value)
+libobjc.objc_autoreleaseReturnValue.restype = objc_id
+libobjc.objc_autoreleaseReturnValue.argtypes = [objc_id]
+
 # Protocol **objc_copyProtocolList(unsigned int *outCount)
 # Returns an array of *outcount pointers followed by NULL terminator.
 # You must free() the array.
@@ -382,6 +386,14 @@ libobjc.objc_getMetaClass.argtypes = [c_char_p]
 # Protocol *objc_getProtocol(const char *name)
 libobjc.objc_getProtocol.restype = objc_id
 libobjc.objc_getProtocol.argtypes = [c_char_p]
+
+# id objc_loadWeakRetained(id *object)
+libobjc.objc_loadWeakRetained.restype = objc_id
+libobjc.objc_loadWeakRetained.argtypes = [c_void_p]
+
+# id objc_storeWeak(id *object, id value)
+libobjc.objc_storeWeak.restype = objc_id
+libobjc.objc_storeWeak.argtypes = [c_void_p, objc_id]
 
 # You should set return and argument types depending on context.
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
@@ -888,7 +900,7 @@ def add_ivar(cls, name, vartype):
     )
 
 
-def get_ivar(obj, varname):
+def get_ivar(obj, varname, weak=False):
     """Get the value of obj's ivar named varname.
 
     The returned object is a :mod:`ctypes` data object.
@@ -909,14 +921,17 @@ def get_ivar(obj, varname):
     ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
     vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
 
-    if isinstance(vartype, objc_id):
+    if weak:
+        value = libobjc.objc_loadWeakRetained(obj.value + libobjc.ivar_getOffset(ivar))
+        return libobjc.objc_autoreleaseReturnValue(value)
+    elif isinstance(vartype, objc_id):
         return cast(libobjc.object_getIvar(obj, ivar), vartype)
     else:
         return vartype.from_address(obj.value + libobjc.ivar_getOffset(ivar))
 
 
-def set_ivar(obj, varname, value):
-    """Set obj's ivar varname to value.
+def set_ivar(obj, varname, value, weak=False):
+    """Set obj's ivar varname to value. If ``weak`` is ``True``, only a weak reference to the value is stored.
 
     value must be a :mod:`ctypes` data object whose type matches that of the ivar.
     """
@@ -940,7 +955,9 @@ def set_ivar(obj, varname, value):
             .format(varname, type(value), sizeof(type(value)), vartype, sizeof(vartype))
         )
 
-    if isinstance(vartype, objc_id):
+    if weak:
+        libobjc.objc_storeWeak(obj.value + libobjc.ivar_getOffset(ivar), value)
+    elif isinstance(vartype, objc_id):
         libobjc.object_setIvar(obj, ivar, value)
     else:
         memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
