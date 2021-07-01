@@ -442,6 +442,28 @@ class objc_property(object):
         attrs = self._get_property_attributes()
         libobjc.class_addProperty(class_ptr, ensure_bytes(attr_name), attrs, len(attrs))
 
+        # Add cleanup routines to dealloc.
+
+        old_dealloc = libobjc.class_getMethodImplementation(class_ptr, SEL("dealloc"))
+
+        def _new_delloc(objc_self, _cmd):
+
+            # Clean up ivar.
+            if self.weak:
+                ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(objc_self), ('_' + attr_name).encode())
+                libobjc.objc_storeWeak(objc_self.value + libobjc.ivar_getOffset(ivar), None)
+            elif issubclass(self.vartype, objc_id):
+                # If the old value is a non-null object, release it. The is no need to set the actual ivar to nil.
+                old_value = get_ivar(objc_self, '_' + attr_name, weak=self.weak)
+                send_message(old_value, 'release', restype=None, argtypes=[])
+
+            # Invoke original dealloc.
+            cfunctype = CFUNCTYPE(None, objc_id, SEL)
+            old_dealloc_callable = cast(old_dealloc, cfunctype)
+            old_dealloc_callable(objc_self, SEL("dealloc"))
+
+        replace_method(class_ptr, 'dealloc', _new_delloc, [None, ObjCInstance, SEL])
+
     def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
         libobjc.protocol_addProperty(proto_ptr, ensure_bytes(attr_name), attrs, len(attrs), True, True)
