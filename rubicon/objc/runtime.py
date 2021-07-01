@@ -18,7 +18,7 @@ __all__ = [
     'Method',
     'SEL',
     'add_ivar',
-    'add_method',
+    'replace_method',
     'get_class',
     'get_ivar',
     'libc',
@@ -301,7 +301,7 @@ libobjc.class_isMetaClass.argtypes = [Class]
 
 # IMP class_replaceMethod(Class cls, SEL name, IMP imp, const char *types)
 libobjc.class_replaceMethod.restype = IMP
-libobjc.class_replaceMethod.argtypes = [Class, SEL, Ivar, c_char_p]
+libobjc.class_replaceMethod.argtypes = [Class, SEL, IMP, c_char_p]
 
 # BOOL class_respondsToSelector(Class cls, SEL sel)
 libobjc.class_respondsToSelector.restype = c_bool
@@ -858,8 +858,8 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
 _keep_alive_imps = []
 
 
-def add_method(cls, selector, method, encoding):
-    """Add a new instance method to the given class.
+def replace_method(cls, selector, method, encoding):
+    """Add a new instance method to the given class or replace an existing instance method.
 
     To add a class method, add an instance method to the metaclass.
 
@@ -886,7 +886,7 @@ def add_method(cls, selector, method, encoding):
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
-    libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
+    libobjc.class_replaceMethod(cls, selector, cast(imp, IMP), types)
     _keep_alive_imps.append(imp)
     return imp
 

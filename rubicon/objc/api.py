@@ -13,7 +13,7 @@ from .types import (
     register_ctype_for_type
 )
 from .runtime import (
-    Class, SEL, add_ivar, add_method, ensure_bytes, get_class, get_ivar, libc, libobjc, objc_block, objc_id,
+    Class, SEL, add_ivar, replace_method, ensure_bytes, get_class, get_ivar, libc, libobjc, objc_block, objc_id,
     objc_property_attribute_t, object_isClass, set_ivar, send_message, send_super,
 )
 
@@ -279,7 +279,7 @@ class objc_method(object):
 
     def class_register(self, class_ptr, attr_name):
         name = attr_name.replace("_", ":")
-        add_method(class_ptr, name, self, self.encoding)
+        replace_method(class_ptr, name, self, self.encoding)
 
     def protocol_register(self, proto_ptr, attr_name):
         name = attr_name.replace('_', ':')
@@ -315,7 +315,7 @@ class objc_classmethod(object):
 
     def class_register(self, class_ptr, attr_name):
         name = attr_name.replace("_", ":")
-        add_method(libobjc.object_getClass(class_ptr), name, self, self.encoding)
+        replace_method(libobjc.object_getClass(class_ptr), name, self, self.encoding)
 
     def protocol_register(self, proto_ptr, attr_name):
         name = attr_name.replace('_', ':')
@@ -430,11 +430,11 @@ class objc_property(object):
 
         setter_name = 'set' + attr_name[0].upper() + attr_name[1:] + ':'
 
-        add_method(
+        replace_method(
             class_ptr, attr_name, _objc_getter,
             [self.vartype, ObjCInstance, SEL],
         )
-        add_method(
+        replace_method(
             class_ptr, setter_name, _objc_setter,
             [None, ObjCInstance, SEL, self.vartype],
         )
@@ -475,7 +475,7 @@ class objc_rawmethod(object):
 
     def class_register(self, class_ptr, attr_name):
         name = attr_name.replace("_", ":")
-        add_method(class_ptr, name, self, self.encoding)
+        replace_method(class_ptr, name, self, self.encoding)
 
     def protocol_register(self, proto_ptr, attr_name):
         raise TypeError('Protocols cannot have method implementations, use objc_method instead of objc_rawmethod')
