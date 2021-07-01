@@ -169,7 +169,7 @@ These utility functions provide easier access from Python to certain parts of th
 .. autofunction:: should_use_fpret
 .. autofunction:: send_message
 .. autofunction:: send_super
-.. autofunction:: add_method
+.. autofunction:: replace_method
 .. autofunction:: add_ivar
 .. autofunction:: get_ivar
 .. autofunction:: set_ivar
