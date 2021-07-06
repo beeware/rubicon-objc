@@ -445,27 +445,18 @@ class objc_property(object):
         attrs = self._get_property_attributes()
         libobjc.class_addProperty(class_ptr, ensure_bytes(attr_name), attrs, len(attrs))
 
-        # Add cleanup routines to dealloc.
+    def dealloc_callback(self, objc_self, attr_name):
 
-        old_dealloc = libobjc.class_getMethodImplementation(class_ptr, SEL("dealloc"))
+        ivar_name = '_' + attr_name
 
-        def _new_delloc(objc_self, _cmd):
-
-            # Clean up ivar.
-            if self.weak:
-                # Clean up weak reference.
-                set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
-            elif issubclass(self.vartype, objc_id):
-                # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
-                old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
-                send_message(old_value, 'release', restype=None, argtypes=[])
-
-            # Invoke original dealloc.
-            cfunctype = CFUNCTYPE(None, objc_id, SEL)
-            old_dealloc_callable = cast(old_dealloc, cfunctype)
-            old_dealloc_callable(objc_self, SEL("dealloc"))
-
-        add_method(class_ptr, 'dealloc', _new_delloc, [None, ObjCInstance, SEL], replace=True)
+        # Clean up ivar.
+        if self.weak:
+            # Clean up weak reference.
+            set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
+        elif issubclass(self.vartype, objc_id):
+            # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
+            old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
+            send_message(old_value, 'release', restype=None, argtypes=[])
 
     def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
@@ -1008,6 +999,24 @@ class ObjCClass(ObjCInstance, type):
                 pass
             else:
                 class_register(ptr, attr_name)
+
+        # Add cleanup of ivars / properties to dealloc
+
+        old_dealloc = libobjc.class_getMethodImplementation(ptr, SEL("dealloc"))
+
+        def _new_delloc(objc_self, _cmd):
+
+            # Invoke dealloc callback of each property.
+            for attr_name, obj in attrs.items():
+                if isinstance(obj, objc_property):
+                    obj.dealloc_callback(objc_self, attr_name)
+
+            # Invoke original dealloc.
+            cfunctype = CFUNCTYPE(None, objc_id, SEL)
+            old_dealloc_callable = cast(old_dealloc, cfunctype)
+            old_dealloc_callable(objc_self, SEL("dealloc"))
+
+        add_method(ptr, "dealloc", _new_delloc, [None, ObjCInstance, SEL], replace=True)
 
         # Register the ObjC class
         libobjc.objc_registerClassPair(ptr)
