@@ -18,7 +18,7 @@ __all__ = [
     'Method',
     'SEL',
     'add_ivar',
-    'replace_method',
+    'add_method',
     'get_class',
     'get_ivar',
     'libc',
@@ -858,8 +858,8 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
 _keep_alive_imps = []
 
 
-def replace_method(cls, selector, method, encoding):
-    """Add a new instance method to the given class or replace an existing instance method.
+def add_method(cls, selector, method, encoding, replace=False):
+    """Add a new instance method to the given class.
 
     To add a class method, add an instance method to the metaclass.
 
@@ -868,6 +868,8 @@ def replace_method(cls, selector, method, encoding):
     :param method: The method implementation, as a Python callable or a C function address.
     :param encoding: The method's signature (return type and argument types) as a :class:`list`.
         The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
+    :param replace: If the class already implements a method with the given name, replaces the current implementation
+        if ``True``. Raises a :class:`ValueError` error otherwise.
     :return: The ctypes C function pointer object that was created for the method's implementation.
         This return value can be ignored. (In version 0.4.0 and older, callers were required to manually
         keep a reference to this function pointer object to ensure that it isn't garbage-collected.
@@ -886,7 +888,14 @@ def replace_method(cls, selector, method, encoding):
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
-    libobjc.class_replaceMethod(cls, selector, cast(imp, IMP), types)
+    if replace:
+        libobjc.class_replaceMethod(cls, selector, cast(imp, IMP), types)
+    else:
+        res = libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
+
+        if not res:
+            raise ValueError("A method with the name {!r} already exists".format(selector.name))
+
     _keep_alive_imps.append(imp)
     return imp
 
