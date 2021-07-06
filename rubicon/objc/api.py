@@ -454,8 +454,7 @@ class objc_property(object):
             # Clean up ivar.
             if self.weak:
                 # Clean up weak reference.
-                ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(objc_self), ivar_name.encode())
-                libobjc.objc_storeWeak(objc_self.value + libobjc.ivar_getOffset(ivar), None)
+                set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
             elif issubclass(self.vartype, objc_id):
                 # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
                 old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
