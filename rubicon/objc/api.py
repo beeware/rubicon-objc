@@ -1008,8 +1008,12 @@ class ObjCClass(ObjCInstance, type):
 
             # Invoke dealloc callback of each property.
             for attr_name, obj in attrs.items():
-                if isinstance(obj, objc_property):
-                    obj.dealloc_callback(objc_self, attr_name)
+                try:
+                    dealloc_callback = obj.dealloc_callback
+                except AttributeError:
+                    pass
+                else:
+                    dealloc_callback(objc_self, attr_name)
 
             # Invoke original dealloc.
             cfunctype = CFUNCTYPE(None, objc_id, SEL)
