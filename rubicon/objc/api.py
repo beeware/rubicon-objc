@@ -993,20 +993,27 @@ class ObjCClass(ObjCInstance, type):
 
         # Register all methods, properties, ivars, etc.
         for attr_name, obj in attrs.items():
-            try:
-                class_register = obj.class_register
-            except AttributeError:
-                pass
-            else:
-                class_register(ptr, attr_name)
+            if attr_name != "dealloc":
+                try:
+                    class_register = obj.class_register
+                except AttributeError:
+                    pass
+                else:
+                    class_register(ptr, attr_name)
 
-        # Add cleanup of ivars / properties to dealloc
+        # Register any user-defined dealloc method. We treat dealloc differently to
+        # inject our own cleanup code for properties, ivars, etc.
 
-        old_dealloc = libobjc.class_getMethodImplementation(ptr, SEL("dealloc"))
+        user_dealloc = attrs.get("dealloc", None)
 
         def _new_delloc(objc_self, _cmd):
 
-            # Invoke dealloc callback of each property.
+            # Invoke user-defined dealloc.
+            if user_dealloc:
+                user_dealloc(objc_self, _cmd)
+
+            # Invoke dealloc callback of each attribute. Currently
+            # defined for properties only.
             for attr_name, obj in attrs.items():
                 try:
                     dealloc_callback = obj.dealloc_callback
@@ -1015,12 +1022,10 @@ class ObjCClass(ObjCInstance, type):
                 else:
                     dealloc_callback(objc_self, attr_name)
 
-            # Invoke original dealloc.
-            cfunctype = CFUNCTYPE(None, objc_id, SEL)
-            old_dealloc_callable = cast(old_dealloc, cfunctype)
-            old_dealloc_callable(objc_self, SEL("dealloc"))
+            # Invoke super dealloc.
+            send_super(ptr, objc_self, "dealloc", restype=None, argtypes=[])
 
-        add_method(ptr, "dealloc", _new_delloc, [None, ObjCInstance, SEL], replace=True)
+        add_method(ptr, "dealloc", _new_delloc, [None, ObjCInstance, SEL])
 
         # Register the ObjC class
         libobjc.objc_registerClassPair(ptr)
@@ -1656,7 +1661,6 @@ except NameError:
             address = get_ivar(self, 'wrapped_pointer')
             if address.value:
                 del _keep_alive_objects[(self.value, address.value)]
-            send_super(__class__, self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:
