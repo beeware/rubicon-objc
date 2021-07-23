@@ -1,4 +1,5 @@
 import os
+import warnings
 from ctypes import (
     ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
     c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
@@ -301,7 +302,7 @@ libobjc.class_isMetaClass.argtypes = [Class]
 
 # IMP class_replaceMethod(Class cls, SEL name, IMP imp, const char *types)
 libobjc.class_replaceMethod.restype = IMP
-libobjc.class_replaceMethod.argtypes = [Class, SEL, Ivar, c_char_p]
+libobjc.class_replaceMethod.argtypes = [Class, SEL, IMP, c_char_p]
 
 # BOOL class_respondsToSelector(Class cls, SEL sel)
 libobjc.class_respondsToSelector.restype = c_bool
@@ -361,6 +362,10 @@ libobjc.method_setImplementation.argtypes = [Method, IMP]
 libobjc.objc_allocateClassPair.restype = Class
 libobjc.objc_allocateClassPair.argtypes = [Class, c_char_p, c_size_t]
 
+# id objc_autoreleaseReturnValue(id value)
+libobjc.objc_autoreleaseReturnValue.restype = objc_id
+libobjc.objc_autoreleaseReturnValue.argtypes = [objc_id]
+
 # Protocol **objc_copyProtocolList(unsigned int *outCount)
 # Returns an array of *outcount pointers followed by NULL terminator.
 # You must free() the array.
@@ -382,6 +387,14 @@ libobjc.objc_getMetaClass.argtypes = [c_char_p]
 # Protocol *objc_getProtocol(const char *name)
 libobjc.objc_getProtocol.restype = objc_id
 libobjc.objc_getProtocol.argtypes = [c_char_p]
+
+# id objc_loadWeakRetained(id *object)
+libobjc.objc_loadWeakRetained.restype = objc_id
+libobjc.objc_loadWeakRetained.argtypes = [c_void_p]
+
+# id objc_storeWeak(id *object, id value)
+libobjc.objc_storeWeak.restype = objc_id
+libobjc.objc_storeWeak.argtypes = [c_void_p, objc_id]
 
 # You should set return and argument types depending on context.
 # id objc_msgSend(id theReceiver, SEL theSelector, ...)
@@ -754,7 +767,7 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
+def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, _allow_dealloc=False):
     """In the context of the given class, call a superclass method on the receiver
     with the given selector and arguments.
 
@@ -790,6 +803,9 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
     except AttributeError:
         pass
 
+    # Convert str / bytes to selector
+    selector = SEL(selector)
+
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
         raise TypeError(
@@ -798,6 +814,14 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
             'To fix this error, pass the special name __class__ as the first argument to send_super.'
             .format(tp=type(cls))
         )
+
+    if not _allow_dealloc and selector.name == b"dealloc":
+        warnings.warn(
+            "You should not call the superclass dealloc manually when overriding dealloc. Rubicon-objc "
+            "will call it for you after releasing objects stored in properties and ivars.",
+            stacklevel=2
+        )
+        return
 
     try:
         receiver = receiver._as_parameter_
@@ -818,7 +842,6 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
             .format(libobjc.class_getName(cls).decode('utf-8'))
         )
     super_struct = objc_super(receiver, super_ptr)
-    selector = SEL(selector)
     if argtypes is None:
         argtypes = []
 
@@ -846,7 +869,7 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
 _keep_alive_imps = []
 
 
-def add_method(cls, selector, method, encoding):
+def add_method(cls, selector, method, encoding, replace=False):
     """Add a new instance method to the given class.
 
     To add a class method, add an instance method to the metaclass.
@@ -856,6 +879,8 @@ def add_method(cls, selector, method, encoding):
     :param method: The method implementation, as a Python callable or a C function address.
     :param encoding: The method's signature (return type and argument types) as a :class:`list`.
         The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
+    :param replace: If the class already implements a method with the given name, replaces the current implementation
+        if ``True``. Raises a :class:`ValueError` error otherwise.
     :return: The ctypes C function pointer object that was created for the method's implementation.
         This return value can be ignored. (In version 0.4.0 and older, callers were required to manually
         keep a reference to this function pointer object to ensure that it isn't garbage-collected.
@@ -874,7 +899,14 @@ def add_method(cls, selector, method, encoding):
 
     cfunctype = CFUNCTYPE(*signature)
     imp = cfunctype(method)
-    libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
+    if replace:
+        libobjc.class_replaceMethod(cls, selector, cast(imp, IMP), types)
+    else:
+        res = libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
+
+        if not res:
+            raise ValueError("A method with the name {!r} already exists".format(selector.name))
+
     _keep_alive_imps.append(imp)
     return imp
 
@@ -888,7 +920,7 @@ def add_ivar(cls, name, vartype):
     )
 
 
-def get_ivar(obj, varname):
+def get_ivar(obj, varname, weak=False):
     """Get the value of obj's ivar named varname.
 
     The returned object is a :mod:`ctypes` data object.
@@ -909,14 +941,17 @@ def get_ivar(obj, varname):
     ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
     vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
 
-    if isinstance(vartype, objc_id):
+    if weak:
+        value = libobjc.objc_loadWeakRetained(obj.value + libobjc.ivar_getOffset(ivar))
+        return libobjc.objc_autoreleaseReturnValue(value)
+    elif issubclass(vartype, objc_id):
         return cast(libobjc.object_getIvar(obj, ivar), vartype)
     else:
         return vartype.from_address(obj.value + libobjc.ivar_getOffset(ivar))
 
 
-def set_ivar(obj, varname, value):
-    """Set obj's ivar varname to value.
+def set_ivar(obj, varname, value, weak=False):
+    """Set obj's ivar varname to value. If ``weak`` is ``True``, only a weak reference to the value is stored.
 
     value must be a :mod:`ctypes` data object whose type matches that of the ivar.
     """
@@ -940,7 +975,9 @@ def set_ivar(obj, varname, value):
             .format(varname, type(value), sizeof(type(value)), vartype, sizeof(vartype))
         )
 
-    if isinstance(vartype, objc_id):
+    if weak:
+        libobjc.objc_storeWeak(obj.value + libobjc.ivar_getOffset(ivar), value)
+    elif issubclass(vartype, objc_id):
         libobjc.object_setIvar(obj, ivar, value)
     else:
         memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))

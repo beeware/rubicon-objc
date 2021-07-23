@@ -13,6 +13,9 @@ When enabling automatic reference counting (ARC), the appropriate calls for
 memory management will be inserted for you at compile-time. However, since
 Rubicon Objective-C operates at runtime, it cannot make use of ARC.
 
+Reference counting in Rubicon Objective-C
+-----------------------------------------
+
 You won't have to manage reference counts in Python, Rubicon Objective-C will
 do that work for you. It does so by tracking when you gain ownership of an
 object. This is the case when you create an Objective-C instance using a method
@@ -51,3 +54,70 @@ weak reference to the object which is assigned to its delegate property:
 
 You will need to keep a reference to the Python variable ``delegate`` so that
 the corresponding Objective-C instance does not get deallocated.
+
+Reference cycles in Objective-C
+-------------------------------
+
+Python has a garbage collector which detects references cycles and frees
+objects in such cycles if no other references remain. Cyclical references can
+be useful in a number of cases, for instance to refer to a "parent" of an
+instance, and Python makes life easier by properly freeing such references. For
+example:
+
+.. code-block:: python
+
+    class TreeNode:
+        def __init__(self, val):
+            self.val = val
+            self.parent = None
+            self.children = []
+
+
+    root = TreeNode("/home")
+
+    child = TreeNode("/Documents")
+    child.parent = root
+
+    root.children.append(child)
+
+    # This will free both root and child on
+    # the next garbage collection cycle:
+    del root
+    del child
+
+
+Similar code in Objective-C will lead to memory leaks. This also holds for
+Objective-C instances created through Rubicon Objective-C since Python's
+garbage collector is unable to detect reference cycles on the Objective-C side.
+If you are writing code which would lead to reference cycles, consider storing
+objects as weak references instead. The above code would be written as follows
+when using Objective-C classes:
+
+.. code-block:: python
+
+    from rubicon.objc import NSObject, NSMutableArray
+    from rubicon.objc.api import objc_property, objc_method
+
+
+    class TreeNode(NSObject):
+        val = objc_property()
+        children = objc_property()
+        parent = objc_property(weak=True)
+
+        @objc_method
+        def initWithValue_(self, val):
+            self.val = val
+            self.children = NSMutableArray.new()
+            return self
+
+
+    root = TreeNode.alloc().initWithValue("/home")
+
+    child = TreeNode.alloc().initWithValue("/Documents")
+    child.parent = root
+
+    root.children.addObject(child)
+
+    # This will free both root and child:
+    del root
+    del child

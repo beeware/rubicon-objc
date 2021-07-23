@@ -368,26 +368,36 @@ class objc_property(object):
     the generated setter keeps the stored object retained, and releases it when it is replaced.
 
     In a custom Objective-C protocol, only the metadata for the property is generated.
+
+    If ``weak`` is ``True``, the property will be created as a weak property. When assigning an object to it,
+    the reference count of the object will not be increased. When the object is deallocated, the property
+    value is set to None.
     """
 
-    def __init__(self, vartype=objc_id):
+    def __init__(self, vartype=objc_id, weak=False):
         super().__init__()
 
         self.vartype = ctype_for_type(vartype)
+        self.weak = weak
 
     def _get_property_attributes(self):
         attrs = [
             objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
         ]
         if issubclass(self.vartype, objc_id):
-            attrs.append(objc_property_attribute_t(b'&', b''))  # retain
+            reference = b'W' if self.weak else b'&'
+            attrs.append(objc_property_attribute_t(reference, b''))
         return (objc_property_attribute_t * len(attrs))(*attrs)
 
     def class_register(self, class_ptr, attr_name):
-        add_ivar(class_ptr, '_' + attr_name, self.vartype)
+
+        ivar_name = '_' + attr_name
+
+        add_ivar(class_ptr, ivar_name, self.vartype)
 
         def _objc_getter(objc_self, _cmd):
-            value = get_ivar(objc_self, '_' + attr_name)
+            value = get_ivar(objc_self, ivar_name, weak=self.weak)
+
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
             # If the data object has a value attribute and is not a structure or union, assume that it is
             # a primitive and unbox it.
@@ -403,12 +413,21 @@ class objc_property(object):
             if not isinstance(new_value, self.vartype):
                 # If vartype is a primitive, then new_value may be unboxed. If that is the case, box it manually.
                 new_value = self.vartype(new_value)
-            old_value = get_ivar(objc_self, '_' + attr_name)
-            if issubclass(self.vartype, objc_id) and new_value:
+
+            if issubclass(self.vartype, objc_id) and not self.weak:
+                old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
+
+                if new_value.value == old_value.value:
+                    # old and new value are the same, nothing to do
+                    return
+
+            if not self.weak and issubclass(self.vartype, objc_id) and new_value:
                 # If the new value is a non-null object, retain it.
                 send_message(new_value, 'retain', restype=objc_id, argtypes=[])
-            set_ivar(objc_self, '_' + attr_name, new_value)
-            if issubclass(self.vartype, objc_id) and old_value:
+
+            set_ivar(objc_self, ivar_name, new_value, weak=self.weak)
+
+            if not self.weak and issubclass(self.vartype, objc_id) and old_value:
                 # If the old value is a non-null object, release it.
                 send_message(old_value, 'release', restype=None, argtypes=[])
 
@@ -425,6 +444,19 @@ class objc_property(object):
 
         attrs = self._get_property_attributes()
         libobjc.class_addProperty(class_ptr, ensure_bytes(attr_name), attrs, len(attrs))
+
+    def dealloc_callback(self, objc_self, attr_name):
+
+        ivar_name = '_' + attr_name
+
+        # Clean up ivar.
+        if self.weak:
+            # Clean up weak reference.
+            set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
+        elif issubclass(self.vartype, objc_id):
+            # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
+            old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
+            send_message(old_value, 'release', restype=None, argtypes=[])
 
     def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
@@ -961,12 +993,39 @@ class ObjCClass(ObjCInstance, type):
 
         # Register all methods, properties, ivars, etc.
         for attr_name, obj in attrs.items():
-            try:
-                class_register = obj.class_register
-            except AttributeError:
-                pass
-            else:
-                class_register(ptr, attr_name)
+            if attr_name != "dealloc":
+                try:
+                    class_register = obj.class_register
+                except AttributeError:
+                    pass
+                else:
+                    class_register(ptr, attr_name)
+
+        # Register any user-defined dealloc method. We treat dealloc differently to
+        # inject our own cleanup code for properties, ivars, etc.
+
+        user_dealloc = attrs.get("dealloc", None)
+
+        def _new_delloc(objc_self, _cmd):
+
+            # Invoke user-defined dealloc.
+            if user_dealloc:
+                user_dealloc(objc_self, _cmd)
+
+            # Invoke dealloc callback of each attribute. Currently
+            # defined for properties only.
+            for attr_name, obj in attrs.items():
+                try:
+                    dealloc_callback = obj.dealloc_callback
+                except AttributeError:
+                    pass
+                else:
+                    dealloc_callback(objc_self, attr_name)
+
+            # Invoke super dealloc.
+            send_super(ptr, objc_self, "dealloc", restype=None, argtypes=[], _allow_dealloc=True)
+
+        add_method(ptr, "dealloc", _new_delloc, [None, ObjCInstance, SEL])
 
         # Register the ObjC class
         libobjc.objc_registerClassPair(ptr)
@@ -1602,7 +1661,6 @@ except NameError:
             address = get_ivar(self, 'wrapped_pointer')
             if address.value:
                 del _keep_alive_objects[(self.value, address.value)]
-            send_super(__class__, self, 'dealloc', restype=None, argtypes=[])
 
         @objc_rawmethod
         def finalize(self, cmd) -> None:

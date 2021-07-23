@@ -1,0 +1,1 @@
+Added support to declare weak properties on custom Objective-C classes.

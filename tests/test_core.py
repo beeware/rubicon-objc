@@ -1003,6 +1003,47 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.width, 56)
         self.assertEqual(r.size.height, 78)
 
+    def test_class_properties_lifecycle_strong(self):
+
+        class StrongProperties(NSObject):
+            object = objc_property(ObjCInstance)
+
+        pool = NSAutoreleasePool.alloc().init()
+
+        properties = StrongProperties.alloc().init()
+
+        obj = NSObject.alloc().init()
+        obj_pointer = obj.ptr.value  # store the object pointer for future use
+
+        properties.object = obj
+
+        del obj
+        del pool
+        gc.collect()
+
+        # assert that the object was retained by the property
+        self.assertEqual(properties.object.ptr.value, obj_pointer)
+
+    def test_class_properties_lifecycle_weak(self):
+
+        class WeakProperties(NSObject):
+            object = objc_property(ObjCInstance, weak=True)
+
+        pool = NSAutoreleasePool.alloc().init()
+
+        properties = WeakProperties.alloc().init()
+
+        obj = NSObject.alloc().init()
+        properties.object = obj
+
+        self.assertIs(properties.object, obj)
+
+        del obj
+        del pool
+        gc.collect()
+
+        self.assertIsNone(properties.object)
+
     def test_class_with_wrapped_methods(self):
         """An ObjCClass can have wrapped methods."""
 
@@ -1318,3 +1359,32 @@ class RubiconTest(unittest.TestCase):
         # Delete it and make sure that we don't segfault on garbage collection.
         del string
         gc.collect()
+
+    def test_objcinstance_dealloc(self):
+
+        class DeallocTester(NSObject):
+            attr0 = objc_property()
+            attr1 = objc_property(weak=True)
+
+            @objc_method
+            def dealloc(self):
+                self._did_dealloc = True
+
+        obj = DeallocTester.alloc().init()
+        obj.__dict__["_did_dealloc"] = False
+
+        attr0 = NSObject.alloc().init()
+        attr1 = NSObject.alloc().init()
+
+        obj.attr0 = attr0
+        obj.attr1 = attr1
+
+        self.assertEqual(attr0.retainCount(), 2)
+        self.assertEqual(attr1.retainCount(), 1)
+
+        # ObjC object will be deallocated, can only access Python attributes afterwards.
+        obj.release()
+
+        self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
+        self.assertEqual(attr0.retainCount(), 1, "strong property value was not released")
+        self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
