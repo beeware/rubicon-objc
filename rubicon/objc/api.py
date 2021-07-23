@@ -1023,7 +1023,7 @@ class ObjCClass(ObjCInstance, type):
                     dealloc_callback(objc_self, attr_name)
 
             # Invoke super dealloc.
-            send_super(ptr, objc_self, "dealloc", restype=None, argtypes=[])
+            send_super(ptr, objc_self, "dealloc", restype=None, argtypes=[], _allow_dealloc=True)
 
         add_method(ptr, "dealloc", _new_delloc, [None, ObjCInstance, SEL])
 

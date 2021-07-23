@@ -1,4 +1,5 @@
 import os
+import warnings
 from ctypes import (
     ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
     c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
@@ -766,7 +767,7 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
+def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, _allow_dealloc=False):
     """In the context of the given class, call a superclass method on the receiver
     with the given selector and arguments.
 
@@ -802,6 +803,9 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
     except AttributeError:
         pass
 
+    # Convert str / bytes to selector
+    selector = SEL(selector)
+
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
         raise TypeError(
@@ -810,6 +814,14 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
             'To fix this error, pass the special name __class__ as the first argument to send_super.'
             .format(tp=type(cls))
         )
+
+    if not _allow_dealloc and selector.name == b"dealloc":
+        warnings.warn(
+            "You should not call the superclass dealloc manually when overriding dealloc. Rubicon-objc "
+            "will call it for you after releasing objects stored in properties and ivars.",
+            stacklevel=2
+        )
+        return
 
     try:
         receiver = receiver._as_parameter_
@@ -830,7 +842,6 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None):
             .format(libobjc.class_getName(cls).decode('utf-8'))
         )
     super_struct = objc_super(receiver, super_ptr)
-    selector = SEL(selector)
     if argtypes is None:
         argtypes = []
 
