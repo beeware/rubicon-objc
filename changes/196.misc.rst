@@ -1,5 +1,0 @@
-Replaced regex-based version extraction code in setup.py with
-``version = attr: ...`` in setup.cfg, now that setuptools (since
-`version 46.4.0 <https://setuptools.readthedocs.io/en/latest/history.html#v46-4-0>`__)
-supports extracting ``attr: ...`` values statically where possible without
-having to import the module in question at runtime.

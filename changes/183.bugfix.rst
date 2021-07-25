@@ -1,2 +1,0 @@
-Improved performance of Objective-C method calls and
-:class:`~rubicon.objc.api.ObjCInstance` creation in many cases.

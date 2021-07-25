@@ -1,1 +1,0 @@
-Autorelease Objective-C instances when the corresponding Python instance is destroyed.

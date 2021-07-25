@@ -1,1 +1,0 @@
-Improved memory management when a Python instance is assigned to a new ObjCInstance attribute.

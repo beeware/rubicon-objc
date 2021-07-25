@@ -3,6 +3,102 @@ Release History
 
 .. towncrier release notes start
 
+0.4.1 (2021-07-25)
+------------------
+
+Features
+^^^^^^^^
+
+* Added official support for Python 3.9. (`#193
+  <https://github.com/beeware/rubicon-objc/issues/193>`_)
+
+* Added official support for macOS 11 (Big Sur). (`#195
+  <https://github.com/beeware/rubicon-objc/issues/195>`_)
+
+* Autorelease Objective-C instances when the corresponding Python instance is
+  destroyed. (`#200 <https://github.com/beeware/rubicon-objc/issues/200>`_)
+
+* Improved memory management when a Python instance is assigned to a new
+  ``ObjCInstance`` attribute. (`#209
+  <https://github.com/beeware/rubicon-objc/issues/209>`_)
+
+* Added support to declare weak properties on custom Objective-C classes. (`#210
+  <https://github.com/beeware/rubicon-objc/issues/210>`_)
+
+Bugfixes
+^^^^^^^^
+
+* Fixed incorrect behavior of :class:`~rubicon.objc.api.Block` when trying to
+  create a block with no arguments and using explicit types. This previously
+  caused an incorrect exception about missing argument types; now a no-arg block
+  is created as expected. (`#153
+  <https://github.com/beeware/rubicon-objc/issues/153>`_)
+
+* Fixed handling of type annotations when passing a bound Python method into
+  :class:`~rubicon.objc.api.Block`. (`#153
+  <https://github.com/beeware/rubicon-objc/issues/153>`_)
+
+* A cooperative entry point for starting event loop has been added. This corrects
+  a problem seen when using Python 3.8 on iOS. (`#182
+  <https://github.com/beeware/rubicon-objc/issues/182>`_)
+
+* Improved performance of Objective-C method calls and
+  :class:`~rubicon.objc.api.ObjCInstance` creation in many cases. (`#183
+  <https://github.com/beeware/rubicon-objc/issues/183>`_)
+
+* Fix calling of signal handlers added to the asyncio loop with CFRunLoop
+  integration. (`#202 <https://github.com/beeware/rubicon-objc/issues/202>`_)
+
+* Allow restarting a stopped event loop. (`#205
+  <https://github.com/beeware/rubicon-objc/issues/205>`_)
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Removed automatic conversion of Objective-C numbers (``NSNumber`` and
+  ``NSDecimalNumber``) to Python numbers when received from Objective-C (i.e.
+  returned from an Objective-C method or property or passed into an Objective-C
+  method implemented in Python). This automatic conversion significantly slowed
+  down every Objective-C method call that returns an object, even though the
+  conversion doesn't apply to most method calls. If you have code that receives
+  an Objective-C number and needs to use it as a Python number, please convert
+  it explicitly using :func:`~rubicon.objc.api.py_from_ns` or an appropriate
+  Objective-C method.
+
+  As a side effect, ``NSNumber`` and ``NSDecimalNumber`` values stored in
+  Objective-C collections (``NSArray``, ``NSDictionary``) are also no longer
+  automatically unwrapped when retrieved from the collection, even when using
+  Python syntax to access the collection. For example, if ``arr`` is a
+  ``NSArray`` of integer ``NSNumber``, ``arr[0]`` now returns an Objective-C
+  ``NSNumber`` and not a Python ``int`` as before. If you need the contents of
+  an Objective-C collection as Python values, you can use
+  :func:`~rubicon.objc.api.py_from_ns` to convert either single values (e. g.
+  ``py_from_ns(arr[0])``) or the entire collection (e. g. ``py_from_ns(arr)``).
+  (`#183 <https://github.com/beeware/rubicon-objc/issues/183>`_)
+
+* Removed macOS 10.12 through 10.14 from our automatic test matrix,
+  due to pricing changes in one of our CI services (Travis CI).
+  OS X 10.11 is still included in the test matrix for now,
+  but will probably be removed relatively soon.
+  Automatic tests on macOS 10.15 and 11.0 are unaffected
+  as they run on a different CI service (GitHub Actions).
+
+  Rubicon will continue to support macOS 10.14 and earlier on a best-effort
+  basis, even though compatibility is no longer tested automatically. If you
+  encounter any bugs or other problems with Rubicon on these older macOS
+  versions, please report them! (`#197
+  <https://github.com/beeware/rubicon-objc/issues/197>`_)
+
+Misc
+^^^^
+
+* `#185 <https://github.com/beeware/rubicon-objc/issues/185>`_,
+  `#189 <https://github.com/beeware/rubicon-objc/issues/189>`_,
+  `#194 <https://github.com/beeware/rubicon-objc/issues/194>`_,
+  `#196 <https://github.com/beeware/rubicon-objc/issues/196>`_,
+  `#208 <https://github.com/beeware/rubicon-objc/issues/208>`_
+
+
 0.4.0 (2020-07-04)
 ------------------
 
