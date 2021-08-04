@@ -1,0 +1,1 @@
+Added `autoreleasepool` context manager to mimic Objective-C `@autoreleasepool` blocks.

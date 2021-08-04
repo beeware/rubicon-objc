@@ -1,5 +1,6 @@
 import os
 import warnings
+from contextlib import contextmanager
 from ctypes import (
     ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
     c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
@@ -20,6 +21,7 @@ __all__ = [
     'SEL',
     'add_ivar',
     'add_method',
+    'autoreleasepool',
     'get_class',
     'get_ivar',
     'libc',
@@ -361,6 +363,14 @@ libobjc.method_setImplementation.argtypes = [Method, IMP]
 # Class objc_allocateClassPair(Class superclass, const char *name, size_t extraBytes)
 libobjc.objc_allocateClassPair.restype = Class
 libobjc.objc_allocateClassPair.argtypes = [Class, c_char_p, c_size_t]
+
+# void *objc_autoreleasePoolPush(void)
+libobjc.objc_autoreleasePoolPush.restype = c_void_p
+libobjc.objc_autoreleasePoolPush.argtypes = []
+
+# void objc_autoreleasePoolPop(void *pool)
+libobjc.objc_autoreleasePoolPop.restype = None
+libobjc.objc_autoreleasePoolPop.argtypes = [c_void_p]
 
 # id objc_autoreleaseReturnValue(id value)
 libobjc.objc_autoreleaseReturnValue.restype = objc_id
@@ -981,3 +991,22 @@ def set_ivar(obj, varname, value, weak=False):
         libobjc.object_setIvar(obj, ivar, value)
     else:
         memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
+
+
+@contextmanager
+def autoreleasepool():
+    """
+    A context manager that has the same effect as a @autoreleasepool block in Objective-C.
+
+    Any objects that are autoreleased within the context will receive a release message when exiting the context. When
+    running an event loop, AppKit will create an autorelease pool at the beginning of each cycle of the event loop and
+    drain it at the end. You therefore do not need to use @autoreleasepool blocks when running an event loop. However,
+    they may be still be useful when your code temporarily allocates large amounts of memory which you want to
+    explicitly free before the end of a cycle.
+    """
+    pool = libobjc.objc_autoreleasePoolPush()
+
+    try:
+        yield
+    finally:
+        libobjc.objc_autoreleasePoolPop(pool)
