@@ -1,5 +1,6 @@
 import os
 import warnings
+from contextlib import contextmanager
 from ctypes import (
     ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
     c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
@@ -992,7 +993,8 @@ def set_ivar(obj, varname, value, weak=False):
         memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
 
 
-class autoreleasepool:
+@contextmanager
+def autoreleasepool():
     """
     A context manager that has the same effect as a @autoreleasepool block in Objective-C.
 
@@ -1002,11 +1004,9 @@ class autoreleasepool:
     they may be still be useful when your code temporarily allocates large amounts of memory which you want to
     explicitly free before the end of a cycle.
     """
-    def __init__(self):
-        self.pool = None
+    pool = libobjc.objc_autoreleasePoolPush()
 
-    def __enter__(self):
-        self.pool = libobjc.objc_autoreleasePoolPush()
-
-    def __exit__(self, type, value, traceback):
-        libobjc.objc_autoreleasePoolPop(self.pool)
+    try:
+        yield
+    finally:
+        libobjc.objc_autoreleasePoolPop(pool)
