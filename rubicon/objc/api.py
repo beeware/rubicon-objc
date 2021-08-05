@@ -51,6 +51,11 @@ __all__ = [
     'unregister_type_for_objcclass',
 ]
 
+# Dictionary to keep references to Python objects which are stored in declared
+# properties or dynamically created attributes of Objective-C objects. This ensures that
+# the Python objects are not destroyed if they are otherwise no Python references left.
+_keep_alive_objects = {}
+
 
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
@@ -1632,13 +1637,6 @@ NSObjectProtocol = ObjCProtocol('NSObject')
 # This allows reloading the module without having to restart
 # the interpreter, although any changes to WrappedPyObject
 # itself are only applied after a restart of course.
-
-
-# Dictionary to keep references to wrapped Python objects. This prevents them
-# from being collected if there are otherwise only Objective-C references left
-# to the object.
-_keep_alive_objects = {}
-
 
 try:
     WrappedPyObject = ObjCClass("WrappedPyObject")
