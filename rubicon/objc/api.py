@@ -383,13 +383,17 @@ class objc_property(object):
         super().__init__()
 
         self.vartype = ctype_for_type(vartype)
+
         self.weak = weak
+
+        self._is_pyo = self.vartype is py_object
+        self._is_objc = issubclass(self.vartype, objc_id)
 
     def _get_property_attributes(self):
         attrs = [
             objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
         ]
-        if issubclass(self.vartype, objc_id):
+        if self._is_objc:
             reference = b'W' if self.weak else b'&'
             attrs.append(objc_property_attribute_t(reference, b''))
         return (objc_property_attribute_t * len(attrs))(*attrs)
@@ -401,7 +405,9 @@ class objc_property(object):
         add_ivar(class_ptr, ivar_name, self.vartype)
 
         def _objc_getter(objc_self, _cmd):
-            value = get_ivar(objc_self, ivar_name, weak=self.weak)
+            # Get the ivar value. ctypes.py_object is always stored as a strong reference.
+            weak = self.weak and not self._is_pyo
+            value = get_ivar(objc_self, ivar_name, weak=weak)
 
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
             # If the data object has a value attribute and is not a structure or union, assume that it is
@@ -412,29 +418,49 @@ class objc_property(object):
                 except AttributeError:
                     pass
 
+            if self.weak and self._is_pyo:
+                # Unpack the Python weakref.
+                value = value()
+
             return value
 
         def _objc_setter(objc_self, _cmd, new_value):
+
+            if self._is_pyo and self.weak:
+                # Don't store the object itself but only a Python weakref.
+                new_value = weakref.ref(new_value)
+
             if not isinstance(new_value, self.vartype):
                 # If vartype is a primitive, then new_value may be unboxed. If that is the case, box it manually.
                 new_value = self.vartype(new_value)
 
-            if issubclass(self.vartype, objc_id) and not self.weak:
+            if self._is_objc and not self.weak:
+                # If vartype is objc_id, retrieve the old object stored in the ivar to release it later.
                 old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
 
                 if new_value.value == old_value.value:
-                    # old and new value are the same, nothing to do
+                    # Old and new value are the same, nothing to do.
                     return
 
-            if not self.weak and issubclass(self.vartype, objc_id) and new_value:
-                # If the new value is a non-null object, retain it.
-                send_message(new_value, 'retain', restype=objc_id, argtypes=[])
+            if not self.weak:
+                # Retain the object stored in the ivar.
 
-            set_ivar(objc_self, ivar_name, new_value, weak=self.weak)
+                if self._is_objc and new_value:
+                    # Retain the object on the Objective-C side.
+                    send_message(new_value, 'retain', restype=objc_id, argtypes=[])
 
-            if not self.weak and issubclass(self.vartype, objc_id) and old_value:
-                # If the old value is a non-null object, release it.
-                send_message(old_value, 'release', restype=None, argtypes=[])
+                elif self._is_pyo:
+                    # Retain the Python object in dictionary, this replaces any previous entry for this property.
+                    _keep_alive_objects[self] = new_value.value
+
+            # Set the ivar. Always store a strong reference if we have a ctypes.py_object.
+            weak = self.weak and not self._is_pyo
+            set_ivar(objc_self, ivar_name, new_value, weak=weak)
+
+            if not self.weak:
+                if self._is_objc and old_value:
+                    # If the old value is a non-null Objective-C object, release it.
+                    send_message(old_value, 'release', restype=None, argtypes=[])
 
         setter_name = 'set' + attr_name[0].upper() + attr_name[1:] + ':'
 
@@ -454,14 +480,19 @@ class objc_property(object):
 
         ivar_name = '_' + attr_name
 
-        # Clean up ivar.
-        if self.weak:
+        if self.weak and not self._is_pyo:
             # Clean up weak reference.
             set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
-        elif issubclass(self.vartype, objc_id):
+        elif self._is_objc:
             # If the old value is a non-null object, release it. There is no need to set the actual ivar to nil.
             old_value = get_ivar(objc_self, ivar_name, weak=self.weak)
             send_message(old_value, 'release', restype=None, argtypes=[])
+
+        # Remove any Python objects that are kept alive.
+        try:
+            del _keep_alive_objects[self]
+        except KeyError:
+            pass
 
     def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
