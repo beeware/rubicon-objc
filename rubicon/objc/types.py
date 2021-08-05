@@ -88,6 +88,7 @@ _ctype_for_type_map = {
     float: c_double,
     bool: c_bool,
     bytes: c_char_p,
+    object: py_object,
 }
 
 
