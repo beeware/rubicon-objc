@@ -389,6 +389,10 @@ class objc_property(object):
         self._is_py_object = issubclass(self.vartype, py_object)
         self._is_objc_object = issubclass(self.vartype, objc_id)
 
+        # Weakly referenced Python objects are still stored in strong ivars.
+        # Check here if we need a weak or strong ivar.
+        self._ivar_weak = self.weak and not self._is_py_object
+
     def _get_property_attributes(self):
         attrs = [
             objc_property_attribute_t(b'T', encoding_for_ctype(self.vartype)),  # Type: vartype
@@ -405,9 +409,7 @@ class objc_property(object):
         add_ivar(class_ptr, ivar_name, self.vartype)
 
         def _objc_getter(objc_self, _cmd):
-            # Get the ivar value. ctypes.py_object is always stored as a strong reference.
-            weak = self.weak and not self._is_py_object
-            value = get_ivar(objc_self, ivar_name, weak=weak)
+            value = get_ivar(objc_self, ivar_name, weak=self._ivar_weak)
 
             # ctypes complains when a callback returns a "boxed" primitive type, so we have to manually unbox it.
             # If the data object has a value attribute and is not a structure or union, assume that it is
@@ -453,9 +455,7 @@ class objc_property(object):
                     # Retain the Python object in dictionary, this replaces any previous entry for this property.
                     _keep_alive_objects[self] = new_value.value
 
-            # Set the ivar. Always store a strong reference if we have a ctypes.py_object.
-            weak = self.weak and not self._is_py_object
-            set_ivar(objc_self, ivar_name, new_value, weak=weak)
+            set_ivar(objc_self, ivar_name, new_value, weak=self._ivar_weak)
 
             if not self.weak:
                 if self._is_objc_object and old_value:
@@ -480,7 +480,7 @@ class objc_property(object):
 
         ivar_name = '_' + attr_name
 
-        if self.weak and not self._is_py_object:
+        if self._ivar_weak:
             # Clean up weak reference.
             set_ivar(objc_self, ivar_name, self.vartype(None), weak=True)
         elif self._is_objc_object:
