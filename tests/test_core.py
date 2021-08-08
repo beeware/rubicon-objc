@@ -1003,6 +1003,7 @@ class RubiconTest(unittest.TestCase):
 
         # Test that Python object is released by the property.
         properties.object = None
+        gc.collect()
         self.assertIsNone(wr())
 
     def test_class_python_properties_weak(self):
