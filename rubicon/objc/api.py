@@ -453,7 +453,7 @@ class objc_property(object):
 
             if self._is_py_object:
                 # Retain the Python object in dictionary, this replaces any previous entry for this property.
-                _keep_alive_objects[self] = new_value.value
+                _keep_alive_objects[(objc_self.value, self)] = new_value.value
 
             set_ivar(objc_self, ivar_name, new_value, weak=self._ivar_weak)
 
@@ -490,7 +490,7 @@ class objc_property(object):
 
         # Remove any Python objects that are kept alive.
         try:
-            del _keep_alive_objects[self]
+            del _keep_alive_objects[(objc_self.value, self)]
         except KeyError:
             pass
 
