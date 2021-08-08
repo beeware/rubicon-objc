@@ -386,7 +386,7 @@ class objc_property(object):
 
         self.weak = weak
 
-        self._is_pyo = self.vartype is py_object
+        self._is_pyo = issubclass(self.vartype, py_object)
         self._is_objc = issubclass(self.vartype, objc_id)
 
     def _get_property_attributes(self):
