@@ -453,23 +453,22 @@ class objc_property(object):
                     # Old and new value are the same, nothing to do.
                     return
 
-            if not self.weak:
-                # Retain the object stored in the ivar.
+            set_ivar(objc_self, ivar_name, new_value, weak=self._ivar_weak)
 
-                if self._is_objc_object and new_value:
+            # Perform reference management.
+
+            if self._is_objc_object and not self.weak:
+                if old_value:
+                    # If the old value is a non-null Objective-C object, release it.
+                    send_message(old_value, 'release', restype=None, argtypes=[])
+
+                if new_value:
                     # Retain the object on the Objective-C side.
                     send_message(new_value, 'retain', restype=objc_id, argtypes=[])
 
-            if self._is_py_object:
+            elif self._is_py_object:
                 # Retain the Python object in dictionary, this replaces any previous entry for this property.
                 _keep_alive_objects[(objc_self.value, self)] = new_value.value
-
-            set_ivar(objc_self, ivar_name, new_value, weak=self._ivar_weak)
-
-            if not self.weak:
-                if self._is_objc_object and old_value:
-                    # If the old value is a non-null Objective-C object, release it.
-                    send_message(old_value, 'release', restype=None, argtypes=[])
 
         setter_name = 'set' + attr_name[0].upper() + attr_name[1:] + ':'
 
