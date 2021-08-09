@@ -408,6 +408,15 @@ class objc_property(object):
 
         add_ivar(class_ptr, ivar_name, self.vartype)
 
+        # Implementation note:
+        # 1. Objective-C objects are stored as strong or weak references in the ivar if the property was declared as
+        #    strong or weak, respectively. In case of strong properties, we retain the object when storing it in the
+        #    ivar and release it when the ivar is changed.
+        # 2. Python objects are wrapped as `ctypes.py_object` which are then always stored as a strong reference in
+        #    the ivar. Since this does not increase the reference count of the Python object itself, we keep a
+        #    reference to it in `_keep_alive_objects`. For weak properties, we store a Python `wearef` to the object
+        #    instead. This weakref is similarly kept alive.
+
         def _objc_getter(objc_self, _cmd):
             value = get_ivar(objc_self, ivar_name, weak=self._ivar_weak)
 
