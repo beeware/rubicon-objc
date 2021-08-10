@@ -497,10 +497,7 @@ class objc_property(object):
             send_message(old_value, 'release', restype=None, argtypes=[])
 
         # Remove any Python objects that are kept alive.
-        try:
-            del _keep_alive_objects[(objc_self.value, self)]
-        except KeyError:
-            pass
+        _keep_alive_objects.pop((objc_self.value, self), None)
 
     def protocol_register(self, proto_ptr, attr_name):
         attrs = self._get_property_attributes()
