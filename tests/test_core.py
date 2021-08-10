@@ -1006,6 +1006,20 @@ class RubiconTest(unittest.TestCase):
         gc.collect()
         self.assertIsNone(wr())
 
+        # Test that Python object is released by dealloc.
+
+        o = PythonObject()
+        wr = weakref.ref(o)
+
+        properties.object = o
+        self.assertIs(properties.object, o)
+
+        del o
+        del properties
+        gc.collect()
+
+        self.assertIsNone(wr())
+
     def test_class_python_properties_weak(self):
 
         class WeakPythonObjectProperties(NSObject):
