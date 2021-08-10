@@ -977,6 +977,74 @@ class RubiconTest(unittest.TestCase):
         box.data = None
         self.assertIsNone(box.data)
 
+    def test_class_python_properties(self):
+
+        class PythonObjectProperties(NSObject):
+            object = objc_property(object)
+
+        class PythonObject:
+            pass
+
+        properties = PythonObjectProperties.alloc().init()
+
+        o = PythonObject()
+        wr = weakref.ref(o)
+
+        properties.object = o
+
+        # Test that Python object is properly stored.
+        self.assertIs(properties.object, o)
+
+        # Test that Python object is retained by the property.
+        del o
+        gc.collect()
+
+        self.assertIs(properties.object, wr())
+
+        # Test that Python object is released by the property.
+        properties.object = None
+        gc.collect()
+        self.assertIsNone(wr())
+
+        # Test that Python object is released by dealloc.
+
+        o = PythonObject()
+        wr = weakref.ref(o)
+
+        properties.object = o
+        self.assertIs(properties.object, o)
+
+        del o
+        del properties
+        gc.collect()
+
+        self.assertIsNone(wr())
+
+    def test_class_python_properties_weak(self):
+
+        class WeakPythonObjectProperties(NSObject):
+            object = objc_property(object, weak=True)
+
+        class PythonObject:
+            pass
+
+        properties = WeakPythonObjectProperties.alloc().init()
+
+        o = PythonObject()
+        wr = weakref.ref(o)
+
+        properties.object = o
+
+        # Test that Python object is properly stored.
+        self.assertIs(properties.object, o)
+
+        # Test that Python object is not retained by the property.
+        del o
+        gc.collect()
+
+        self.assertIsNone(properties.object)
+        self.assertIsNone(wr())
+
     def test_class_nonobject_properties(self):
         """An Objective-C class can have properties of non-object types."""
 
