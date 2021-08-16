@@ -1068,6 +1068,12 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.width, 56)
         self.assertEqual(r.size.height, 78)
 
+    def test_class_nonobject_properties_weak(self):
+
+        with self.assertRaises(TypeError):
+            class WeakNonObjectProperties(NSObject):
+                int = objc_property(c_int, weak=True)
+
     def test_class_properties_lifecycle_strong(self):
 
         class StrongProperties(NSObject):
