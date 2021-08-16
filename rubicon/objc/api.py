@@ -394,7 +394,10 @@ class objc_property(object):
         self._ivar_weak = self.weak and not self._is_py_object
 
         if self.weak and not (self._is_py_object or self._is_objc_object):
-            raise TypeError("Weak properties are only supported for Objective-C or Python object types")
+            raise TypeError(
+                "Incompatible type for ivar {!r}: Weak properties are only supported "
+                "for Objective-C or Python object types".format(vartype)
+            )
 
     def _get_property_attributes(self):
         attrs = [
