@@ -1048,12 +1048,12 @@ class RubiconTest(unittest.TestCase):
     def test_class_nonobject_properties(self):
         """An Objective-C class can have properties of non-object types."""
 
-        class Properties(NSObject):
+        class NonObjectProperties(NSObject):
             object = objc_property(ObjCInstance)
             int = objc_property(c_int)
             rect = objc_property(NSRect)
 
-        properties = Properties.alloc().init()
+        properties = NonObjectProperties.alloc().init()
 
         properties.object = at('foo')
         properties.int = 12345
@@ -1076,12 +1076,12 @@ class RubiconTest(unittest.TestCase):
 
     def test_class_properties_lifecycle_strong(self):
 
-        class StrongProperties(NSObject):
+        class StrongObjectProperties(NSObject):
             object = objc_property(ObjCInstance)
 
         with autoreleasepool():
 
-            properties = StrongProperties.alloc().init()
+            properties = StrongObjectProperties.alloc().init()
 
             obj = NSObject.alloc().init()
             obj_pointer = obj.ptr.value  # store the object pointer for future use
@@ -1096,12 +1096,12 @@ class RubiconTest(unittest.TestCase):
 
     def test_class_properties_lifecycle_weak(self):
 
-        class WeakProperties(NSObject):
+        class WeakObjectProperties(NSObject):
             object = objc_property(ObjCInstance, weak=True)
 
         with autoreleasepool():
 
-            properties = WeakProperties.alloc().init()
+            properties = WeakObjectProperties.alloc().init()
 
             obj = NSObject.alloc().init()
             properties.object = obj
