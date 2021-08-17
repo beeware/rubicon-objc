@@ -376,7 +376,7 @@ class objc_property(object):
 
     If ``weak`` is ``True``, the property will be created as a weak property. When assigning an object to it,
     the reference count of the object will not be increased. When the object is deallocated, the property
-    value is set to None.
+    value is set to None. Weak properties are only supported for Objective-C or Python object types.
     """
 
     def __init__(self, vartype=objc_id, weak=False):
@@ -392,6 +392,12 @@ class objc_property(object):
         # Weakly referenced Python objects are still stored in strong ivars.
         # Check here if we need a weak or strong ivar.
         self._ivar_weak = self.weak and not self._is_py_object
+
+        if self.weak and not (self._is_py_object or self._is_objc_object):
+            raise TypeError(
+                "Incompatible type for ivar {!r}: Weak properties are only supported "
+                "for Objective-C or Python object types".format(vartype)
+            )
 
     def _get_property_attributes(self):
         attrs = [
