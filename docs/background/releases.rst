@@ -9,12 +9,12 @@ Release History
 Features
 ^^^^^^^^
 
-* Added `autoreleasepool` context manager to mimic Objective-C
-  `@autoreleasepool` blocks. (`#213
+* Added ``autoreleasepool`` context manager to mimic Objective-C
+  ``@autoreleasepool`` blocks. (`#213
   <https://github.com/beeware/rubicon-objc/issues/213>`_)
 
 * Allow storing Python objects in Objective-C properties declared with
-  `@objc_property`. (`#214
+  ``@objc_property``. (`#214
   <https://github.com/beeware/rubicon-objc/issues/214>`_)
 
 * Added support for Python 3.10. (`#218
@@ -23,7 +23,7 @@ Features
 Bugfixes
 ^^^^^^^^
 
-* Raise `TypeError` when trying to declare a weak property of a non-object
+* Raise ``TypeError`` when trying to declare a weak property of a non-object
   type. (`#215 <https://github.com/beeware/rubicon-objc/issues/215>`_)
 
 * Corrected handling of methods when a class overrides a method defined in a
