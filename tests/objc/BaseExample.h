@@ -20,4 +20,7 @@
 -(int) accessBaseIntField;
 -(void) mutateBaseIntFieldWithValue: (int) v;
 
+-(void) method:(int) v withArg: (int) m;
+-(void) method:(int) v;
+
 @end

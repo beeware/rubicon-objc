@@ -66,4 +66,13 @@ static int _staticBaseIntField = 1;
     self.baseIntField = v;
 }
 
+
+-(void) method:(int) v withArg: (int) m{
+    self.baseIntField = v * m;
+}
+
+-(void) method:(int) v{
+    self.baseIntField = v;
+}
+
 @end
