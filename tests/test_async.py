@@ -135,15 +135,14 @@ class AsyncReaderWriterTests(unittest.TestCase):
             writer.close()
 
         self.server = self.loop.run_until_complete(
-            asyncio.start_server(echo_server, '127.0.0.1', 3742, loop=self.loop)
+            asyncio.start_server(echo_server, '127.0.0.1', 3742)
         )
 
         client_messages = []
 
         @asyncio.coroutine
-        def echo_client(message, loop):
-            reader, writer = yield from asyncio.open_connection('127.0.0.1', 3742,
-                                                                loop=loop)
+        def echo_client(message):
+            reader, writer = yield from asyncio.open_connection('127.0.0.1', 3742)
 
             writer.write(message.encode())
 
@@ -152,8 +151,8 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
             writer.close()
 
-        self.loop.run_until_complete(echo_client('Hello, World!', self.loop))
-        self.loop.run_until_complete(echo_client('Goodbye, World!', self.loop))
+        self.loop.run_until_complete(echo_client('Hello, World!'))
+        self.loop.run_until_complete(echo_client('Goodbye, World!'))
 
         self.assertEqual(server_messages, ['Hello, World!', 'Goodbye, World!'])
         self.assertEqual(client_messages, ['Hello, World!', 'Goodbye, World!'])
