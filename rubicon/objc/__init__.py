@@ -6,7 +6,7 @@
 # __version__ = '1.2.3'       # Final Release
 # __version__ = '1.2.3.post1' # Post Release 1
 
-__version__ = '0.4.1'
+__version__ = '0.4.2'
 
 # Import commonly used submodules right away.
 # The first few imports are only included for clarity. They are not strictly necessary, because the from-imports below
