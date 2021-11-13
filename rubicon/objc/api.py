@@ -1338,8 +1338,14 @@ class ObjCClass(ObjCInstance, type):
 
         self.methods_ptr = libobjc.class_copyMethodList(self, byref(self.methods_ptr_count))
 
-        if self.superclass is not None and self.superclass.methods_ptr is None:
-            self.superclass._load_methods()
+        if self.superclass is not None:
+            if self.superclass.methods_ptr is None:
+                self.superclass._load_methods()
+
+            # Prime this class' partials list with a list from the superclass.
+            for first, superpartial in self.superclass.partial_methods.items():
+                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+                partial.methods.update(superpartial.methods)
 
         for i in range(self.methods_ptr_count.value):
             method = self.methods_ptr[i]
@@ -1355,14 +1361,7 @@ class ObjCClass(ObjCInstance, type):
             try:
                 partial = self.partial_methods[first]
             except KeyError:
-                if self.superclass is None:
-                    super_partial = None
-                else:
-                    super_partial = self.superclass.partial_methods.get(first)
-
                 partial = self.partial_methods[first] = ObjCPartialMethod(first)
-                if super_partial is not None:
-                    partial.methods.update(super_partial.methods)
 
             # order is rest without the dummy "" part
             order = rest[:-1]

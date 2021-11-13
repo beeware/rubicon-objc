@@ -1453,3 +1453,17 @@ class RubiconTest(unittest.TestCase):
         self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
         self.assertEqual(attr0.retainCount(), 1, "strong property value was not released")
         self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
+
+    def test_partial_with_override(self):
+        "If one method in a partial is overridden, that doesn't impact lookup of other partial targets"
+        SpecificExample = ObjCClass("SpecificExample")
+
+        obj = SpecificExample.alloc().init()
+
+        # The subclass implementation is invoked, not the base
+        obj.method(2, withArg=3)
+        self.assertEqual(obj.baseIntField, 5)
+
+        # The base class implementation can still be found an invoked.
+        obj.method(2)
+        self.assertEqual(obj.baseIntField, 2)
