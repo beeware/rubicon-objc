@@ -1,1 +1,0 @@
-Allow storing Python objects in Objective-C properties declared with `objc_property`.

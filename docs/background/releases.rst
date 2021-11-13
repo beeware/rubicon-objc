@@ -3,6 +3,33 @@ Release History
 
 .. towncrier release notes start
 
+0.4.2 (2021-11-14)
+------------------
+
+Features
+^^^^^^^^
+
+* Added `autoreleasepool` context manager to mimic Objective-C
+  `@autoreleasepool` blocks. (`#213
+  <https://github.com/beeware/rubicon-objc/issues/213>`_)
+
+* Allow storing Python objects in Objective-C properties declared with
+  `@objc_property`. (`#214
+  <https://github.com/beeware/rubicon-objc/issues/214>`_)
+
+* Added support for Python 3.10. (`#218
+  <https://github.com/beeware/rubicon-objc/issues/218>`_)
+
+Bugfixes
+^^^^^^^^
+
+* Raise `TypeError` when trying to declare a weak property of a non-object
+  type. (`#215 <https://github.com/beeware/rubicon-objc/issues/215>`_)
+
+* Corrected handling of methods when a class overrides a method defined in a
+  grandparent. (`#216 <https://github.com/beeware/rubicon-objc/issues/216>`_)
+
+
 0.4.1 (2021-07-25)
 ------------------
 

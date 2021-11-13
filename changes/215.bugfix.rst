@@ -1,1 +1,0 @@
-Raise `TypeError` when trying to declare a weak property of a non-object type.
