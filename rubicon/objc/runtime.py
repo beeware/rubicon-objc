@@ -683,7 +683,7 @@ def _msg_send_for_types(restype, argtypes):
         return send
 
 
-def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
+def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None):
     """Call a method on the receiver with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
@@ -719,7 +719,7 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
-    :param argtypes: The argument types of the method, as a :class:`list`.
+    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to ``[]``.
     :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
         These arguments are converted according to the default :mod:`ctypes` conversion rules.
     """
@@ -738,14 +738,17 @@ def send_message(receiver, selector, *args, restype, argtypes, varargs=None):
     if not isinstance(selector, SEL):
         selector = SEL(selector)
 
+    if argtypes is None:
+        argtypes = []
+
+    if varargs is None:
+        varargs = []
+
     if len(args) != len(argtypes):
         raise TypeError(
             "Inconsistent number of arguments ({}) and argument types ({})"
             .format(len(args), len(argtypes))
         )
-
-    if varargs is None:
-        varargs = []
 
     send = _msg_send_for_types(restype, argtypes)
 
