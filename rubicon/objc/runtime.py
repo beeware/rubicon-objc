@@ -777,7 +777,7 @@ class objc_super(Structure):
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, _allow_dealloc=False):
+def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, varargs=None, _allow_dealloc=False):
     """In the context of the given class, call a superclass method on the receiver
     with the given selector and arguments.
 
@@ -802,9 +802,10 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
         or :class:`~ctypes.c_void_p`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
     :param args: The method arguments.
-    :param restype: The return type of the method. Defaults to :class:`~ctypes.c_void_p`.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to an empty list
-        (i. e. all arguments are treated as C varargs).
+    :param restype: The return type of the method.
+    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to ``[]``.
+    :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
+        These arguments are converted according to the default :mod:`ctypes` conversion rules.
     """
 
     # Unwrap ObjCClass to Class if necessary
@@ -815,6 +816,18 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
 
     # Convert str / bytes to selector
     selector = SEL(selector)
+
+    if argtypes is None:
+        argtypes = []
+
+    if varargs is None:
+        varargs = []
+
+    if len(args) != len(argtypes):
+        raise TypeError(
+            "Inconsistent number of arguments ({}) and argument types ({})"
+            .format(len(args), len(argtypes))
+        )
 
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
@@ -852,8 +865,6 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
             .format(libobjc.class_getName(cls).decode('utf-8'))
         )
     super_struct = objc_super(receiver, super_ptr)
-    if argtypes is None:
-        argtypes = []
 
     if should_use_stret(restype):
         send = libobjc['objc_msgSendSuper_stret']
@@ -861,7 +872,7 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
         send = libobjc['objc_msgSendSuper']
     send.restype = restype
     send.argtypes = [POINTER(objc_super), SEL] + argtypes
-    result = send(byref(super_struct), selector, *args)
+    result = send(byref(super_struct), selector, *args, *varargs)
     if restype == c_void_p:
         result = c_void_p(result)
     return result
