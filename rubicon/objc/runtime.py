@@ -818,7 +818,8 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
         pass
 
     # Convert str / bytes to selector
-    selector = SEL(selector)
+    if not isinstance(selector, SEL):
+        selector = SEL(selector)
 
     if argtypes is None:
         argtypes = []
