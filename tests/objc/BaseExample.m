@@ -71,6 +71,23 @@ static int _staticBaseIntField = 1;
     self.baseIntField = v * m;
 }
 
+-(void) methodWithArgs: (int) num, ... {
+
+   int sum = 0;
+
+   va_list args;
+   va_start( args, num );
+
+   for( int i = 0; i < num; i++)
+   {
+      sum += va_arg( args, int);
+   }
+
+   va_end( args );
+
+   self.baseIntField = sum;
+}
+
 -(void) method:(int) v{
     self.baseIntField = v;
 }

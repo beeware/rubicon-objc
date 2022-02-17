@@ -397,6 +397,57 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(send_message(obj, SEL("accessIntField"), restype=c_int, argtypes=[]), 33)
 
+    def test_send_super(self):
+        """An instance method of the super class can be invoked"""
+        SpecificExample = ObjCClass("SpecificExample")
+
+        obj = SpecificExample.alloc().init()
+
+        send_super(SpecificExample, obj, "method:withArg:", 2, 5, restype=None, argtypes=[c_int, c_int])
+
+        self.assertEqual(obj.baseIntField, 10)
+
+    def test_send_super_sel(self):
+        """send_super accepts a SEL object as the selector parameter."""
+        SpecificExample = ObjCClass("SpecificExample")
+
+        obj = SpecificExample.alloc().init()
+
+        send_super(SpecificExample, obj, SEL("method:withArg:"), 2, 5, restype=None, argtypes=[c_int, c_int])
+
+        self.assertEqual(obj.baseIntField, 10)
+
+    def test_send_super_incorrect_argument_count(self):
+        """Attempting to call a method with send_super with an incorrect number of arguments throws an exception."""
+        SpecificExample = ObjCClass("SpecificExample")
+
+        obj = SpecificExample.alloc().init()
+
+        with self.assertRaises(TypeError):
+            send_super(SpecificExample, obj, "method:withArg:", 2, restype=None, argtypes=[])
+
+        with self.assertRaises(TypeError):
+            send_super(SpecificExample, obj, "method:withArg:", restype=None, argtypes=[c_int, c_int])
+
+        with self.assertRaises(TypeError):
+            send_super(
+                SpecificExample,
+                obj,
+                "method:withArg:",
+                2, 5, 6, "extra argument",
+                restype=None,
+                argtypes=[c_int, c_int],
+            )
+
+    def test_send_super_varargs(self):
+        """A variadic method can be called using send_super."""
+        SpecificExample = ObjCClass("SpecificExample")
+
+        obj = SpecificExample.alloc().init()
+        send_super(SpecificExample, obj, "methodWithArgs:", 2, varargs=[5, 6], argtypes=[c_int], restype=None)
+
+        self.assertEqual(obj.accessBaseIntField(), 11)
+
     def test_static_field(self):
         "A static field on a class can be accessed and mutated"
         Example = ObjCClass('Example')

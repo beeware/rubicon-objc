@@ -1,0 +1,1 @@
+Enforce usage of `argtypes` when calling `send_super`.
