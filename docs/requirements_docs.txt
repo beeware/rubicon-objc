@@ -1,5 +1,5 @@
 pyenchant
-sphinx > 2
+sphinx
 sphinx-autobuild
 sphinx-rtd-theme
 sphinx-tabs
