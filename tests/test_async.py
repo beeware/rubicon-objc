@@ -6,16 +6,14 @@ from rubicon.objc.eventloop import EventLoopPolicy
 
 
 # Some coroutines with known behavior for testing purposes.
-@asyncio.coroutine
-def do_stuff(results, x):
+async def do_stuff(results, x):
     for i in range(0, x):
         results.append(i)
-        yield from asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)
 
 
-@asyncio.coroutine
-def stop_loop(loop, delay):
-    yield from asyncio.sleep(delay)
+async def stop_loop(loop, delay):
+    await asyncio.sleep(delay)
     loop.stop()
 
 
@@ -123,14 +121,13 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
         server_messages = []
 
-        @asyncio.coroutine
-        def echo_server(reader, writer):
-            data = yield from reader.read(100)
+        async def echo_server(reader, writer):
+            data = await reader.read(100)
             message = data.decode()
             server_messages.append(message)
 
             writer.write(data)
-            yield from writer.drain()
+            await writer.drain()
 
             writer.close()
 
@@ -140,13 +137,12 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
         client_messages = []
 
-        @asyncio.coroutine
-        def echo_client(message):
-            reader, writer = yield from asyncio.open_connection('127.0.0.1', 3742)
+        async def echo_client(message):
+            reader, writer = await asyncio.open_connection('127.0.0.1', 3742)
 
             writer.write(message.encode())
 
-            data = yield from reader.read(100)
+            data = await reader.read(100)
             client_messages.append(data.decode())
 
             writer.close()
@@ -168,18 +164,17 @@ class AsyncSubprocessTests(unittest.TestCase):
         self.loop.close()
 
     def test_subprocess(self):
-        @asyncio.coroutine
-        def list_dir():
-            proc = yield from asyncio.create_subprocess_shell(
+        async def list_dir():
+            proc = await asyncio.create_subprocess_shell(
                 'ls',
                 stdout=asyncio.subprocess.PIPE,
             )
 
             entries = set()
-            line = yield from proc.stdout.readline()
+            line = await proc.stdout.readline()
             while line:
                 entries.add(line.decode('utf-8').strip())
-                line = yield from proc.stdout.readline()
+                line = await proc.stdout.readline()
 
             # Cleanup - close the transport.
             proc._transport.close()
