@@ -81,7 +81,9 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", '3.11.0-alpha - 3.11.0']
+        python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11"]
+        # As soon as 3.12.0a1 is released:
+        # python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
