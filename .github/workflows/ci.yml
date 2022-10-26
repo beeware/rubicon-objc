@@ -18,7 +18,10 @@ jobs:
         - 'docs'
         - 'package'
     steps:
-    - uses: actions/checkout@v3.1.0
+    - name: Check out code
+      uses: actions/checkout@v3.1.0
+      with:
+        fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v4.3.0
       with:
@@ -37,7 +40,10 @@ jobs:
     needs: beefore
     runs-on: macOS-11
     steps:
-    - uses: actions/checkout@v3.1.0
+    - name: Check out code
+      uses: actions/checkout@v3.1.0
+      with:
+        fetch-depth: 0
     - name: Set up Python 3.7
       uses: actions/setup-python@v4.3.0
       with:
@@ -60,7 +66,10 @@ jobs:
         platform: ['macOS-12']
     runs-on: ${{ matrix.platform }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - name: Check out code
+      uses: actions/checkout@v3.1.0
+      with:
+        fetch-depth: 0
     - name: Set up Python 3.7
       uses: actions/setup-python@v4.3.0
       with:
@@ -85,7 +94,10 @@ jobs:
         # As soon as 3.12.0a1 is released:
         # python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
     steps:
-    - uses: actions/checkout@v3.1.0
+    - name: Check out code
+      uses: actions/checkout@v3.1.0
+      with:
+        fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4.3.0
       with:
