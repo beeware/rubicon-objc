@@ -18,9 +18,9 @@ jobs:
         - 'docs'
         - 'package'
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: "3.X"
     - name: Install dependencies
@@ -37,9 +37,9 @@ jobs:
     needs: beefore
     runs-on: macOS-11
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: "3.7"
     - name: Install dependencies
@@ -60,9 +60,9 @@ jobs:
         platform: ['macOS-12']
     runs-on: ${{ matrix.platform }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python 3.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: "3.7"
     - name: Install dependencies
@@ -85,9 +85,9 @@ jobs:
         # As soon as 3.12.0a1 is released:
         # python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3.1.0
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
