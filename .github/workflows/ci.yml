@@ -10,7 +10,6 @@ jobs:
     name: Pre-test checks
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
       matrix:
         task:
         - 'flake8'
@@ -61,7 +60,6 @@ jobs:
     name: macOS compatibility test
     needs: smoke
     strategy:
-      max-parallel: 4
       matrix:
         platform: ['macOS-12']
     runs-on: ${{ matrix.platform }}
@@ -88,7 +86,6 @@ jobs:
     needs: smoke
     runs-on: macOS-latest
     strategy:
-      max-parallel: 4
       matrix:
         python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11"]
         # As soon as 3.12.0a1 is released:
