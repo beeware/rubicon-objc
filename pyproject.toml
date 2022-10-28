@@ -5,6 +5,14 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.isort]
+profile = "black"
+skip_glob = [
+    "docs/conf.py",
+    "venv*",
+    "local",
+]
+
 [tool.towncrier]
 directory = "changes"
 package = "rubicon.objc"

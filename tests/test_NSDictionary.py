@@ -1,7 +1,11 @@
 import unittest
 
 from rubicon.objc import (
-    NSDictionary, NSMutableDictionary, NSObject, ObjCClass, objc_method,
+    NSDictionary,
+    NSMutableDictionary,
+    NSObject,
+    ObjCClass,
+    objc_method,
     objc_property,
 )
 from rubicon.objc.collections import ObjCDictInstance
@@ -9,9 +13,9 @@ from rubicon.objc.collections import ObjCDictInstance
 
 class NSDictionaryMixinTest(unittest.TestCase):
     py_dict = {
-        'one': 'ONE',
-        'two': 'TWO',
-        'three': 'THREE',
+        "one": "ONE",
+        "two": "TWO",
+        "three": "THREE",
     }
 
     def make_dictionary(self, contents=None):
@@ -29,7 +33,7 @@ class NSDictionaryMixinTest(unittest.TestCase):
             self.assertEqual(d[key], value)
 
         with self.assertRaises(KeyError):
-            d['NO SUCH KEY']
+            d["NO SUCH KEY"]
 
     def test_iter(self):
         d = self.make_dictionary(self.py_dict)
@@ -47,11 +51,11 @@ class NSDictionaryMixinTest(unittest.TestCase):
     def test_get(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.get('one'), 'ONE')
-        self.assertEqual(d.get('two', None), 'TWO')
-        self.assertEqual(d.get('four', None), None)
-        self.assertEqual(d.get('five', 5), 5)
-        self.assertEqual(d.get('six', None), None)
+        self.assertEqual(d.get("one"), "ONE")
+        self.assertEqual(d.get("two", None), "TWO")
+        self.assertEqual(d.get("four", None), None)
+        self.assertEqual(d.get("five", 5), 5)
+        self.assertEqual(d.get("six", None), None)
 
     def test_contains(self):
         d = self.make_dictionary(self.py_dict)
@@ -68,8 +72,8 @@ class NSDictionaryMixinTest(unittest.TestCase):
         d1 = self.make_dictionary(self.py_dict)
         d2 = self.make_dictionary(self.py_dict)
         smaller_py_dict = self.py_dict.copy()
-        del smaller_py_dict['three']
-        bigger_py_dict = {'four': 'FOUR'}
+        del smaller_py_dict["three"]
+        bigger_py_dict = {"four": "FOUR"}
         bigger_py_dict.update(self.py_dict)
 
         self.assertEqual(d1, self.py_dict)
@@ -110,12 +114,12 @@ class NSDictionaryMixinTest(unittest.TestCase):
         # Call the same method with the raw Python dictionary
         self.assertIsNone(example.processDictionary(self.py_dict))
 
-        raw = {'data': 'stuff', 'other': 'gadgets'}
+        raw = {"data": "stuff", "other": "gadgets"}
         d = self.make_dictionary(raw)
         # Call a method with an NSDictionary instance
-        self.assertEqual(example.processDictionary(d), 'stuff')
+        self.assertEqual(example.processDictionary(d), "stuff")
         # Call the same method with the raw Python dictionary
-        self.assertEqual(example.processDictionary(raw), 'stuff')
+        self.assertEqual(example.processDictionary(raw), "stuff")
 
     def test_property(self):
         Example = ObjCClass("Example")
@@ -126,7 +130,7 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
         self.assertEqual(example.dict, self.py_dict)
         self.assertIsInstance(example.dict, ObjCDictInstance)
-        self.assertEqual(example.dict['one'], 'ONE')
+        self.assertEqual(example.dict["one"], "ONE")
 
 
 class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
@@ -148,10 +152,10 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
 
     def test_del(self):
         d = self.make_dictionary(self.py_dict)
-        del d['one']
+        del d["one"]
         self.assertEqual(len(d), 2)
         with self.assertRaises(KeyError):
-            d['one']
+            d["one"]
 
     def test_clear(self):
         d = self.make_dictionary(self.py_dict)
@@ -164,26 +168,26 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
         self.assertEqual(e, d)
         self.assertEqual(e, self.py_dict)
 
-        e['four'] = 'FOUR'
+        e["four"] = "FOUR"
 
     def test_pop1(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.pop('one'), 'ONE')
+        self.assertEqual(d.pop("one"), "ONE")
         self.assertEqual(len(d), 2)
         with self.assertRaises(KeyError):
-            d['one']
+            d["one"]
 
     def test_pop2(self):
         d = self.make_dictionary(self.py_dict)
 
         with self.assertRaises(KeyError):
-            d.pop('four')
+            d.pop("four")
 
     def test_pop3(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.pop('four', 4), 4)
+        self.assertEqual(d.pop("four", 4), 4)
 
     def test_popitem(self):
         d = self.make_dictionary(self.py_dict)
@@ -202,71 +206,71 @@ class NSMutableDictionaryMixinTest(NSDictionaryMixinTest):
     def test_setdefault1(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertEqual(d.setdefault('one', 'default'), 'ONE')
+        self.assertEqual(d.setdefault("one", "default"), "ONE")
         self.assertEqual(len(d), len(self.py_dict))
 
     def test_setdefault2(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertTrue('four' not in d)
-        self.assertEqual(d.setdefault('four', 'FOUR'), 'FOUR')
+        self.assertTrue("four" not in d)
+        self.assertEqual(d.setdefault("four", "FOUR"), "FOUR")
         self.assertEqual(len(d), len(self.py_dict) + 1)
-        self.assertEqual(d['four'], 'FOUR')
+        self.assertEqual(d["four"], "FOUR")
 
     def test_setdefault3(self):
         d = self.make_dictionary(self.py_dict)
 
-        self.assertTrue('four' not in d)
-        self.assertEqual(d.setdefault('four'), None)
+        self.assertTrue("four" not in d)
+        self.assertEqual(d.setdefault("four"), None)
         self.assertEqual(len(d), len(self.py_dict))
         with self.assertRaises(KeyError):
-            d['four']
+            d["four"]
 
     def test_update1(self):
         d = self.make_dictionary(self.py_dict)
 
         self.assertEqual(d, self.py_dict)
-        d.update({'one': 'two', 'three': 'four', 'four': 'FIVE'})
+        d.update({"one": "two", "three": "four", "four": "FIVE"})
         self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(d["one"], "two")
+        self.assertEqual(d["two"], "TWO")
+        self.assertEqual(d["three"], "four")
+        self.assertEqual(d["four"], "FIVE")
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
     def test_update2(self):
         d = self.make_dictionary(self.py_dict)
 
         self.assertEqual(d, self.py_dict)
-        d.update([('one', 'two'), ('three', 'four'), ('four', 'FIVE')])
+        d.update([("one", "two"), ("three", "four"), ("four", "FIVE")])
         self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
+        self.assertEqual(d["one"], "two")
+        self.assertEqual(d["two"], "TWO")
+        self.assertEqual(d["three"], "four")
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
     def test_update3(self):
         d = self.make_dictionary(self.py_dict)
 
         self.assertEqual(d, self.py_dict)
-        d.update(one='two', three='four', four='FIVE')
+        d.update(one="two", three="four", four="FIVE")
         self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(d["one"], "two")
+        self.assertEqual(d["two"], "TWO")
+        self.assertEqual(d["three"], "four")
+        self.assertEqual(d["four"], "FIVE")
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
     def test_update4(self):
         d = self.make_dictionary(self.py_dict)
 
         self.assertEqual(d, self.py_dict)
-        d.update({'one': 'two'}, three='four', four='FIVE')
+        d.update({"one": "two"}, three="four", four="FIVE")
         self.assertNotEqual(d, self.py_dict)
-        self.assertEqual(d['one'], 'two')
-        self.assertEqual(d['two'], 'TWO')
-        self.assertEqual(d['three'], 'four')
-        self.assertEqual(d['four'], 'FIVE')
+        self.assertEqual(d["one"], "two")
+        self.assertEqual(d["two"], "TWO")
+        self.assertEqual(d["three"], "four")
+        self.assertEqual(d["four"], "FIVE")
         self.assertEqual(len(d), len(self.py_dict) + 1)
 
 
@@ -327,7 +331,7 @@ class PythonObjectTest(unittest.TestCase):
         class ObjectDictAttrContainer(NSObject):
             @objc_method
             def init(self):
-                self.data = {'x': 'x1', 'y': 'y2', 'z': 'z3'}
+                self.data = {"x": "x1", "y": "y2", "z": "z3"}
                 return self
 
             @objc_method
@@ -336,17 +340,19 @@ class PythonObjectTest(unittest.TestCase):
                 return self
 
         obj1 = ObjectDictAttrContainer.alloc().init()
-        self.assertEqual(obj1.data, {'x': 'x1', 'y': 'y2', 'z': 'z3'})
+        self.assertEqual(obj1.data, {"x": "x1", "y": "y2", "z": "z3"})
         self.assertIsInstance(obj1.data, dict)
 
         # If it's set through a method call, it becomes an objc instance
-        obj2 = ObjectDictAttrContainer.alloc().initWithDict_({'a': 'a4', 'b': 'b5', 'c': 'c6'})
-        self.assertEqual(obj2.data, {'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        obj2 = ObjectDictAttrContainer.alloc().initWithDict_(
+            {"a": "a4", "b": "b5", "c": "c6"}
+        )
+        self.assertEqual(obj2.data, {"a": "a4", "b": "b5", "c": "c6"})
         self.assertIsInstance(obj2.data, ObjCDictInstance)
 
         # If it's set by direct attribute access, it becomes a Python object.
-        obj2.data = {'i': 'i7', 'j': 'j8', 'k': 'k9'}
-        self.assertEqual(obj2.data, {'i': 'i7', 'j': 'j8', 'k': 'k9'})
+        obj2.data = {"i": "i7", "j": "j8", "k": "k9"}
+        self.assertEqual(obj2.data, {"i": "i7", "j": "j8", "k": "k9"})
         self.assertIsInstance(obj2.data, dict)
 
     def test_object_dict_property(self):
@@ -355,7 +361,7 @@ class PythonObjectTest(unittest.TestCase):
 
             @objc_method
             def init(self):
-                self.data = {'x': 'x1', 'y': 'y2', 'z': 'z3'}
+                self.data = {"x": "x1", "y": "y2", "z": "z3"}
                 return self
 
             @objc_method
@@ -364,15 +370,17 @@ class PythonObjectTest(unittest.TestCase):
                 return self
 
         obj1 = ObjectDictContainer.alloc().init()
-        self.assertEqual(obj1.data, {'x': 'x1', 'y': 'y2', 'z': 'z3'})
+        self.assertEqual(obj1.data, {"x": "x1", "y": "y2", "z": "z3"})
         self.assertIsInstance(obj1.data, ObjCDictInstance)
 
-        obj2 = ObjectDictContainer.alloc().initWithDict_({'a': 'a4', 'b': 'b5', 'c': 'c6'})
-        self.assertEqual(obj2.data, {'a': 'a4', 'b': 'b5', 'c': 'c6'})
+        obj2 = ObjectDictContainer.alloc().initWithDict_(
+            {"a": "a4", "b": "b5", "c": "c6"}
+        )
+        self.assertEqual(obj2.data, {"a": "a4", "b": "b5", "c": "c6"})
         self.assertIsInstance(obj2.data, ObjCDictInstance)
 
-        obj2.data = {'i': 'i7', 'j': 'j8', 'k': 'k9'}
-        self.assertEqual(obj2.data, {'i': 'i7', 'j': 'j8', 'k': 'k9'})
+        obj2.data = {"i": "i7", "j": "j8", "k": "k9"}
+        self.assertEqual(obj2.data, {"i": "i7", "j": "j8", "k": "k9"})
         self.assertIsInstance(obj2.data, ObjCDictInstance)
 
     def test_multitype_dict_property(self):
@@ -381,6 +389,6 @@ class PythonObjectTest(unittest.TestCase):
 
         # All types can be stored in a dict.
         obj = MultitypeDictContainer.alloc().init()
-        obj.data = {4: 16, True: False, 'Hello': 'Goodbye'}
-        self.assertEqual(obj.data, {4: 16, True: False, 'Hello': 'Goodbye'})
+        obj.data = {4: 16, True: False, "Hello": "Goodbye"}
+        self.assertEqual(obj.data, {4: 16, True: False, "Hello": "Goodbye"})
         self.assertIsInstance(obj.data, ObjCDictInstance)

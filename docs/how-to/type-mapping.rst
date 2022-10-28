@@ -103,7 +103,7 @@ Return value conversion and wrapping
 
 Primitive values returned from methods are converted using the usual
 :mod:`ctypes` conversions, e. g. C integers are converted to Python
-:class:`int` and floating-point values to Python :class:`float`. 
+:class:`int` and floating-point values to Python :class:`float`.
 
 Objective-C objects are automatically returned as
 :class:`~rubicon.objc.api.ObjCInstance` objects, so you can call methods on

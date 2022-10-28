@@ -24,11 +24,11 @@ Before we can call the function, we need to look it up first. To do this, we nee
 .. note::
 
     For a list of all C libraries that Rubicon loads and exposes by default, see the :ref:`predefined-c-libraries` section of the :mod:`rubicon.objc.runtime` reference documentation.
-    
+
     To access a library that is not predefined by Rubicon, you can use the :func:`~rubicon.objc.runtime.load_library` function:
-    
+
     .. code-block:: python
-    
+
         >>> from rubicon.objc.runtime import load_library
         >>> libm = load_library("m")
         >>> libm
@@ -363,7 +363,7 @@ This code can finally be translated to Python:
     from ctypes import byref, cast
     from rubicon.objc import ObjCInstance
     from rubicon.objc.runtime import objc_id
-    
+
     # This requires the _dispatch_main_q Python code from before.
 
     def dispatch_get_main_queue():

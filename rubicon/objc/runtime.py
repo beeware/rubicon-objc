@@ -2,42 +2,70 @@ import os
 import warnings
 from contextlib import contextmanager
 from ctypes import (
-    ArgumentError, CDLL, CFUNCTYPE, POINTER, Structure, Union, addressof, alignment, byref, c_bool, c_char_p,
-    c_double, c_float, c_int, c_longdouble, c_size_t, c_uint, c_uint8, c_void_p, cast, memmove, sizeof, util,
+    CDLL,
+    CFUNCTYPE,
+    POINTER,
+    ArgumentError,
+    Structure,
+    Union,
+    addressof,
+    alignment,
+    byref,
+    c_bool,
+    c_char_p,
+    c_double,
+    c_float,
+    c_int,
+    c_longdouble,
+    c_size_t,
+    c_uint,
+    c_uint8,
+    c_void_p,
+    cast,
+    memmove,
+    sizeof,
+    util,
 )
 
 from . import ctypes_patch
 from .types import (
-    __arm__, __i386__, __x86_64__, c_ptrdiff_t, ctype_for_encoding, ctype_for_type, encoding_for_ctype, with_encoding,
+    __arm__,
+    __i386__,
+    __x86_64__,
+    c_ptrdiff_t,
+    ctype_for_encoding,
+    ctype_for_type,
+    encoding_for_ctype,
+    with_encoding,
     with_preferred_encoding,
 )
 
 __all__ = [
-    'Class',
-    'Foundation',
-    'IMP',
-    'Ivar',
-    'Method',
-    'SEL',
-    'add_ivar',
-    'add_method',
-    'autoreleasepool',
-    'get_class',
-    'get_ivar',
-    'libc',
-    'libobjc',
-    'load_library',
-    'objc_block',
-    'objc_id',
-    'objc_method_description',
-    'objc_property_t',
-    'objc_super',
-    'object_isClass',
-    'send_message',
-    'send_super',
-    'set_ivar',
-    'should_use_fpret',
-    'should_use_stret',
+    "Class",
+    "Foundation",
+    "IMP",
+    "Ivar",
+    "Method",
+    "SEL",
+    "add_ivar",
+    "add_method",
+    "autoreleasepool",
+    "get_class",
+    "get_ivar",
+    "libc",
+    "libobjc",
+    "load_library",
+    "objc_block",
+    "objc_id",
+    "objc_method_description",
+    "objc_property_t",
+    "objc_super",
+    "object_isClass",
+    "send_message",
+    "send_super",
+    "set_ivar",
+    "should_use_fpret",
+    "should_use_stret",
 ]
 
 ######################################################################
@@ -76,22 +104,24 @@ def load_library(name):
         except OSError:
             pass
 
-    raise ValueError("Library {!r} not found".format(name))
+    raise ValueError(f"Library {name!r} not found")
 
 
-libc = load_library('c')
-libobjc = load_library('objc')
-Foundation = load_library('Foundation')
+libc = load_library("c")
+libobjc = load_library("objc")
+Foundation = load_library("Foundation")
 
 
-@with_encoding(b'@')
+@with_encoding(b"@")
 class objc_id(c_void_p):
-    """The `id <https://developer.apple.com/documentation/objectivec/id?language=objc>`__ type
-    from ``<objc/objc.h>``.
+    """The `id.
+
+    <https://developer.apple.com/documentation/objectivec/id?language=objc>`__
+    type from ``<objc/objc.h>``.
     """
 
 
-@with_encoding(b'@?')
+@with_encoding(b"@?")
 class objc_block(objc_id):
     """The low-level type of block pointers.
 
@@ -108,10 +138,12 @@ class objc_block(objc_id):
     """
 
 
-@with_preferred_encoding(b':')
+@with_preferred_encoding(b":")
 class SEL(c_void_p):
-    """The `SEL <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__ type
-    from ``<objc/objc.h>``.
+    """The `SEL.
+
+    <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__
+    type from ``<objc/objc.h>``.
     """
 
     @property
@@ -124,8 +156,11 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        """The constructor can be called with a :class:`bytes` or :class:`str` object to obtain a selector
-        with that value. (The normal arguments supported by :class:`~ctypes.c_void_p` are still accepted.)
+        """The constructor can be called with a :class:`bytes` or :class:`str`
+        object to obtain a selector with that value.
+
+        (The normal arguments supported by :class:`~ctypes.c_void_p` are
+        still accepted.)
         """
 
         if isinstance(init, (bytes, str)):
@@ -147,49 +182,51 @@ class SEL(c_void_p):
         )
 
 
-@with_preferred_encoding(b'#')
+@with_preferred_encoding(b"#")
 class Class(objc_id):
-    """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__ type
-    from ``<objc/objc.h>``.
-    """
+    """The `Class <https://developer.apple.com/documentation/objectivec/class?l
+    anguage=objc>`__ type from ``<objc/objc.h>``."""
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/objective_c_runtime/imp?language=objc>`__ type
-    from ``<objc/objc.h>``.
+    """The `IMP <https://developer.apple.com/documentation/objectivec/objective
+    _c_runtime/imp?language=objc>`__ type from ``<objc/objc.h>``.
 
-    An :class:`IMP` cannot be called directly --- it must be cast to the correct :func:`~ctypes.CFUNCTYPE` first,
-    to provide the necessary information about its signature.
+    An :class:`IMP` cannot be called directly --- it must be cast to the
+    correct :func:`~ctypes.CFUNCTYPE` first, to provide the necessary
+    information about its signature.
     """
 
 
 class Method(c_void_p):
-    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__ type
-    from ``<objc/runtime.h>``.
+    """The `Method.
+
+    <https://developer.apple.com/documentation/objectivec/method.
+
+    ?language=objc>`__ type from ``<objc/runtime.h>``.
     """
 
 
 class Ivar(c_void_p):
-    """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?language=objc>`__ type
-    from ``<objc/runtime.h>``.
-    """
+    """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?lan
+    guage=objc>`__ type from ``<objc/runtime.h>``."""
 
 
 class objc_property_t(c_void_p):
-    """The `objc_property_t <https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc>`__
-    type from ``<objc/runtime.h>``.
-    """
+    """The `objc_property_t <https://developer.apple.com/documentation/objectiv
+    ec/objc_property_t?language=objc>`__ type from ``<objc/runtime.h>``."""
 
 
 class objc_property_attribute_t(Structure):
-    """The `objc_property_attribute_t
+    """The `objc_property_attribute_t.
+
     <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__ structure
     from ``<objc/runtime.h>``.
     """
 
     _fields_ = [
-        ('name', c_char_p),
-        ('value', c_char_p),
+        ("name", c_char_p),
+        ("value", c_char_p),
     ]
 
 
@@ -210,7 +247,12 @@ libobjc.class_addMethod.argtypes = [Class, SEL, IMP, c_char_p]
 # BOOL class_addProperty(Class cls, const char *name, const objc_property_attribute_t *attributes,
 #     unsigned int attributeCount)
 libobjc.class_addProperty.restype = c_bool
-libobjc.class_addProperty.argtypes = [Class, c_char_p, POINTER(objc_property_attribute_t), c_uint]
+libobjc.class_addProperty.argtypes = [
+    Class,
+    c_char_p,
+    POINTER(objc_property_attribute_t),
+    c_uint,
+]
 
 # BOOL class_addProtocol(Class cls, Protocol *protocol)
 libobjc.class_addProtocol.restype = c_bool
@@ -446,14 +488,18 @@ libobjc.object_getClass.argtypes = [objc_id]
 try:
     object_isClass = libobjc.object_isClass
 except AttributeError:
-    def object_isClass(obj):
-        """Return whether the given Objective-C object is a class (or a metaclass).
 
-        This is the emulated version of the object_isClass runtime function, for systems older than OS X 10.10
-        or iOS 8, where the real function doesn't exist yet.
+    def object_isClass(obj):
+        """Return whether the given Objective-C object is a class (or a
+        metaclass).
+
+        This is the emulated version of the object_isClass runtime
+        function, for systems older than OS X 10.10 or iOS 8, where the
+        real function doesn't exist yet.
         """
 
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
+
 else:
     # BOOL object_isClass(id obj)
     object_isClass.restype = c_bool
@@ -495,20 +541,28 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """The `objc_method_description
+    """The `objc_method_description.
+
     <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__ structure
-    from ``<objc/runtime.h>``."""
+    from ``<objc/runtime.h>``.
+    """
 
     _fields_ = [
-        ('name', SEL),
-        ('types', c_char_p),
+        ("name", SEL),
+        ("types", c_char_p),
     ]
 
 
 # void protocol_addMethodDescription(Protocol *proto, SEL name, const char *types,
 #     BOOL isRequiredMethod, BOOL isInstanceMethod)
 libobjc.protocol_addMethodDescription.restype = None
-libobjc.protocol_addMethodDescription.argtypes = [objc_id, SEL, c_char_p, c_bool, c_bool]
+libobjc.protocol_addMethodDescription.argtypes = [
+    objc_id,
+    SEL,
+    c_char_p,
+    c_bool,
+    c_bool,
+]
 
 # void protocol_addProtocol(Protocol *proto, Protocol *addition)
 libobjc.protocol_addProtocol.restype = None
@@ -517,7 +571,14 @@ libobjc.protocol_addProtocol.argtypes = [objc_id, objc_id]
 # void protocol_addProperty(Protocol *proto, const char *name, const objc_property_attribute_t *attributes,
 #     unsigned int attributeCount, BOOL isRequiredProperty, BOOL isInstanceProperty)
 libobjc.protocol_addProperty.restype = None
-libobjc.protocol_addProperty.argtypes = [objc_id, c_char_p, POINTER(objc_property_attribute_t), c_uint, c_bool, c_bool]
+libobjc.protocol_addProperty.argtypes = [
+    objc_id,
+    c_char_p,
+    POINTER(objc_property_attribute_t),
+    c_uint,
+    c_bool,
+    c_bool,
+]
 
 # Protocol *objc_allocateProtocol(const char *name)
 libobjc.objc_allocateProtocol.restype = objc_id
@@ -531,7 +592,12 @@ libobjc.protocol_conformsToProtocol.argtypes = [objc_id, objc_id]
 #     Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount)
 # You must free() the returned array.
 libobjc.protocol_copyMethodDescriptionList.restype = POINTER(objc_method_description)
-libobjc.protocol_copyMethodDescriptionList.argtypes = [objc_id, c_bool, c_bool, POINTER(c_uint)]
+libobjc.protocol_copyMethodDescriptionList.argtypes = [
+    objc_id,
+    c_bool,
+    c_bool,
+    POINTER(c_uint),
+]
 
 # objc_property_t * protocol_copyPropertyList(Protocol *protocol, unsigned int *outCount)
 libobjc.protocol_copyPropertyList.restype = POINTER(objc_property_t)
@@ -571,27 +637,30 @@ libobjc.sel_registerName.argtypes = [c_char_p]
 
 ######################################################################
 
+
 def ensure_bytes(x):
     """Convert the given string to :class:`bytes` if necessary.
 
-    If the argument is already :class:`bytes`, it is returned unchanged; if it is :class:`str`, it is encoded as UTF-8.
+    If the argument is already :class:`bytes`, it is returned unchanged;
+    if it is :class:`str`, it is encoded as UTF-8.
     """
 
     if isinstance(x, bytes):
         return x
     # "All char * in the runtime API should be considered to have UTF-8 encoding."
     # https://developer.apple.com/documentation/objectivec/objective_c_runtime?preferredLanguage=occ
-    return x.encode('utf-8')
+    return x.encode("utf-8")
 
 
 ######################################################################
 
 
 def get_class(name):
-    """Get the Objective-C class with the given name as a :class:`Class` object.
+    """Get the Objective-C class with the given name as a :class:`Class`
+    object.
 
-    If no class with the given name is loaded, ``None`` is returned, and the Objective-C runtime will log
-    a warning message.
+    If no class with the given name is loaded, ``None`` is returned, and
+    the Objective-C runtime will log a warning message.
     """
 
     return libobjc.objc_getClass(ensure_bytes(name))
@@ -601,9 +670,8 @@ def get_class(name):
 # http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
-    """Return whether a method returning the given type must be called using ``objc_msgSend_stret``
-    on the current system.
-    """
+    """Return whether a method returning the given type must be called using
+    ``objc_msgSend_stret`` on the current system."""
 
     if type(restype) != type(Structure):
         # Not needed when restype is not a structure.
@@ -627,9 +695,8 @@ def should_use_stret(restype):
 
 # http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
-    """Return whether a method returning the given type must be called using ``objc_msgSend_fpret``
-    on the current system.
-    """
+    """Return whether a method returning the given type must be called using
+    ``objc_msgSend_fpret`` on the current system."""
 
     if __x86_64__:
         # On x86_64: Use only for long double.
@@ -646,7 +713,8 @@ _msg_send_cache = {}
 
 
 def _msg_send_for_types(restype, argtypes):
-    """Get the appropriate variant of ``objc_msgSend`` for calling a method with the given return and argument types.
+    """Get the appropriate variant of ``objc_msgSend`` for calling a method
+    with the given return and argument types.
 
     :param restype: The return type of the method to be called.
     :param argtypes: The argument types of the method to be called, excluding the self and _cmd arguments.
@@ -661,11 +729,11 @@ def _msg_send_for_types(restype, argtypes):
     except KeyError:
         # Choose the correct version of objc_msgSend based on return type.
         if should_use_fpret(restype):
-            send_name = 'objc_msgSend_fpret'
+            send_name = "objc_msgSend_fpret"
         elif should_use_stret(restype):
-            send_name = 'objc_msgSend_stret'
+            send_name = "objc_msgSend_stret"
         else:
-            send_name = 'objc_msgSend'
+            send_name = "objc_msgSend"
 
         # Looking up a C function via attribute access (e. g. libobjc.objc_msgSend)
         # always returns the same function object.
@@ -731,8 +799,9 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     if not isinstance(receiver, objc_id):
         raise TypeError(
-            "Receiver must be an ObjCInstance or objc_id, not {tp.__module__}.{tp.__qualname__}"
-            .format(tp=type(receiver))
+            "Receiver must be an ObjCInstance or objc_id, not {tp.__module__}.{tp.__qualname__}".format(
+                tp=type(receiver)
+            )
         )
 
     if not isinstance(selector, SEL):
@@ -746,8 +815,9 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     if len(args) != len(argtypes):
         raise TypeError(
-            "Inconsistent number of arguments ({}) and argument types ({})"
-            .format(len(args), len(argtypes))
+            "Inconsistent number of arguments ({}) and argument types ({})".format(
+                len(args), len(argtypes)
+            )
         )
 
     send = _msg_send_for_types(restype, argtypes)
@@ -758,8 +828,9 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         # Add more useful info to argument error exceptions, then reraise.
         error.args = (
             error.args[0]
-            + ' (selector = {selector}, argtypes = {argtypes})'
-            .format(selector=selector, argtypes=argtypes),
+            + " (selector = {selector}, argtypes = {argtypes})".format(
+                selector=selector, argtypes=argtypes
+            ),
         )
         raise
 
@@ -769,20 +840,28 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
 
 class objc_super(Structure):
-    """The `objc_super <https://developer.apple.com/documentation/objectivec/objc_super?language=objc>`__ structure
-    from ``<objc/message.h>``.
-    """
+    """The `objc_super <https://developer.apple.com/documentation/objectivec/ob
+    jc_super?language=objc>`__ structure from ``<objc/message.h>``."""
 
     _fields_ = [
-        ('receiver', objc_id),
-        ('super_class', Class),
+        ("receiver", objc_id),
+        ("super_class", Class),
     ]
 
 
 # http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
-def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, varargs=None, _allow_dealloc=False):
-    """In the context of the given class, call a superclass method on the receiver
-    with the given selector and arguments.
+def send_super(
+    cls,
+    receiver,
+    selector,
+    *args,
+    restype=c_void_p,
+    argtypes=None,
+    varargs=None,
+    _allow_dealloc=False,
+):
+    """In the context of the given class, call a superclass method on the
+    receiver with the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like ``[super sel:args]`` in the class ``cls``.
 
@@ -829,24 +908,26 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
 
     if len(args) != len(argtypes):
         raise TypeError(
-            "Inconsistent number of arguments ({}) and argument types ({})"
-            .format(len(args), len(argtypes))
+            "Inconsistent number of arguments ({}) and argument types ({})".format(
+                len(args), len(argtypes)
+            )
         )
 
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
         raise TypeError(
-            'Missing or invalid cls argument: expected an ObjCClass or Class, not {tp.__module__}.{tp.__qualname__}\n'
-            'send_super requires the current class to be passed explicitly as the first argument. '
-            'To fix this error, pass the special name __class__ as the first argument to send_super.'
-            .format(tp=type(cls))
+            "Missing or invalid cls argument: expected an ObjCClass or Class, not {tp.__module__}.{tp.__qualname__}\n"
+            "send_super requires the current class to be passed explicitly as the first argument. "
+            "To fix this error, pass the special name __class__ as the first argument to send_super.".format(
+                tp=type(cls)
+            )
         )
 
     if not _allow_dealloc and selector.name == b"dealloc":
         warnings.warn(
             "You should not call the superclass dealloc manually when overriding dealloc. Rubicon-objc "
             "will call it for you after releasing objects stored in properties and ivars.",
-            stacklevel=2
+            stacklevel=2,
         )
         return
 
@@ -860,20 +941,25 @@ def send_super(cls, receiver, selector, *args, restype=c_void_p, argtypes=None, 
     elif type(receiver) == c_void_p:
         receiver = cast(receiver, objc_id)
     else:
-        raise TypeError("Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(tp=type(receiver)))
+        raise TypeError(
+            "Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(
+                tp=type(receiver)
+            )
+        )
 
     super_ptr = libobjc.class_getSuperclass(cls)
     if super_ptr.value is None:
         raise ValueError(
-            'The specified class {!r} is a root class, it cannot be used with send_super'
-            .format(libobjc.class_getName(cls).decode('utf-8'))
+            "The specified class {!r} is a root class, it cannot be used with send_super".format(
+                libobjc.class_getName(cls).decode("utf-8")
+            )
         )
     super_struct = objc_super(receiver, super_ptr)
 
     if should_use_stret(restype):
-        send = libobjc['objc_msgSendSuper_stret']
+        send = libobjc["objc_msgSendSuper_stret"]
     else:
-        send = libobjc['objc_msgSendSuper']
+        send = libobjc["objc_msgSendSuper"]
     send.restype = restype
     send.argtypes = [POINTER(objc_super), SEL] + argtypes
     result = send(byref(super_struct), selector, *args, *varargs)
@@ -930,7 +1016,7 @@ def add_method(cls, selector, method, encoding, replace=False):
         res = libobjc.class_addMethod(cls, selector, cast(imp, IMP), types)
 
         if not res:
-            raise ValueError("A method with the name {!r} already exists".format(selector.name))
+            raise ValueError(f"A method with the name {selector.name!r} already exists")
 
     _keep_alive_imps.append(imp)
     return imp
@@ -940,8 +1026,11 @@ def add_ivar(cls, name, vartype):
     """Add a new instance variable of type vartype to cls."""
 
     return libobjc.class_addIvar(
-        cls, ensure_bytes(name), sizeof(vartype),
-        alignment(vartype), encoding_for_ctype(ctype_for_type(vartype))
+        cls,
+        ensure_bytes(name),
+        sizeof(vartype),
+        alignment(vartype),
+        encoding_for_ctype(ctype_for_type(vartype)),
     )
 
 
@@ -963,7 +1052,9 @@ def get_ivar(obj, varname, weak=False):
     except AttributeError:
         pass
 
-    ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
+    ivar = libobjc.class_getInstanceVariable(
+        libobjc.object_getClass(obj), ensure_bytes(varname)
+    )
     vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
 
     if weak:
@@ -976,9 +1067,11 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's ivar varname to value. If ``weak`` is ``True``, only a weak reference to the value is stored.
+    """Set obj's ivar varname to value. If ``weak`` is ``True``, only a weak
+    reference to the value is stored.
 
-    value must be a :mod:`ctypes` data object whose type matches that of the ivar.
+    value must be a :mod:`ctypes` data object whose type matches that of
+    the ivar.
     """
 
     try:
@@ -986,18 +1079,22 @@ def set_ivar(obj, varname, value, weak=False):
     except AttributeError:
         pass
 
-    ivar = libobjc.class_getInstanceVariable(libobjc.object_getClass(obj), ensure_bytes(varname))
+    ivar = libobjc.class_getInstanceVariable(
+        libobjc.object_getClass(obj), ensure_bytes(varname)
+    )
     vartype = ctype_for_encoding(libobjc.ivar_getTypeEncoding(ivar))
 
     if not isinstance(value, vartype):
         raise TypeError(
-            "Incompatible type for ivar {!r}: {!r} is not a subclass of the ivar's type {!r}"
-            .format(varname, type(value), vartype)
+            "Incompatible type for ivar {!r}: {!r} is not a subclass of the ivar's type {!r}".format(
+                varname, type(value), vartype
+            )
         )
     elif sizeof(type(value)) != sizeof(vartype):
         raise TypeError(
-            "Incompatible type for ivar {!r}: {!r} has size {}, but the ivar's type {!r} has size {}"
-            .format(varname, type(value), sizeof(type(value)), vartype, sizeof(vartype))
+            "Incompatible type for ivar {!r}: {!r} has size {}, but the ivar's type {!r} has size {}".format(
+                varname, type(value), sizeof(type(value)), vartype, sizeof(vartype)
+            )
         )
 
     if weak:
@@ -1005,18 +1102,23 @@ def set_ivar(obj, varname, value, weak=False):
     elif issubclass(vartype, objc_id):
         libobjc.object_setIvar(obj, ivar, value)
     else:
-        memmove(obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype))
+        memmove(
+            obj.value + libobjc.ivar_getOffset(ivar), addressof(value), sizeof(vartype)
+        )
 
 
 @contextmanager
 def autoreleasepool():
-    """
-    A context manager that has the same effect as a @autoreleasepool block in Objective-C.
+    """A context manager that has the same effect as a @autoreleasepool block
+    in Objective-C.
 
-    Any objects that are autoreleased within the context will receive a release message when exiting the context. When
-    running an event loop, AppKit will create an autorelease pool at the beginning of each cycle of the event loop and
-    drain it at the end. You therefore do not need to use @autoreleasepool blocks when running an event loop. However,
-    they may be still be useful when your code temporarily allocates large amounts of memory which you want to
+    Any objects that are autoreleased within the context will receive a
+    release message when exiting the context. When running an event
+    loop, AppKit will create an autorelease pool at the beginning of
+    each cycle of the event loop and drain it at the end. You therefore
+    do not need to use @autoreleasepool blocks when running an event
+    loop. However, they may be still be useful when your code
+    temporarily allocates large amounts of memory which you want to
     explicitly free before the end of a cycle.
     """
     pool = libobjc.objc_autoreleasePoolPush()
