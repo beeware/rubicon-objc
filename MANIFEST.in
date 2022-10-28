@@ -2,6 +2,7 @@
 # https://packaging.python.org/guides/using-manifest-in/#how-files-are-included-in-an-sdist
 # Please only add entries here for files that are *not* already handled by default.
 
+include .git-blame-ignore-revs
 include .pre-commit-config.yaml
 include .readthedocs.yml
 include CHANGELOG.rst
