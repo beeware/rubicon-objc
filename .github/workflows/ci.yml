@@ -6,6 +6,19 @@ on:
       - main
 
 jobs:
+  pre-commit:
+    name: Pre-commit code style checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - name: Set up Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: ${{ env.python_version }}
+      - name: Lint with Pre-commit
+        uses: pre-commit/action@v3.0.0
+
   beefore:
     name: Pre-test checks
     runs-on: ubuntu-latest
@@ -13,9 +26,7 @@ jobs:
       max-parallel: 4
       matrix:
         task:
-        - 'flake8'
         - 'towncrier-check'
-        - 'docs'
         - 'package'
     steps:
     - name: Check out code
@@ -37,7 +48,7 @@ jobs:
 
   smoke:
     name: Smoke test (3.7)
-    needs: beefore
+    needs: [pre-commit, beefore]
     runs-on: macOS-11
     steps:
     - name: Check out code
