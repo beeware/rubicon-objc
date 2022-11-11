@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         task:
-        - 'towncrier-check'
-        - 'package'
+        - "towncrier-check"
+        - "package"
     steps:
     - name: Check out code
       uses: actions/checkout@v3.1.0
@@ -50,7 +50,7 @@ jobs:
     needs: [pre-commit, beefore]
     strategy:
       matrix:
-        platform: ['macOS-11', 'macOS-12']
+        platform: ["macOS-11", "macOS-12"]
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
         # As soon as 3.12.0a1 is released:
         # python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
