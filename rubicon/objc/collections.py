@@ -97,7 +97,7 @@ class ObjCStrInstance(ObjCInstance):
         if not isinstance(value, (str, NSString)):
             raise TypeError(
                 "'in <NSString>' requires str or NSString as left operand, "
-                "not {tp.__module__}.{tp.__qualname__}".format(tp=type(value))
+                f"not {type(value).__module__}.{type(value).__qualname__}"
             )
 
         return self.find(value) != -1

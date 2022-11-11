@@ -338,10 +338,9 @@ class objc_classmethod:
     """Exposes the decorated method as an Objective-C class method in a custom
     class or protocol.
 
-    This decorator behaves exactly like :func:`@objc_method
-    <objc_method>`, except that the decorated method becomes a class
-    method, so it is exposed on the Objective-C class rather than its
-    instances.
+    This decorator behaves exactly like :func:`@objc_method <objc_method>`,
+    except that the decorated method becomes a class method, so it is exposed
+    on the Objective-C class rather than its instances.
     """
 
     def __init__(self, py_method):
@@ -857,13 +856,9 @@ class ObjCInstance:
         """Get a debugging representation of ``self``, which includes the
         Objective-C object's address, class, and ``debugDescription``."""
 
-        return "<{}.{} {:#x}: {} at {:#x}: {}>".format(
-            type(self).__module__,
-            type(self).__qualname__,
-            id(self),
-            self.objc_class.name,
-            self.ptr.value,
-            self.debugDescription,
+        return (
+            f"<{type(self).__module__}.{type(self).__qualname__} {id(self):#x}: "
+            f"{self.objc_class.name} at {self.ptr.value:#x}: {self.debugDescription}>"
         )
 
     def __getattr__(self, name):

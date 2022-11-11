@@ -197,11 +197,11 @@ except ImportError:
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
+    # 'papersize': 'letterpaper',
     # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
+    # 'pointsize': '10pt',
     # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
+    # 'preamble': '',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -290,6 +290,6 @@ spelling_ignore_pypi_package_names = True
 sys.path.insert(0, os.path.abspath("_mocked_modules"))
 sys.modules.pop("ctypes", None)
 sys.modules.pop("ctypes.util", None)
-import ctypes.util
+import ctypes.util  # noqa: F401, E402
 
 del sys.path[0]
