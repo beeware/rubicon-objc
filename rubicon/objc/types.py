@@ -333,15 +333,18 @@ def _ctype_for_unknown_encoding(encoding):
 def ctype_for_encoding(encoding):
     """Return the ctype corresponding to an Objective-C type encoding.
 
-    If a ctype has been registered for the encoding, that type is returned. Otherwise, if the type encoding represents
-    a compound type (pointer, array, structure, or union), the contained types are converted recursively. A new ctype
-    is then created from the converted ctypes, and is registered for the encoding (so that future conversions of the
-    same encoding return the same ctype).
+    If a ctype has been registered for the encoding, that type is returned.
+    Otherwise, if the type encoding represents a compound type (pointer, array,
+    structure, or union), the contained types are converted recursively. A new
+    ctype is then created from the converted ctypes, and is registered for the
+    encoding (so that future conversions of the same encoding return the same
+    ctype).
 
-    For example, the type encoding ``{spam=ic}`` is not registered by default. However, the contained types ``i`` and
-    ``c`` are registered, so they are converted individually and used to create a new :class:`~ctypes.Structure` with
-    two fields of the correct types. The new structure type is then registered for the original encoding ``{spam=ic}``
-    and returned.
+    For example, the type encoding ``{spam=ic}`` is not registered by default.
+    However, the contained types ``i`` and ``c`` are registered, so they are
+    converted individually and used to create a new :class:`~ctypes.Structure`
+    with two fields of the correct types. The new structure type is then
+    registered for the original encoding ``{spam=ic}`` and returned.
 
     :raises ValueError: if the conversion fails at any point
     """
@@ -360,11 +363,13 @@ def ctype_for_encoding(encoding):
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type.
 
-    If a type encoding has been registered for the ctype, that encoding is returned. Otherwise, if the ctype is a
-    pointer type, its pointed-to type is encoded and used to construct the pointer type encoding.
+    If a type encoding has been registered for the ctype, that encoding is
+    returned. Otherwise, if the ctype is a pointer type, its pointed-to type is
+    encoded and used to construct the pointer type encoding.
 
-    Automatic encoding of other compound types (arrays, structures, and unions) is currently not supported. To encode
-    such types, a type encoding must be manually provided for them using :func:`register_preferred_encoding` or
+    Automatic encoding of other compound types (arrays, structures, and unions)
+    is currently not supported. To encode such types, a type encoding must be
+    manually provided for them using :func:`register_preferred_encoding` or
     :func:`register_encoding`.
 
     :raises ValueError: if the conversion fails at any point
@@ -383,10 +388,9 @@ def register_preferred_encoding(encoding, ctype):
     """Register a preferred conversion between an Objective-C type encoding and
     a ctype.
 
-    "Preferred" means that any existing conversions in each direction
-    are overwritten with the new conversion. To register an encoding
-    without overwriting existing conversions, use
-    :func:`register_encoding`.
+    "Preferred" means that any existing conversions in each direction are
+    overwritten with the new conversion. To register an encoding without
+    overwriting existing conversions, use :func:`register_encoding`.
     """
 
     _ctype_for_encoding_map[encoding] = ctype
@@ -397,8 +401,8 @@ def with_preferred_encoding(encoding):
     """Register a preferred conversion between an Objective-C type encoding and
     the decorated ctype.
 
-    This is equivalent to calling :func:`register_preferred_encoding` on
-    the decorated ctype.
+    This is equivalent to calling :func:`register_preferred_encoding` on the
+    decorated ctype.
     """
 
     def _with_preferred_encoding_decorator(ctype):
@@ -412,10 +416,9 @@ def register_encoding(encoding, ctype):
     """Register an additional conversion between an Objective-C type encoding
     and a ctype.
 
-    "Additional" means that any existing conversions in either direction
-    are *not* overwritten with the new conversion. To register an
-    encoding and overwrite existing conversions, use
-    :func:`register_preferred_encoding`.
+    "Additional" means that any existing conversions in either direction are
+    *not* overwritten with the new conversion. To register an encoding and
+    overwrite existing conversions, use :func:`register_preferred_encoding`.
     """
 
     _ctype_for_encoding_map.setdefault(encoding, ctype)
@@ -441,9 +444,10 @@ def unregister_encoding(encoding):
     """Unregister the conversion from an Objective-C type encoding to its
     corresponding ctype.
 
-    Note that this does not remove any conversions in the other direction (from a ctype to this encoding). These
-    conversions may be replaced with :func:`register_encoding`, or unregistered with :func:`unregister_ctype`.
-    To remove all ctypes for an encoding, use :func:`unregister_encoding_all`.
+    Note that this does not remove any conversions in the other direction (from
+    a ctype to this encoding). These conversions may be replaced with
+    :func:`register_encoding`, or unregistered with :func:`unregister_ctype`. To
+    remove all ctypes for an encoding, use :func:`unregister_encoding_all`.
 
     If the encoding was not registered previously, nothing happens.
     """
@@ -455,7 +459,8 @@ def unregister_encoding_all(encoding):
     """Unregister all conversions between an Objective-C type encoding and all
     corresponding ctypes.
 
-    All conversions from any ctype to this encoding are removed recursively using :func:`unregister_ctype_all`.
+    All conversions from any ctype to this encoding are removed recursively
+    using :func:`unregister_ctype_all`.
 
     If the encoding was not registered previously, nothing happens.
     """
@@ -470,8 +475,9 @@ def unregister_ctype(ctype):
     """Unregister the conversion from a ctype to its corresponding Objective-C
     type encoding.
 
-    Note that this does not remove any conversions in the other direction (from an encoding to this ctype). These
-    conversions may be replaced with :func:`register_encoding`, or unregistered with :func:`unregister_encoding`.
+    Note that this does not remove any conversions in the other direction (from
+    an encoding to this ctype). These conversions may be replaced with
+    :func:`register_encoding`, or unregistered with :func:`unregister_encoding`.
     To remove all encodings for a ctype, use :func:`unregister_ctype_all`.
 
     If the ctype was not registered previously, nothing happens.
@@ -484,7 +490,8 @@ def unregister_ctype_all(ctype):
     """Unregister all conversions between a ctype and all corresponding
     Objective-C type encodings.
 
-    All conversions from any type encoding to this ctype are removed recursively using :func:`unregister_encoding_all`.
+    All conversions from any type encoding to this ctype are removed recursively
+    using :func:`unregister_encoding_all`.
 
     If the ctype was not registered previously, nothing happens.
     """
@@ -512,10 +519,12 @@ def get_encoding_for_ctype_map():
 def split_method_encoding(encoding):
     """Split a method signature encoding into a sequence of type encodings.
 
-    The first type encoding represents the return type, all remaining type encodings represent the argument types.
+    The first type encoding represents the return type, all remaining type
+    encodings represent the argument types.
 
-    If there are any numbers after a type encoding, they are ignored. On PowerPC, these numbers indicated each
-    argument/return value's offset on the stack. These numbers are meaningless on modern architectures.
+    If there are any numbers after a type encoding, they are ignored. On
+    PowerPC, these numbers indicated each argument/return value's offset on the
+    stack. These numbers are meaningless on modern architectures.
     """
 
     encodings = []
@@ -535,9 +544,9 @@ def split_method_encoding(encoding):
 def ctypes_for_method_encoding(encoding):
     """Convert a method signature encoding into a sequence of ctypes.
 
-    This is equivalent to first splitting the method signature encoding
-    using :func:`split_method_encoding`, and then converting each
-    individual type encoding using :func:`ctype_for_encoding`.
+    This is equivalent to first splitting the method signature encoding using
+    :func:`split_method_encoding`, and then converting each individual type
+    encoding using :func:`ctype_for_encoding`.
     """
 
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
@@ -586,14 +595,17 @@ def compound_value_for_sequence(seq, tp):
     """Create a C structure or array of type ``tp``, initialized with values
     from ``seq``.
 
-    If ``tp`` is a :class:`~ctypes.Structure` type, the newly created structure's fields are initialized in declaration
-    order with the values from ``seq``. ``seq`` must have as many elements as the structure has fields.
+    If ``tp`` is a :class:`~ctypes.Structure` type, the newly created
+    structure's fields are initialized in declaration order with the values from
+    ``seq``. ``seq`` must have as many elements as the structure has fields.
 
-    If ``tp`` is a :class:`~ctypes.Array` type, the newly created array is initialized with the values from ``seq``.
-    ``seq`` must have as many elements as the array type.
+    If ``tp`` is a :class:`~ctypes.Array` type, the newly created array is
+    initialized with the values from ``seq``. ``seq`` must have as many elements
+    as the array type.
 
-    In both cases, if a structure field type or the array element type is itself a structure or array type, the
-    corresponding value from ``seq`` is recursively converted as well.
+    In both cases, if a structure field type or the array element type is itself
+    a structure or array type, the corresponding value from ``seq`` is
+    recursively converted as well.
     """
 
     if issubclass(tp, Structure):
@@ -712,11 +724,13 @@ class UnknownPointer(c_void_p):
 
     Not to be confused with a ``^v`` void pointer.
 
-    Usually a ``^?`` is a function pointer, but because the encoding doesn't contain the function signature,
-    you need to manually create a CFUNCTYPE with the proper types, and cast this pointer to it.
+    Usually a ``^?`` is a function pointer, but because the encoding doesn't
+    contain the function signature, you need to manually create a CFUNCTYPE with
+    the proper types, and cast this pointer to it.
 
-    ``^{?}`` and ``^(?)`` are pointers to a structure or union (respectively) with unknown name and fields. Such a type
-    also cannot be used meaningfully without casting it to the correct pointer type first.
+    ``^{?}`` and ``^(?)`` are pointers to a structure or union (respectively)
+    with unknown name and fields. Such a type also cannot be used meaningfully
+    without casting it to the correct pointer type first.
     """
 
 

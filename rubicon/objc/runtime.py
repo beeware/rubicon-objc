@@ -79,18 +79,22 @@ def load_library(name):
 
     If the library could not be found, a :class:`ValueError` is raised.
 
-    Internally, this function uses :func:`ctypes.util.find_library` to search for the library in the system-standard
-    locations. If the library cannot be found this way, it is attempted to load the library from certain hardcoded
-    locations, as a fallback for systems where ``find_library`` does not work (such as iOS).
+    Internally, this function uses :func:`ctypes.util.find_library` to search
+    for the library in the system-standard locations. If the library cannot be
+    found this way, it is attempted to load the library from certain hardcoded
+    locations, as a fallback for systems where ``find_library`` does not work
+    (such as iOS).
     """
 
     path = util.find_library(name)
     if path is not None:
         return CDLL(path)
 
-    # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library doesn't work and always returns None.
-    # This is because the sandbox hides all system libraries from the filesystem and pretends they don't exist.
-    # However they can still be loaded if the path is known, so we try to load the library from a few known locations.
+    # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library
+    # doesn't work and always returns None. This is because the sandbox hides
+    # all system libraries from the filesystem and pretends they don't exist.
+    # However they can still be loaded if the path is known, so we try to load
+    # the library from a few known locations.
 
     for loc in _lib_path:
         try:
@@ -199,7 +203,9 @@ class IMP(c_void_p):
 
 
 class Method(c_void_p):
-    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__ type from ``<objc/runtime.h>``."""
+    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__
+    type from ``<objc/runtime.h>``.
+    """
 
 
 class Ivar(c_void_p):
@@ -710,10 +716,12 @@ def _msg_send_for_types(restype, argtypes):
     with the given return and argument types.
 
     :param restype: The return type of the method to be called.
-    :param argtypes: The argument types of the method to be called, excluding the self and _cmd arguments.
-    :return: A C function for ``objc_msgSend`` or one of its variants, with its return and argument types configured
-        correctly based on the ``restype`` and ``argtypes`` arguments.
-        The ``restype`` and ``argtypes`` attributes of the returned function *must not* be modified.
+    :param argtypes: The argument types of the method to be called, excluding
+        the self and _cmd arguments.
+    :return: A C function for ``objc_msgSend`` or one of its variants, with its
+        return and argument types configured correctly based on the ``restype``
+        and ``argtypes`` arguments. The ``restype`` and ``argtypes`` attributes
+        of the returned function *must not* be modified.
     """
 
     try:
@@ -728,13 +736,14 @@ def _msg_send_for_types(restype, argtypes):
         else:
             send_name = "objc_msgSend"
 
-        # Looking up a C function via attribute access (e. g. libobjc.objc_msgSend)
-        # always returns the same function object.
-        # Because we need to set the function object's restype and argtypes, this would not be thread safe,
-        # and it also makes it impossible to cache multiple differently configured copies of the same function
-        # like we do here.
-        # Instead, we look up the C function using subscript syntax (e. g. libobjc['objc_msgSend']),
-        # which returns a new function object every time.
+        # Looking up a C function via attribute access (e. g.
+        # libobjc.objc_msgSend) always returns the same function object. Because
+        # we need to set the function object's restype and argtypes, this would
+        # not be thread safe, and it also makes it impossible to cache multiple
+        # differently configured copies of the same function like we do here.
+        # Instead, we look up the C function using subscript syntax (e. g.
+        # libobjc['objc_msgSend']), which returns a new function object every
+        # time.
         send = libobjc[send_name]
         send.restype = restype
         send.argtypes = [objc_id, SEL] + argtypes
@@ -751,38 +760,46 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     .. note::
 
-        Some Objective-C methods take variadic arguments (varargs), for example `+[NSString stringWithFormat:]
-        <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
-        When using :func:`send_message`, variadic arguments are treated differently from regular arguments:
-        they are not passed as normal function arguments in ``*args``, but as a list in a separate ``varargs``
+        Some Objective-C methods take variadic arguments (varargs), for example
+        `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
+        When using :func:`send_message`, variadic arguments are treated
+        differently from regular arguments: they are not passed as normal
+        function arguments in ``*args``, but as a list in a separate ``varargs``
         keyword argument.
 
-        This explicit separation of regular and variadic arguments protects against accidentally passing too many
-        arguments into a method. By default these extra arguments would be considered varargs and passed on to the
-        method, even if the method in question doesn't take varargs. Because of how the Objective-C runtime and most
-        C calling conventions work, this error would otherwise be silently ignored.
+        This explicit separation of regular and variadic arguments protects
+        against accidentally passing too many arguments into a method. By
+        default these extra arguments would be considered varargs and passed on
+        to the method, even if the method in question doesn't take varargs.
+        Because of how the Objective-C runtime and most C calling conventions
+        work, this error would otherwise be silently ignored.
 
-        The types of varargs are not included in the ``argtypes`` list. Instead, the values are automatically
-        converted to C types using the default :mod:`ctypes` argument conversion rules. To ensure that all varargs are
-        converted to the expected C types, it is recommended to manually convert all varargs to :mod:`ctypes` types
-        instead of relying on automatic conversions. For example:
+        The types of varargs are not included in the ``argtypes`` list. Instead,
+        the values are automatically converted to C types using the default
+        :mod:`ctypes` argument conversion rules. To ensure that all varargs are
+        converted to the expected C types, it is recommended to manually convert
+        all varargs to :mod:`ctypes` types instead of relying on automatic
+        conversions. For example:
 
         .. code-block:: python
 
             send_message(
-                NSString, "stringWithFormat:",
-                at("%i %s %@"),
-                restype=objc_id, argtypes=[objc_id],
-                varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
+                NSString, "stringWithFormat:", at("%i %s %@"), restype=objc_id,
+                argtypes=[objc_id], varargs=[c_int(123), cast(b"C string",
+                c_char_p), at("ObjC string")],
             )
 
-    :param receiver: The object on which to call the method, as an :class:`ObjCInstance` or :class:`objc_id`.
-    :param selector: The name of the method as a :class:`str`, :class:`bytes`, or :class:`SEL`.
+    :param receiver: The object on which to call the method, as an
+        :class:`ObjCInstance` or :class:`objc_id`.
+    :param selector: The name of the method as a :class:`str`, :class:`bytes`,
+        or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
-    :param argtypes: The argument types of the method, as a :class:`list`. Defaults to ``[]``.
-    :param varargs: Variadic arguments for the method, as a :class:`list`. Defaults to ``[]``.
-        These arguments are converted according to the default :mod:`ctypes` conversion rules.
+    :param argtypes: The argument types of the method, as a :class:`list`.
+        Defaults to ``[]``.
+    :param varargs: Variadic arguments for the method, as a :class:`list`.
+        Defaults to ``[]``. These arguments are converted according to the
+        default :mod:`ctypes` conversion rules.
     """
 
     try:
@@ -908,7 +925,8 @@ def send_super(
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
         raise TypeError(
-            f"Missing or invalid cls argument: expected an ObjCClass or Class, not {type(cls).__module__}.{type(cls).__qualname__}\n"
+            f"Missing or invalid cls argument: expected an ObjCClass or Class, "
+            f"not {type(cls).__module__}.{type(cls).__qualname__}\n"
             f"send_super requires the current class to be passed explicitly as the first argument. "
             f"To fix this error, pass the special name __class__ as the first argument to send_super."
         )
@@ -955,15 +973,18 @@ def send_super(
     return result
 
 
-# Collection of the ctypes C function pointer objects of the implementations of all Python-defined Objective-C methods.
-# When an Objective-C method implemented in Python is created, the Python callable that implements the method
-# is wrapped as a C function pointer using ctypes. This C function pointer object must be kept alive manually
-# from Python for as long as the C function pointer is in use. Objective-C method implementations almost always remain
-# referenced until the process terminates, so the function pointer objects are never removed again
-# from this collection after they are added.
-# (There are rare cases where method implementations might become unreferenced early,
-# for example if a method is swizzled and the old implementation is never called again, but it's impossible to detect
-# when this happens and is rare enough that it's not worth handling.)
+# Collection of the ctypes C function pointer objects of the implementations of
+# all Python-defined Objective-C methods. When an Objective-C method implemented
+# in Python is created, the Python callable that implements the method is
+# wrapped as a C function pointer using ctypes. This C function pointer object
+# must be kept alive manually from Python for as long as the C function pointer
+# is in use. Objective-C method implementations almost always remain referenced
+# until the process terminates, so the function pointer objects are never
+# removed again from this collection after they are added. (There are rare cases
+# where method implementations might become unreferenced early, for example if a
+# method is swizzled and the old implementation is never called again, but it's
+# impossible to detect when this happens and is rare enough that it's not worth
+# handling.)
 _keep_alive_imps = []
 
 
@@ -972,16 +993,22 @@ def add_method(cls, selector, method, encoding, replace=False):
 
     To add a class method, add an instance method to the metaclass.
 
-    :param cls: The Objective-C class to which to add the method, as an :class:`ObjCClass` or :class:`Class`.
-    :param selector: The name for the new method, as a :class:`str`, :class:`bytes`, or :class:`SEL`.
-    :param method: The method implementation, as a Python callable or a C function address.
-    :param encoding: The method's signature (return type and argument types) as a :class:`list`.
-        The types of the implicit ``self`` and ``_cmd`` parameters must be included in the signature.
-    :param replace: If the class already implements a method with the given name, replaces the current implementation
-        if ``True``. Raises a :class:`ValueError` error otherwise.
-    :return: The ctypes C function pointer object that was created for the method's implementation.
-        This return value can be ignored. (In version 0.4.0 and older, callers were required to manually
-        keep a reference to this function pointer object to ensure that it isn't garbage-collected.
+    :param cls: The Objective-C class to which to add the method, as an
+        :class:`ObjCClass` or :class:`Class`.
+    :param selector: The name for the new method, as a :class:`str`,
+        :class:`bytes`, or :class:`SEL`.
+    :param method: The method implementation, as a Python callable or a C
+        function address.
+    :param encoding: The method's signature (return type and argument types) as
+        a :class:`list`. The types of the implicit ``self`` and ``_cmd``
+        parameters must be included in the signature.
+    :param replace: If the class already implements a method with the given
+        name, replaces the current implementation if ``True``. Raises a
+        :class:`ValueError` error otherwise.
+    :return: The ctypes C function pointer object that was created for the
+        method's implementation. This return value can be ignored. (In version
+        0.4.0 and older, callers were required to manually keep a reference to
+        this function pointer object to ensure that it isn't garbage-collected.
         Rubicon now does this automatically.)
     """
 
@@ -1026,12 +1053,14 @@ def get_ivar(obj, varname, weak=False):
 
     The returned object is a :mod:`ctypes` data object.
 
-    For non-object types (everything except :class:`objc_id` and subclasses), the returned data object is backed by the
-    ivar's actual memory. This means that the data object is only usable as long as the "owner" object is alive, and
-    writes to it will directly change the ivar's value.
+    For non-object types (everything except :class:`objc_id` and subclasses),
+    the returned data object is backed by the ivar's actual memory. This means
+    that the data object is only usable as long as the "owner" object is alive,
+    and writes to it will directly change the ivar's value.
 
-    For object types, the returned data object is independent of the ivar's memory. This is because object ivars may
-    be weak, and thus cannot always be accessed directly by their address.
+    For object types, the returned data object is independent of the ivar's
+    memory. This is because object ivars may be weak, and thus cannot always be
+    accessed directly by their address.
     """
 
     try:
@@ -1073,11 +1102,14 @@ def set_ivar(obj, varname, value, weak=False):
 
     if not isinstance(value, vartype):
         raise TypeError(
-            f"Incompatible type for ivar {varname!r}: {type(value)!r} is not a subclass of the ivar's type {vartype!r}"
+            f"Incompatible type for ivar {varname!r}: {type(value)!r} "
+            f"is not a subclass of the ivar's type {vartype!r}"
         )
     elif sizeof(type(value)) != sizeof(vartype):
         raise TypeError(
-            f"Incompatible type for ivar {varname!r}: {type(value)!r} has size {sizeof(type(value))}, but the ivar's type {vartype!r} has size {sizeof(vartype)}"
+            f"Incompatible type for ivar {varname!r}: {type(value)!r} "
+            f"has size {sizeof(type(value))}, but the ivar's type {vartype!r} "
+            f"has size {sizeof(vartype)}"
         )
 
     if weak:
@@ -1095,13 +1127,12 @@ def autoreleasepool():
     """A context manager that has the same effect as a @autoreleasepool block
     in Objective-C.
 
-    Any objects that are autoreleased within the context will receive a
-    release message when exiting the context. When running an event
-    loop, AppKit will create an autorelease pool at the beginning of
-    each cycle of the event loop and drain it at the end. You therefore
-    do not need to use @autoreleasepool blocks when running an event
-    loop. However, they may be still be useful when your code
-    temporarily allocates large amounts of memory which you want to
+    Any objects that are autoreleased within the context will receive a release
+    message when exiting the context. When running an event loop, AppKit will
+    create an autorelease pool at the beginning of each cycle of the event loop
+    and drain it at the end. You therefore do not need to use @autoreleasepool
+    blocks when running an event loop. However, they may be still be useful when
+    your code temporarily allocates large amounts of memory which you want to
     explicitly free before the end of a cycle.
     """
     pool = libobjc.objc_autoreleasePoolPush()

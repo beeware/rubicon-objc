@@ -271,7 +271,8 @@ class ObjCMutableListInstance(ObjCListInstance):
             arr = ns_from_py(value)
             if not isinstance(arr, NSArray):
                 raise TypeError(
-                    f"{type(value).__module__}.{type(value).__qualname__} is not convertible to NSArray"
+                    f"{type(value).__module__}.{type(value).__qualname__} "
+                    "is not convertible to NSArray"
                 )
 
             start, stop, step = item.indices(len(self))
@@ -283,7 +284,8 @@ class ObjCMutableListInstance(ObjCListInstance):
                 indices = range(start, stop, step)
                 if len(arr) != len(indices):
                     raise ValueError(
-                        f"attempt to assign sequence of size {len(value)} to extended slice of size {len(indices)}"
+                        f"attempt to assign sequence of size {len(value)} "
+                        f"to extended slice of size {len(indices)}"
                     )
 
                 for idx, obj in zip(indices, arr):
