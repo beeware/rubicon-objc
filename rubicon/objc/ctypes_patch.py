@@ -132,9 +132,7 @@ def unwrap_mappingproxy(proxy):
 
     if not isinstance(proxy, types.MappingProxyType):
         raise TypeError(
-            "Expected a mapping proxy object, not {tp.__module__}.{tp.__qualname__}".format(
-                tp=type(proxy)
-            )
+            f"Expected a mapping proxy object, not {type(proxy).__module__}.{type(proxy).__qualname__}"
         )
 
     return mappingproxyobject.from_address(id(proxy)).mapping
@@ -152,9 +150,7 @@ def get_stgdict_of_type(tp):
 
     if not isinstance(tp, type):
         raise TypeError(
-            "Expected a type object, not {tptp.__module__}.{tptp.__qualname__}".format(
-                tptp=type(tp)
-            )
+            f"Expected a type object, not {type(tp).__module__}.{type(tp).__qualname__}"
         )
 
     stgdict = tp.__dict__
@@ -168,9 +164,7 @@ def get_stgdict_of_type(tp):
     # we can do here.
     if type(stgdict).__name__ != "StgDict":
         raise TypeError(
-            "The given type's dict must be a StgDict, not {tp.__module__}.{tp.__qualname__}".format(
-                tp=type(stgdict)
-            )
+            f"The given type's dict must be a StgDict, not {type(stgdict).__module__}.{type(stgdict).__qualname__}"
         )
 
     return stgdict
@@ -210,9 +204,7 @@ def make_callback_returnable(ctype):
         actual_size = ctypes.sizeof(ctype)
         if size != 0 and size != actual_size:
             raise ValueError(
-                "getfunc for ctype {}: Requested size {} does not match actual size {}".format(
-                    ctype, size, actual_size
-                )
+                f"getfunc for ctype {ctype}: Requested size {size} does not match actual size {actual_size}"
             )
 
         return ctype.from_buffer_copy(ctypes.string_at(ptr, actual_size))
@@ -222,9 +214,7 @@ def make_callback_returnable(ctype):
         actual_size = ctypes.sizeof(ctype)
         if size != 0 and size != actual_size:
             raise ValueError(
-                "setfunc for ctype {}: Requested size {} does not match actual size {}".format(
-                    ctype, size, actual_size
-                )
+                f"setfunc for ctype {ctype}: Requested size {size} does not match actual size {actual_size}"
             )
 
         ctypes.memmove(ptr, ctypes.addressof(value), actual_size)

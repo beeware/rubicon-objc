@@ -314,15 +314,11 @@ def _ctype_for_unknown_encoding(encoding):
         return ctype_for_encoding(b"@")
     elif encoding.startswith(b"b"):
         raise ValueError(
-            "A bit field encoding cannot appear outside a structure: {}".format(
-                encoding
-            )
+            f"A bit field encoding cannot appear outside a structure: {encoding}"
         )
     elif encoding.startswith(b"?"):
         raise ValueError(
-            "An unknown encoding cannot appear outside of a pointer: {}".format(
-                encoding
-            )
+            f"An unknown encoding cannot appear outside of a pointer: {encoding}"
         )
     elif encoding.startswith(b"T") or encoding.startswith(b"t"):
         raise ValueError(f"128-bit integers are not supported by ctypes: {encoding}")
@@ -550,10 +546,8 @@ def ctypes_for_method_encoding(encoding):
 def _struct_for_sequence(seq, struct_type):
     if len(seq) != len(struct_type._fields_):
         raise ValueError(
-            "Struct type {tp.__module__}.{tp.__qualname__} has {fields_len} fields, "
-            "but a sequence of length {seq_len} was given".format(
-                tp=struct_type, fields_len=len(struct_type._fields_), seq_len=len(seq)
-            )
+            f"Struct type {struct_type.__module__}.{struct_type.__qualname__} has {len(struct_type._fields_)} fields, "
+            f"but a sequence of length {len(seq)} was given"
         )
 
     values = []
@@ -571,10 +565,8 @@ def _struct_for_sequence(seq, struct_type):
 def _array_for_sequence(seq, array_type):
     if len(seq) != array_type._length_:
         raise ValueError(
-            "Array type {tp.__module__}.{tp.__qualname__} has {array_len} fields, "
-            "but a sequence of length {seq_len} was given".format(
-                tp=array_type, array_len=array_type._length_, seq_len=len(seq)
-            )
+            f"Array type {array_type.__module__}.{array_type.__qualname__} has {array_type._length_} fields, "
+            f"but a sequence of length {len(seq)} was given"
         )
 
     if issubclass(array_type._type_, (Structure, Array)):
@@ -610,9 +602,7 @@ def compound_value_for_sequence(seq, tp):
         return _array_for_sequence(seq, tp)
     else:
         raise TypeError(
-            "Don't know how to convert a sequence to a {tp.__module__}.{tp.__qualname__}".format(
-                tp=tp
-            )
+            f"Don't know how to convert a sequence to a {tp.__module__}.{tp.__qualname__}"
         )
 
 

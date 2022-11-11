@@ -160,9 +160,7 @@ class ObjCMethod:
 
         if len(args) != len(self.method_argtypes):
             raise TypeError(
-                "Method {} takes {} arguments, but got {} arguments".format(
-                    self.name, len(args), len(self.method_argtypes)
-                )
+                f"Method {self.name} takes {len(args)} arguments, but got {len(self.method_argtypes)} arguments"
             )
 
         if convert_args:
@@ -231,9 +229,7 @@ class ObjCPartialMethod:
         self.methods = {}  # Initialized in ObjCClass._load_methods
 
     def __repr__(self):
-        return "{cls.__module__}.{cls.__qualname__}({self.name_start!r})".format(
-            cls=type(self), self=self
-        )
+        return f"{type(self).__module__}.{type(self).__qualname__}({self.name_start!r})"
 
     def __call__(self, receiver, first_arg=_sentinel, **kwargs):
         if first_arg is ObjCPartialMethod._sentinel:
@@ -251,11 +247,8 @@ class ObjCPartialMethod:
             name, order = self.methods[rest]
         except KeyError:
             raise ValueError(
-                "No method was found starting with {!r} and with keywords {}\nKnown keywords are:\n{}".format(
-                    self.name_start,
-                    set(kwargs),
-                    "\n".join(repr(keywords) for keywords in self.methods),
-                )
+                f"No method was found starting with {self.name_start!r} and with keywords {set(kwargs)}\nKnown keywords are:\n"
+                + "\n".join(repr(keywords) for keywords in self.methods)
             )
 
         meth = receiver.objc_class._cache_method(name)
@@ -276,9 +269,7 @@ class ObjCBoundMethod:
             self.receiver = receiver
 
     def __repr__(self):
-        return "{cls.__module__}.{cls.__qualname__}({self.method}, {self.receiver})".format(
-            cls=type(self), self=self
-        )
+        return f"{type(self).__module__}.{type(self).__qualname__}({self.method}, {self.receiver})"
 
     def __call__(self, *args, **kwargs):
         """Call the method with the given arguments."""
@@ -457,9 +448,8 @@ class objc_property:
 
     def _get_property_attributes(self):
         attrs = [
-            objc_property_attribute_t(
-                b"T", encoding_for_ctype(self.vartype)
-            ),  # Type: vartype
+            # Type: vartype
+            objc_property_attribute_t(b"T", encoding_for_ctype(self.vartype)),
         ]
         if self._is_objc_object:
             reference = b"W" if self.weak else b"&"
@@ -967,12 +957,7 @@ class ObjCInstance:
 
         if pyo_wrapper.value is None:
             raise AttributeError(
-                "{}.{} {} has no attribute {}".format(
-                    type(self).__module__,
-                    type(self).__qualname__,
-                    self.objc_class.name,
-                    name,
-                )
+                f"{type(self).__module__}.{type(self).__qualname__} {self.objc_class.name} has no attribute {name}"
             )
         address = get_ivar(pyo_wrapper, "wrapped_pointer")
         pyo = cast(address.value, py_object)
@@ -1033,12 +1018,7 @@ class ObjCInstance:
             pyo_wrapper = libobjc.objc_getAssociatedObject(self, key)
             if pyo_wrapper.value is None:
                 raise AttributeError(
-                    "{}.{} {} has no attribute {}".format(
-                        type(self).__module__,
-                        type(self).__qualname__,
-                        self.objc_class.name,
-                        name,
-                    )
+                    f"{type(self).__module__}.{type(self).__qualname__} {self.objc_class.name} has no attribute {name}"
                 )
             # If set, clear the instance attribute / associated object.
             libobjc.objc_setAssociatedObject(self, key, None, 0x301)
@@ -1116,16 +1096,16 @@ class ObjCClass(ObjCInstance, type):
         # Check that the superclass is an ObjCClass.
         if not isinstance(superclass, ObjCClass):
             raise TypeError(
-                "The superclass of an Objective-C class must be an ObjCClass, "
-                "not a {cls.__module__}.{cls.__qualname__}".format(cls=type(superclass))
+                f"The superclass of an Objective-C class must be an ObjCClass, "
+                f"not a {type(superclass).__module__}.{type(superclass).__qualname__}"
             )
 
         # Check that all protocols are ObjCProtocols, and that there are no duplicates.
         for proto in protocols:
             if not isinstance(proto, ObjCProtocol):
                 raise TypeError(
-                    "The protocols list of an Objective-C class must contain ObjCProtocol objects, "
-                    "not {cls.__module__}.{cls.__qualname__}".format(cls=type(proto))
+                    f"The protocols list of an Objective-C class must contain ObjCProtocol objects, "
+                    f"not {type(proto).__module__}.{type(proto).__qualname__}"
                 )
             elif protocols.count(proto) > 1:
                 raise ValueError(f"Protocol {proto.name} is adopted more than once")
@@ -1407,12 +1387,7 @@ class ObjCClass(ObjCInstance, type):
         self.objc_class.forced_properties.add(name)
 
     def __repr__(self):
-        return "<{}.{}: {} at {:#x}>".format(
-            type(self).__module__,
-            type(self).__qualname__,
-            self.name,
-            self.ptr.value,
-        )
+        return f"<{type(self).__module__}.{type(self).__qualname__}: {self.name} at {self.ptr.value:#x}>"
 
     def __str__(self):
         return f"{type(self).__name__}({self.name!r})"
@@ -1447,9 +1422,7 @@ class ObjCClass(ObjCInstance, type):
             return bool(subclass.isSubclassOfClass(self))
         else:
             raise TypeError(
-                "issubclass(X, {self!r}) arg 1 must be an ObjCClass, not {tp.__module__}.{tp.__qualname__}".format(
-                    self=self, tp=type(subclass)
-                )
+                f"issubclass(X, {self!r}) arg 1 must be an ObjCClass, not {type(subclass).__module__}.{type(subclass).__qualname__}"
             )
 
     def _load_methods(self):
@@ -1587,9 +1560,7 @@ def py_from_ns(nsobj):
             return nsobj.doubleValue
         else:
             raise TypeError(
-                "NSNumber containing unsupported type {!r} cannot be converted to a Python object".format(
-                    objc_type
-                )
+                f"NSNumber containing unsupported type {objc_type!r} cannot be converted to a Python object"
             )
     elif nsobj.isKindOfClass(NSString):
         return str(nsobj)
@@ -1665,9 +1636,7 @@ def ns_from_py(pyobj):
         return ObjCInstance(NSNumber.numberWithDouble_(pyobj, convert_result=False))
     else:
         raise TypeError(
-            "Don't know how to convert a {cls.__module__}.{cls.__qualname__} to a Foundation object".format(
-                cls=type(pyobj)
-            )
+            f"Don't know how to convert a {type(pyobj).__module__}.{type(pyobj).__qualname__} to a Foundation object"
         )
 
 
@@ -1739,8 +1708,8 @@ class ObjCProtocol(ObjCInstance):
             for base in bases:
                 if not isinstance(base, ObjCProtocol):
                     raise TypeError(
-                        "An Objective-C protocol can only extend ObjCProtocol objects, "
-                        "not {cls.__module__}.{cls.__qualname__}".format(cls=type(base))
+                        f"An Objective-C protocol can only extend ObjCProtocol objects, "
+                        f"not {type(base).__module__}.{type(base).__qualname__}"
                     )
 
             # Allocate the protocol object.
@@ -1763,9 +1732,7 @@ class ObjCProtocol(ObjCInstance):
         return super().__new__(cls, ptr)
 
     def __repr__(self):
-        return "<{cls.__module__}.{cls.__qualname__}: {self.name} at {self.ptr.value:#x}>".format(
-            cls=type(self), self=self
-        )
+        return f"<{type(self).__module__}.{type(self).__qualname__}: {self.name} at {self.ptr.value:#x}>"
 
     def __instancecheck__(self, instance):
         """Check whether the given object conforms to this protocol.
@@ -1797,10 +1764,8 @@ class ObjCProtocol(ObjCInstance):
             return bool(libobjc.protocol_conformsToProtocol(subclass, self))
         else:
             raise TypeError(
-                "issubclass(X, {self!r}) arg 1 must be an ObjCClass or ObjCProtocol, "
-                "not {tp.__module__}.{tp.__qualname__}".format(
-                    self=self, tp=type(subclass)
-                )
+                f"issubclass(X, {self!r}) arg 1 must be an ObjCClass or ObjCProtocol, "
+                f"not {type(subclass).__module__}.{type(subclass).__qualname__}"
             )
 
 
@@ -2093,9 +2058,8 @@ class Block:
             for name, param in signature.parameters.items():
                 if param.annotation == inspect.Parameter.empty:
                     raise ValueError(
-                        "Function has no argument type annotation for parameter "
-                        + repr(name)
-                        + " - please add one, or pass return and argument types directly into Block"
+                        f"Function has no argument type annotation for parameter {name!r} - "
+                        f"please add one, or pass return and argument types directly into Block"
                     )
 
                 argtypes.append(param.annotation)

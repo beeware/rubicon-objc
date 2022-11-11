@@ -162,9 +162,7 @@ class ObjCStrInstance(ObjCInstance):
     def _find(self, sub, start=None, end=None, *, reverse):
         if not isinstance(sub, (str, NSString)):
             raise TypeError(
-                "must be str or NSString, not {tp.__module__}.{tp.__qualname__}".format(
-                    tp=type(sub)
-                )
+                f"must be str or NSString, not {type(sub).__module__}.{type(sub).__qualname__}"
             )
 
         start, end, _ = slice(start, end).indices(len(self))
@@ -256,7 +254,7 @@ class ObjCListInstance(ObjCInstance):
     def index(self, value):
         idx = self.indexOfObject_(value)
         if idx == NSNotFound:
-            raise ValueError("%r is not in list" % value)
+            raise ValueError(f"{value!r} is not in list")
         return idx
 
     def count(self, value):
@@ -273,9 +271,7 @@ class ObjCMutableListInstance(ObjCListInstance):
             arr = ns_from_py(value)
             if not isinstance(arr, NSArray):
                 raise TypeError(
-                    "{cls.__module__}.{cls.__qualname__} is not convertible to NSArray".format(
-                        cls=type(value)
-                    )
+                    f"{type(value).__module__}.{type(value).__qualname__} is not convertible to NSArray"
                 )
 
             start, stop, step = item.indices(len(self))
@@ -287,9 +283,7 @@ class ObjCMutableListInstance(ObjCListInstance):
                 indices = range(start, stop, step)
                 if len(arr) != len(indices):
                     raise ValueError(
-                        "attempt to assign sequence of size {} to extended slice of size {}".format(
-                            len(value), len(indices)
-                        )
+                        f"attempt to assign sequence of size {len(value)} to extended slice of size {len(indices)}"
                     )
 
                 for idx, obj in zip(indices, arr):

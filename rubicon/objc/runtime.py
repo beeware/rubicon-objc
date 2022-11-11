@@ -799,9 +799,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     if not isinstance(receiver, objc_id):
         raise TypeError(
-            "Receiver must be an ObjCInstance or objc_id, not {tp.__module__}.{tp.__qualname__}".format(
-                tp=type(receiver)
-            )
+            f"Receiver must be an ObjCInstance or objc_id, not {type(receiver).__module__}.{type(receiver).__qualname__}"
         )
 
     if not isinstance(selector, SEL):
@@ -815,9 +813,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     if len(args) != len(argtypes):
         raise TypeError(
-            "Inconsistent number of arguments ({}) and argument types ({})".format(
-                len(args), len(argtypes)
-            )
+            f"Inconsistent number of arguments ({len(args)}) and argument types ({len(argtypes)})"
         )
 
     send = _msg_send_for_types(restype, argtypes)
@@ -908,19 +904,15 @@ def send_super(
 
     if len(args) != len(argtypes):
         raise TypeError(
-            "Inconsistent number of arguments ({}) and argument types ({})".format(
-                len(args), len(argtypes)
-            )
+            f"Inconsistent number of arguments ({len(args)}) and argument types ({len(argtypes)})"
         )
 
     if not isinstance(cls, Class):
         # Kindly remind the caller that the API has changed
         raise TypeError(
-            "Missing or invalid cls argument: expected an ObjCClass or Class, not {tp.__module__}.{tp.__qualname__}\n"
-            "send_super requires the current class to be passed explicitly as the first argument. "
-            "To fix this error, pass the special name __class__ as the first argument to send_super.".format(
-                tp=type(cls)
-            )
+            f"Missing or invalid cls argument: expected an ObjCClass or Class, not {type(cls).__module__}.{type(cls).__qualname__}\n"
+            f"send_super requires the current class to be passed explicitly as the first argument. "
+            f"To fix this error, pass the special name __class__ as the first argument to send_super."
         )
 
     if not _allow_dealloc and selector.name == b"dealloc":
@@ -942,9 +934,7 @@ def send_super(
         receiver = cast(receiver, objc_id)
     else:
         raise TypeError(
-            "Invalid type for receiver: {tp.__module__}.{tp.__qualname__}".format(
-                tp=type(receiver)
-            )
+            f"Invalid type for receiver: {type(receiver).__module__}.{type(receiver).__qualname__}"
         )
 
     super_ptr = libobjc.class_getSuperclass(cls)
@@ -1086,15 +1076,11 @@ def set_ivar(obj, varname, value, weak=False):
 
     if not isinstance(value, vartype):
         raise TypeError(
-            "Incompatible type for ivar {!r}: {!r} is not a subclass of the ivar's type {!r}".format(
-                varname, type(value), vartype
-            )
+            f"Incompatible type for ivar {varname!r}: {type(value)!r} is not a subclass of the ivar's type {vartype!r}"
         )
     elif sizeof(type(value)) != sizeof(vartype):
         raise TypeError(
-            "Incompatible type for ivar {!r}: {!r} has size {}, but the ivar's type {!r} has size {}".format(
-                varname, type(value), sizeof(type(value)), vartype, sizeof(vartype)
-            )
+            f"Incompatible type for ivar {varname!r}: {type(value)!r} has size {sizeof(type(value))}, but the ivar's type {vartype!r} has size {sizeof(vartype)}"
         )
 
     if weak:

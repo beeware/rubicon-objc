@@ -8,7 +8,7 @@
 
 __version__ = "0.4.2"
 
-# `api`, `runtime` and `tupers` are only included for clarity. They are not
+# `api`, `runtime` and `types` are only included for clarity. They are not
 # strictly necessary, because the from-imports below also import the types and
 # runtime modules and implicitly add them to the rubicon.objc namespace.
 #

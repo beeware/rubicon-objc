@@ -86,7 +86,7 @@ class _CDataMeta(type):
             return _array_type_cache[self, count]
         except KeyError:
             array_type = type(
-                f"{self.__name__}_Array_{str(count)}",
+                f"{self.__name__}_Array_{count}",
                 (Array,),
                 {"_type_": self, "_length_": count},
             )

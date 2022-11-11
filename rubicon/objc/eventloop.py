@@ -55,16 +55,13 @@ CFAbsoluteTime = CFTimeInterval
 
 class CFRunLoopTimerContext(Structure):
     _fields_ = [
-        (
-            "copyDescription",
-            CFUNCTYPE(CFStringRef, c_void_p),
-        ),  # CFStringRef (*copyDescription)(const void *info)
+        # CFStringRef (*copyDescription)(const void *info)
+        ("copyDescription", CFUNCTYPE(CFStringRef, c_void_p)),
         ("info", c_void_p),
-        ("release", CFUNCTYPE(None, c_void_p)),  # void (*release)(const void *info)
-        (
-            "retain",
-            CFUNCTYPE(None, c_void_p),
-        ),  # const void *(*retain)(const void *info)
+        # void (*release)(const void *info)
+        ("release", CFUNCTYPE(None, c_void_p)),
+        # const void *(*retain)(const void *info)
+        ("retain", CFUNCTYPE(None, c_void_p)),
         ("version", CFIndex),
     ]
 
@@ -89,16 +86,13 @@ kCFSocketAutomaticallyReenableWriteCallBack = 8
 
 class CFSocketContext(Structure):
     _fields_ = [
-        (
-            "copyDescription",
-            CFUNCTYPE(CFStringRef, c_void_p),
-        ),  # CFStringRef (*copyDescription)(const void *info)
+        # CFStringRef (*copyDescription)(const void *info)
+        ("copyDescription", CFUNCTYPE(CFStringRef, c_void_p)),
         ("info", c_void_p),
-        ("release", CFUNCTYPE(None, c_void_p)),  # void (*release)(const void *info)
-        (
-            "retain",
-            CFUNCTYPE(None, c_void_p),
-        ),  # const void *(*retain)(const void *info)
+        # void (*release)(const void *info)
+        ("release", CFUNCTYPE(None, c_void_p)),
+        # const void *(*retain)(const void *info)
+        ("retain", CFUNCTYPE(None, c_void_p)),
         ("version", CFIndex),
     ]
 

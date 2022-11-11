@@ -1135,7 +1135,7 @@ class RubiconTest(unittest.TestCase):
         full = NSURL.URLWithString("contributing/", relativeToURL=base)
 
         self.assertEqual(
-            "Visit %s for details" % full.absoluteURL,
+            f"Visit {full.absoluteURL} for details",
             "Visit https://pybee.org/contributing/ for details",
         )
 
