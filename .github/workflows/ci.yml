@@ -18,7 +18,7 @@ jobs:
         - 'package'
     steps:
     - name: Check out code
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Set up Python
@@ -40,7 +40,7 @@ jobs:
     runs-on: macOS-11
     steps:
     - name: Check out code
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Set up Python 3.7
@@ -65,7 +65,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Check out code
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Set up Python 3.7
@@ -92,7 +92,7 @@ jobs:
         # python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
     steps:
     - name: Check out code
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
