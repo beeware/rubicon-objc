@@ -31,175 +31,60 @@ simple issues and standardize code formatting. It does this by installing a git
 hook that automatically runs a series of code linters prior to finalizing any
 git commit. To enable pre-commit, run:
 
-.. tabs::
+.. code-block:: sh
 
-  .. group-tab:: macOS
-
-    .. code-block:: bash
-
-      (venv) $ pre-commit install
-      pre-commit installed at .git/hooks/pre-commit
-
-  .. group-tab:: Linux
-
-    .. code-block:: bash
-
-      (venv) $ pre-commit install
-      pre-commit installed at .git/hooks/pre-commit
-
-  .. group-tab:: Windows
-
-    .. code-block:: doscon
-
-      (venv) C:\...>pre-commit install
-      pre-commit installed at .git/hooks/pre-commit
+    (venv) $ pre-commit install
+    pre-commit installed at .git/hooks/pre-commit
 
 When you commit any change, pre-commit will run automatically. If there are any
 issues found with the commit, this will cause your commit to fail. Where possible,
 pre-commit will make the changes needed to correct the problems it has found:
 
-.. tabs::
+.. code-block:: sh
 
-  .. group-tab:: macOS
+    (venv) $ git add some/interesting_file.py
+    (venv) $ git commit -m "Minor change"
+    black....................................................................Failed
+    - hook id: black
+    - files were modified by this hook
 
-    .. code-block:: bash
+    reformatted some/interesting_file.py
 
-      (venv) $ git add some/interesting_file.py
-      (venv) $ git commit -m "Minor change"
-      black....................................................................Failed
-      - hook id: black
-      - files were modified by this hook
+    All done! ✨ 🍰 ✨
+    1 file reformatted.
 
-      reformatted some/interesting_file.py
+    flake8...................................................................Passed
+    check toml...........................................(no files to check)Skipped
+    check yaml...........................................(no files to check)Skipped
+    check for case conflicts.................................................Passed
+    check docstring is first.................................................Passed
+    fix end of files.........................................................Passed
+    trim trailing whitespace.................................................Passed
+    isort....................................................................Passed
+    pyupgrade................................................................Passed
+    docformatter.............................................................Passed
 
-      All done! ✨ 🍰 ✨
-      1 file reformatted.
-
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
-
-  .. group-tab:: Linux
-
-    .. code-block:: bash
-
-      (venv) $ git add some/interesting_file.py
-      (venv) $ git commit -m "Minor change"
-      black....................................................................Failed
-      - hook id: black
-      - files were modified by this hook
-
-      reformatted some/interesting_file.py
-
-      All done! ✨ 🍰 ✨
-      1 file reformatted.
-
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
-
-  .. group-tab:: Windows
-
-    .. code-block:: doscon
-
-      (venv) C:\...>git add some/interesting_file.py
-      (venv) C:\...>git commit -m "Minor change"
-      black....................................................................Failed
-      - hook id: black
-      - files were modified by this hook
-
-      reformatted some\interesting_file.py
-
-      All done! ✨ 🍰 ✨
-      1 file reformatted.
-
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
 
 You can then re-add any files that were modified as a result of the pre-commit checks,
 and re-commit the change.
 
-.. tabs::
+.. code-block:: sh
 
-  .. group-tab:: macOS
-
-    .. code-block:: bash
-
-      (venv) $ git add some/interesting_file.py
-      (venv) $ git commit -m "Minor change"
-      black....................................................................Passed
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
-      [bugfix e3e0f73] Minor change
-      1 file changed, 4 insertions(+), 2 deletions(-)
-
-  .. group-tab:: Linux
-
-    .. code-block:: bash
-
-      (venv) $ git add some/interesting_file.py
-      (venv) $ git commit -m "Minor change"
-      black....................................................................Passed
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
-      [bugfix e3e0f73] Minor change
-      1 file changed, 4 insertions(+), 2 deletions(-)
-
-  .. group-tab:: Windows
-
-    .. code-block:: doscon
-
-      (venv) C:\...>git add some\interesting_file.py
-      (venv) C:\...>git commit -m "Minor change"
-      black....................................................................Passed
-      flake8...................................................................Passed
-      check toml...........................................(no files to check)Skipped
-      check yaml...........................................(no files to check)Skipped
-      check for case conflicts.................................................Passed
-      check docstring is first.................................................Passed
-      fix end of files.........................................................Passed
-      trim trailing whitespace.................................................Passed
-      isort....................................................................Passed
-      pyupgrade................................................................Passed
-      docformatter.............................................................Passed
+    (venv) $ git add some/interesting_file.py
+    (venv) $ git commit -m "Minor change"
+    black....................................................................Passed
+    flake8...................................................................Passed
+    check toml...........................................(no files to check)Skipped
+    check yaml...........................................(no files to check)Skipped
+    check for case conflicts.................................................Passed
+    check docstring is first.................................................Passed
+    fix end of files.........................................................Passed
+    trim trailing whitespace.................................................Passed
+    isort....................................................................Passed
+    pyupgrade................................................................Passed
+    docformatter.............................................................Passed
+    [bugfix e3e0f73] Minor change
+    1 file changed, 4 insertions(+), 2 deletions(-)
 
 Rubicon uses `tox <https://tox.readthedocs.io/en/latest/>`__ to manage the
 testing process. To set up a testing environment and run the full test suite,
