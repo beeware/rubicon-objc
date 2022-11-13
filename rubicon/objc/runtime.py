@@ -542,7 +542,7 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """The `objc_method_description. <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__
+    """The `objc_method_description <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__
     structure from ``<objc/runtime.h>``.
     """
 
@@ -784,9 +784,12 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         .. code-block:: python
 
             send_message(
-                NSString, "stringWithFormat:", at("%i %s %@"), restype=objc_id,
-                argtypes=[objc_id], varargs=[c_int(123), cast(b"C string",
-                c_char_p), at("ObjC string")],
+                NSString,
+                "stringWithFormat:",
+                at("%i %s %@"),
+                restype=objc_id,
+                argtypes=[objc_id],
+                varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
             )
 
     :param receiver: The object on which to call the method, as an

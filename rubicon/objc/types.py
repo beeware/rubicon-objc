@@ -737,7 +737,10 @@ class UnknownPointer(c_void_p):
 # from /System/Library/Frameworks/Foundation.framework/Headers/NSGeometry.h
 @with_preferred_encoding(_NSPointEncoding)
 class NSPoint(Structure):
-    _fields_ = [("x", CGFloat), ("y", CGFloat)]
+    _fields_ = [
+        ("x", CGFloat),
+        ("y", CGFloat),
+    ]
 
 
 if _CGPointEncoding == _NSPointEncoding:
@@ -746,12 +749,18 @@ else:
 
     @with_preferred_encoding(_CGPointEncoding)
     class CGPoint(Structure):
-        _fields_ = [("x", CGFloat), ("y", CGFloat)]
+        _fields_ = [
+            ("x", CGFloat),
+            ("y", CGFloat),
+        ]
 
 
 @with_preferred_encoding(_NSSizeEncoding)
 class NSSize(Structure):
-    _fields_ = [("width", CGFloat), ("height", CGFloat)]
+    _fields_ = [
+        ("width", CGFloat),
+        ("height", CGFloat),
+    ]
 
 
 if _CGSizeEncoding == _NSSizeEncoding:
@@ -760,12 +769,18 @@ else:
 
     @with_preferred_encoding(_CGSizeEncoding)
     class CGSize(Structure):
-        _fields_ = [("width", CGFloat), ("height", CGFloat)]
+        _fields_ = [
+            ("width", CGFloat),
+            ("height", CGFloat),
+        ]
 
 
 @with_preferred_encoding(_NSRectEncoding)
 class NSRect(Structure):
-    _fields_ = [("origin", NSPoint), ("size", NSSize)]
+    _fields_ = [
+        ("origin", NSPoint),
+        ("size", NSSize),
+    ]
 
 
 if _CGRectEncoding == _NSRectEncoding:
@@ -774,7 +789,10 @@ else:
 
     @with_preferred_encoding(_CGRectEncoding)
     class CGRect(Structure):
-        _fields_ = [("origin", CGPoint), ("size", CGSize)]
+        _fields_ = [
+            ("origin", CGPoint),
+            ("size", CGSize),
+        ]
 
 
 def NSMakeSize(w, h):
@@ -849,13 +867,19 @@ CGGlyph = c_ushort
 # CFRange struct defined in CFBase.h
 # This replaces the CFRangeMake(LOC, LEN) macro.
 class CFRange(Structure):
-    _fields_ = [("location", CFIndex), ("length", CFIndex)]
+    _fields_ = [
+        ("location", CFIndex),
+        ("length", CFIndex),
+    ]
 
 
 # NSRange.h  (Note, not defined the same as CFRange)
 @with_preferred_encoding(_NSRangeEncoding)
 class NSRange(Structure):
-    _fields_ = [("location", NSUInteger), ("length", NSUInteger)]
+    _fields_ = [
+        ("location", NSUInteger),
+        ("length", NSUInteger),
+    ]
 
 
 NSZeroPoint = NSPoint(0, 0)

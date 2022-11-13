@@ -212,7 +212,7 @@ def make_callback_returnable(ctype):
         if size != 0 and size != actual_size:
             raise ValueError(
                 f"getfunc for ctype {ctype}: Requested size {size} "
-                "does not match actual size {actual_size}"
+                f"does not match actual size {actual_size}"
             )
 
         return ctype.from_buffer_copy(ctypes.string_at(ptr, actual_size))
@@ -223,7 +223,7 @@ def make_callback_returnable(ctype):
         if size != 0 and size != actual_size:
             raise ValueError(
                 f"setfunc for ctype {ctype}: Requested size {size} "
-                "does not match actual size {actual_size}"
+                f"does not match actual size {actual_size}"
             )
 
         ctypes.memmove(ptr, ctypes.addressof(value), actual_size)
