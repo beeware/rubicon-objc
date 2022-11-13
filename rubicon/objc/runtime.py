@@ -188,13 +188,14 @@ class SEL(c_void_p):
 
 @with_preferred_encoding(b"#")
 class Class(objc_id):
-    """The `Class <https://developer.apple.com/documentation/objectivec/class?l
-    anguage=objc>`__ type from ``<objc/objc.h>``."""
+    """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__
+    type from ``<objc/objc.h>``.
+    """
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/objective
-    _c_runtime/imp?language=objc>`__ type from ``<objc/objc.h>``.
+    """The `IMP <https://developer.apple.com/documentation/objectivec/objective_c_runtime/imp?language=objc>`__
+    type from ``<objc/objc.h>``.
 
     An :class:`IMP` cannot be called directly --- it must be cast to the
     correct :func:`~ctypes.CFUNCTYPE` first, to provide the necessary

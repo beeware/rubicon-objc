@@ -1131,12 +1131,12 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(box.getSchemeIfPresent())
 
         # Try composing URLs using constructors
-        base = NSURL.URLWithString("https://pybee.org")
+        base = NSURL.URLWithString("https://beeware.org")
         full = NSURL.URLWithString("contributing/", relativeToURL=base)
 
         self.assertEqual(
             f"Visit {full.absoluteURL} for details",
-            "Visit https://pybee.org/contributing/ for details",
+            "Visit https://beeware.org/contributing/ for details",
         )
 
         # ObjC type conversions are performed on property assignment.
