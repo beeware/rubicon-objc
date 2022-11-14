@@ -78,7 +78,7 @@ The following classes from the `Objective-C runtime <https://developer.apple.com
 
     .. note::
 
-        This class has no (non-deprecated) Objective-C methods; protocol objects can only be manipulated using Objective-C runtime functions. Rubicon automatically wraps all :class:`Protocol` objects using :class:`ObjCProtocol`, which provides an easier interface for working with protocols. 
+        This class has no (non-deprecated) Objective-C methods; protocol objects can only be manipulated using Objective-C runtime functions. Rubicon automatically wraps all :class:`Protocol` objects using :class:`ObjCProtocol`, which provides an easier interface for working with protocols.
 
 .. class::
     NSNumber
@@ -364,7 +364,7 @@ Similarly, if an Objective-C method has a parameter that expects a block, you ca
 
     def result_handler(res: objc_id) -> None:
         print(ObjCInstance(res))
-    
+
     an_objc_instance.doSomethingWithResultHandler(result_handler)
 
 If you are writing a custom Objective-C method (see :ref:`custom-classes-and-protocols`), you can annotate parameter or return types using :class:`~rubicon.objc.runtime.objc_block` so that Rubicon converts them appropriately:

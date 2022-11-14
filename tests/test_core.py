@@ -2,17 +2,48 @@ import functools
 import gc
 import math
 import unittest
-from ctypes import Structure, byref, c_char, c_double, c_float, c_int, c_void_p, cast, create_string_buffer
+import weakref
+from ctypes import (
+    Structure,
+    byref,
+    c_char,
+    c_double,
+    c_float,
+    c_int,
+    c_void_p,
+    cast,
+    create_string_buffer,
+)
 from decimal import Decimal
 from enum import Enum
-import weakref
 
 from rubicon.objc import (
-    SEL, NSEdgeInsets, NSEdgeInsetsMake, NSMakeRect, NSObject, NSObjectProtocol, NSRange, NSRect, NSSize, NSUInteger,
-    ObjCClass, ObjCInstance, ObjCMetaClass, ObjCProtocol, at, objc_classmethod, objc_const, objc_ivar, objc_method,
-    objc_property, py_from_ns, send_message, send_super, types,
+    SEL,
+    NSEdgeInsets,
+    NSEdgeInsetsMake,
+    NSMakeRect,
+    NSObject,
+    NSObjectProtocol,
+    NSRange,
+    NSRect,
+    NSSize,
+    NSUInteger,
+    ObjCClass,
+    ObjCInstance,
+    ObjCMetaClass,
+    ObjCProtocol,
+    at,
+    objc_classmethod,
+    objc_const,
+    objc_ivar,
+    objc_method,
+    objc_property,
+    py_from_ns,
+    send_message,
+    send_super,
+    types,
 )
-from rubicon.objc.runtime import get_ivar, libobjc, objc_id, set_ivar, autoreleasepool
+from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
 
 from . import OSX_VERSION, rubiconharness
 
@@ -62,7 +93,7 @@ class RubiconTest(unittest.TestCase):
         """A NameError is raised if a class doesn't exist."""
 
         with self.assertRaises(NameError):
-            ObjCClass('DoesNotExist')
+            ObjCClass("DoesNotExist")
 
     def test_metaclass_by_name(self):
         """An Objective-C metaclass can be looked up by name."""
@@ -92,7 +123,7 @@ class RubiconTest(unittest.TestCase):
         """A NameError is raised if a metaclass doesn't exist."""
 
         with self.assertRaises(NameError):
-            ObjCMetaClass('DoesNotExist')
+            ObjCMetaClass("DoesNotExist")
 
     def test_metametaclass(self):
         """The class of a metaclass can be looked up."""
@@ -106,29 +137,29 @@ class RubiconTest(unittest.TestCase):
     def test_protocol_by_name(self):
         """An Objective-C protocol can be looked up by name."""
 
-        ExampleProtocol = ObjCProtocol('ExampleProtocol')
-        self.assertEqual(ExampleProtocol.name, 'ExampleProtocol')
+        ExampleProtocol = ObjCProtocol("ExampleProtocol")
+        self.assertEqual(ExampleProtocol.name, "ExampleProtocol")
 
     def test_protocol_caching(self):
         """ObjCProtocol instances are cached."""
 
-        ExampleProtocol1 = ObjCProtocol('ExampleProtocol')
-        ExampleProtocol2 = ObjCProtocol('ExampleProtocol')
+        ExampleProtocol1 = ObjCProtocol("ExampleProtocol")
+        ExampleProtocol2 = ObjCProtocol("ExampleProtocol")
 
         self.assertIs(ExampleProtocol1, ExampleProtocol2)
 
     def test_protocol_by_pointer(self):
         """An Objective-C protocol can be created from a pointer."""
 
-        example_protocol_ptr = libobjc.objc_getProtocol(b'ExampleProtocol')
+        example_protocol_ptr = libobjc.objc_getProtocol(b"ExampleProtocol")
         ExampleProtocol = ObjCProtocol(example_protocol_ptr)
-        self.assertEqual(ExampleProtocol, ObjCProtocol('ExampleProtocol'))
+        self.assertEqual(ExampleProtocol, ObjCProtocol("ExampleProtocol"))
 
     def test_nonexistant_protocol(self):
         """A NameError is raised if a protocol doesn't exist."""
 
         with self.assertRaises(NameError):
-            ObjCProtocol('DoesNotExist')
+            ObjCProtocol("DoesNotExist")
 
     def test_objcinstance_can_produce_objcclass(self):
         """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
@@ -139,7 +170,8 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(Example, ObjCClass)
 
     def test_objcinstance_can_produce_objcmetaclass(self):
-        """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
+        """Creating an ObjCInstance for a metaclass pointer gives an
+        ObjCMetaClass."""
 
         examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCInstance(examplemeta_ptr)
@@ -147,7 +179,8 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
 
     def test_objcclass_can_produce_objcmetaclass(self):
-        """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
+        """Creating an ObjCClass for a metaclass pointer gives an
+        ObjCMetaclass."""
 
         examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCClass(examplemeta_ptr)
@@ -155,11 +188,12 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
 
     def test_objcinstance_can_produce_objcprotocol(self):
-        """Creating an ObjCInstance for a protocol pointer gives an ObjCProtocol."""
+        """Creating an ObjCInstance for a protocol pointer gives an
+        ObjCProtocol."""
 
-        example_protocol_ptr = libobjc.objc_getProtocol(b'ExampleProtocol')
+        example_protocol_ptr = libobjc.objc_getProtocol(b"ExampleProtocol")
         ExampleProtocol = ObjCInstance(example_protocol_ptr)
-        self.assertEqual(ExampleProtocol, ObjCProtocol('ExampleProtocol'))
+        self.assertEqual(ExampleProtocol, ObjCProtocol("ExampleProtocol"))
         self.assertIsInstance(ExampleProtocol, ObjCProtocol)
 
     def test_objcclass_requires_class(self):
@@ -209,30 +243,30 @@ class RubiconTest(unittest.TestCase):
     def test_objcclass_protocols(self):
         """An ObjCClass's protocols can be looked up."""
 
-        BaseExample = ObjCClass('BaseExample')
-        ExampleProtocol = ObjCProtocol('ExampleProtocol')
-        DerivedProtocol = ObjCProtocol('DerivedProtocol')
+        BaseExample = ObjCClass("BaseExample")
+        ExampleProtocol = ObjCProtocol("ExampleProtocol")
+        DerivedProtocol = ObjCProtocol("DerivedProtocol")
 
         self.assertEqual(BaseExample.protocols, (ExampleProtocol, DerivedProtocol))
 
     def test_objcprotocol_protocols(self):
         """An ObjCProtocol's protocols can be looked up."""
 
-        DerivedProtocol = ObjCProtocol('DerivedProtocol')
-        BaseProtocolOne = ObjCProtocol('BaseProtocolOne')
-        BaseProtocolTwo = ObjCProtocol('BaseProtocolTwo')
+        DerivedProtocol = ObjCProtocol("DerivedProtocol")
+        BaseProtocolOne = ObjCProtocol("BaseProtocolOne")
+        BaseProtocolTwo = ObjCProtocol("BaseProtocolTwo")
 
         self.assertEqual(DerivedProtocol.protocols, (BaseProtocolOne, BaseProtocolTwo))
 
     def test_objcclass_instancecheck(self):
         """isinstance works with an ObjCClass as the second argument."""
 
-        NSArray = ObjCClass('NSArray')
-        NSString = ObjCClass('NSString')
+        NSArray = ObjCClass("NSArray")
+        NSString = ObjCClass("NSString")
 
         self.assertIsInstance(NSObject.new(), NSObject)
-        self.assertIsInstance(at(''), NSString)
-        self.assertIsInstance(at(''), NSObject)
+        self.assertIsInstance(at(""), NSString)
+        self.assertIsInstance(at(""), NSObject)
         self.assertIsInstance(NSObject, NSObject)
         self.assertIsInstance(NSObject, NSObject.objc_class)
 
@@ -243,8 +277,8 @@ class RubiconTest(unittest.TestCase):
     def test_objcclass_subclasscheck(self):
         """issubclass works with an ObjCClass as the second argument."""
 
-        NSArray = ObjCClass('NSArray')
-        NSString = ObjCClass('NSString')
+        NSArray = ObjCClass("NSArray")
+        NSString = ObjCClass("NSString")
 
         self.assertTrue(issubclass(NSObject, NSObject))
         self.assertTrue(issubclass(NSString, NSObject))
@@ -266,11 +300,11 @@ class RubiconTest(unittest.TestCase):
     def test_objcprotocol_instancecheck(self):
         """isinstance works with an ObjCProtocol as the second argument."""
 
-        NSCoding = ObjCProtocol('NSCoding')
-        NSSecureCoding = ObjCProtocol('NSSecureCoding')
+        NSCoding = ObjCProtocol("NSCoding")
+        NSSecureCoding = ObjCProtocol("NSSecureCoding")
 
-        self.assertIsInstance(at(''), NSSecureCoding)
-        self.assertIsInstance(at(''), NSCoding)
+        self.assertIsInstance(at(""), NSSecureCoding)
+        self.assertIsInstance(at(""), NSCoding)
 
         self.assertNotIsInstance(object(), NSSecureCoding)
         self.assertNotIsInstance(NSObject.new(), NSSecureCoding)
@@ -278,10 +312,10 @@ class RubiconTest(unittest.TestCase):
     def test_objcprotocol_subclasscheck(self):
         """issubclass works with an ObjCProtocol as the second argument."""
 
-        NSString = ObjCClass('NSString')
-        NSCopying = ObjCProtocol('NSCopying')
-        NSCoding = ObjCProtocol('NSCoding')
-        NSSecureCoding = ObjCProtocol('NSSecureCoding')
+        NSString = ObjCClass("NSString")
+        NSCopying = ObjCProtocol("NSCopying")
+        NSCoding = ObjCProtocol("NSCoding")
+        NSSecureCoding = ObjCProtocol("NSSecureCoding")
 
         self.assertTrue(issubclass(NSObject, NSObjectProtocol))
         self.assertTrue(issubclass(NSString, NSObjectProtocol))
@@ -302,7 +336,7 @@ class RubiconTest(unittest.TestCase):
     def test_field(self):
         "A field on an instance can be accessed and mutated"
 
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
@@ -317,7 +351,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_method(self):
         "An instance method can be invoked."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
@@ -331,9 +365,10 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.accessIntField(), 9999)
 
     def test_method_incorrect_argument_count(self):
-        """Attempting to call a method with an incorrect number of arguments throws an exception."""
+        """Attempting to call a method with an incorrect number of arguments
+        throws an exception."""
 
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         obj = Example.alloc().init()
 
         with self.assertRaises(TypeError):
@@ -346,64 +381,100 @@ class RubiconTest(unittest.TestCase):
             obj.mutateIntFieldWithValue_(123, "extra argument")
 
     def test_method_incorrect_argument_count_send(self):
-        """Attempting to call a method with send_message with an incorrect number of arguments throws an exception."""
+        """Attempting to call a method with send_message with an incorrect
+        number of arguments throws an exception."""
 
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         obj = Example.alloc().init()
 
         with self.assertRaises(TypeError):
-            send_message(obj, 'accessIntField', 'extra argument 1', restype=c_int, argtypes=[])
+            send_message(
+                obj, "accessIntField", "extra argument 1", restype=c_int, argtypes=[]
+            )
 
         with self.assertRaises(TypeError):
-            send_message(obj, 'mutateIntFieldWithValue:', restype=None, argtypes=[c_int])
+            send_message(
+                obj, "mutateIntFieldWithValue:", restype=None, argtypes=[c_int]
+            )
 
         with self.assertRaises(TypeError):
-            send_message(obj, 'mutateIntFieldWithValue:', 123, 'extra_argument', restype=None, argtypes=[c_int])
+            send_message(
+                obj,
+                "mutateIntFieldWithValue:",
+                123,
+                "extra_argument",
+                restype=None,
+                argtypes=[c_int],
+            )
 
     def test_method_varargs_send(self):
         """A variadic method can be called using send_message."""
 
-        NSString = ObjCClass('NSString')
+        NSString = ObjCClass("NSString")
         formatted = send_message(
             NSString,
-            'stringWithFormat:',
-            at('This is a %@ with %@'),
-            varargs=[at('string'), at('placeholders')],
+            "stringWithFormat:",
+            at("This is a %@ with %@"),
+            varargs=[at("string"), at("placeholders")],
             restype=objc_id,
             argtypes=[objc_id],
         )
-        self.assertEqual(str(ObjCInstance(formatted)), 'This is a string with placeholders')
+        self.assertEqual(
+            str(ObjCInstance(formatted)), "This is a string with placeholders"
+        )
 
     def test_method_send(self):
         "An instance method can be invoked with send_message."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
-        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 22)
-        self.assertEqual(send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 33)
+        self.assertEqual(
+            send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 22
+        )
+        self.assertEqual(
+            send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 33
+        )
 
-        send_message(obj, "mutateBaseIntFieldWithValue:", 8888, restype=None, argtypes=[c_int])
-        send_message(obj, "mutateIntFieldWithValue:", 9999, restype=None, argtypes=[c_int])
+        send_message(
+            obj, "mutateBaseIntFieldWithValue:", 8888, restype=None, argtypes=[c_int]
+        )
+        send_message(
+            obj, "mutateIntFieldWithValue:", 9999, restype=None, argtypes=[c_int]
+        )
 
-        self.assertEqual(send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 8888)
-        self.assertEqual(send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 9999)
+        self.assertEqual(
+            send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]), 8888
+        )
+        self.assertEqual(
+            send_message(obj, "accessIntField", restype=c_int, argtypes=[]), 9999
+        )
 
     def test_send_sel(self):
         """send_message accepts a SEL object as the selector parameter."""
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
-        self.assertEqual(send_message(obj, SEL("accessIntField"), restype=c_int, argtypes=[]), 33)
+        self.assertEqual(
+            send_message(obj, SEL("accessIntField"), restype=c_int, argtypes=[]), 33
+        )
 
     def test_send_super(self):
-        """An instance method of the super class can be invoked"""
+        """An instance method of the super class can be invoked."""
         SpecificExample = ObjCClass("SpecificExample")
 
         obj = SpecificExample.alloc().init()
 
-        send_super(SpecificExample, obj, "method:withArg:", 2, 5, restype=None, argtypes=[c_int, c_int])
+        send_super(
+            SpecificExample,
+            obj,
+            "method:withArg:",
+            2,
+            5,
+            restype=None,
+            argtypes=[c_int, c_int],
+        )
 
         self.assertEqual(obj.baseIntField, 10)
 
@@ -413,28 +484,48 @@ class RubiconTest(unittest.TestCase):
 
         obj = SpecificExample.alloc().init()
 
-        send_super(SpecificExample, obj, SEL("method:withArg:"), 2, 5, restype=None, argtypes=[c_int, c_int])
+        send_super(
+            SpecificExample,
+            obj,
+            SEL("method:withArg:"),
+            2,
+            5,
+            restype=None,
+            argtypes=[c_int, c_int],
+        )
 
         self.assertEqual(obj.baseIntField, 10)
 
     def test_send_super_incorrect_argument_count(self):
-        """Attempting to call a method with send_super with an incorrect number of arguments throws an exception."""
+        """Attempting to call a method with send_super with an incorrect number
+        of arguments throws an exception."""
         SpecificExample = ObjCClass("SpecificExample")
 
         obj = SpecificExample.alloc().init()
 
         with self.assertRaises(TypeError):
-            send_super(SpecificExample, obj, "method:withArg:", 2, restype=None, argtypes=[])
-
-        with self.assertRaises(TypeError):
-            send_super(SpecificExample, obj, "method:withArg:", restype=None, argtypes=[c_int, c_int])
+            send_super(
+                SpecificExample, obj, "method:withArg:", 2, restype=None, argtypes=[]
+            )
 
         with self.assertRaises(TypeError):
             send_super(
                 SpecificExample,
                 obj,
                 "method:withArg:",
-                2, 5, 6, "extra argument",
+                restype=None,
+                argtypes=[c_int, c_int],
+            )
+
+        with self.assertRaises(TypeError):
+            send_super(
+                SpecificExample,
+                obj,
+                "method:withArg:",
+                2,
+                5,
+                6,
+                "extra argument",
                 restype=None,
                 argtypes=[c_int, c_int],
             )
@@ -444,13 +535,21 @@ class RubiconTest(unittest.TestCase):
         SpecificExample = ObjCClass("SpecificExample")
 
         obj = SpecificExample.alloc().init()
-        send_super(SpecificExample, obj, "methodWithArgs:", 2, varargs=[5, 6], argtypes=[c_int], restype=None)
+        send_super(
+            SpecificExample,
+            obj,
+            "methodWithArgs:",
+            2,
+            varargs=[5, 6],
+            argtypes=[c_int],
+            restype=None,
+        )
 
         self.assertEqual(obj.accessBaseIntField(), 11)
 
     def test_static_field(self):
         "A static field on a class can be accessed and mutated"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         Example.mutateStaticBaseIntFieldWithValue_(1)
         Example.mutateStaticIntFieldWithValue_(11)
@@ -466,7 +565,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_static_method(self):
         "A static method on a class can be invoked."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         Example.mutateStaticBaseIntFieldWithValue_(2288)
         Example.mutateStaticIntFieldWithValue_(2299)
@@ -476,7 +575,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_mutator_like_method(self):
         "A method that looks like a mutator doesn't confuse issues."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj1 = Example.alloc().init()
 
@@ -498,11 +597,11 @@ class RubiconTest(unittest.TestCase):
 
     def test_property_forcing(self):
         "An instance or property method can be explicitly declared as a property."
-        Example = ObjCClass('Example')
-        Example.declare_class_property('classMethod')
-        Example.declare_class_property('classAmbiguous')
-        Example.declare_property('instanceMethod')
-        Example.declare_property('instanceAmbiguous')
+        Example = ObjCClass("Example")
+        Example.declare_class_property("classMethod")
+        Example.declare_class_property("classAmbiguous")
+        Example.declare_property("instanceMethod")
+        Example.declare_property("instanceAmbiguous")
 
         # A class method can be turned into a property
         self.assertEqual(Example.classMethod, 37)
@@ -521,13 +620,15 @@ class RubiconTest(unittest.TestCase):
 
         # Practical example: In Sierra, mainBundle was turned into a class property.
         # Previously, it was a method.
-        NSBundle = ObjCClass('NSBundle')
-        NSBundle.declare_class_property('mainBundle')
-        self.assertFalse(callable(NSBundle.mainBundle), 'NSBundle.mainBundle should not be a method')
+        NSBundle = ObjCClass("NSBundle")
+        NSBundle.declare_class_property("mainBundle")
+        self.assertFalse(
+            callable(NSBundle.mainBundle), "NSBundle.mainBundle should not be a method"
+        )
 
     def test_non_existent_field(self):
         "An attribute error is raised if you invoke a non-existent field."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj1 = Example.alloc().init()
 
@@ -541,7 +642,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_non_existent_method(self):
         "An attribute error is raised if you invoke a non-existent method."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj1 = Example.alloc().init()
 
@@ -555,7 +656,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_non_existent_static_field(self):
         "An attribute error is raised if you invoke a non-existent static field."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         # Non-existent fields raise an error.
         with self.assertRaises(AttributeError):
@@ -567,7 +668,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_non_existent_static_method(self):
         "An attribute error is raised if you invoke a non-existent static method."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         # Non-existent methods raise an error.
         with self.assertRaises(AttributeError):
@@ -579,7 +680,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_polymorphic_constructor(self):
         "Check that the right constructor is activated based on arguments used"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj1 = Example.alloc().init()
         obj2 = Example.alloc().initWithIntValue_(2242)
@@ -600,7 +701,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_static_access_non_static(self):
         "An instance field/method cannot be accessed from the static context"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
@@ -612,7 +713,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_non_static_access_static(self):
         "A static field/method cannot be accessed from an instance context"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         with self.assertRaises(AttributeError):
             Example.intField
@@ -622,13 +723,13 @@ class RubiconTest(unittest.TestCase):
 
     def test_string_argument(self):
         "A method with a string argument can be passed."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.duplicateString_("Wagga"), "WaggaWagga")
 
     def test_enum_argument(self):
         "An enumerated type can be used as an argument."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
 
@@ -655,19 +756,19 @@ class RubiconTest(unittest.TestCase):
 
     def test_string_return(self):
         "If a method or field returns a string, you get a Python string back"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.toString(), "This is an ObjC Example object")
 
     def test_constant_string_return(self):
         "If a method or field returns a *constant* string, you get a Python string back"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.smiley(), "%-)")
 
     def test_number_return(self):
         "If a method or field returns a NSNumber, it is not automatically converted to a Python number."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
 
         answer = example.theAnswer()
@@ -679,66 +780,76 @@ class RubiconTest(unittest.TestCase):
 
     def test_float_method(self):
         "A method with a float argument can be handled."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.areaOfSquare_(1.5), 2.25)
 
     def test_float_method_send(self):
         "A method with a float argument can be handled by send_message."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
-        self.assertEqual(send_message(example, "areaOfSquare:", 1.5, restype=c_float, argtypes=[c_float]), 2.25)
+        self.assertEqual(
+            send_message(
+                example, "areaOfSquare:", 1.5, restype=c_float, argtypes=[c_float]
+            ),
+            2.25,
+        )
 
     def test_double_method(self):
         "A method with a double argument can be handled."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertAlmostEqual(example.areaOfCircle_(1.5), 1.5 * math.pi, 5)
 
     def test_double_method_send(self):
         "A method with a double argument can be handled by send_message."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertAlmostEqual(
             send_message(
-                example, "areaOfCircle:", 1.5,
-                restype=c_double,
-                argtypes=[c_double]
+                example, "areaOfCircle:", 1.5, restype=c_double, argtypes=[c_double]
             ),
-            1.5 * math.pi, 5
+            1.5 * math.pi,
+            5,
         )
 
-    @unittest.skipIf(OSX_VERSION and OSX_VERSION < (10, 10),
-                     "Property handling doesn't work on OS X 10.9 (Mavericks) and earlier")
+    @unittest.skipIf(
+        OSX_VERSION and OSX_VERSION < (10, 10),
+        "Property handling doesn't work on OS X 10.9 (Mavericks) and earlier",
+    )
     def test_decimal_method(self):
         "A method with a NSDecimalNumber arguments can be handled."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
 
-        result = example.areaOfTriangleWithWidth_andHeight_(Decimal('3.0'), Decimal('4.0'))
-        self.assertIsInstance(result, ObjCClass('NSDecimalNumber'))
-        self.assertEqual(py_from_ns(result), Decimal('6.0'))
+        result = example.areaOfTriangleWithWidth_andHeight_(
+            Decimal("3.0"), Decimal("4.0")
+        )
+        self.assertIsInstance(result, ObjCClass("NSDecimalNumber"))
+        self.assertEqual(py_from_ns(result), Decimal("6.0"))
 
     def test_auto_struct_creation(self):
         "Structs from method signatures are created automatically."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
-        types.unregister_encoding_all(b'{simple=ii}')
-        types.unregister_encoding_all(b'{simple}')
-        types.unregister_encoding_all(b'{complex=[4s]^?{simple=ii}^{complex}}')
-        types.unregister_encoding_all(b'{complex}')
+        types.unregister_encoding_all(b"{simple=ii}")
+        types.unregister_encoding_all(b"{simple}")
+        types.unregister_encoding_all(b"{complex=[4s]^?{simple=ii}^{complex}}")
+        types.unregister_encoding_all(b"{complex}")
 
         # Look up the method, so the return/argument types are decoded and the structs are registered.
         Example.doStuffWithStruct_
 
-        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
-        self.assertEqual(struct_simple, types.ctype_for_encoding(b'{simple}'))
+        struct_simple = types.ctype_for_encoding(b"{simple=ii}")
+        self.assertEqual(struct_simple, types.ctype_for_encoding(b"{simple}"))
 
         simple = struct_simple(123, 456)
         ret = Example.doStuffWithStruct_(simple)
-        struct_complex = types.ctype_for_encoding(b'{complex=[4s]^?{simple=ii}^{complex}}')
+        struct_complex = types.ctype_for_encoding(
+            b"{complex=[4s]^?{simple=ii}^{complex}}"
+        )
         self.assertIsInstance(ret, struct_complex)
-        self.assertEqual(struct_complex, types.ctype_for_encoding(b'{complex}'))
+        self.assertEqual(struct_complex, types.ctype_for_encoding(b"{complex}"))
         self.assertEqual(list(ret.field_0), [1, 2, 3, 4])
         self.assertEqual(ret.field_1.value, None)
         self.assertEqual(ret.field_2.field_0, 123)
@@ -747,39 +858,43 @@ class RubiconTest(unittest.TestCase):
 
     def test_sequence_arg_to_struct(self):
         "Sequence arguments are converted to structures."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
 
         ret = Example.extractSimpleStruct(([9, 8, 7, 6], None, (987, 654), None))
-        struct_simple = types.ctype_for_encoding(b'{simple=ii}')
+        struct_simple = types.ctype_for_encoding(b"{simple=ii}")
         self.assertIsInstance(ret, struct_simple)
         self.assertEqual(ret.field_0, 987)
         self.assertEqual(ret.field_1, 654)
 
     def test_struct_return(self):
         "Methods returning structs of different sizes by value can be handled."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
 
-        types.register_encoding(b'{int_sized=[4c]}', struct_int_sized)
+        types.register_encoding(b"{int_sized=[4c]}", struct_int_sized)
         self.assertEqual(example.intSizedStruct().x, b"abc")
 
-        types.register_encoding(b'{oddly_sized=[5c]}', struct_oddly_sized)
+        types.register_encoding(b"{oddly_sized=[5c]}", struct_oddly_sized)
         self.assertEqual(example.oddlySizedStruct().x, b"abcd")
 
-        types.register_encoding(b'{large=[17c]}', struct_large)
+        types.register_encoding(b"{large=[17c]}", struct_large)
         self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
 
     def test_struct_return_send(self):
         "Methods returning structs of different sizes by value can be handled when using send_message."
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
 
         self.assertEqual(
-            send_message(example, "intSizedStruct", restype=struct_int_sized, argtypes=[]).x,
+            send_message(
+                example, "intSizedStruct", restype=struct_int_sized, argtypes=[]
+            ).x,
             b"abc",
         )
         self.assertEqual(
-            send_message(example, "oddlySizedStruct", restype=struct_oddly_sized, argtypes=[]).x,
+            send_message(
+                example, "oddlySizedStruct", restype=struct_oddly_sized, argtypes=[]
+            ).x,
             b"abcd",
         )
         self.assertEqual(
@@ -789,11 +904,11 @@ class RubiconTest(unittest.TestCase):
 
     def test_object_return(self):
         "If a method or field returns an object, you get an instance of that type returned"
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
 
-        Thing = ObjCClass('Thing')
-        thing = Thing.alloc().initWithName_value_('This is thing', 2)
+        Thing = ObjCClass("Thing")
+        thing = Thing.alloc().initWithName_value_("This is thing", 2)
 
         example.thing = thing
 
@@ -818,7 +933,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_partial_method_two_args(self):
         Example = ObjCClass("Example")
-        self.assertEqual(Example.overloaded(12, extraArg=34), 12+34)
+        self.assertEqual(Example.overloaded(12, extraArg=34), 12 + 34)
 
     def test_partial_method_lots_of_args(self):
         pystring = "Uñîçö∂€"
@@ -839,7 +954,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
     def test_objcinstance_str_repr(self):
-        """An ObjCInstance's str and repr contain the object's description and debugDescription, respectively."""
+        """An ObjCInstance's str and repr contain the object's description and
+        debugDescription, respectively."""
 
         DescriptionTester = ObjCClass("DescriptionTester")
         py_description_string = "normal description string"
@@ -852,10 +968,13 @@ class RubiconTest(unittest.TestCase):
         self.assertIn(py_debug_description_string, repr(tester))
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
-        """An ObjCInstance's str and repr work even if description and debugDescription are nil."""
+        """An ObjCInstance's str and repr work even if description and
+        debugDescription are nil."""
 
         DescriptionTester = ObjCClass("DescriptionTester")
-        tester = DescriptionTester.alloc().initWithDescriptionString(None, debugDescriptionString=None)
+        tester = DescriptionTester.alloc().initWithDescriptionString(
+            None, debugDescriptionString=None
+        )
         self.assertIsNot(str(tester), None)
         self.assertIsNot(repr(tester), None)
 
@@ -869,13 +988,14 @@ class RubiconTest(unittest.TestCase):
         # Second definition will raise an error.
         # Without protection, this is a segfault.
         with self.assertRaises(RuntimeError):
+
             class MyClass(NSObject):  # noqa: F811
                 pass
 
     def test_interface(self):
         "An ObjC protocol implementation can be defined in Python."
 
-        Callback = ObjCProtocol('Callback')
+        Callback = ObjCProtocol("Callback")
         results = {}
 
         class Handler(NSObject, protocols=[Callback]):
@@ -886,17 +1006,17 @@ class RubiconTest(unittest.TestCase):
 
             @objc_method
             def peek_withValue_(self, example, value: int) -> None:
-                results['string'] = example.toString() + " peeked"
-                results['int'] = value + self.value
+                results["string"] = example.toString() + " peeked"
+                results["int"] = value + self.value
 
             @objc_method
             def poke_withValue_(self, example, value: int) -> None:
-                results['string'] = example.toString() + " poked"
-                results['int'] = value + self.value
+                results["string"] = example.toString() + " poked"
+                results["int"] = value + self.value
 
             @objc_method
             def reverse_(self, input):
-                return ''.join(reversed(input))
+                return "".join(reversed(input))
 
             @objc_method
             def message(self):
@@ -904,8 +1024,8 @@ class RubiconTest(unittest.TestCase):
 
             @objc_classmethod
             def fiddle_(cls, value: int) -> None:
-                results['string'] = "Fiddled with it"
-                results['int'] = value
+                results["string"] = "Fiddled with it"
+                results["int"] = value
 
         # Check that the protocol is adopted.
         self.assertSequenceEqual(Handler.protocols, (Callback,))
@@ -916,7 +1036,7 @@ class RubiconTest(unittest.TestCase):
         handler2 = Handler.alloc().initWithValue_(10)
 
         # Create an Example object, and register a handler with it.
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         example.callback = handler2
 
@@ -927,28 +1047,31 @@ class RubiconTest(unittest.TestCase):
         # Invoke the callback; check that the results have been peeked as expected
         example.testPeek_(42)
 
-        self.assertEqual(results['string'], 'This is an ObjC Example object peeked')
-        self.assertEqual(results['int'], 52)
+        self.assertEqual(results["string"], "This is an ObjC Example object peeked")
+        self.assertEqual(results["int"], 52)
 
         example.testPoke_(37)
 
-        self.assertEqual(results['string'], 'This is an ObjC Example object poked')
-        self.assertEqual(results['int'], 47)
+        self.assertEqual(results["string"], "This is an ObjC Example object poked")
+        self.assertEqual(results["int"], 47)
 
-        self.assertEqual(example.getMessage(), 'Alea iacta est.')
+        self.assertEqual(example.getMessage(), "Alea iacta est.")
 
-        self.assertEqual(example.reverseIt_('Alea iacta est.'), '.tse atcai aelA')
+        self.assertEqual(example.reverseIt_("Alea iacta est."), ".tse atcai aelA")
 
         Handler.fiddle_(99)
 
-        self.assertEqual(results['string'], 'Fiddled with it')
-        self.assertEqual(results['int'], 99)
+        self.assertEqual(results["string"], "Fiddled with it")
+        self.assertEqual(results["int"], 99)
 
     def test_no_duplicate_protocols(self):
         """An Objective-C class cannot adopt a protocol more than once."""
 
         with self.assertRaises(ValueError):
-            class DuplicateProtocol(NSObject, protocols=[NSObjectProtocol, NSObjectProtocol]):
+
+            class DuplicateProtocol(
+                NSObject, protocols=[NSObjectProtocol, NSObjectProtocol]
+            ):
                 pass
 
     def test_class_ivars(self):
@@ -961,17 +1084,17 @@ class RubiconTest(unittest.TestCase):
 
         ivars = Ivars.alloc().init()
 
-        set_ivar(ivars, 'object', at('foo').ptr)
-        set_ivar(ivars, 'int', c_int(12345))
-        set_ivar(ivars, 'rect', NSMakeRect(12, 34, 56, 78))
+        set_ivar(ivars, "object", at("foo").ptr)
+        set_ivar(ivars, "int", c_int(12345))
+        set_ivar(ivars, "rect", NSMakeRect(12, 34, 56, 78))
 
-        s = ObjCInstance(get_ivar(ivars, 'object'))
-        self.assertEqual(str(s), 'foo')
+        s = ObjCInstance(get_ivar(ivars, "object"))
+        self.assertEqual(str(s), "foo")
 
-        i = get_ivar(ivars, 'int')
+        i = get_ivar(ivars, "int")
         self.assertEqual(i.value, 12345)
 
-        r = get_ivar(ivars, 'rect')
+        r = get_ivar(ivars, "rect")
         self.assertEqual(r.origin.x, 12)
         self.assertEqual(r.origin.y, 34)
         self.assertEqual(r.size.width, 56)
@@ -980,7 +1103,7 @@ class RubiconTest(unittest.TestCase):
     def test_class_properties(self):
         "A Python class can have ObjC properties with synthesized getters and setters."
 
-        NSURL = ObjCClass('NSURL')
+        NSURL = ObjCClass("NSURL")
 
         class URLBox(NSObject):
 
@@ -999,28 +1122,28 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(box.url)
 
         # Assign an object via synthesized property setter and call method that uses synthesized property getter
-        url = NSURL.alloc().initWithString_('https://www.google.com')
+        url = NSURL.alloc().initWithString_("https://www.google.com")
         box.url = url
-        self.assertEqual(box.getSchemeIfPresent(), 'https')
+        self.assertEqual(box.getSchemeIfPresent(), "https")
 
         # Assign None to dealloc property and see if method returns expected None
         box.url = None
         self.assertIsNone(box.getSchemeIfPresent())
 
         # Try composing URLs using constructors
-        base = NSURL.URLWithString('https://pybee.org')
-        full = NSURL.URLWithString('contributing/', relativeToURL=base)
+        base = NSURL.URLWithString("https://beeware.org")
+        full = NSURL.URLWithString("contributing/", relativeToURL=base)
 
         self.assertEqual(
-            "Visit %s for details" % full.absoluteURL,
-            "Visit https://pybee.org/contributing/ for details"
+            f"Visit {full.absoluteURL} for details",
+            "Visit https://beeware.org/contributing/ for details",
         )
 
         # ObjC type conversions are performed on property assignment.
         box.data = "Jabberwock"
         self.assertEqual(box.data, "Jabberwock")
 
-        Example = ObjCClass('Example')
+        Example = ObjCClass("Example")
         example = Example.alloc().init()
         box.data = example
         self.assertEqual(box.data, example)
@@ -1029,7 +1152,6 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(box.data)
 
     def test_class_python_properties(self):
-
         class PythonObjectProperties(NSObject):
             object = objc_property(object)
 
@@ -1072,7 +1194,6 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(wr())
 
     def test_class_python_properties_weak(self):
-
         class WeakPythonObjectProperties(NSObject):
             object = objc_property(object, weak=True)
 
@@ -1106,11 +1227,11 @@ class RubiconTest(unittest.TestCase):
 
         properties = NonObjectProperties.alloc().init()
 
-        properties.object = at('foo')
+        properties.object = at("foo")
         properties.int = 12345
         properties.rect = NSMakeRect(12, 34, 56, 78)
 
-        self.assertEqual(properties.object, 'foo')
+        self.assertEqual(properties.object, "foo")
         self.assertEqual(properties.int, 12345)
 
         r = properties.rect
@@ -1122,11 +1243,11 @@ class RubiconTest(unittest.TestCase):
     def test_class_nonobject_properties_weak(self):
 
         with self.assertRaises(TypeError):
+
             class WeakNonObjectProperties(NSObject):
                 int = objc_property(c_int, weak=True)
 
     def test_class_properties_lifecycle_strong(self):
-
         class StrongObjectProperties(NSObject):
             object = objc_property(ObjCInstance)
 
@@ -1146,7 +1267,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(properties.object.ptr.value, obj_pointer)
 
     def test_class_properties_lifecycle_weak(self):
-
         class WeakObjectProperties(NSObject):
             object = objc_property(ObjCInstance, weak=True)
 
@@ -1171,6 +1291,7 @@ class RubiconTest(unittest.TestCase):
             @functools.wraps(f)
             def _wrapper(*args, **kwargs):
                 return f(*args, **kwargs)
+
             return _wrapper
 
         class SimpleMath(NSObject):
@@ -1219,12 +1340,14 @@ class RubiconTest(unittest.TestCase):
     def test_protocol_def_extends(self):
         """An ObjCProtocol that extends other protocols can be defined."""
 
-        ExampleProtocol = ObjCProtocol('ExampleProtocol')
+        ExampleProtocol = ObjCProtocol("ExampleProtocol")
 
         class ProtocolExtendsProtocols(NSObjectProtocol, ExampleProtocol):
             pass
 
-        self.assertSequenceEqual(ProtocolExtendsProtocols.protocols, [NSObjectProtocol, ExampleProtocol])
+        self.assertSequenceEqual(
+            ProtocolExtendsProtocols.protocols, [NSObjectProtocol, ExampleProtocol]
+        )
 
     def test_function_NSEdgeInsetsMake(self):
         "Python can invoke NSEdgeInsetsMake to create NSEdgeInsets."
@@ -1261,17 +1384,33 @@ class RubiconTest(unittest.TestCase):
 
             @objc_method
             def computeSize_(self, input: NSSize) -> NSSize:
-                results['size'] = True
-                sup = send_super(__class__, self, 'computeSize:', input, restype=NSSize, argtypes=[NSSize])
+                results["size"] = True
+                sup = send_super(
+                    __class__,
+                    self,
+                    "computeSize:",
+                    input,
+                    restype=NSSize,
+                    argtypes=[NSSize],
+                )
                 return NSSize(input.width + self.value, sup.height)
 
             @objc_method
             def computeRect_(self, input: NSRect) -> NSRect:
-                results['rect'] = True
-                sup = send_super(__class__, self, 'computeRect:', input, restype=NSRect, argtypes=[NSRect])
+                results["rect"] = True
+                sup = send_super(
+                    __class__,
+                    self,
+                    "computeRect:",
+                    input,
+                    restype=NSRect,
+                    argtypes=[NSRect],
+                )
                 return NSMakeRect(
-                    input.origin.y + self.value, sup.origin.x,
-                    input.size.height + self.value, sup.size.width
+                    input.origin.y + self.value,
+                    sup.origin.x,
+                    input.size.height + self.value,
+                    sup.size.width,
                 )
 
             # Register a second method returning NSSize. Don't
@@ -1288,14 +1427,14 @@ class RubiconTest(unittest.TestCase):
         outSize = handler1.computeSize(NSSize(20, 30))
         self.assertEqual(outSize.width, 25)
         self.assertEqual(outSize.height, 90)
-        self.assertTrue(results.get('size'))
+        self.assertTrue(results.get("size"))
 
         outRect = handler2.computeRect(NSMakeRect(10, 20, 30, 40))
         self.assertEqual(outRect.origin.x, 30)
         self.assertEqual(outRect.origin.y, 110)
         self.assertEqual(outRect.size.width, 50)
         self.assertEqual(outRect.size.height, 60)
-        self.assertTrue(results.get('rect'))
+        self.assertTrue(results.get("rect"))
 
         # Invoke a method through an interface.
         Example = ObjCClass("Example")
@@ -1336,7 +1475,8 @@ class RubiconTest(unittest.TestCase):
             thing.python_object_1
 
     def test_objcinstance_python_attribute_keep_alive(self):
-        """Python attributes on an ObjCInstance are kept even if the object temporarily has no Python references."""
+        """Python attributes on an ObjCInstance are kept even if the object
+        temporarily has no Python references."""
 
         Example = ObjCClass("Example")
         example = Example.alloc().init()
@@ -1382,7 +1522,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(id(thing.python_object_2), python_object_2_id)
 
     def test_objcinstance_python_attribute_freed(self):
-        """Python attributes on an ObjCInstance are freed after the instance is released."""
+        """Python attributes on an ObjCInstance are freed after the instance is
+        released."""
 
         with autoreleasepool():
 
@@ -1455,10 +1596,10 @@ class RubiconTest(unittest.TestCase):
         gc.collect()
 
     def test_objcinstance_retain_release(self):
-        NSString = ObjCClass('NSString')
+        NSString = ObjCClass("NSString")
 
         # Create an object which we don't own.
-        string = NSString.stringWithString('test')
+        string = NSString.stringWithString("test")
 
         # Check that it is not marked for release.
         self.assertFalse(string._needs_release)
@@ -1477,7 +1618,6 @@ class RubiconTest(unittest.TestCase):
         gc.collect()
 
     def test_objcinstance_dealloc(self):
-
         class DeallocTester(NSObject):
             attr0 = objc_property()
             attr1 = objc_property(weak=True)
@@ -1502,7 +1642,9 @@ class RubiconTest(unittest.TestCase):
         obj.release()
 
         self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
-        self.assertEqual(attr0.retainCount(), 1, "strong property value was not released")
+        self.assertEqual(
+            attr0.retainCount(), 1, "strong property value was not released"
+        )
         self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
 
     def test_partial_with_override(self):
