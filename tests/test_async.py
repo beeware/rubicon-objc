@@ -109,7 +109,7 @@ class AsyncReaderWriterTests(unittest.TestCase):
         self.loop.close()
 
     def test_tcp_echo(self):
-        """A simple TCP Echo client/server works as expected"""
+        """A simple TCP Echo client/server works as expected."""
         # This tests that you can:
         # * create a TCP server
         # * create a TCP client
@@ -132,13 +132,13 @@ class AsyncReaderWriterTests(unittest.TestCase):
             writer.close()
 
         self.server = self.loop.run_until_complete(
-            asyncio.start_server(echo_server, '127.0.0.1', 3742)
+            asyncio.start_server(echo_server, "127.0.0.1", 3742)
         )
 
         client_messages = []
 
         async def echo_client(message):
-            reader, writer = await asyncio.open_connection('127.0.0.1', 3742)
+            reader, writer = await asyncio.open_connection("127.0.0.1", 3742)
 
             writer.write(message.encode())
 
@@ -147,11 +147,11 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
             writer.close()
 
-        self.loop.run_until_complete(echo_client('Hello, World!'))
-        self.loop.run_until_complete(echo_client('Goodbye, World!'))
+        self.loop.run_until_complete(echo_client("Hello, World!"))
+        self.loop.run_until_complete(echo_client("Goodbye, World!"))
 
-        self.assertEqual(server_messages, ['Hello, World!', 'Goodbye, World!'])
-        self.assertEqual(client_messages, ['Hello, World!', 'Goodbye, World!'])
+        self.assertEqual(server_messages, ["Hello, World!", "Goodbye, World!"])
+        self.assertEqual(client_messages, ["Hello, World!", "Goodbye, World!"])
 
 
 class AsyncSubprocessTests(unittest.TestCase):
@@ -166,14 +166,14 @@ class AsyncSubprocessTests(unittest.TestCase):
     def test_subprocess(self):
         async def list_dir():
             proc = await asyncio.create_subprocess_shell(
-                'ls',
+                "ls",
                 stdout=asyncio.subprocess.PIPE,
             )
 
             entries = set()
             line = await proc.stdout.readline()
             while line:
-                entries.add(line.decode('utf-8').strip())
+                entries.add(line.decode("utf-8").strip())
                 line = await proc.stdout.readline()
 
             # Cleanup - close the transport.
@@ -187,6 +187,6 @@ class AsyncSubprocessTests(unittest.TestCase):
         # Everything in the sample set, less everything from the result,
         # should be an empty set.
         self.assertEqual(
-            {'README.rst', 'MANIFEST.in', 'setup.py', 'setup.cfg'} - task.result(),
-            set()
+            {"README.rst", "MANIFEST.in", "setup.py", "setup.cfg"} - task.result(),
+            set(),
         )

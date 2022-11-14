@@ -6,16 +6,27 @@ on:
       - main
 
 jobs:
+  pre-commit:
+    name: Pre-commit code style checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - name: Set up Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: ${{ env.python_version }}
+      - name: Lint with Pre-commit
+        uses: pre-commit/action@v3.0.0
+
   beefore:
     name: Pre-test checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
         task:
-        - 'flake8'
-        - 'towncrier-check'
-        - 'docs'
-        - 'package'
+        - "towncrier-check"
+        - "package"
     steps:
     - name: Check out code
       uses: actions/checkout@v3
@@ -34,62 +45,16 @@ jobs:
       run: |
         tox -e ${{ matrix.task }}
 
-  smoke:
-    name: Smoke test (3.7)
-    needs: beefore
-    runs-on: macOS-11
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.7"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        python -m pip install tox
-    - name: Test
-      run: |
-        tox -e py
-
-  macOS-versions:
-    name: macOS compatibility test
-    needs: smoke
+  unit-tests:
+    name: Unit tests
+    needs: [pre-commit, beefore]
     strategy:
       matrix:
-        platform: ['macOS-12']
-    runs-on: ${{ matrix.platform }}
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.7"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade setuptools
-        python -m pip install tox
-    - name: Test
-      run: |
-        tox -e py
-
-  python-versions:
-    name: Python compatibility test
-    needs: smoke
-    runs-on: macOS-latest
-    strategy:
-      matrix:
-        python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11"]
+        platform: ["macOS-11", "macOS-12"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
         # As soon as 3.12.0a1 is released:
-        # python-version: ["3.5", "3.6", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
+        # python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
+    runs-on: ${{ matrix.platform }}
     steps:
     - name: Check out code
       uses: actions/checkout@v3

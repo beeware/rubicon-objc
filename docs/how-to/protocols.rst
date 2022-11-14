@@ -42,7 +42,7 @@ like this:
     class UserAccount(NSObject, protocols=[NSCopying]):
         username = objc_property()
         emailAddress = objc_property()
-        
+
         @objc_method
         def initWithUsername_emailAddress_(self, username, emailAddress):
             self = self.init()
@@ -51,7 +51,7 @@ like this:
             self.username = username
             self.emailAddress = emailAddress
             return self
-        
+
         # This method is required by NSCopying.
         # The "zone" parameter is obsolete and can be ignored, but must be included for backwards compatibility.
         # This method is not normally used directly. Usually you call the copy method instead,
@@ -88,7 +88,7 @@ Objective-C classes:
 
     class Named(metaclass=ObjCProtocol):
         name = objc_property()
-        
+
         @objc_method
         def sayName(self):
             ...

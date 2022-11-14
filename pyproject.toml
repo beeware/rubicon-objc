@@ -5,6 +5,11 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.isort]
+profile = "black"
+split_on_trailing_comma = true
+combine_as_imports = true
+
 [tool.towncrier]
 directory = "changes"
 package = "rubicon.objc"

@@ -24,6 +24,7 @@ class BlockTests(unittest.TestCase):
             @objc_method
             def exampleMethod_(self, block):
                 ObjCBlock(block, c_void_p, c_int, c_int)(2, 3)
+
         BlockObjectExample = ObjCClass("BlockObjectExample")
         delegate = DelegateManualC.alloc().init()
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
@@ -35,6 +36,7 @@ class BlockTests(unittest.TestCase):
             @objc_method
             def exampleMethod_(self, block):
                 ObjCBlock(block, None, int, int)(2, 3)
+
         BlockObjectExample = ObjCClass("BlockObjectExample")
         delegate = DelegateManualPY.alloc().init()
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
@@ -46,6 +48,7 @@ class BlockTests(unittest.TestCase):
             @objc_method
             def exampleMethod_(self, block: objc_block):
                 block(4, 5)
+
         BlockObjectExample = ObjCClass("BlockObjectExample")
         delegate = DelegateAuto.alloc().init()
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
@@ -55,14 +58,15 @@ class BlockTests(unittest.TestCase):
     def test_block_delegate_auto_struct(self):
         class BlockStruct(Structure):
             _fields_ = [
-                ('a', c_int),
-                ('b', c_int),
+                ("a", c_int),
+                ("b", c_int),
             ]
 
         class DelegateAutoStruct(NSObject):
             @objc_method
             def structBlockMethod_(self, block: objc_block) -> int:
                 return block(BlockStruct(42, 43))
+
         BlockObjectExample = ObjCClass("BlockObjectExample")
         delegate = DelegateAutoStruct.alloc().init()
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
@@ -77,6 +81,7 @@ class BlockTests(unittest.TestCase):
 
         def block(a: int, b: int) -> None:
             values.append(a + b)
+
         instance.receiverMethod_(block)
 
         self.assertEqual(values, [27])
@@ -87,6 +92,7 @@ class BlockTests(unittest.TestCase):
 
         def block(a, b):
             return a + b
+
         with self.assertRaises(ValueError):
             instance.receiverMethod_(block)
 
@@ -118,7 +124,8 @@ class BlockTests(unittest.TestCase):
         self.assertEqual(returned_block(8, 9), 17)
 
     def test_block_round_trip_no_arguments(self):
-        """A block that takes no arguments can be created with both ways of specifying types."""
+        """A block that takes no arguments can be created with both ways of
+        specifying types."""
 
         BlockRoundTrip = ObjCClass("BlockRoundTrip")
         instance = BlockRoundTrip.alloc().init()
@@ -137,7 +144,7 @@ class BlockTests(unittest.TestCase):
     def test_block_bound_method(self):
         """A bound method with type annotations can be wrapped in a block."""
 
-        class Handler(object):
+        class Handler:
             def no_args(self) -> c_int:
                 return 42
 

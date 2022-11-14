@@ -13,10 +13,12 @@ class CtypesPatchTest(unittest.TestCase):
                 ("spam", ctypes.c_int),
                 ("ham", ctypes.c_double),
             ]
+
         functype = ctypes.CFUNCTYPE(TestStruct)
 
         # Before patching, the structure cannot be returned from a callback.
         with self.assertRaises(TypeError):
+
             @functype
             def get_struct_fail():
                 return TestStruct(123, 123)
@@ -41,6 +43,7 @@ class CtypesPatchTest(unittest.TestCase):
                 ("spam", ctypes.c_int),
                 ("ham", ctypes.c_double),
             ]
+
         pointertype = ctypes.POINTER(TestStruct)
         functype = ctypes.CFUNCTYPE(pointertype)
 
@@ -48,6 +51,7 @@ class CtypesPatchTest(unittest.TestCase):
 
         # Before patching, the pointer cannot be returned from a callback.
         with self.assertRaises(TypeError):
+
             @functype
             def get_struct_fail():
                 return pointertype(original_struct)
@@ -61,7 +65,9 @@ class CtypesPatchTest(unittest.TestCase):
 
         # After being returned from the callback, the pointer's data is intact.
         struct_pointer = get_struct()
-        self.assertEqual(ctypes.addressof(struct_pointer.contents), ctypes.addressof(original_struct))
+        self.assertEqual(
+            ctypes.addressof(struct_pointer.contents), ctypes.addressof(original_struct)
+        )
         self.assertEqual(struct_pointer.contents.spam, 123)
         self.assertEqual(struct_pointer.contents.ham, 123)
 
@@ -81,6 +87,7 @@ class CtypesPatchTest(unittest.TestCase):
                 ("spam", ctypes.c_int),
                 ("ham", ctypes.c_double),
             ]
+
         functype = ctypes.CFUNCTYPE(TestStruct)
 
         for _ in range(5):
@@ -97,7 +104,8 @@ class CtypesPatchTest(unittest.TestCase):
             self.assertEqual(struct.ham, 123)
 
     def test_patched_type_returned_often(self):
-        """Returning a patched type very often works properly without crashing anything.
+        """Returning a patched type very often works properly without crashing
+        anything.
 
         This checks that bpo-36880 is either fixed or worked around.
         """
@@ -107,6 +115,7 @@ class CtypesPatchTest(unittest.TestCase):
                 ("spam", ctypes.c_int),
                 ("ham", ctypes.c_double),
             ]
+
         functype = ctypes.CFUNCTYPE(TestStruct)
 
         ctypes_patch.make_callback_returnable(TestStruct)
