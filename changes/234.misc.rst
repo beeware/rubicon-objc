@@ -1,0 +1,1 @@
+The Dependabot changelog CI script was modified to avoid potential double escaping.
