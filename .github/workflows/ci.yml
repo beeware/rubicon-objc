@@ -51,10 +51,13 @@ jobs:
     strategy:
       matrix:
         platform: ["macOS-11", "macOS-12"]
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
-        # As soon as 3.12.0a1 is released:
-        # python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12.0-alpha - 3.12.0"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
+        include:
+          - experimental: false
+          - python-version: "3.12-dev"
+            experimental: true
     runs-on: ${{ matrix.platform }}
+    continue-on-error: ${{ matrix.experimental }}
     steps:
     - name: Check out code
       uses: actions/checkout@v3
