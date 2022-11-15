@@ -51,15 +51,10 @@ jobs:
     strategy:
       matrix:
         platform: ["macOS-11", "macOS-12"]
-        python-version: ["3.6", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
         include:
           - experimental: false
-
-          - platform: macOS-11
-            python-version: "3.12-dev"
-            experimental: true
-          - platform: macOS-12
-            python-version: "3.12-dev"
+          - python-version: "3.12-dev"
             experimental: true
     runs-on: ${{ matrix.platform }}
     continue-on-error: ${{ matrix.experimental }}
