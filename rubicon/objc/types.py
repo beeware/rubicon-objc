@@ -1,5 +1,5 @@
 import collections.abc
-import os
+import platform
 import struct
 from ctypes import (
     POINTER,
@@ -90,15 +90,18 @@ __all__ = [
 
 __LP64__ = 8 * struct.calcsize("P") == 64
 
-# os.uname() provides system identification details; the `machine` attribute
-# indicates the machine's physical architecture. On a 64-bit Intel machine it is
-# always "x86_64", even if Python is built as 32-bit.
-_machine = os.uname().machine
-_any_x86 = _machine in ("i386", "x86_64")
+# platform.processor() describes the CPU on which the code is running.
+#   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit.
+#   * M1 MacBooks return "arm"
+#   * iPhones (as of the late 2022 support packages) return "arm64"
+# This *wont'* work on older iOS support builds, as it relies on the customized
+# platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
+_processor = platform.processor()
+_any_x86 = _processor in ("i386", "x86_64")
 __i386__ = _any_x86 and not __LP64__
 __x86_64__ = _any_x86 and __LP64__
 
-_any_arm = _machine.startswith("arm")
+_any_arm = _processor.startswith("arm")
 __arm64__ = _any_arm and __LP64__
 __arm__ = _any_arm and not __LP64__
 
