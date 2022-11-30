@@ -1,5 +1,5 @@
 import collections.abc
-import platform
+import os
 import struct
 from ctypes import (
     POINTER,
@@ -90,16 +90,15 @@ __all__ = [
 
 __LP64__ = 8 * struct.calcsize("P") == 64
 
-# platform.machine() indicates the machine's physical architecture,
-# which means that on a 64-bit Intel machine it is always "x86_64",
-# even if Python is built as 32-bit.
-_any_x86 = platform.machine() in ("i386", "x86_64")
+# os.uname() provides system identification details; the `machine` attribute
+# indicates the machine's physical architecture. On a 64-bit Intel machine it is
+# always "x86_64", even if Python is built as 32-bit.
+_machine = os.uname().machine
+_any_x86 = _machine in ("i386", "x86_64")
 __i386__ = _any_x86 and not __LP64__
 __x86_64__ = _any_x86 and __LP64__
 
-# On iOS, platform.machine() is a device identifier like "iPhone9,4",
-# but the platform.version() string contains the architecture.
-_any_arm = "ARM" in platform.version()
+_any_arm = _machine.startswith("arm")
 __arm64__ = _any_arm and __LP64__
 __arm__ = _any_arm and not __LP64__
 

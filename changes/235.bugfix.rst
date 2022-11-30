@@ -1,0 +1,1 @@
+The check identifying the architecture on which Rubicon is running has been corrected for x86_64 simulators using a recent Python-Apple-support releases.
