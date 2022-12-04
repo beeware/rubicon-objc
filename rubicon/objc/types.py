@@ -101,7 +101,14 @@ _any_x86 = _processor in ("i386", "x86_64")
 __i386__ = _any_x86 and not __LP64__
 __x86_64__ = _any_x86 and __LP64__
 
-_any_arm = _processor.startswith("arm")
+if _processor:
+    _any_arm = _processor.startswith("arm")
+else:
+    # Fallback when running on iOS without the support package,
+    # where platform.processor() is an empty string
+    # and the "model" field of uname/platform doesn't indicate the processor architecture.
+    # In that case, look for the architecture in the kernel version string.
+    _any_arm = "ARM" in platform.version()
 __arm64__ = _any_arm and __LP64__
 __arm__ = _any_arm and not __LP64__
 
