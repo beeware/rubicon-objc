@@ -90,16 +90,25 @@ __all__ = [
 
 __LP64__ = 8 * struct.calcsize("P") == 64
 
-# platform.machine() indicates the machine's physical architecture,
-# which means that on a 64-bit Intel machine it is always "x86_64",
-# even if Python is built as 32-bit.
-_any_x86 = platform.machine() in ("i386", "x86_64")
+# platform.processor() describes the CPU on which the code is running.
+#   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit.
+#   * M1 MacBooks return "arm"
+#   * iPhones (as of the late 2022 support packages) return "arm64"
+# This *wont'* work on older iOS support builds, as it relies on the customized
+# platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
+_processor = platform.processor()
+_any_x86 = _processor in ("i386", "x86_64")
 __i386__ = _any_x86 and not __LP64__
 __x86_64__ = _any_x86 and __LP64__
 
-# On iOS, platform.machine() is a device identifier like "iPhone9,4",
-# but the platform.version() string contains the architecture.
-_any_arm = "ARM" in platform.version()
+if _processor:
+    _any_arm = _processor.startswith("arm")
+else:
+    # Fallback when running on iOS without the support package,
+    # where platform.processor() is an empty string
+    # and the "model" field of uname/platform doesn't indicate the processor architecture.
+    # In that case, look for the architecture in the kernel version string.
+    _any_arm = "ARM" in platform.version()
 __arm64__ = _any_arm and __LP64__
 __arm__ = _any_arm and not __LP64__
 
