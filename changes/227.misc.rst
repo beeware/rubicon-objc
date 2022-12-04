@@ -1,1 +1,0 @@
-CI has been updated to include macOS-12 and remove macOS-10.15.

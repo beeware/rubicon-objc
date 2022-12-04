@@ -3,6 +3,32 @@ Release History
 
 .. towncrier release notes start
 
+0.4.3 (2022-12-05)
+==================
+
+Features
+--------
+
+* Support for Python 3.11 has been added. (`#224
+  <https://github.com/beeware/rubicon-objc/issues/224>`__)
+* Support for Python 3.12 has been added. (`#231
+  <https://github.com/beeware/rubicon-objc/issues/231>`__)
+
+Bugfixes
+--------
+
+* Enforce usage of `argtypes` when calling `send_super`. (`#220
+  <https://github.com/beeware/rubicon-objc/issues/220>`__)
+* The check identifying the architecture on which Rubicon is running has been
+  corrected for x86_64 simulators using a recent Python-Apple-support releases.
+  (`#235 <https://github.com/beeware/rubicon-objc/issues/235>`__)
+
+Misc
+----
+
+* #227, #228, #229, #232, #233, #234
+
+
 0.4.2 (2021-11-14)
 ------------------
 
@@ -11,23 +37,23 @@ Features
 
 * Added ``autoreleasepool`` context manager to mimic Objective-C
   ``@autoreleasepool`` blocks. (`#213
-  <https://github.com/beeware/rubicon-objc/issues/213>`_)
+  <https://github.com/beeware/rubicon-objc/issues/213>`__)
 
 * Allow storing Python objects in Objective-C properties declared with
   ``@objc_property``. (`#214
-  <https://github.com/beeware/rubicon-objc/issues/214>`_)
+  <https://github.com/beeware/rubicon-objc/issues/214>`__)
 
 * Added support for Python 3.10. (`#218
-  <https://github.com/beeware/rubicon-objc/issues/218>`_)
+  <https://github.com/beeware/rubicon-objc/issues/218>`__)
 
 Bugfixes
 ^^^^^^^^
 
 * Raise ``TypeError`` when trying to declare a weak property of a non-object
-  type. (`#215 <https://github.com/beeware/rubicon-objc/issues/215>`_)
+  type. (`#215 <https://github.com/beeware/rubicon-objc/issues/215>`__)
 
 * Corrected handling of methods when a class overrides a method defined in a
-  grandparent. (`#216 <https://github.com/beeware/rubicon-objc/issues/216>`_)
+  grandparent. (`#216 <https://github.com/beeware/rubicon-objc/issues/216>`__)
 
 
 0.4.1 (2021-07-25)
@@ -37,20 +63,20 @@ Features
 ^^^^^^^^
 
 * Added official support for Python 3.9. (`#193
-  <https://github.com/beeware/rubicon-objc/issues/193>`_)
+  <https://github.com/beeware/rubicon-objc/issues/193>`__)
 
 * Added official support for macOS 11 (Big Sur). (`#195
-  <https://github.com/beeware/rubicon-objc/issues/195>`_)
+  <https://github.com/beeware/rubicon-objc/issues/195>`__)
 
 * Autorelease Objective-C instances when the corresponding Python instance is
-  destroyed. (`#200 <https://github.com/beeware/rubicon-objc/issues/200>`_)
+  destroyed. (`#200 <https://github.com/beeware/rubicon-objc/issues/200>`__)
 
 * Improved memory management when a Python instance is assigned to a new
   ``ObjCInstance`` attribute. (`#209
-  <https://github.com/beeware/rubicon-objc/issues/209>`_)
+  <https://github.com/beeware/rubicon-objc/issues/209>`__)
 
 * Added support to declare weak properties on custom Objective-C classes. (`#210
-  <https://github.com/beeware/rubicon-objc/issues/210>`_)
+  <https://github.com/beeware/rubicon-objc/issues/210>`__)
 
 Bugfixes
 ^^^^^^^^
@@ -59,25 +85,25 @@ Bugfixes
   create a block with no arguments and using explicit types. This previously
   caused an incorrect exception about missing argument types; now a no-arg block
   is created as expected. (`#153
-  <https://github.com/beeware/rubicon-objc/issues/153>`_)
+  <https://github.com/beeware/rubicon-objc/issues/153>`__)
 
 * Fixed handling of type annotations when passing a bound Python method into
   :class:`~rubicon.objc.api.Block`. (`#153
-  <https://github.com/beeware/rubicon-objc/issues/153>`_)
+  <https://github.com/beeware/rubicon-objc/issues/153>`__)
 
 * A cooperative entry point for starting event loop has been added. This corrects
   a problem seen when using Python 3.8 on iOS. (`#182
-  <https://github.com/beeware/rubicon-objc/issues/182>`_)
+  <https://github.com/beeware/rubicon-objc/issues/182>`__)
 
 * Improved performance of Objective-C method calls and
   :class:`~rubicon.objc.api.ObjCInstance` creation in many cases. (`#183
-  <https://github.com/beeware/rubicon-objc/issues/183>`_)
+  <https://github.com/beeware/rubicon-objc/issues/183>`__)
 
 * Fix calling of signal handlers added to the asyncio loop with CFRunLoop
-  integration. (`#202 <https://github.com/beeware/rubicon-objc/issues/202>`_)
+  integration. (`#202 <https://github.com/beeware/rubicon-objc/issues/202>`__)
 
 * Allow restarting a stopped event loop. (`#205
-  <https://github.com/beeware/rubicon-objc/issues/205>`_)
+  <https://github.com/beeware/rubicon-objc/issues/205>`__)
 
 Deprecations and Removals
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -101,7 +127,7 @@ Deprecations and Removals
   an Objective-C collection as Python values, you can use
   :func:`~rubicon.objc.api.py_from_ns` to convert either single values (e. g.
   ``py_from_ns(arr[0])``) or the entire collection (e. g. ``py_from_ns(arr)``).
-  (`#183 <https://github.com/beeware/rubicon-objc/issues/183>`_)
+  (`#183 <https://github.com/beeware/rubicon-objc/issues/183>`__)
 
 * Removed macOS 10.12 through 10.14 from our automatic test matrix,
   due to pricing changes in one of our CI services (Travis CI).
@@ -114,7 +140,7 @@ Deprecations and Removals
   basis, even though compatibility is no longer tested automatically. If you
   encounter any bugs or other problems with Rubicon on these older macOS
   versions, please report them! (`#197
-  <https://github.com/beeware/rubicon-objc/issues/197>`_)
+  <https://github.com/beeware/rubicon-objc/issues/197>`__)
 
 Misc
 ^^^^
@@ -133,21 +159,21 @@ Features
 ^^^^^^^^
 
 * Added macOS 10.15 (Catalina) to the test matrix.
-  (`#145 <https://github.com/beeware/rubicon-objc/issues/145>`_)
+  (`#145 <https://github.com/beeware/rubicon-objc/issues/145>`__)
 * Added :pep:`517` and :pep:`518` build system metadata to pyproject.toml.
-  (`#156 <https://github.com/beeware/rubicon-objc/issues/156>`_)
+  (`#156 <https://github.com/beeware/rubicon-objc/issues/156>`__)
 * Added official support for Python 3.8.
-  (`#162 <https://github.com/beeware/rubicon-objc/issues/162>`_)
+  (`#162 <https://github.com/beeware/rubicon-objc/issues/162>`__)
 * Added a ``varargs`` keyword argument to
   :func:`~rubicon.objc.runtime.send_message` to allow calling variadic methods
-  more safely. (`#174 <https://github.com/beeware/rubicon-objc/issues/174>`_)
+  more safely. (`#174 <https://github.com/beeware/rubicon-objc/issues/174>`__)
 * Changed ``ObjCMethod`` to call methods using
   :func:`~rubicon.objc.runtime.send_message` instead of calling
   :class:`~rubicon.objc.runtime.IMP`\s directly. This is mainly an internal
   change and should not affect most existing code, although it may improve
   compatibility with Objective-C code that makes heavy use of runtime
   reflection and method manipulation (such as swizzling).
-  (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`_)
+  (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`__)
 
 Bugfixes
 ^^^^^^^^
@@ -155,44 +181,44 @@ Bugfixes
 * Fixed Objective-C method calls in "flat" syntax accepting more arguments than
   the method has. The extra arguments were previously silently ignored.
   An exception is now raised if too many arguments are passed.
-  (`#123 <https://github.com/beeware/rubicon-objc/issues/123>`_)
+  (`#123 <https://github.com/beeware/rubicon-objc/issues/123>`__)
 * Fixed :func:`ObjCInstance.__str__ <rubicon.objc.api.ObjCInstance.__str__>`
   throwing an exception if the object's Objective-C ``description`` is ``nil``.
-  (`#125 <https://github.com/beeware/rubicon-objc/issues/125>`_)
+  (`#125 <https://github.com/beeware/rubicon-objc/issues/125>`__)
 * Corrected a slow memory leak caused every time an asyncio timed event handler
-  triggered. (`#146 <https://github.com/beeware/rubicon-objc/issues/146>`_)
+  triggered. (`#146 <https://github.com/beeware/rubicon-objc/issues/146>`__)
 * Fixed various minor issues in the build and packaging metadata.
-  (`#156 <https://github.com/beeware/rubicon-objc/issues/156>`_)
+  (`#156 <https://github.com/beeware/rubicon-objc/issues/156>`__)
 * Removed unit test that attempted to pass a struct with bit fields into a C
   function by value. Although this has worked in the past on x86 and x86_64,
   :mod:`ctypes` never officially supported this, and started generating an
   error in Python 3.7.6 and 3.8.1
-  (see `bpo-39295 <https://bugs.python.org/issue39295>`_).
-  (`#157 <https://github.com/beeware/rubicon-objc/issues/157>`_)
+  (see `bpo-39295 <https://bugs.python.org/issue39295>`__).
+  (`#157 <https://github.com/beeware/rubicon-objc/issues/157>`__)
 * Corrected the invocation of ``NSApplication.terminate()`` when the
   :class:`~rubicon.objc.eventloop.CocoaLifecycle` is ended.
-  (`#170 <https://github.com/beeware/rubicon-objc/issues/170>`_)
+  (`#170 <https://github.com/beeware/rubicon-objc/issues/170>`__)
 * Fixed :func:`~rubicon.objc.runtime.send_message` not accepting
   :class:`~rubicon.objc.runtime.SEL` objects for the ``selector`` parameter.
   The documentation stated that this is allowed, but actually doing so caused
-  a type error. (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`_)
+  a type error. (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`__)
 
 Improved Documentation
 ^^^^^^^^^^^^^^^^^^^^^^
 
 * Added detailed :doc:`reference documentation </reference/index>` for all
   public APIs of :mod:`rubicon.objc`.
-  (`#118 <https://github.com/beeware/rubicon-objc/issues/118>`_)
+  (`#118 <https://github.com/beeware/rubicon-objc/issues/118>`__)
 * Added a :doc:`how-to guide for calling regular C functions
   </how-to/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`.
-  (`#147 <https://github.com/beeware/rubicon-objc/issues/147>`_)
+  (`#147 <https://github.com/beeware/rubicon-objc/issues/147>`__)
 
 Deprecations and Removals
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Removed the i386 architecture from the test matrix. It is still supported on
   a best-effort basis, but compatibility is not tested automatically.
-  (`#139 <https://github.com/beeware/rubicon-objc/issues/139>`_)
+  (`#139 <https://github.com/beeware/rubicon-objc/issues/139>`__)
 * Tightened the API of :func:`~rubicon.objc.runtime.send_message`, removing
   some previously allowed shortcuts and features that were rarely used, or
   likely to be used by accident in an unsafe way.
@@ -240,16 +266,16 @@ Deprecations and Removals
   arguments now has to exactly match the number of ``argtypes``. Variadic
   methods can still be called, but the varargs now need to be passed as a list
   into the separate ``varargs`` keyword arugment.
-  (`#174 <https://github.com/beeware/rubicon-objc/issues/174>`_)
+  (`#174 <https://github.com/beeware/rubicon-objc/issues/174>`__)
 * Removed the ``rubicon.objc.core_foundation`` module. This was an internal
   module with few remaining contents and should not have any external uses. If
   you need to call Core Foundation functions in your code, please load the
   framework yourself using ``load_library('CoreFoundation')`` and define the
   types and functions that you need.
-  (`#175 <https://github.com/beeware/rubicon-objc/issues/175>`_)
+  (`#175 <https://github.com/beeware/rubicon-objc/issues/175>`__)
 * Removed the ``ObjCMethod`` class from the public API, as there was no good
   way to use it from external code.
-  (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`_)
+  (`#177 <https://github.com/beeware/rubicon-objc/issues/177>`__)
 
 Misc
 ^^^^

@@ -1,1 +1,0 @@
-Black formatting and pre-commit hooks were enabled on the codebase.
