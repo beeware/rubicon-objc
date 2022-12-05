@@ -16,7 +16,7 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../src"))
 
 # -- General configuration -----------------------------------------------------
 
@@ -48,7 +48,7 @@ copyright = "2014, Russell Keith-Magee"
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-with open("../rubicon/objc/__init__.py", encoding="utf8") as version_file:
+with open("../src/rubicon/objc/__init__.py", encoding="utf8") as version_file:
     version_match = re.search(
         r"^__version__ = ['\"]([^'\"]*)['\"]", version_file.read(), re.MULTILINE
     )
