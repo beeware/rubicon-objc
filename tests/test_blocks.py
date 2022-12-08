@@ -79,12 +79,14 @@ class BlockTests(unittest.TestCase):
 
         values = []
 
-        def block(a: int, b: int) -> None:
+        def block(a: int, b: int) -> int:
             values.append(a + b)
+            return 42
 
-        instance.receiverMethod_(block)
+        result = instance.receiverMethod_(block)
 
         self.assertEqual(values, [27])
+        self.assertEqual(result, 42)
 
     def test_block_receiver_unannotated(self):
         BlockReceiverExample = ObjCClass("BlockReceiverExample")
