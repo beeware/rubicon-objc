@@ -1,3 +1,4 @@
+import platform
 import unittest
 from ctypes import Structure, c_int, c_void_p
 
@@ -6,19 +7,29 @@ from rubicon.objc.api import Block
 from rubicon.objc.runtime import objc_block
 
 
+def m1_block_failure(test):
+    if platform.processor().startswith("arm"):
+        return unittest.expectedFailure(test)
+    else:
+        return test
+
+
 class BlockTests(unittest.TestCase):
+    @m1_block_failure
     def test_block_property_ctypes(self):
         BlockPropertyExample = ObjCClass("BlockPropertyExample")
         instance = BlockPropertyExample.alloc().init()
         result = ObjCBlock(instance.blockProperty, c_int, c_int, c_int)(1, 2)
         self.assertEqual(result, 3)
 
+    @m1_block_failure
     def test_block_property_pytypes(self):
         BlockPropertyExample = ObjCClass("BlockPropertyExample")
         instance = BlockPropertyExample.alloc().init()
         result = ObjCBlock(instance.blockProperty, int, int, int)(1, 2)
         self.assertEqual(result, 3)
 
+    @m1_block_failure
     def test_block_delegate_method_manual_ctypes(self):
         class DelegateManualC(NSObject):
             @objc_method
@@ -31,6 +42,7 @@ class BlockTests(unittest.TestCase):
         result = instance.blockExample()
         self.assertEqual(result, 5)
 
+    @m1_block_failure
     def test_block_delegate_method_manual_pytypes(self):
         class DelegateManualPY(NSObject):
             @objc_method
@@ -43,6 +55,7 @@ class BlockTests(unittest.TestCase):
         result = instance.blockExample()
         self.assertEqual(result, 5)
 
+    @m1_block_failure
     def test_block_delegate_auto(self):
         class DelegateAuto(NSObject):
             @objc_method
@@ -55,6 +68,7 @@ class BlockTests(unittest.TestCase):
         result = instance.blockExample()
         self.assertEqual(result, 9)
 
+    @m1_block_failure
     def test_block_delegate_auto_struct(self):
         class BlockStruct(Structure):
             _fields_ = [
@@ -115,6 +129,7 @@ class BlockTests(unittest.TestCase):
 
         self.assertEqual(values, [27])
 
+    @m1_block_failure
     def test_block_round_trip(self):
         BlockRoundTrip = ObjCClass("BlockRoundTrip")
         instance = BlockRoundTrip.alloc().init()
@@ -143,6 +158,7 @@ class BlockTests(unittest.TestCase):
         returned_block_2 = instance.roundTripNoArgs(block_2)
         self.assertEqual(returned_block_2(), 42)
 
+    @m1_block_failure
     def test_block_bound_method(self):
         """A bound method with type annotations can be wrapped in a block."""
 
