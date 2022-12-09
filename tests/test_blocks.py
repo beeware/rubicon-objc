@@ -8,6 +8,8 @@ from rubicon.objc.runtime import objc_block
 
 
 def m1_block_failure(test):
+    # Properties/methods returning blocks currently fail on ARM hardware.
+    # See #225 for details
     if platform.processor().startswith("arm"):
         return unittest.expectedFailure(test)
     else:
