@@ -20,7 +20,7 @@ async def stop_loop(loop, delay):
 class AsyncRunTests(unittest.TestCase):
     def setUp(self):
         asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
 
     def tearDown(self):
         asyncio.set_event_loop_policy(None)
@@ -58,7 +58,7 @@ class AsyncRunTests(unittest.TestCase):
 class AsyncCallTests(unittest.TestCase):
     def setUp(self):
         asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
 
     def tearDown(self):
         asyncio.set_event_loop_policy(None)
@@ -98,7 +98,7 @@ class AsyncCallTests(unittest.TestCase):
 
 class AsyncReaderWriterTests(unittest.TestCase):
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
         self.server = None
 
     def tearDown(self):
@@ -157,7 +157,7 @@ class AsyncReaderWriterTests(unittest.TestCase):
 class AsyncSubprocessTests(unittest.TestCase):
     def setUp(self):
         asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.new_event_loop()
 
     def tearDown(self):
         asyncio.set_event_loop_policy(None)
@@ -180,7 +180,7 @@ class AsyncSubprocessTests(unittest.TestCase):
             proc._transport.close()
             return entries
 
-        task = asyncio.ensure_future(list_dir())
+        task = asyncio.ensure_future(list_dir(), loop=self.loop)
         self.loop.run_until_complete(task)
 
         # Check for some files that should exist.
