@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: ${{ env.python_version }}
+          python-version: "3.X"
       - name: Lint with Pre-commit
         uses: pre-commit/action@v3.0.0
 
