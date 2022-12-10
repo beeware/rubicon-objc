@@ -32,7 +32,7 @@ typedef struct
 
 
 @interface BlockReceiverExample : NSObject
-- (void)receiverMethod:(void (^)(int, int))blockArgument;
+- (int)receiverMethod:(int (^)(int, int))blockArgument;
 @end
 
 
