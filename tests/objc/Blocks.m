@@ -53,9 +53,9 @@
 
 @implementation BlockReceiverExample
 
--(void) receiverMethod:(void (^)(int, int))blockArgument
+-(int) receiverMethod:(int (^)(int, int))blockArgument
 {
-    blockArgument(13, 14);
+    return blockArgument(13, 14);
 }
 
 @end

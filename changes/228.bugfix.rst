@@ -1,0 +1,1 @@
+Background threads will no longer lock up on iOS when an asyncio event loop is in use.

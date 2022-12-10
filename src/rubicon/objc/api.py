@@ -2076,7 +2076,7 @@ class ObjCBlock:
         if self.has_helpers:
             representation += ",has_helpers"
         if self.has_signature:
-            representation += ",has_signature:" + self.signature
+            representation += ",has_signature:" + self.signature.decode("utf-8")
         representation += ">"
         return representation
 
@@ -2087,7 +2087,6 @@ class ObjCBlock:
         objects according to the default ``ctypes`` rules, based on the
         block's return and parameter types.
         """
-
         return self.struct.contents.invoke(self.pointer, *args)
 
 
