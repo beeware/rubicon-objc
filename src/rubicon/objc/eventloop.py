@@ -223,9 +223,9 @@ class CFSocketHandle(events.Handle):
             )
             return
 
-        if callbackType == kCFSocketReadCallBack:
+        if callbackType == kCFSocketReadCallBack and self._reader:
             callback, args = self._reader
-        elif callbackType == kCFSocketWriteCallBack:
+        elif callbackType == kCFSocketWriteCallBack and self._writer:
             callback, args = self._writer
         else:
             callback = None
@@ -516,7 +516,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         if hasattr(events, "_set_running_loop"):
             events._set_running_loop(self)
 
-        self._lifecycle.start()
+        # Start the lifecycle, but invoke it as a deferred event on the event
+        # loop. iOSLifeCycle.start() invokes libcf.CFRunLoopRun(); this ensures
+        # that a full CFRunLoop is running, not just one that responds to
+        # iOS events. See #228 for the sort of behavior that occurs on threads
+        # if the CFRunLoop isn't started.
+        self.call_soon(self._lifecycle.start)
 
     def call_soon(self, callback, *args, context=None):
         """Arrange for a callback to be called as soon as possible.
@@ -739,7 +744,7 @@ class iOSLifecycle:
     """A lifecycle manager for iOS (``UIApplication``) apps."""
 
     def start(self):
-        pass
+        libcf.CFRunLoopRun()
 
     def stop(self):
-        pass
+        libcf.CFRunLoopStop(libcf.CFRunLoopGetMain())
