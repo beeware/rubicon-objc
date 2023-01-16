@@ -18,10 +18,10 @@ Rubicon-ObjC
    :alt: Project status
 
 .. image:: https://img.shields.io/pypi/l/rubicon-objc.svg
-   :target: https://github.com/beeware/rubicon-objc/blob/master/LICENSE
+   :target: https://github.com/beeware/rubicon-objc/blob/main/LICENSE
    :alt: License
 
-.. image:: https://github.com/beeware/rubicon-objc/workflows/CI/badge.svg?branch=master
+.. image:: https://github.com/beeware/rubicon-objc/workflows/CI/badge.svg?branch=main
    :target: https://github.com/beeware/rubicon-objc/actions
    :alt: Build Status
 
