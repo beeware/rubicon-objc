@@ -2,6 +2,7 @@ import collections.abc
 import decimal
 import enum
 import inspect
+import threading
 import weakref
 from ctypes import (
     CFUNCTYPE,
@@ -991,8 +992,9 @@ class ObjCInstance:
         cls = self.objc_class
         while cls is not None:
             # Load the class's methods if we haven't done so yet.
-            if cls.methods_ptr is None:
-                cls._load_methods()
+            with _ObjCClass_load_methods_lock:
+                if cls.methods_ptr is None:
+                    cls._load_methods()
 
             try:
                 method = cls.partial_methods[name]
@@ -1087,6 +1089,11 @@ class ObjCInstance:
             libobjc.objc_setAssociatedObject(self, key, None, 0x301)
 
 
+# A re-entrant thread lock moderating access to ObjCClass._load_methods().
+# This ensures that only one thread populates the method table for each class.
+_ObjCClass_load_methods_lock = threading.RLock()
+
+
 # The inheritance order is important here.
 # type must come after ObjCInstance, so super() refers to ObjCInstance.
 # This allows the ObjCInstance constructor to receive the class pointer
@@ -1125,7 +1132,7 @@ class ObjCClass(ObjCInstance, type):
         name = ensure_bytes(name)
         ptr = get_class(name)
         if ptr.value is None:
-            raise NameError("ObjC Class '%s' couldn't be found." % name)
+            raise NameError(f"ObjC Class {name} couldn't be found.")
 
         return ptr, name
 
@@ -1284,7 +1291,6 @@ class ObjCClass(ObjCInstance, type):
 
         new_attrs = {
             "name": objc_class_name,
-            "methods_ptr_count": c_uint(0),
             "methods_ptr": None,
             # Mapping of name -> method pointer
             "instance_method_ptrs": {},
@@ -1327,8 +1333,9 @@ class ObjCClass(ObjCInstance, type):
         objc_method = None
         while supercls is not None:
             # Load the class's methods if we haven't done so yet.
-            if supercls.methods_ptr is None:
-                supercls._load_methods()
+            with _ObjCClass_load_methods_lock:
+                if supercls.methods_ptr is None:
+                    supercls._load_methods()
 
             try:
                 objc_method = supercls.instance_methods[name]
@@ -1508,11 +1515,11 @@ class ObjCClass(ObjCInstance, type):
 
     def _load_methods(self):
         if self.methods_ptr is not None:
-            raise RuntimeError("_load_methods cannot be called more than once")
+            raise RuntimeError(f"{self}_load_methods cannot be called more than once")
 
-        self.methods_ptr = libobjc.class_copyMethodList(
-            self, byref(self.methods_ptr_count)
-        )
+        methods_ptr_count = c_uint(0)
+
+        methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
 
         if self.superclass is not None:
             if self.superclass.methods_ptr is None:
@@ -1523,8 +1530,8 @@ class ObjCClass(ObjCInstance, type):
                 partial = self.partial_methods[first] = ObjCPartialMethod(first)
                 partial.methods.update(superpartial.methods)
 
-        for i in range(self.methods_ptr_count.value):
-            method = self.methods_ptr[i]
+        for i in range(methods_ptr_count.value):
+            method = methods_ptr[i]
             name = libobjc.method_getName(method).name.decode("utf-8")
             self.instance_method_ptrs[name] = method
 
@@ -1542,6 +1549,9 @@ class ObjCClass(ObjCInstance, type):
             # order is rest without the dummy "" part
             order = rest[:-1]
             partial.methods[frozenset(rest)] = (name, order)
+
+        # Set the list of methods for the class to the computed list.
+        self.methods_ptr = methods_ptr
 
 
 class ObjCMetaClass(ObjCClass):
