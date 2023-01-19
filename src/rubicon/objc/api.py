@@ -1586,7 +1586,7 @@ class ObjCClass(ObjCInstance, type):
 
     def _load_methods(self):
         if self.methods_ptr is not None:
-            raise RuntimeError(f"{self}_load_methods cannot be called more than once")
+            raise RuntimeError(f"{self}._load_methods cannot be called more than once")
 
         methods_ptr_count = c_uint(0)
 
