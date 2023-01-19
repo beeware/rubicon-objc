@@ -1,6 +1,7 @@
 import functools
 import gc
 import math
+import threading
 import unittest
 import weakref
 from ctypes import (
@@ -10,6 +11,7 @@ from ctypes import (
     c_double,
     c_float,
     c_int,
+    c_uint,
     c_void_p,
     cast,
     create_string_buffer,
@@ -1660,3 +1662,205 @@ class RubiconTest(unittest.TestCase):
         # The base class implementation can still be found an invoked.
         obj.method(2)
         self.assertEqual(obj.baseIntField, 2)
+
+    def test_stale_instance_cache(self):
+        "Instances returned by the ObjCInstance cache are checked for staleness (#249)"
+        # Wrap 2 classes with different method lists
+        Example = ObjCClass("Example")
+        Thing = ObjCClass("Thing")
+
+        # Create objects of 2 different types.
+        old = Example.alloc().init()
+        thing = Thing.alloc().init()
+
+        # Deliberately poison the ObjCInstance Cache, making the memory address
+        # for thing point at the "old" example. This matches what happens when a
+        # memory address is re-allocated by the Objective-C runtime
+        ObjCInstance._cached_objects[thing.ptr.value] = old
+
+        # Obtain a fresh address-based wrapper for the same Thing instance.
+        new_thing = Thing(thing.ptr.value)
+        self.assertEqual(new_thing.objc_class, Thing)
+        self.assertIsInstance(new_thing, ObjCInstance)
+
+        try:
+            # Try to access an method known to exist on Thing
+            new_thing.computeSize(NSSize(37, 42))
+        except AttributeError:
+            # If a stale wrapper is returned, new_example will be of type Example,
+            # so the expected method won't exist, causing an AttributeError.
+            self.fail("Stale wrapper returned")
+
+    def test_stale_instance_cache_implicit(self):
+        "Implicit instances returned by the ObjCInstance cache are checked for staleness (#249)"
+        # Wrap 2 classes with different method lists
+        Example = ObjCClass("Example")
+        Thing = ObjCClass("Thing")
+
+        # Create objects of 2 different types.
+        old = Example.alloc().init()
+        example = Example.alloc().init()
+        thing = Thing.alloc().init()
+
+        # Store the reference to Thing on example.
+        example.thing = thing
+
+        # Deliberately poison the ObjCInstance cache, making the memory address
+        # for thing point at the "old" example. This matches what happens when a memory
+        # address is re-allocated by the Objective-C runtime.
+        ObjCInstance._cached_objects[thing.ptr.value] = old
+
+        # When accessing a property that returns an ObjC id, we don't have
+        # type information, so the metaclass at time of construction is ObjCInstance,
+        # rather than an instance of ObjCClass.
+        #
+        # Access the thing property to return the generic instance wrapper
+        new_thing = example.thing
+        self.assertEqual(new_thing.objc_class, Thing)
+        self.assertIsInstance(new_thing, ObjCInstance)
+
+        try:
+            # Try to access an method known to exist on Thing
+            new_thing.computeSize(NSSize(37, 42))
+        except AttributeError:
+            # If a stale wrapper is returned, new_example will be of type Example,
+            # so the expected method won't exist, causing an AttributeError.
+            self.fail("Stale wrapper returned")
+
+    def test_threaded_wrapper_creation(self):
+        "If 2 threads try to create a wrapper for the same object, only 1 wrapper is created (#251)"
+        # Create an ObjC instance, and keep a track of the memory address
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+        ptr = obj.ptr
+
+        # The underlying problem is a race condition, so we need to try a
+        # bunch of times to make it happen.
+        for _ in range(0, 1000):
+            # Flush the ObjC instance cache
+            ObjCInstance._cached_objects = {}
+
+            # Keep a log of the Example instances that have been created,
+            # keyed by thread_id
+            instances = {}
+
+            # A worker method that will create a wrapper object from a (known
+            # good) memory address, and track the wrapper object created.
+            def work():
+                instances[threading.get_ident()] = Example(ptr)
+
+            # Run the work method in the main thread, and in a secondary thread;
+            # wait for both to complete.
+            thread = threading.Thread(target=work)
+            thread.start()
+            work()
+            thread.join()
+
+            # There should be 2 instances
+            wrappers = list(instances.values())
+            self.assertEqual(len(wrappers), 2)
+
+            # They should be pointing at the same memory address
+            self.assertEqual(wrappers[0].ptr, wrappers[1].ptr)
+
+            # They should be the same object (i.e., one came from the cache)
+            self.assertEqual(id(wrappers[0]), id(wrappers[1]))
+
+    def test_threaded_method_cache(self):
+        "If 2 threads try to access a method on the same object, there's no race condition populating the cache (#252)"
+        # Wrap a class with lots of methods, and create the instance
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+
+        for _ in range(0, 1000):
+            # Manually clear the method/property cache on Example.
+            # This returns the attributes set in ObjCClass.__new__
+            # to their initial values.
+            Example.methods_ptr_count = c_uint(0)
+            Example.methods_ptr = None
+            Example.instance_method_ptrs = {}
+            Example.instance_methods = {}
+            Example.instance_properties = {}
+            Example.forced_properties = set()
+            Example.partial_methods = {}
+
+            # A worker method that invokes a method.
+            # This will also populate the method cache.
+            def work():
+                try:
+                    obj.mutateIntFieldWithValue(42)
+                except AttributeError:
+                    self.fail("method should exist; method cache is corrupt")
+
+            # Run the work method in the main thread, and in a secondary thread;
+            # wait for both to complete.
+            thread = threading.Thread(target=work)
+            thread.start()
+            work()
+            thread.join()
+
+    def test_threaded_accessor_cache(self):
+        "If 2 threads try to access an accessor on the same object, there's no race condition populating the cache (#252)"
+        # Wrap a class with lots of methods, and create the instance
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+
+        for _ in range(0, 1000):
+            # Manually clear the method/property cache on Example.
+            # This returns the attributes set in ObjCClass.__new__
+            # to their initial values.
+            Example.methods_ptr_count = c_uint(0)
+            Example.methods_ptr = None
+            Example.instance_method_ptrs = {}
+            Example.instance_methods = {}
+            Example.instance_properties = {}
+            Example.forced_properties = set()
+            Example.partial_methods = {}
+
+            # A worker method that accesses a property
+            # This will also populate the property cache.
+            def work():
+                try:
+                    obj.intField
+                except AttributeError:
+                    self.fail("accessor should exist; property cache is corrupt")
+
+            # Run the work method in the main thread, and in a secondary thread;
+            # wait for both to complete.
+            thread = threading.Thread(target=work)
+            thread.start()
+            work()
+            thread.join()
+
+    def test_threaded_mutator_cache(self):
+        "If 2 threads try to access an mutator on the same object, there's no race condition populating the cache (#252)"
+        # Wrap a class with lots of methods, and create the instance
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+
+        for _ in range(0, 1000):
+            # Manually clear the method/property cache on Example.
+            # This returns the attributes set in ObjCClass.__new__
+            # to their initial values.
+            Example.methods_ptr_count = c_uint(0)
+            Example.methods_ptr = None
+            Example.instance_method_ptrs = {}
+            Example.instance_methods = {}
+            Example.instance_properties = {}
+            Example.forced_properties = set()
+            Example.partial_methods = {}
+
+            # A worker method that mutates a property
+            # This will also populate the property cache.
+            def work():
+                try:
+                    obj.intField = 42
+                except AttributeError:
+                    self.fail("mutator should exist; property cache is corrupt")
+
+            # Run the work method in the main thread, and in a secondary thread;
+            # wait for both to complete.
+            thread = threading.Thread(target=work)
+            thread.start()
+            work()
+            thread.join()

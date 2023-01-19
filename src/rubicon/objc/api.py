@@ -852,13 +852,18 @@ class ObjCInstance:
                 # discrepancy, purge the cache for the memory address, and
                 # re-create the object.
                 #
-                # We only do this on ObjCInstance (not ObjCClass, ObjCMetaClass,
-                # etc) as there's a race condition on startup - retrieving
-                # `.objc_class` causes the creation of ObjCClass objects, which
-                # will cause cache hits trying to re-use existing ObjCClass
-                # objects. However, ObjCClass instances generally won't be
-                # recycled or reused, so that should be safe to exclude from the
-                # cache freshness check.
+                # We do this both when the type *is* ObjCInstance (the case when
+                # instantiating a literal ObjCInstance()), and when type is an
+                # ObjCClass instance (e.g., ObjClass("Example"), which is the
+                # type of a directly instantiated instance of Example.
+                #
+                # We *don't* do this when the type *is* ObjCClass,
+                # ObjCMetaClass, as there's a race condition on startup -
+                # retrieving `.objc_class` causes the creation of ObjCClass
+                # objects, which will cause cache hits trying to re-use existing
+                # ObjCClass objects. However, ObjCClass instances generally
+                # won't be recycled or reused, so that should be safe to exclude
+                # from the cache freshness check.
                 #
                 # One edge case with this approach: if the old and new
                 # Objective-C objects have the same class, they won't be
@@ -871,7 +876,7 @@ class ObjCInstance:
                 # it's the correct class.
                 #
                 # Refs #249.
-                if cls == ObjCInstance:
+                if cls == ObjCInstance or isinstance(cls, ObjCInstance):
                     cached_class_name = ensure_bytes(cached.objc_class.name)
                     current_class_name = libobjc.class_getName(
                         libobjc.object_getClass(object_ptr)
