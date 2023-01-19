@@ -128,7 +128,6 @@ class ObjCMethod:
         :class:`~rubicon.objc.runtime.Method` pointer received from the
         Objective-C runtime.
         """
-
         self.selector = libobjc.method_getName(method)
         self.name = self.selector.name
         self.encoding = libobjc.method_getTypeEncoding(method)
@@ -756,6 +755,21 @@ class ObjCInstance:
     # ObjCInstance might be created for it if it is wrapped again later.)
     _cached_objects = weakref.WeakValueDictionary()
 
+    # A re-entrant thread lock moderating access to
+    # ObjCInstance._cached_objects. When creating new instances, there is a time
+    # gap between determining there has been a cache miss, and the addition of a
+    # new instance into the cache. This leaves a gap where a separate thread
+    # could wrap the same pointer, and creating a second wrapper; whichever
+    # wrapper is written to the cache first will be overwritten by the second.
+    # This probably won't cause any observable problems - both instances will be
+    # valid wrappers around the same memory address, but it's memory that we
+    # don't need to allocate. The lock is re-entrant because allocating an
+    # instance can cause the creation of additional instances, especially at
+    # time of bootstrapping.
+    #
+    # Refs #251.
+    _instance_lock = threading.RLock()
+
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
@@ -816,37 +830,89 @@ class ObjCInstance:
         if not object_ptr.value:
             return None
 
-        # If an ObjCInstance already exists for the Objective-C object,
-        # reuse it instead of creating a second ObjCInstance for the same object.
-        try:
-            return cls._cached_objects[object_ptr.value]
-        except KeyError:
-            pass
+        with ObjCInstance._instance_lock:
+            try:
+                # If an ObjCInstance already exists for the Objective-C object,
+                # reuse it instead of creating a second ObjCInstance for the
+                # same object.
+                cached = cls._cached_objects[object_ptr.value]
 
-        # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
-        if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
-            return ObjCClass(object_ptr)
+                # In a high-churn environment, it is possible for an object to
+                # be deallocated, and the same memory address be re-used on the
+                # Objective-C side, but the Python wrapper object for the
+                # original instance has *not* been cleaned up. In that
+                # situation, an attempt to wrap the *new* Objective-C object
+                # instance will cause a false positive cache hit; returning a
+                # Python object that has a class that doesn't match the class of
+                # the new instance.
+                #
+                # To prevent this, when we get a cache hit on an ObjCInstance,
+                # use the raw Objective-C API on the pointer to get the current
+                # class of the object referred to by the pointer. If there's a
+                # discrepancy, purge the cache for the memory address, and
+                # re-create the object.
+                #
+                # We only do this on ObjCInstance (not ObjCClass, ObjCMetaClass,
+                # etc) as there's a race condition on startup - retrieving
+                # `.objc_class` causes the creation of ObjCClass objects, which
+                # will cause cache hits trying to re-use existing ObjCClass
+                # objects. However, ObjCClass instances generally won't be
+                # recycled or reused, so that should be safe to exclude from the
+                # cache freshness check.
+                #
+                # One edge case with this approach: if the old and new
+                # Objective-C objects have the same class, they won't be
+                # identified as a stale object, and they'll re-use the same
+                # Python wrapper. This effectively means id(obj) isn't a
+                # reliable instance identifier... but (a) this won't be a common
+                # case; (b) this flaw exists in pure Python and Objective-C as
+                # well, because default object identity is tied to memory
+                # allocation; and (c) the stale wrapper will *work*, because
+                # it's the correct class.
+                #
+                # Refs #249.
+                if cls == ObjCInstance:
+                    cached_class_name = ensure_bytes(cached.objc_class.name)
+                    current_class_name = libobjc.class_getName(
+                        libobjc.object_getClass(object_ptr)
+                    )
+                    if cached_class_name != current_class_name:
+                        # There has been a cache hit, but the object is a different class.
+                        # Purge the cache for this address, and treat it as a cache miss.
+                        del cls._cached_objects[object_ptr.value]
+                        raise KeyError(object_ptr.value)
 
-        # Otherwise, create a new ObjCInstance.
-        if issubclass(cls, type):
-            # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
-            self = super().__new__(cls, _name, _bases, _ns)
-        else:
-            if isinstance(object_ptr, objc_block):
-                cls = ObjCBlockInstance
+                return cached
+            except KeyError:
+                pass
+
+            # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
+            if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
+                return ObjCClass(object_ptr)
+
+            # Otherwise, create a new ObjCInstance.
+            if issubclass(cls, type):
+                # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
+                self = super().__new__(cls, _name, _bases, _ns)
             else:
-                cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
-            self = super().__new__(cls)
-        super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
-        super(ObjCInstance, type(self)).__setattr__(self, "_as_parameter_", object_ptr)
-        super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
-        if isinstance(object_ptr, objc_block):
+                if isinstance(object_ptr, objc_block):
+                    cls = ObjCBlockInstance
+                else:
+                    cls = type_for_objcclass(libobjc.object_getClass(object_ptr))
+                self = super().__new__(cls)
+            super(ObjCInstance, type(self)).__setattr__(self, "ptr", object_ptr)
             super(ObjCInstance, type(self)).__setattr__(
-                self, "block", ObjCBlock(object_ptr)
+                self, "_as_parameter_", object_ptr
             )
-        # Store new object in the dictionary of cached objects, keyed
-        # by the (integer) memory address pointed to by the object_ptr.
-        cls._cached_objects[object_ptr.value] = self
+            super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
+            if isinstance(object_ptr, objc_block):
+                super(ObjCInstance, type(self)).__setattr__(
+                    self, "block", ObjCBlock(object_ptr)
+                )
+
+            # Store new object in the dictionary of cached objects, keyed
+            # by the (integer) memory address pointed to by the object_ptr.
+            cls._cached_objects[object_ptr.value] = self
 
         return self
 
@@ -881,7 +947,6 @@ class ObjCInstance:
         was returned by by a method starting with 'alloc', 'new', 'copy', or
         'mutableCopy' and it wasn't already explicitly released by calling
         :meth:`release` or :meth:`autorelease`."""
-
         if self._needs_release:
             send_message(self, "release", restype=objc_id, argtypes=[])
 
@@ -894,7 +959,6 @@ class ObjCInstance:
         instead. If that is also ``nil``, ``repr(self)`` is returned as
         a fallback.
         """
-
         desc = self.description
         if desc is not None:
             return str(desc)
@@ -908,7 +972,6 @@ class ObjCInstance:
     def __repr__(self):
         """Get a debugging representation of ``self``, which includes the
         Objective-C object's address, class, and ``debugDescription``."""
-
         return (
             f"<{type(self).__module__}.{type(self).__qualname__} {id(self):#x}: "
             f"{self.objc_class.name} at {self.ptr.value:#x}: {self.debugDescription}>"
@@ -971,7 +1034,6 @@ class ObjCInstance:
             but will also disallow specifying the keyword arguments out of
             order.
         """
-
         # Search for named instance method in the class object and if it
         # exists, return callable object with self as hidden argument.
         # Note: you should give self and not self.ptr as a parameter to
@@ -992,15 +1054,15 @@ class ObjCInstance:
         cls = self.objc_class
         while cls is not None:
             # Load the class's methods if we haven't done so yet.
-            with _ObjCClass_load_methods_lock:
+            with cls.cache_lock:
                 if cls.methods_ptr is None:
                     cls._load_methods()
 
-            try:
-                method = cls.partial_methods[name]
-                break
-            except KeyError:
-                cls = cls.superclass
+                try:
+                    method = cls.partial_methods[name]
+                    break
+                except KeyError:
+                    cls = cls.superclass
         else:
             method = None
 
@@ -1048,10 +1110,8 @@ class ObjCInstance:
                     value = value.value
                 ObjCBoundMethod(method, self)(value)
             else:
-
                 # Wrap the Python object in a WrappedPyObject instance.
                 # A reference will be retained as long as the WrappedPyObject is alive.
-
                 wrapper = send_message(
                     send_message(
                         get_class("WrappedPyObject"),
@@ -1087,11 +1147,6 @@ class ObjCInstance:
                 )
             # If set, clear the instance attribute / associated object.
             libobjc.objc_setAssociatedObject(self, key, None, 0x301)
-
-
-# A re-entrant thread lock moderating access to ObjCClass._load_methods().
-# This ensures that only one thread populates the method table for each class.
-_ObjCClass_load_methods_lock = threading.RLock()
 
 
 # The inheritance order is important here.
@@ -1302,6 +1357,12 @@ class ObjCClass(ObjCInstance, type):
             "forced_properties": set(),
             # Mapping of first keyword -> ObjCPartialMethod instances
             "partial_methods": {},
+            # A re-entrant thread lock moderating access to the ObjCClass
+            # method/property cache. This ensures that only one thread populates
+            # the cache of methods/properties on each class. The lock is
+            # re-entrant because there are some dependencies between caches
+            # (e.g., cache_property_accessor calls cache_method).
+            "cache_lock": threading.RLock(),
         }
 
         # On Python 3.6 and later, the class namespace may contain a
@@ -1328,34 +1389,37 @@ class ObjCClass(ObjCInstance, type):
         """Returns a python representation of the named instance method, either
         by looking it up in the cached list of methods or by searching for and
         creating a new method object."""
-
-        supercls = self
-        objc_method = None
-        while supercls is not None:
-            # Load the class's methods if we haven't done so yet.
-            with _ObjCClass_load_methods_lock:
-                if supercls.methods_ptr is None:
-                    supercls._load_methods()
-
+        with self.cache_lock:
             try:
-                objc_method = supercls.instance_methods[name]
-                break
+                # Try to return an existing cached method for the name
+                return self.instance_methods[name]
             except KeyError:
-                pass
+                supercls = self
+                objc_method = None
+                while supercls is not None:
+                    # Load the class's methods if we haven't done so yet.
+                    if supercls.methods_ptr is None:
+                        supercls._load_methods()
 
-            try:
-                objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
-                break
-            except KeyError:
-                pass
+                    try:
+                        objc_method = supercls.instance_methods[name]
+                        break
+                    except KeyError:
+                        pass
 
-            supercls = supercls.superclass
+                    try:
+                        objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
+                        break
+                    except KeyError:
+                        pass
 
-        if objc_method is None:
-            return None
-        else:
-            self.instance_methods[name] = objc_method
-            return objc_method
+                    supercls = supercls.superclass
+
+                if objc_method is None:
+                    return None
+                else:
+                    self.instance_methods[name] = objc_method
+                    return objc_method
 
     def _cache_property_methods(self, name):
         """Return the accessor and mutator for the named property."""
@@ -1398,11 +1462,12 @@ class ObjCClass(ObjCInstance, type):
         Existence of a property is done by looking for the write
         selector (set<Name>:).
         """
-        try:
-            methods = self.instance_properties[name]
-        except KeyError:
-            methods = self._cache_property_methods(name)
-            self.instance_properties[name] = methods
+        with self.cache_lock:
+            try:
+                methods = self.instance_properties[name]
+            except KeyError:
+                methods = self._cache_property_methods(name)
+                self.instance_properties[name] = methods
         if methods:
             return methods[0]
         return None
@@ -1414,11 +1479,12 @@ class ObjCClass(ObjCInstance, type):
         Existence of a property is done by looking for the write
         selector (set<Name>:).
         """
-        try:
-            methods = self.instance_properties[name]
-        except KeyError:
-            methods = self._cache_property_methods(name)
-            self.instance_properties[name] = methods
+        with self.cache_lock:
+            try:
+                methods = self.instance_properties[name]
+            except KeyError:
+                methods = self._cache_property_methods(name)
+                self.instance_properties[name] = methods
         if methods:
             return methods[1]
         return None
