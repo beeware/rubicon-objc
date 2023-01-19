@@ -11,7 +11,6 @@ from ctypes import (
     c_double,
     c_float,
     c_int,
-    c_uint,
     c_void_p,
     cast,
     create_string_buffer,
@@ -1776,7 +1775,6 @@ class RubiconTest(unittest.TestCase):
             # Manually clear the method/property cache on Example.
             # This returns the attributes set in ObjCClass.__new__
             # to their initial values.
-            Example.methods_ptr_count = c_uint(0)
             Example.methods_ptr = None
             Example.instance_method_ptrs = {}
             Example.instance_methods = {}
@@ -1809,7 +1807,6 @@ class RubiconTest(unittest.TestCase):
             # Manually clear the method/property cache on Example.
             # This returns the attributes set in ObjCClass.__new__
             # to their initial values.
-            Example.methods_ptr_count = c_uint(0)
             Example.methods_ptr = None
             Example.instance_method_ptrs = {}
             Example.instance_methods = {}
@@ -1842,7 +1839,6 @@ class RubiconTest(unittest.TestCase):
             # Manually clear the method/property cache on Example.
             # This returns the attributes set in ObjCClass.__new__
             # to their initial values.
-            Example.methods_ptr_count = c_uint(0)
             Example.methods_ptr = None
             Example.instance_method_ptrs = {}
             Example.instance_methods = {}
