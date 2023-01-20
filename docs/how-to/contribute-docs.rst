@@ -23,6 +23,8 @@ Build documentation locally
 To build the documentation locally, :ref:`set up a development environment
 <setup-dev-environment>`, and run:
 
+.. code-block:: sh
+
     $ tox -e docs
 
 The output of the file should be in the ``build/sphinx/html`` folder. If there are
