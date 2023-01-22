@@ -8,7 +8,7 @@ on:
 jobs:
   pre-commit:
     name: Pre-commit code style checks
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v3.3.0
@@ -21,7 +21,7 @@ jobs:
 
   beefore:
     name: Pre-test checks
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     strategy:
       matrix:
         task:
