@@ -34,6 +34,7 @@ kCFAllocatorDefault = None
 CFDataRef = objc_id
 CFOptionFlags = c_ulong
 CFStringRef = objc_id
+CFTypeRef = objc_id
 
 CFRunLoopRef = objc_id
 CFRunLoopMode = CFStringRef
@@ -100,6 +101,12 @@ class CFSocketContext(Structure):
 libcf.CFAbsoluteTimeGetCurrent.restype = CFAbsoluteTime
 libcf.CFAbsoluteTimeGetCurrent.argtypes = []
 
+libcf.CFRelease.restype = CFTypeRef
+libcf.CFRelease.argtypes = [CFTypeRef]
+
+libcf.CFRetain.restype = CFTypeRef
+libcf.CFRetain.argtypes = [CFTypeRef]
+
 libcf.CFRunLoopAddSource.restype = None
 libcf.CFRunLoopAddSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoopMode]
 
@@ -108,6 +115,9 @@ libcf.CFRunLoopAddTimer.argtypes = [CFRunLoopRef, CFRunLoopTimerRef, CFRunLoopMo
 
 libcf.CFRunLoopGetMain.restype = CFRunLoopRef
 libcf.CFRunLoopGetMain.argtypes = []
+
+libcf.CFRunLoopGetCurrent.restype = CFRunLoopRef
+libcf.CFRunLoopGetCurrent.argtypes = []
 
 libcf.CFRunLoopRemoveSource.restype = None
 libcf.CFRunLoopRemoveSource.argtypes = [CFRunLoopRef, CFRunLoopSourceRef, CFRunLoopMode]
@@ -221,6 +231,7 @@ class CFSocketHandle(events.Handle):
             libcf.CFRunLoopRemoveSource(
                 self._loop._cfrunloop, self._src, kCFRunLoopCommonModes
             )
+            self._src = None
             return
 
         if callbackType == kCFSocketReadCallBack and self._reader:
@@ -302,7 +313,7 @@ class CFSocketHandle(events.Handle):
         *both* the reader and writer component have been disabled. If
         either is still active, cancel() will be a no-op.
         """
-        if self._reader is None and self._writer is None:
+        if self._reader is None and self._writer is None and self._src:
             super().cancel()
             del self._loop._sockets[self._fd]
 
@@ -333,7 +344,7 @@ def context_callback(context, callback):
 class CFEventLoop(unix_events.SelectorEventLoop):
     def __init__(self, lifecycle=None):
         self._lifecycle = lifecycle
-        self._cfrunloop = libcf.CFRunLoopGetMain()
+        self._cfrunloop = libcf.CFRetain(libcf.CFRunLoopGetCurrent())
         self._running = False
 
         self._timers = set()
@@ -341,6 +352,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._sockets = {}
 
         super().__init__()
+
+    def __del__(self):
+        libcf.CFRelease(self._cfrunloop)
+        super().__del__()
 
     def _add_reader(self, fd, callback, *args):
         try:
@@ -375,7 +390,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._remove_reader(fd)
 
     def _add_writer(self, fd, callback, *args):
-
         try:
             handle = self._sockets[fd]
         except KeyError:
@@ -598,6 +612,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         Every callback already scheduled will still run.  This simply
         informs run_forever to stop looping after a complete iteration.
         """
+        super().stop()
         self._lifecycle.stop()
 
     def close(self):
