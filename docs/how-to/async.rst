@@ -36,8 +36,8 @@ To use asyncio in a pure Core Foundation application, do the following::
     # Install the event loop policy
     asyncio.set_event_loop_policy(EventLoopPolicy())
 
-    # Get an event loop, and run it!
-    loop = asyncio.get_event_loop()
+    # Create an event loop, and run it!
+    loop = asyncio.new_event_loop()
     loop.run_forever()
 
 The last call (``loop.run_forever()``) will, as the name suggests, run forever
@@ -67,8 +67,8 @@ lifecycle. To do this, you pass the application instance into the call to
     NSApplication.declare_class_property('sharedApplication')
     app = NSApplication.sharedApplication
 
-    # Get an event loop, and run it, using the NSApplication!
-    loop = asyncio.get_event_loop()
+    # Create an event loop, and run it, using the NSApplication!
+    loop = asyncio.new_event_loop()
     loop.run_forever(lifecycle=CocoaLifecycle(app))
 
 Again, this will run "forever" -- until either ``loop.stop()`` is called, or
@@ -87,9 +87,9 @@ lifecycle. To do this, you pass an ``iOSLifecycle`` object into the call to
     # Install the event loop policy
     asyncio.set_event_loop_policy(EventLoopPolicy())
 
-    # Get an event loop, and run it, using the NSApplication!
-    loop = asyncio.get_event_loop()
+    # Create an event loop, and run it, using the UIApplication!
+    loop = asyncio.new_event_loop()
     loop.run_forever(lifecycle=iOSLifecycle())
 
 Again, this will run "forever" -- until either ``loop.stop()`` is called, or
-``terminate:`` is invoked on the NSApplication.
+``terminate:`` is invoked on the UIApplication.

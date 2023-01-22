@@ -8,8 +8,6 @@ This module contains types, functions, and C libraries used for low-level access
 
 In most cases there is no need to use this module directly --- the :mod:`rubicon.objc.api` module provides the same functionality through a high-level interface.
 
-.. contents::
-
 .. _predefined-c-libraries:
 
 C libraries

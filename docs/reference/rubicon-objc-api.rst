@@ -8,8 +8,6 @@ This module contains Rubicon's main high-level APIs, which allow easy interactio
 
 Nearly all attributes of this module are also available on the main :mod:`rubicon.objc` module, and if possible that module should be used instead of importing :mod:`rubicon.objc.api` directly.
 
-.. contents::
-
 Objective-C objects
 -------------------
 

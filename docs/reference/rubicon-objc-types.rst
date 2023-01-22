@@ -6,8 +6,6 @@
 
 This module contains definitions for common C constants and types, and utilities for working with C types.
 
-.. contents::
-
 Common C type definitions
 -------------------------
 
