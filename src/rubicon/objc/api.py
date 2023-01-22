@@ -780,15 +780,29 @@ class ObjCInstance:
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
         except AttributeError:
             # This assumes that objects never change their class after they are
-            # seen by Rubicon. Technically this might not always be true,
-            # because the Objective-C runtime provides a function
-            # object_setClass that can change an object's class after creation,
-            # and some code also manipulates objects' isa pointers directly
-            # (although the latter is no longer officially supported by Apple).
-            # This is only extremely rarely done in practice though, and then
-            # usually only during object creation/initialization, so it's
-            # basically safe to assume that an object's class will never change
-            # after it's been wrapped in an ObjCInstance.
+            # seen by Rubicon. There are two reasons why this may not be true:
+            #
+            # 1. Objective-C runtime provides a function object_setClass that
+            #    can change an object's class after creation, and some code
+            #    manipulates objects' isa pointers directly (although the latter
+            #    is no longer officially supported by Apple). This is not
+            #    commonly done in practice, and even then it is usually only
+            #    done during object creation/initialization, so it's basically
+            #    safe to assume that an object's class will never change after
+            #    it's been wrapped in an ObjCInstance.
+            # 2. If a memory address is freed by the Objective-C runtime, and
+            #    then re-allocated by an object of a different type, but the
+            #    Python ObjCInstance wrapper persists, Python will assume the
+            #    object is still of the old type. If a new ObjCInstance wrapper
+            #    for the same pointer is re-created, a check is performed to
+            #    ensure the type hasn't changed; this problem only affects
+            #    pre-existing Python wrappers. If this occurs, it probably
+            #    indicates an issue with the retain count on the Python side (as
+            #    the Objective-C runtime shouldn't be able to dispose of an
+            #    object if Python still has a handle to it). If this *does*
+            #    happen, it will manifest as objects appearing to be the wrong
+            #    type, and/or objects having the wrong list of attributes
+            #    available. Refs #249.
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_objc_class", ObjCClass(libobjc.object_getClass(self))
             )
