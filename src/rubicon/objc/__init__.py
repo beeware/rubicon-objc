@@ -6,7 +6,7 @@
 # __version__ = '1.2.3'       # Final Release
 # __version__ = '1.2.3.post1' # Post Release 1
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 # `api`, `runtime` and `types` are only included for clarity. They are not
 # strictly necessary, because the from-imports below also import the types and
