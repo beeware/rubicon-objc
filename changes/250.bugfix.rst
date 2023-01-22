@@ -1,1 +1,0 @@
-It is safe to open an asyncio event loop on a secondary thread. Previously this would work, but would intermittently fail with a segfault when then loop was closed.

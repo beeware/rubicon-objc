@@ -1,1 +1,0 @@
-A potential race condition that would lead to duplicated creation on ObjCInstance wrapper objects has been resolved.

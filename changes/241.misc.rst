@@ -1,1 +1,0 @@
-Use the latest stable Python 3 version for CI ``pre-commit`` checks instead of the Python in ``PATH``.

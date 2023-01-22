@@ -1,1 +1,0 @@
-The Sphinx theme was changed to Furo.

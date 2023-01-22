@@ -1,1 +1,0 @@
-A race condition associated with populating the ObjCClass method/property cache has been resolved.

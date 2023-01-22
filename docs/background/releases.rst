@@ -3,6 +3,34 @@ Release History
 
 .. towncrier release notes start
 
+0.4.4 (2023-01-23)
+==================
+
+Bugfixes
+--------
+
+* Background threads will no longer lock up on iOS when an asyncio event loop is
+  in use. (`#228 <https://github.com/beeware/rubicon-objc/issues/228>`__)
+* The ObjCInstance cache no longer returns a stale wrapper objects if a memory
+  address is re-used by the Objective C runtime. (`#249
+  <https://github.com/beeware/rubicon-objc/issues/249>`__)
+* It is now safe to open an asyncio event loop on a secondary thread. Previously
+  this would work, but would intermittently fail with a segfault when then loop
+  was closed. (`#250 <https://github.com/beeware/rubicon-objc/issues/250>`__)
+* A potential race condition that would lead to duplicated creation on
+  ObjCInstance wrapper objects has been resolved. (`#251
+  <https://github.com/beeware/rubicon-objc/issues/251>`__)
+* A race condition associated with populating the ObjCClass method/property
+  cache has been resolved. (`#252
+  <https://github.com/beeware/rubicon-objc/issues/252>`__)
+
+
+Misc
+----
+
+* #225, #237, #240, #241, #242, #243, #244, #245, #247, #248, #253
+
+
 0.4.3 (2022-12-05)
 ==================
 

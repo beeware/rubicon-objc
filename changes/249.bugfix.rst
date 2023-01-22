@@ -1,1 +1,0 @@
-The ObjCInstance cache no longer returns a stale wrapper objects if a memory address is re-used by the Objective C runtime.
