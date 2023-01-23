@@ -11,7 +11,12 @@ except (ModuleNotFoundError, LookupError):
     # If it *is* in the environment, but the code isn't a git checkout (e.g.,
     # it's been pip installed non-editable) the call to get_version() will fail.
     # If either of these occurs, read version from the installer metadata.
-    from importlib.metadata import version
+
+    # importlib.metadata.versoin was added in Python 3.8
+    try:
+        from importlib.metadata import version
+    except ModuleNotFoundError:
+        from importlib_metadata import version
 
     __version__ = version("rubicon-objc")
 
