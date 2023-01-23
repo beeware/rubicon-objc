@@ -1,14 +1,14 @@
 [build-system]
-requires = [
-    "setuptools >= 46.4.0",
-    "wheel >= 0.32.0",
-]
+requires = ["setuptools>=60", "setuptools_scm[toml]>=7.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
 split_on_trailing_comma = true
 combine_as_imports = true
+
+[tool.setuptools_scm]
+# To enable SCM versioning, we need an empty tool configuration for setuptools_scm
 
 [tool.towncrier]
 directory = "changes"
