@@ -11,7 +11,7 @@ jobs:
   release:
     name: Create Release
     needs: ci
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     permissions:
       contents: write
     steps:
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4.5.0
         with:
-          python-version: '3.x'
+          python-version: '3.X'
       - name: Get packages
         uses: actions/download-artifact@v3
         with:
