@@ -8,9 +8,11 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+
   release:
     name: Create Release
-    needs: ci
+    needs: [ci]
+    # This has to be run on macOS, because rubicon tries to load the Foundation library
     runs-on: macOS-latest
     permissions:
       contents: write
@@ -42,6 +44,19 @@ jobs:
           draft: true
           artifacts: dist/*
           artifactErrorsFailBuild: true
+
+  test-publish:
+    name: Publish test package
+    needs: [release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Get packages
+        uses: actions/download-artifact@v3
+        with:
+          name: packages
+          path: dist
       - name: Publish release to Test PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
