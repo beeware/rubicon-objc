@@ -1,5 +1,7 @@
 #import "Example.h"
+#import "Altered_Example.h"
 #import <stdio.h>
+#import <objc/runtime.h>
 
 NSString *const SomeGlobalStringConstant = @"Some global string constant";
 
@@ -57,6 +59,19 @@ static int _staticIntField = 11;
         [self setIntField:33];
     }
     _ambiguous = 42;
+    return self;
+}
+
+-(id) initWithClassChange
+{
+    self = [super initWithIntValue:44];
+
+    if (self) {
+        [self setIntField:55];
+    }
+    _ambiguous = 37;
+
+    object_setClass(self, [Altered_Example class]);
     return self;
 }
 
