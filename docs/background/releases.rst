@@ -3,8 +3,25 @@ Release History
 
 .. towncrier release notes start
 
+0.4.5rc1 (2023-01-25)
+=====================
+
+Features
+--------
+
+* Support for Python 3.6 was dropped. (#371)
+
+Misc
+----
+
+* #254
+
+
 0.4.4 (2023-01-23)
 ==================
+
+This version was yanked from PyPI because of an incompatibility with Toga-iOS
+0.3.0dev39, which was the published Toga release at the time.
 
 Bugfixes
 --------

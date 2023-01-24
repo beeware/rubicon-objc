@@ -1,1 +1,0 @@
-The CI configuration was modified to publish the same artefacts used for testing, with a version number coming from git.
