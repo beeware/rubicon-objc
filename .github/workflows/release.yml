@@ -6,19 +6,59 @@ on:
       - "v*"
 
 jobs:
-  build:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
     name: Create Release
-    runs-on: macos-latest
+    needs: [ci]
+    # This has to be run on macOS, because rubicon tries to load the Foundation library
+    runs-on: macOS-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3.3.0
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set build variables
+        run: |
+          echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v4.5.0
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          python-version: '3.X'
+      - name: Get packages
+        uses: actions/download-artifact@v3
+        with:
+          name: packages
+          path: dist
+      - name: Install packages
+        run: pip install dist/rubicon_objc-*.whl
+      - name: Check version number
+        # Check that the setuptools_scm-generated version number is still the same when
+        # installed from a wheel with setuptools_scm not present.
+        run: |
+          set -x
+          test $(python -c "from rubicon.objc import __version__; print(__version__)") = $VERSION
+      - name: Create Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          name: ${{ env.VERSION }}
           draft: true
-          prerelease: false
+          artifacts: dist/*
+          artifactErrorsFailBuild: true
+
+  test-publish:
+    name: Publish test package
+    needs: [release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Get packages
+        uses: actions/download-artifact@v3
+        with:
+          name: packages
+          path: dist
+      - name: Publish release to Test PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository_url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_PASSWORD }}
