@@ -891,14 +891,20 @@ class ObjCInstance:
                 #
                 # Refs #249.
                 if cls == ObjCInstance or isinstance(cls, ObjCInstance):
-                    cached_class_name = ensure_bytes(cached.objc_class.name)
+                    cached_class_name = cached.objc_class.name
                     current_class_name = libobjc.class_getName(
                         libobjc.object_getClass(object_ptr)
-                    )
-                    if cached_class_name != current_class_name:
-                        # There has been a cache hit, but the object is a different class.
-                        # Purge the cache for this address, and treat it as a cache miss.
-                        del cls._cached_objects[object_ptr.value]
+                    ).decode("utf-8")
+                    if (
+                        current_class_name != cached_class_name
+                        and not current_class_name.endswith(f"_{cached_class_name}")
+                    ):
+                        # There has been a cache hit, but the object is a
+                        # different class, treat this as a cache miss. We don't
+                        # *just* look for an *exact* class name match, because
+                        # some Cocoa/UIKit classes undergo a class name change
+                        # between `alloc()` and `init()` (e.g., `NSWindow`
+                        # becomes `NSKVONotifying_NSWindow`). Refs #257.
                         raise KeyError(object_ptr.value)
 
                 return cached

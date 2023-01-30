@@ -1726,6 +1726,24 @@ class RubiconTest(unittest.TestCase):
             # so the expected method won't exist, causing an AttributeError.
             self.fail("Stale wrapper returned")
 
+    def test_compatible_class_name_change(self):
+        "If the class name changes in a compatible way, the wrapper isn't recreated (#257)"
+        Example = ObjCClass("Example")
+
+        pre_init = Example.alloc()
+
+        # Call initWithClassChange(), which does an internal class name change.
+        # This mirrors what happens with NSWindow, where `init()` changes the
+        # class name to NSKVONotifying_NSWindow.
+        post_init = pre_init.initWithClassChange()
+
+        # Memory address hasn't changed
+        assert pre_init.ptr.value == post_init.ptr.value
+        # The class name hasn't changed either
+        assert pre_init.objc_class.name == post_init.objc_class.name == "Example"
+        # The wrapper is the same object
+        assert id(pre_init) == id(post_init)
+
     def test_threaded_wrapper_creation(self):
         "If 2 threads try to create a wrapper for the same object, only 1 wrapper is created (#251)"
         # Create an ObjC instance, and keep a track of the memory address

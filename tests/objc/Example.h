@@ -63,6 +63,7 @@ extern NSString *const SomeGlobalStringConstant;
 +(void) mutateStaticIntFieldWithValue: (int) v;
 
 -(id) init;
+-(id) initWithClassChange;
 -(id) initWithIntValue: (int) v;
 -(id) initWithBaseIntValue: (int) b intValue: (int) v;
 
