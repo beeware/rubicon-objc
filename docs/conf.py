@@ -48,7 +48,9 @@ copyright = "2014, Russell Keith-Magee"
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-version = metadata_version("rubicon-objc")
+release = metadata_version("rubicon-objc")
+# The short X.Y version
+version = ".".join(release.split(".")[:2])
 
 autoclass_content = "both"
 
@@ -99,7 +101,7 @@ pygments_style = "sphinx"
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = f"Rubicon {release}"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
