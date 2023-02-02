@@ -482,7 +482,6 @@ class objc_property:
         return (objc_property_attribute_t * len(attrs))(*attrs)
 
     def class_register(self, class_ptr, attr_name):
-
         ivar_name = "_" + attr_name
 
         add_ivar(class_ptr, ivar_name, self.vartype)
@@ -519,7 +518,6 @@ class objc_property:
             return value
 
         def _objc_setter(objc_self, _cmd, new_value):
-
             if self._is_py_object and self.weak:
                 # Don't store the object itself but only a Python weakref.
                 new_value = weakref.ref(new_value)
@@ -575,7 +573,6 @@ class objc_property:
         libobjc.class_addProperty(class_ptr, ensure_bytes(attr_name), attrs, len(attrs))
 
     def dealloc_callback(self, objc_self, attr_name):
-
         ivar_name = "_" + attr_name
 
         if self._ivar_weak:
@@ -1286,7 +1283,6 @@ class ObjCClass(ObjCInstance, type):
         user_dealloc = attrs.get("dealloc", None)
 
         def _new_delloc(objc_self, _cmd):
-
             # Invoke user-defined dealloc.
             if user_dealloc:
                 user_dealloc(objc_self, _cmd)
@@ -2000,7 +1996,6 @@ try:
 except NameError:
 
     class WrappedPyObject(NSObject):
-
         wrapped_pointer = objc_ivar(c_void_p)
 
         @objc_rawmethod
