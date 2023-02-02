@@ -1107,7 +1107,6 @@ class RubiconTest(unittest.TestCase):
         NSURL = ObjCClass("NSURL")
 
         class URLBox(NSObject):
-
             url = objc_property(ObjCInstance)
             data = objc_property(ObjCInstance)
 
@@ -1242,7 +1241,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.height, 78)
 
     def test_class_nonobject_properties_weak(self):
-
         with self.assertRaises(TypeError):
 
             class WeakNonObjectProperties(NSObject):
@@ -1253,7 +1251,6 @@ class RubiconTest(unittest.TestCase):
             object = objc_property(ObjCInstance)
 
         with autoreleasepool():
-
             properties = StrongObjectProperties.alloc().init()
 
             obj = NSObject.alloc().init()
@@ -1272,7 +1269,6 @@ class RubiconTest(unittest.TestCase):
             object = objc_property(ObjCInstance, weak=True)
 
         with autoreleasepool():
-
             properties = WeakObjectProperties.alloc().init()
 
             obj = NSObject.alloc().init()
@@ -1527,7 +1523,6 @@ class RubiconTest(unittest.TestCase):
         released."""
 
         with autoreleasepool():
-
             obj = NSObject.alloc().init()
 
             # Use a custom object as attribute value so that we can keep a weak reference.
@@ -1558,7 +1553,6 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(wr_python_object())
 
     def test_objcinstance_release_owned(self):
-
         # Create an object which we own.
         obj = NSObject.alloc().init()
 
@@ -1576,7 +1570,6 @@ class RubiconTest(unittest.TestCase):
         gc.collect()
 
     def test_objcinstance_autorelease_owned(self):
-
         # Create an object which we own.
         obj = NSObject.alloc().init()
 
