@@ -9,7 +9,7 @@ Release History
 Features
 --------
 
-* Support for Python 3.6 was dropped. (#371)
+* Support for Python 3.6 was dropped. (#255)
 
 Misc
 ----
