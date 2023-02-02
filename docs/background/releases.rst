@@ -3,13 +3,32 @@ Release History
 
 .. towncrier release notes start
 
+0.4.5 (2023-02-03)
+==================
+
+Bugfixes
+--------
+
+* Classes that undergo a class name change between ``alloc()`` and ``init()``
+  (e.g., ``NSWindow`` becomes ``NSKVONotifying_Window``) no longer trigger
+  instance cache eviction logic. (`#258
+  <https://github.com/beeware/rubicon-objc/issues/258>`__)
+
+
+Misc
+----
+
+* #259, #260, #262, #263, #264, #265, #266
+
+
 0.4.5rc1 (2023-01-25)
 =====================
 
 Features
 --------
 
-* Support for Python 3.6 was dropped. (#255)
+* Support for Python 3.6 was dropped. (`#255
+  <https://github.com/beeware/rubicon-objc/issues/255>`__)
 
 Misc
 ----

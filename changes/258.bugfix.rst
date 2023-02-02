@@ -1,1 +1,0 @@
-Classes that undergo a class name change between ``alloc()`` and ``init()`` (e.g., ``NSWindow`` becomes ``NSKVONotifying_Window``) no longer trigger instance cache eviction logic.

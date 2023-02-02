@@ -1,1 +1,0 @@
-The sidebar title of the documentation was modified.
