@@ -1,6 +1,6 @@
 """PEP 3156 event loop based on CoreFoundation."""
 
-import sys
+import contextvars
 import threading
 from asyncio import (
     DefaultEventLoopPolicy,
@@ -324,21 +324,13 @@ class CFSocketHandle(events.Handle):
 
 
 def context_callback(context, callback):
-    # Python 3.7 introduced the idea of context variables.
-    # asyncio.call_{at,later,soon} need to run any callbacks
-    # *inside* the context provided.
-    if sys.version_info >= (3, 7):
-        import contextvars
+    if context is None:
+        context = contextvars.copy_context()
 
-        if context is None:
-            context = contextvars.copy_context()
+    def _callback(*args):
+        context.run(callback, *args)
 
-        def _callback(*args):
-            context.run(callback, *args)
-
-        return _callback
-    else:
-        return callback
+    return _callback
 
 
 class CFEventLoop(unix_events.SelectorEventLoop):
