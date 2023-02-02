@@ -18,7 +18,7 @@ repos:
     rev: v2.38.2
     hooks:
       - id: pyupgrade
-        args: [--py36-plus]
+        args: [--py37-plus]
   # Docformatter is RST-unaware, and may break markup by inserting or removing newlines
   # (see https://github.com/PyCQA/docformatter/issues/124 and linked issues). Until this
   # is fixed, it's not safe to run it automatically.
