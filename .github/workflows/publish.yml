@@ -17,6 +17,7 @@ jobs:
           file: rubicon.*
           regex: true
           target: dist/
+
       - name: Publish release to production PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
