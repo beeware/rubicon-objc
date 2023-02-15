@@ -389,7 +389,9 @@ class RubiconTest(unittest.TestCase):
 
         with self.assertRaisesRegex(
             TypeError,
-            r"argument 3: TypeError: wrong type \(mutateIntFieldWithValue: argtypes: c_int\)",
+            # This pattern match needs to be flexible because the exact
+            # text returned in the ctype error changes between Python versions.
+            r"argument 3: .*?: wrong type \(mutateIntFieldWithValue: argtypes: c_int\)",
         ):
             obj.mutateIntFieldWithValue_(1.234)
 
