@@ -381,6 +381,18 @@ class RubiconTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             obj.mutateIntFieldWithValue_(123, "extra argument")
 
+    def test_method_incorrect_argument_type(self):
+        """Attempting to call a method with the wrong type of argument throws an exception."""
+
+        Example = ObjCClass("Example")
+        obj = Example.alloc().init()
+
+        with self.assertRaisesRegex(
+            TypeError,
+            r"argument 3: TypeError: wrong type \(mutateIntFieldWithValue: argtypes: c_int\)",
+        ):
+            obj.mutateIntFieldWithValue_(1.234)
+
     def test_method_incorrect_argument_count_send(self):
         """Attempting to call a method with send_message with an incorrect
         number of arguments throws an exception."""
