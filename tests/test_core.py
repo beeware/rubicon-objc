@@ -1,10 +1,12 @@
 import functools
 import gc
 import math
+import sys
 import threading
 import unittest
 import weakref
 from ctypes import (
+    ArgumentError,
     Structure,
     byref,
     c_char,
@@ -388,10 +390,12 @@ class RubiconTest(unittest.TestCase):
         obj = Example.alloc().init()
 
         with self.assertRaisesRegex(
-            TypeError,
-            # This pattern match needs to be flexible because the exact
-            # text returned in the ctype error changes between Python versions.
-            r"argument 3: .*?: wrong type \(mutateIntFieldWithValue: argtypes: c_int\)",
+            ArgumentError,
+            (
+                r"mutateIntFieldWithValue: argument 3: TypeError: wrong type; argtypes: c_int"
+                if sys.version_info >= (3, 10)
+                else r"mutateIntFieldWithValue: argument 3: <class 'TypeError'>: wrong type; argtypes: c_int"
+            ),
         ):
             obj.mutateIntFieldWithValue_(1.234)
 
