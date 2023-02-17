@@ -835,9 +835,12 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
     try:
         result = send(receiver, selector, *args, *varargs)
     except ArgumentError as error:
-        # Add more useful info to argument error exceptions, then reraise.
-        error.args = f"{error.args[0]} (selector = {selector}, argtypes = {argtypes})"
-        raise
+        # Add more useful info to the default error message, then reraise.
+        err = error.args[0]
+        sel = selector.name.decode(errors="backslashreplace")
+        valid_args = ", ".join(t.__name__ for t in argtypes)
+        error.args = [f"{sel} {err}; argtypes: {valid_args}"]
+        raise error
 
     if restype == c_void_p:
         result = c_void_p(result)
