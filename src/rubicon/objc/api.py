@@ -260,7 +260,8 @@ class ObjCPartialMethod:
             name, order = self.methods[rest]
         except KeyError:
             raise ValueError(
-                f"No method was found starting with {self.name_start!r} and with keywords {set(kwargs)}\nKnown keywords are:\n"
+                f"No method was found starting with {self.name_start!r} and with keywords {set(kwargs)}\n"
+                f"Known keywords are:\n"
                 + "\n".join(repr(keywords) for keywords in self.methods)
             )
 
@@ -1544,7 +1545,7 @@ class ObjCClass(ObjCInstance, type):
             property can be declared explicitly using
             ``NSObject.declare_property('description')``, so that it can always
             be accessed using ``obj.description``.
-        """  # noqa: E501 # The links in the docstring above are too long to wrap to 120 chars.
+        """
 
         self.forced_properties.add(name)
 
