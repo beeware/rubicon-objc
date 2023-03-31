@@ -224,7 +224,7 @@ class objc_property_t(c_void_p):
 class objc_property_attribute_t(Structure):
     """The `objc_property_attribute_t <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__
     structure from ``<objc/runtime.h>``.
-    """
+    """  # noqa: E501
 
     _fields_ = [
         ("name", c_char_p),
@@ -545,7 +545,7 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 class objc_method_description(Structure):
     """The `objc_method_description <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__
     structure from ``<objc/runtime.h>``.
-    """
+    """  # noqa: E501
 
     _fields_ = [
         ("name", SEL),
@@ -804,7 +804,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
     :param varargs: Variadic arguments for the method, as a :class:`list`.
         Defaults to ``[]``. These arguments are converted according to the
         default :mod:`ctypes` conversion rules.
-    """
+    """  # noqa: E501
 
     try:
         receiver = receiver._as_parameter_
@@ -813,7 +813,8 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     if not isinstance(receiver, objc_id):
         raise TypeError(
-            f"Receiver must be an ObjCInstance or objc_id, not {type(receiver).__module__}.{type(receiver).__qualname__}"
+            f"Receiver must be an ObjCInstance or objc_id, "
+            f"not {type(receiver).__module__}.{type(receiver).__qualname__}"
         )
 
     if not isinstance(selector, SEL):

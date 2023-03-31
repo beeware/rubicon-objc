@@ -94,8 +94,8 @@ __LP64__ = 8 * struct.calcsize("P") == 64
 #   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit.
 #   * M1 MacBooks return "arm"
 #   * iPhones (as of the late 2022 support packages) return "arm64"
-# This *wont'* work on older iOS support builds, as it relies on the customized
-# platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
+# This *won't* work on older iOS support builds, as it relies on the customized
+# platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e  # noqa: E501
 _processor = platform.processor()
 _any_x86 = _processor in ("i386", "x86_64")
 __i386__ = _any_x86 and not __LP64__
