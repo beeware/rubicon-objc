@@ -25,7 +25,7 @@ we're going to use the `NSURL` class, Objective-C's representation of URLs:
 This gives us an `NSURL` class in Python which is transparently bridged to the
 `NSURL` class in the Objective-C runtime. Any method or property described in
 `Apple's documentation on NSURL
-<https://developer.apple.com/reference/foundation/nsurl?language=objc>`__  can
+<https://developer.apple.com/documentation/foundation/nsurl?language=objc>`__  can
 be accessed over this bridge.
 
 Let's create an instance of an `NSURL` object. The `NSURL` documentation

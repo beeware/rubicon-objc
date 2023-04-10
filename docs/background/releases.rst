@@ -147,8 +147,8 @@ Bugfixes
 
 * Fixed incorrect behavior of :class:`~rubicon.objc.api.Block` when trying to
   create a block with no arguments and using explicit types. This previously
-  caused an incorrect exception about missing argument types; now a no-arg block
-  is created as expected. (`#153
+  caused an incorrect exception about missing argument types; now a ``no-arg``
+  block is created as expected. (`#153
   <https://github.com/beeware/rubicon-objc/issues/153>`__)
 
 * Fixed handling of type annotations when passing a bound Python method into
@@ -321,15 +321,15 @@ Deprecations and Removals
 * Disallowed passing more argument values than there are argument types in
   ``argtypes``. This was previously allowed to support calling variadic methods
   - any arguments beyond the types set in ``argtypes`` would be passed as
-  varargs. However, this feature was easy to misuse by accident, as it allowed
+  ``varargs``. However, this feature was easy to misuse by accident, as it allowed
   passing extra arguments to *any* method, even though most Objective-C methods
   are not variadic. Extra arguments passed this way were silently ignored
   without causing an error or a crash.
 
   To prevent accidentally passing too many arguments like this, the number of
   arguments now has to exactly match the number of ``argtypes``. Variadic
-  methods can still be called, but the varargs now need to be passed as a list
-  into the separate ``varargs`` keyword arugment.
+  methods can still be called, but the ``varargs`` now need to be passed as a
+  list into the separate ``varargs`` keyword argument.
   (`#174 <https://github.com/beeware/rubicon-objc/issues/174>`__)
 * Removed the ``rubicon.objc.core_foundation`` module. This was an internal
   module with few remaining contents and should not have any external uses. If
@@ -384,16 +384,16 @@ Misc
   ``str`` object is required, the ``NSString`` object can be wrapped in a
   ``str`` call to convert it.
 * Added support for ``objc_property``\s with non-object types.
-* Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ivars.
-* Changed the implementation of ``objc_property`` to use ivars instead of
+* Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ``ivars``.
+* Changed the implementation of ``objc_property`` to use ``ivars`` instead of
   Python attributes for storage. This fixes name conflicts in some situations.
 * Added the :func:`~rubicon.objc.runtime.load_library` function for loading
   :class:`~ctypes.CDLL`\s by their name instead of their full path.
-* Split the high-level Rubicon API (:class:`ObjCInstance`, :class:`ObjCClass`,
-  etc.) out of :mod:`rubicon.objc.runtime` into a separate
-  :mod:`rubicon.objc.api` module. The :mod:`~rubicon.objc.runtime` module now
-  only contains low-level runtime interfaces like
-  :data:`~rubicon.objc.runtime.libobjc`.
+* Split the high-level Rubicon API (:class:`~rubicon.objc.api.ObjCInstance`,
+  :class:`~rubicon.objc.api.ObjCClass`, etc.) out of :mod:`rubicon.objc.runtime`
+  into a separate :mod:`rubicon.objc.api` module. The
+  :mod:`~rubicon.objc.runtime` module now only contains low-level runtime
+  interfaces like :data:`~rubicon.objc.runtime.libobjc`.
 
   This is mostly an internal change, existing code will not be affected unless
   it imports names directly from :mod:`rubicon.objc.runtime`.
@@ -428,7 +428,7 @@ Misc
 * Fixed calling ``update`` with both a mapping and keyword arguments on an
   Objective-C dictionary. Previously the kwargs were incorrectly ignored if a
   mapping was given, now both are respected.
-* Fixed calling methods using kwarg syntax if a superclass and subclass define
+* Fixed calling methods using ``kwarg`` syntax if a superclass and subclass define
   methods with the same prefix, but different names. For example, if a
   superclass had a method ``initWithFoo:bar:`` and the subclass
   ``initWithFoo:spam:``, the former could not be called on instances of the

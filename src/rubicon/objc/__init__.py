@@ -12,7 +12,7 @@ except (ModuleNotFoundError, LookupError):
     # it's been pip installed non-editable) the call to get_version() will fail.
     # If either of these occurs, read version from the installer metadata.
 
-    # importlib.metadata.versoin was added in Python 3.8
+    # importlib.metadata.version was added in Python 3.8
     try:
         from importlib.metadata import version
     except ModuleNotFoundError:

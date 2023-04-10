@@ -4,9 +4,9 @@ The Rubicon Objective-C Developer and User community
 Rubicon Objective-C is part of the `BeeWare suite <https://beeware.org>`__. You
 can talk to the community through:
 
-* `@pybeeware on Twitter <https://twitter.com/pybeeware>`__
+* `@beeware@fosstodon.org <https://fosstodon.org/@beeware>`__
 
-* The `beeware/general <https://gitter.im/beeware/general>`__ channel on Gitter.
+* `Discord <https://beeware.org/bee/chat/>`__
 
 Code of Conduct
 ---------------

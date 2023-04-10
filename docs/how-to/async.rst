@@ -3,19 +3,17 @@ Asynchronous Programming with Rubicon
 =====================================
 
 One of the banner features of Python 3 is the introduction of native
-asychronous programming, implemented in the `asyncio`.
+asynchronous programming, implemented in the `asyncio`.
 
 For an introduction to the use of asynchronous programming, see `the
 documentation for the asyncio module
-<https://docs.python.org/3/library/asyncio.html>`__, or `this introductory
-tutorial to asynchronous programming with asyncio
-<http://asyncio.readthedocs.io/en/latest/index.html>`__.
+<https://docs.python.org/3/library/asyncio.html>`__.
 
 Integrating asyncio with CoreFoundation
 =======================================
 
 The asyncio module provides an event loop to coordinate asynchronous features.
-However, if you're running an Objective C GUI applicaiton, you probably
+However, if you're running an Objective C GUI application, you probably
 already have an event loop - the one provided by CoreFoundation. This
 CoreFoundation event loop is then wrapped by `NSApplication` or
 `UIApplication` in end-user code.

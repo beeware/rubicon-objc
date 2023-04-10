@@ -6,26 +6,147 @@ more and help us out!
 
 First of all, you should check the `Restructured Text (reST) and Sphinx
 CheatSheet <http://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html>`_ to
-learn how to write your .rst file.
+learn how to write your ``.rst`` file.
 
-Create a .rst file
----------------------
+Create a ``.rst`` file
+----------------------
 
-Look at the structure and choose the best category to put your .rst file. Make
-sure that it is referenced in the index of the corresponding category, so it
-will show on in the documentation. If you have no idea how to do this, study
-the other index files for clues.
-
+Look at the structure and choose the best category to put your ``.rst`` file.
+Make sure that it is referenced in the index of the corresponding category,
+so it will show on in the documentation. If you have no idea how to do this,
+study the other index files for clues.
 
 Build documentation locally
 ---------------------------
 
 To build the documentation locally, :ref:`set up a development environment
-<setup-dev-environment>`, and run:
+<setup-dev-environment>`.
 
-.. code-block:: sh
+You'll also need to install the Enchant spell checking library.
 
-    $ tox -e docs
+.. tabs::
 
-The output of the file should be in the ``build/sphinx/html`` folder. If there are
-any markup problems, they'll raise an error.
+  .. group-tab:: macOS
+
+    Enchant can be installed using `Homebrew <https://brew.sh>`__:
+
+    .. code-block:: bash
+
+      (venv) $ brew install enchant
+
+  .. group-tab:: Linux
+
+    Enchant can be installed as a system package:
+
+    **Ubuntu 20.04+ / Debian 10+**
+
+    .. code-block:: console
+
+      $ sudo apt-get update
+      $ sudo apt-get install enchant-2
+
+    **Fedora**
+
+    .. code-block:: console
+
+      $ sudo dnf install enchant
+
+    **Arch, Manjaro**
+
+    .. code-block:: console
+
+      $ sudo pacman -Syu enchant
+
+  .. group-tab:: Windows
+
+    Enchant is installed automatically when you set up your development
+    environment.
+
+Once your development environment is set up, run:
+
+.. tabs::
+
+  .. group-tab:: macOS
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs
+
+  .. group-tab:: Linux
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs
+
+  .. group-tab:: Windows
+
+    .. code-block:: powershell
+
+      C:\...>tox -e docs
+
+The output of the file should be in the ``docs/_build/html`` folder. If there
+are any markup problems, they'll raise an error.
+
+Documentation linting
+---------------------
+
+Before committing and pushing documentation updates, run linting for the
+documentation:
+
+.. tabs::
+
+  .. group-tab:: macOS
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs-lint
+
+  .. group-tab:: Linux
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs-lint
+
+  .. group-tab:: Windows
+
+    .. code-block:: powershell
+
+      C:\...>tox -e docs-lint
+
+This will validate the documentation does not contain:
+
+* invalid syntax and markup
+* dead hyperlinks
+* misspelled words
+
+If a valid spelling of a word is identified as misspelled, then add the word to
+the list in ``docs/spelling_wordlist``. This will add the word to the
+spellchecker's dictionary.
+
+Rebuilding all documentation
+----------------------------
+
+To force a rebuild for all of the documentation:
+
+.. tabs::
+
+  .. group-tab:: macOS
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs-all
+
+  .. group-tab:: Linux
+
+    .. code-block:: bash
+
+      (venv) $ tox -e docs-all
+
+  .. group-tab:: Windows
+
+    .. code-block:: powershell
+
+      C:\...>tox -e docs-all
+
+The documentation should be fully rebuilt in the ``docs/_build/html`` folder.
+If there are any markup problems, they'll raise an error.
