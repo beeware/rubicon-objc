@@ -224,7 +224,7 @@ Features
 
 * Added macOS 10.15 (Catalina) to the test matrix.
   (`#145 <https://github.com/beeware/rubicon-objc/issues/145>`__)
-* Added :pep:`517` and :pep:`518` build system metadata to pyproject.toml.
+* Added :pep:`517` and :pep:`518` build system metadata to ``pyproject.toml``.
   (`#156 <https://github.com/beeware/rubicon-objc/issues/156>`__)
 * Added official support for Python 3.8.
   (`#162 <https://github.com/beeware/rubicon-objc/issues/162>`__)
@@ -509,7 +509,7 @@ Misc
 -----
 
 * (#40) Added the ability to explicitly declare no-attribute methods as
-  properties. This is to enable a workaround when Apple introduces readonly
+  properties. This is to enable a workaround when Apple introduces read-only
   properties as a way to access these methods.
 
 0.2.6

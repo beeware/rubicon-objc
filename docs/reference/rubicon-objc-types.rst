@@ -231,7 +231,7 @@ Default registered type encodings
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following table lists Objective-C's standard type encodings for primitive types, and the corresponding registered
-ctypes. These mappings can be considered stable, but nonetheless users should not hardcode these encodings unless
+ctypes. These mappings can be considered stable, but nonetheless users should not hard code these encodings unless
 necessary. Instead, the :func:`encoding_for_ctype` function should be used to encode types, because it is less
 error-prone and more readable than typing encodings out by hand.
 
