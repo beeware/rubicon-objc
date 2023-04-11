@@ -10,6 +10,7 @@ distribute-*
 venv*/
 local
 .tox
+.envrc
 
 # OS X
 .DS_Store
