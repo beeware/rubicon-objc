@@ -227,7 +227,7 @@ class CFSocketHandle(events.Handle):
         if self._fd not in self._loop._sockets:
             # Spurious notifications seem to be generated sometimes if you
             # CFSocketDisableCallBacks in the middle of an event.  I don't know
-            # about this FD, any more, so let's get rid of it.
+            # about this FD any more, so let's get rid of it.
             libcf.CFRunLoopRemoveSource(
                 self._loop._cfrunloop, self._src, kCFRunLoopCommonModes
             )

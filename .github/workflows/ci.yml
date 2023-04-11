@@ -10,6 +10,11 @@ on:
         description: "Name of the uploaded artifact; use for artifact retrieval."
         value: ${{ jobs.package.outputs.artifact-name }}
 
+# Cancel active CI runs for a PR before starting another run
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pre-commit:
     name: Pre-commit checks

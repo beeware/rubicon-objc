@@ -220,7 +220,7 @@ class ObjCMethod:
         if not convert_result:
             return result
 
-        # Convert result to python type if it is a instance or class pointer.
+        # Convert result to python type if it is an instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
             result = ObjCInstance(result)
 
@@ -394,19 +394,19 @@ class objc_classmethod:
 
 
 class objc_ivar:
-    """Defines an ivar in a custom Objective-C class.
+    """Defines an ``ivar`` in a custom Objective-C class.
 
     If you want to store additional data on a custom Objective-C class, it is
-    recommended to use properties (:func:`objc_property`) instead of ivars.
+    recommended to use properties (:func:`objc_property`) instead of ``ivars``.
     Properties are a more modern and high-level Objective-C feature, which
     automatically deal with reference counting for objects, and creation of
     getters and setters.
 
-    The ivar type may be any :mod:`ctypes` type.
+    The ``ivar`` type may be any :mod:`ctypes` type.
 
-    Unlike properties, the contents of an ivar cannot be accessed or modified
-    using Python attribute syntax. Instead, the :func:`get_ivar` and
-    :func:`set_ivar` functions need to be used.
+    Unlike properties, the contents of an ``ivar`` cannot be accessed or
+    modified using Python attribute syntax. Instead, the :func:`get_ivar`
+    and :func:`set_ivar` functions need to be used.
     """
 
     def __init__(self, vartype):
@@ -438,7 +438,7 @@ class objc_property:
     the getter is called ``name`` and the setter is called ``setName:``.
 
     In a custom Objective-C class, implementations for the getter and setter are
-    also generated, which store the property's value in an ivar called
+    also generated, which store the property's value in an ``ivar`` called
     ``_name``. If the property has an object type, the generated setter keeps
     the stored object retained, and releases it when it is replaced.
 
@@ -967,9 +967,9 @@ class ObjCInstance:
 
     def __del__(self):
         """Release the corresponding objc instance if we own it, i.e., if it
-        was returned by by a method starting with 'alloc', 'new', 'copy', or
-        'mutableCopy' and it wasn't already explicitly released by calling
-        :meth:`release` or :meth:`autorelease`."""
+        was returned by a method starting with :meth:`alloc`, :meth:`new`,
+        :meth:`copy`, or :meth:`mutableCopy` and it wasn't already explicitly
+        released by calling :meth:`release` or :meth:`autorelease`."""
         if self._needs_release:
             send_message(self, "release", restype=objc_id, argtypes=[])
 
@@ -1011,7 +1011,7 @@ class ObjCInstance:
         returned using its getter method. An attribute is considered a property
         if any of the following are true:
 
-        * A property with the name is present on the class (i. e. declared using
+        * A property with the name is present on the class (i.e. declared using
           ``@property`` in the source code)
         * There is both a getter and setter method for the name
         * The name has been declared as a property using
@@ -1035,7 +1035,7 @@ class ObjCInstance:
         The "interleaved" syntax is usually preferred, since it looks more
         similar to normal Objective-C syntax. However, the "flat" syntax is also
         fully supported. Certain method names require the "flat" syntax, for
-        example if two arguments have the same label (e. g.
+        example if two arguments have the same label (e.g.
         ``performSelector:withObject:withObject:``), which is not supported by
         Python's keyword argument syntax.
 

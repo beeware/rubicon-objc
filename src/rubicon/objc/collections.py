@@ -428,7 +428,7 @@ class ObjCMutableDictInstance(ObjCDictInstance):
         key = self.allKeys().firstObject()
         value = self.objectForKey_(key)
         self.removeObjectForKey_(key)
-        return (key, value)
+        return key, value
 
     def setdefault(self, key, default=None):
         value = self.objectForKey_(key)

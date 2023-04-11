@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["sphinx.ext.autodoc", "sphinx_tabs.tabs"]
+extensions = ["sphinx.ext.autodoc", "sphinx_tabs.tabs", "sphinx.ext.intersphinx"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -88,6 +88,19 @@ pygments_style = "sphinx"
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
 
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+
+nitpick_ignore = [
+    # These functions do not have documentation
+    ("py:func", "rubicon.objc.types.CGPointMake"),
+    ("py:func", "rubicon.objc.types.CGRectMake"),
+    ("py:func", "rubicon.objc.types.CGSizeMake"),
+    ("py:func", "rubicon.objc.types.NSEdgeInsetsMake"),
+    ("py:func", "rubicon.objc.types.NSMakePoint"),
+    ("py:func", "rubicon.objc.types.NSMakeRect"),
+    ("py:func", "rubicon.objc.types.NSMakeSize"),
+    ("py:func", "rubicon.objc.types.UIEdgeInsetsMake"),
+]
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -248,6 +261,9 @@ texinfo_documents = [
 # Add it only if spelling check is requested so docs can be generated without it.
 if "spelling" in sys.argv:
     extensions.append("sphinxcontrib.spelling")
+    # Load the enchant package here before `ctypes` is mocked out.
+    # Otherwise, it will not be able to load its external library later.
+    import enchant  # noqa: F401, E402
 
 # Spelling language.
 spelling_lang = "en_US"

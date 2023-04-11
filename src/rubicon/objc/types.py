@@ -123,32 +123,33 @@ _ctype_for_type_map = {
 
 
 def ctype_for_type(tp):
-    """Look up the ctype corresponding to the given Python type.
+    """Look up the C type corresponding to the given Python type.
 
-    This conversion is applied to types used in :class:`objc_method`
-    signatures, :class:`objc_ivar` types, etc. This function translates
+    This conversion is applied to types used in
+    :class:`~rubicon.objc.api.objc_method` signatures,
+    :class:`~rubicon.objc.api.objc_ivar` types, etc. This function translates
     Python built-in types and :mod:`rubicon.objc` classes to their
-    :mod:`ctypes` equivalents. Unregistered types (including types that
-    are already ctypes) are returned unchanged.
+    :mod:`ctypes` equivalents. Unregistered types (including types that are
+    already ctypes) are returned unchanged.
     """
 
     return _ctype_for_type_map.get(tp, tp)
 
 
 def register_ctype_for_type(tp, ctype):
-    """Register a conversion from a Python type to a ctype."""
+    """Register a conversion from a Python type to a C type."""
 
     _ctype_for_type_map[tp] = ctype
 
 
 def unregister_ctype_for_type(tp):
-    """Unregister a conversion from a Python type to a ctype."""
+    """Unregister a conversion from a Python type to a C type."""
 
     del _ctype_for_type_map[tp]
 
 
 def get_ctype_for_type_map():
-    """Get a copy of all currently registered type-to-ctype conversions as a
+    """Get a copy of all currently registered type-to-C type conversions as a
     mapping."""
 
     return dict(_ctype_for_type_map)
@@ -340,14 +341,14 @@ def _ctype_for_unknown_encoding(encoding):
 
 
 def ctype_for_encoding(encoding):
-    """Return the ctype corresponding to an Objective-C type encoding.
+    """Return the C type corresponding to an Objective-C type encoding.
 
-    If a ctype has been registered for the encoding, that type is returned.
+    If a C type has been registered for the encoding, that type is returned.
     Otherwise, if the type encoding represents a compound type (pointer, array,
     structure, or union), the contained types are converted recursively. A new
-    ctype is then created from the converted ctypes, and is registered for the
-    encoding (so that future conversions of the same encoding return the same
-    ctype).
+    C type is then created from the converted ctypes, and is registered for
+    the encoding (so that future conversions of the same encoding return the
+    same C type).
 
     For example, the type encoding ``{spam=ic}`` is not registered by default.
     However, the contained types ``i`` and ``c`` are registered, so they are
@@ -372,9 +373,9 @@ def ctype_for_encoding(encoding):
 def encoding_for_ctype(ctype):
     """Return the Objective-C type encoding for the given ctypes type.
 
-    If a type encoding has been registered for the ctype, that encoding is
-    returned. Otherwise, if the ctype is a pointer type, its pointed-to type is
-    encoded and used to construct the pointer type encoding.
+    If a type encoding has been registered for the C type, that encoding is
+    returned. Otherwise, if the C type is a pointer type, its pointed-to type
+    is encoded and used to construct the pointer type encoding.
 
     Automatic encoding of other compound types (arrays, structures, and unions)
     is currently not supported. To encode such types, a type encoding must be
@@ -395,7 +396,7 @@ def encoding_for_ctype(ctype):
 
 def register_preferred_encoding(encoding, ctype):
     """Register a preferred conversion between an Objective-C type encoding and
-    a ctype.
+    a C type.
 
     "Preferred" means that any existing conversions in each direction are
     overwritten with the new conversion. To register an encoding without
@@ -408,10 +409,10 @@ def register_preferred_encoding(encoding, ctype):
 
 def with_preferred_encoding(encoding):
     """Register a preferred conversion between an Objective-C type encoding and
-    the decorated ctype.
+    the decorated C type.
 
     This is equivalent to calling :func:`register_preferred_encoding` on the
-    decorated ctype.
+    decorated C type.
     """
 
     def _with_preferred_encoding_decorator(ctype):
@@ -423,7 +424,7 @@ def with_preferred_encoding(encoding):
 
 def register_encoding(encoding, ctype):
     """Register an additional conversion between an Objective-C type encoding
-    and a ctype.
+    and a C type.
 
     "Additional" means that any existing conversions in either direction are
     *not* overwritten with the new conversion. To register an encoding and
@@ -436,10 +437,10 @@ def register_encoding(encoding, ctype):
 
 def with_encoding(encoding):
     """Register an additional conversion between an Objective-C type encoding
-    and the decorated ctype.
+    and the decorated C type.
 
     This is equivalent to calling :func:`register_encoding` on the
-    decorated ctype.
+    decorated C type.
     """
 
     def _with_encoding_decorator(ctype):
@@ -451,10 +452,10 @@ def with_encoding(encoding):
 
 def unregister_encoding(encoding):
     """Unregister the conversion from an Objective-C type encoding to its
-    corresponding ctype.
+    corresponding C type.
 
     Note that this does not remove any conversions in the other direction (from
-    a ctype to this encoding). These conversions may be replaced with
+    a C type to this encoding). These conversions may be replaced with
     :func:`register_encoding`, or unregistered with :func:`unregister_ctype`. To
     remove all ctypes for an encoding, use :func:`unregister_encoding_all`.
 
@@ -468,7 +469,7 @@ def unregister_encoding_all(encoding):
     """Unregister all conversions between an Objective-C type encoding and all
     corresponding ctypes.
 
-    All conversions from any ctype to this encoding are removed recursively
+    All conversions from any C type to this encoding are removed recursively
     using :func:`unregister_ctype_all`.
 
     If the encoding was not registered previously, nothing happens.
@@ -481,28 +482,28 @@ def unregister_encoding_all(encoding):
 
 
 def unregister_ctype(ctype):
-    """Unregister the conversion from a ctype to its corresponding Objective-C
-    type encoding.
+    """Unregister the conversion from a C type to its corresponding
+    Objective-C type encoding.
 
     Note that this does not remove any conversions in the other direction (from
-    an encoding to this ctype). These conversions may be replaced with
+    an encoding to this C type). These conversions may be replaced with
     :func:`register_encoding`, or unregistered with :func:`unregister_encoding`.
-    To remove all encodings for a ctype, use :func:`unregister_ctype_all`.
+    To remove all encodings for a C type, use :func:`unregister_ctype_all`.
 
-    If the ctype was not registered previously, nothing happens.
+    If the C type was not registered previously, nothing happens.
     """
 
     _encoding_for_ctype_map.pop(ctype, default=None)
 
 
 def unregister_ctype_all(ctype):
-    """Unregister all conversions between a ctype and all corresponding
+    """Unregister all conversions between a C type and all corresponding
     Objective-C type encodings.
 
-    All conversions from any type encoding to this ctype are removed recursively
-    using :func:`unregister_encoding_all`.
+    All conversions from any type encoding to this C type are removed
+    recursively using :func:`unregister_encoding_all`.
 
-    If the ctype was not registered previously, nothing happens.
+    If the C type was not registered previously, nothing happens.
     """
 
     _encoding_for_ctype_map.pop(ctype, default=None)
@@ -512,15 +513,15 @@ def unregister_ctype_all(ctype):
 
 
 def get_ctype_for_encoding_map():
-    """Get a copy of all currently registered encoding-to-ctype conversions as
-    a map."""
+    """Get a copy of all currently registered encoding-to-C type conversions
+    as a map."""
 
     return dict(_ctype_for_encoding_map)
 
 
 def get_encoding_for_ctype_map():
-    """Get a copy of all currently registered ctype-to-encoding conversions as
-    a map."""
+    """Get a copy of all currently registered C type-to-encoding conversions
+    as a map."""
 
     return dict(_encoding_for_ctype_map)
 

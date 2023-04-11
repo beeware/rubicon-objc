@@ -197,9 +197,10 @@ for your needs.
     than Python :class:`str` objects in some cases. For technical reasons,
     :class:`~rubicon.objc.api.NSString`\s are not hashable in Python, which
     means they cannot be used as :class:`dict` keys (but they *can* be used as
-    :class:`NSDictionary` keys). :class:`~rubicon.objc.api.NSString` also
-    handles Unicode code points above ``U+FFFF`` differently than Python
-    :class:`str`, because the former is based on UTF-16.
+    :class:`~rubicon.objc.api.NSDictionary` keys).
+    :class:`~rubicon.objc.api.NSString` also handles Unicode code points above
+    ``U+FFFF`` differently than Python :class:`str`, because the former is
+    based on UTF-16.
 
 Lists
 ^^^^^

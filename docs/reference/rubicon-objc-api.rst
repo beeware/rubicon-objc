@@ -331,8 +331,8 @@ The implicit ``_cmd`` parameter is not passed to the Python method, as it is nor
 
 .. autofunction:: objc_rawmethod
 
-Defining properties and ivars
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Defining properties and ``ivars``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: objc_property
 .. autofunction:: objc_ivar
@@ -385,7 +385,7 @@ If you are writing a custom Objective-C method (see :ref:`custom-classes-and-pro
 
     These automatic conversions are mostly equivalent to the manual conversions described in the next section. There are internal technical differences between automatic and manual conversions, but they are not noticeable to most users.
 
-    The internals of automatic conversion and :class:`objc_block` handling may change in the future, so if you need more control over the block conversion process, you should use the manual conversions described in the next section.
+    The internals of automatic conversion and :class:`~rubicon.objc.runtime.objc_block` handling may change in the future, so if you need more control over the block conversion process, you should use the manual conversions described in the next section.
 
 Manual conversion
 ^^^^^^^^^^^^^^^^^

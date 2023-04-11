@@ -93,7 +93,7 @@ def load_library(name):
     # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library
     # doesn't work and always returns None. This is because the sandbox hides
     # all system libraries from the filesystem and pretends they don't exist.
-    # However they can still be loaded if the path is known, so we try to load
+    # However, they can still be loaded if the path is known, so we try to load
     # the library from a few known locations.
 
     for loc in _lib_path:
@@ -194,7 +194,7 @@ class Class(objc_id):
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/objective_c_runtime/imp?language=objc>`__
+    """The `IMP <https://developer.apple.com/documentation/objectivec/objective-c_runtime/imp?language=objc>`__
     type from ``<objc/objc.h>``.
 
     An :class:`IMP` cannot be called directly --- it must be cast to the
@@ -737,12 +737,12 @@ def _msg_send_for_types(restype, argtypes):
         else:
             send_name = "objc_msgSend"
 
-        # Looking up a C function via attribute access (e. g.
+        # Looking up a C function via attribute access (e.g.
         # libobjc.objc_msgSend) always returns the same function object. Because
         # we need to set the function object's restype and argtypes, this would
         # not be thread safe, and it also makes it impossible to cache multiple
         # differently configured copies of the same function like we do here.
-        # Instead, we look up the C function using subscript syntax (e. g.
+        # Instead, we look up the C function using subscript syntax (e.g.
         # libobjc['objc_msgSend']), which returns a new function object every
         # time.
         send = libobjc[send_name]
@@ -761,7 +761,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     .. note::
 
-        Some Objective-C methods take variadic arguments (varargs), for example
+        Some Objective-C methods take variadic arguments (``varargs``), for example
         `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
         When using :func:`send_message`, variadic arguments are treated
         differently from regular arguments: they are not passed as normal
@@ -770,16 +770,16 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
         This explicit separation of regular and variadic arguments protects
         against accidentally passing too many arguments into a method. By
-        default these extra arguments would be considered varargs and passed on
-        to the method, even if the method in question doesn't take varargs.
+        default these extra arguments would be considered ``varargs`` and passed on
+        to the method, even if the method in question doesn't take ``varargs``.
         Because of how the Objective-C runtime and most C calling conventions
         work, this error would otherwise be silently ignored.
 
-        The types of varargs are not included in the ``argtypes`` list. Instead,
+        The types of ``varargs`` are not included in the ``argtypes`` list. Instead,
         the values are automatically converted to C types using the default
-        :mod:`ctypes` argument conversion rules. To ensure that all varargs are
+        :mod:`ctypes` argument conversion rules. To ensure that all ``varargs`` are
         converted to the expected C types, it is recommended to manually convert
-        all varargs to :mod:`ctypes` types instead of relying on automatic
+        all ``varargs`` to :mod:`ctypes` types instead of relying on automatic
         conversions. For example:
 
         .. code-block:: python
@@ -794,7 +794,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
             )
 
     :param receiver: The object on which to call the method, as an
-        :class:`ObjCInstance` or :class:`objc_id`.
+        :class:`~rubicon.objc.api.ObjCInstance` or :class:`.objc_id`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`,
         or :class:`SEL`.
     :param args: The method arguments.
@@ -895,9 +895,10 @@ def send_super(
     implementation details of the superclasses.
 
     :param cls: The class in whose context the ``super`` call is happening, as
-        an :class:`ObjCClass` or :class:`Class`.
+        an :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
     :param receiver: The object on which to call the method, as an
-        :class:`ObjCInstance`, :class:`objc_id`, or :class:`~ctypes.c_void_p`.
+        :class:`~rubicon.objc.api.ObjCInstance`, :class:`.objc_id`, or
+        :class:`~ctypes.c_void_p`.
     :param selector: The name of the method as a :class:`str`, :class:`bytes`,
         or :class:`SEL`.
     :param args: The method arguments.
@@ -1002,7 +1003,7 @@ def add_method(cls, selector, method, encoding, replace=False):
     To add a class method, add an instance method to the metaclass.
 
     :param cls: The Objective-C class to which to add the method, as an
-        :class:`ObjCClass` or :class:`Class`.
+        :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
     :param selector: The name for the new method, as a :class:`str`,
         :class:`bytes`, or :class:`SEL`.
     :param method: The method implementation, as a Python callable or a C
@@ -1045,7 +1046,7 @@ def add_method(cls, selector, method, encoding, replace=False):
 
 
 def add_ivar(cls, name, vartype):
-    """Add a new instance variable of type vartype to cls."""
+    """Add a new instance variable of type ``vartype`` to ``cls``."""
 
     return libobjc.class_addIvar(
         cls,
@@ -1057,18 +1058,18 @@ def add_ivar(cls, name, vartype):
 
 
 def get_ivar(obj, varname, weak=False):
-    """Get the value of obj's ivar named varname.
+    """Get the value of obj's ``ivar`` named varname.
 
     The returned object is a :mod:`ctypes` data object.
 
-    For non-object types (everything except :class:`objc_id` and subclasses),
-    the returned data object is backed by the ivar's actual memory. This means
+    For non-object types (everything except :class:`.objc_id` and subclasses),
+    the returned data object is backed by the ``ivar``'s actual memory. This means
     that the data object is only usable as long as the "owner" object is alive,
-    and writes to it will directly change the ivar's value.
+    and writes to it will directly change the ``ivar``'s value.
 
-    For object types, the returned data object is independent of the ivar's
-    memory. This is because object ivars may be weak, and thus cannot always be
-    accessed directly by their address.
+    For object types, the returned data object is independent of the ``ivar``'s
+    memory. This is because object ``ivars`` may be weak, and thus cannot always
+    be accessed directly by their address.
     """
 
     try:
@@ -1091,11 +1092,11 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's ivar varname to value. If ``weak`` is ``True``, only a weak
+    """Set obj's ``ivar`` varname to value. If ``weak`` is ``True``, only a weak
     reference to the value is stored.
 
     value must be a :mod:`ctypes` data object whose type matches that of
-    the ivar.
+    the ``ivar``.
     """
 
     try:
