@@ -1,0 +1,1 @@
+Rubicon now uses an implicit namespace package, instead of relying on the deprecated ``pkg_resources`` API.
