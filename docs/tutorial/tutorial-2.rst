@@ -116,7 +116,7 @@ What, no `__init__()`?
 
 You'll also notice that our example code *doesn't* have an `__init__()` method
 like you'd normally expect of Python code. As we're defining an Objective-C
-class, we need to follow the Objective-C object lifecycle - which means
+class, we need to follow the Objective-C object life cycle - which means
 defining initializer methods that are visible to the Objective-C runtime, and
 invoking them over that bridge.
 

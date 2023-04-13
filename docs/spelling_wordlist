@@ -9,17 +9,27 @@ deallocating
 Deprecations
 dev
 Est
+getter
 getters
+hashable
 Iacta
 IDEs
 initializer
 inlines
+kwargs
 linters
+lookups
 macOS
+metaclass
 metaclasses
+namespace
+namespaces
 ObjC
 pre
+Pythonic
 rc
+runtime
+structs
 subclassed
 subclasses
 Subclasses
@@ -29,7 +39,9 @@ superclass
 superclasses
 Sur
 syntaxes
+Towncrier
 Unregister
+variadic
 Variadic
 Xcode
 

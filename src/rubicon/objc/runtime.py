@@ -81,7 +81,7 @@ def load_library(name):
 
     Internally, this function uses :func:`ctypes.util.find_library` to search
     for the library in the system-standard locations. If the library cannot be
-    found this way, it is attempted to load the library from certain hardcoded
+    found this way, it is attempted to load the library from certain hard-coded
     locations, as a fallback for systems where ``find_library`` does not work
     (such as iOS).
     """
@@ -1058,7 +1058,7 @@ def add_ivar(cls, name, vartype):
 
 
 def get_ivar(obj, varname, weak=False):
-    """Get the value of obj's ``ivar`` named varname.
+    """Get the value of obj's ``ivar`` named ``varname``.
 
     The returned object is a :mod:`ctypes` data object.
 
@@ -1092,7 +1092,7 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's ``ivar`` varname to value. If ``weak`` is ``True``, only a weak
+    """Set obj's ``ivar`` ``varname`` to value. If ``weak`` is ``True``, only a weak
     reference to the value is stored.
 
     value must be a :mod:`ctypes` data object whose type matches that of

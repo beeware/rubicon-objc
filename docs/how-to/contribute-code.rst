@@ -86,7 +86,7 @@ and re-commit the change.
     [bugfix e3e0f73] Minor change
     1 file changed, 4 insertions(+), 2 deletions(-)
 
-Rubicon uses `tox <https://tox.readthedocs.io/en/latest/>`__ to manage the
+Rubicon uses `tox <https://tox.wiki/en/latest/>`__ to manage the
 testing process. To set up a testing environment and run the full test suite,
 run:
 

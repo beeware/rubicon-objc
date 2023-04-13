@@ -253,7 +253,7 @@ error-prone and more readable than typing encodings out by hand.
 :class:`~ctypes.c_float`                  ``f``
 :class:`~ctypes.c_double`                 ``d``
 :class:`~ctypes.c_longdouble`             ``D``                      On ARM, :class:`~ctypes.c_longdouble` is an alias for :class:`~ctypes.c_double`, and will be encoded as such.
-:class:`~ctypes.c_char`                   ``c``                      Only when encoding. Decoding ``c`` produces :class:`~ctypes.c_byte`, to allow using ``signed char`` as a boolean value.
+:class:`~ctypes.c_char`                   ``c``                      Only when encoding. Decoding ``c`` produces :class:`~ctypes.c_byte`, to allow using ``signed char`` as a Boolean value.
 :class:`~ctypes.c_char_p`                 ``*``
 ``POINTER(c_char)``                       ``*``                      Only when encoding. Decoding ``*`` produces :class:`~ctypes.c_char_p` for easier use of C strings.
 ``POINTER(c_byte)``                       ``*``                      Only when encoding. Decoding ``*`` produces :class:`~ctypes.c_char_p` for easier use of C strings.

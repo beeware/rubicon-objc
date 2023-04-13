@@ -149,7 +149,7 @@ other Objective-C and Python strings.
     in your code.
 
 If you have an :class:`~rubicon.objc.api.NSString`, and you need to pass it to
-a method that does a specific typecheck for :class:`str`, you can use
+a method that does a specific type check for :class:`str`, you can use
 ``str(nsstring)`` to convert the :class:`~rubicon.objc.api.NSString` to
 :class:`str`:
 

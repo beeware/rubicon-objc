@@ -81,22 +81,6 @@ If a valid spelling of a word is identified as misspelled, then add the word to
 the list in ``docs/spelling_wordlist``. This will add the word to the
 spellchecker's
 
-If you get an error related to SSL certificate verification::
-
-    Exception occurred:
-      File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/ssl.py", line 1342, in do_handshake
-        self._sslobj.do_handshake()
-    ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1007)
-
-The root certificate on your machine is out of date. You can correct this by
-installing the Python package `certifi`, and using that package to provide your
-SSL root certificate:
-
-.. code-block:: bash
-
-  (venv) $ pip install certifi
-  (venv) $ export SSL_CERT_FILE=$(python -m certifi)
-
 Rebuilding all documentation
 ----------------------------
 
