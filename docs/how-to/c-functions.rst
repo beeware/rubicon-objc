@@ -199,8 +199,8 @@ A complex example: ``dispatch_get_main_queue``
 As a final example, we'll look at the function ``dispatch_get_main_queue`` from
 the ``libdispatch`` library. This is a very complex function definition, which
 involves many of the concepts introduced above, as well as heavy use of C
-preprocessor macros. If you don't have a lot of experience with the C
-preprocessor, you may want to skip this section.
+pre-processor macros. If you don't have a lot of experience with the C
+pre-processor, you may want to skip this section.
 
 .. This example is based on the response to a question from the beeware/general Gitter chat: https://gitter.im/beeware/general?at=5b54e95357f4f664b794cde2
 
@@ -377,6 +377,6 @@ Further information
 -------------------
 
 * `cdecl.org <https://cdecl.org/>`_: An online service to translate C type syntax into more understandable English.
-* `cppreference.com <https://en.cppreference.com/>`_: A reference site about the standard C and C++ languages and libraries.
+* `cppreference.com <https://en.cppreference.com/w/>`_: A reference site about the standard C and C++ languages and libraries.
 * `Apple's reference documentation <https://developer.apple.com/documentation/>`_: Official API documentation for Apple platforms. Make sure to change the language to Objective-C in the top-right corner, otherwise you'll get Swift documentation, which can differ significantly from Objective-C.
 * macOS man pages, sections 2 and 3: Documentation for the C functions provided by macOS. View these using the ``man`` command, or by typing a function name into the search box of the macOS Terminal's Help menu.

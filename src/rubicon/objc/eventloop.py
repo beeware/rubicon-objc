@@ -735,7 +735,7 @@ class CFLifecycle:
 
 
 class CocoaLifecycle:
-    """A lifecycle manager for Cocoa (``NSApplication``) apps."""
+    """A life cycle manager for Cocoa (``NSApplication``) apps."""
 
     def __init__(self, application):
         self._application = application
@@ -748,7 +748,7 @@ class CocoaLifecycle:
 
 
 class iOSLifecycle:
-    """A lifecycle manager for iOS (``UIApplication``) apps."""
+    """A life cycle manager for iOS (``UIApplication``) apps."""
 
     def start(self):
         libcf.CFRunLoopRun()

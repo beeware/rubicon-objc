@@ -271,8 +271,6 @@ spelling_lang = "en_US"
 # Location of word list.
 spelling_word_list_filename = "spelling_wordlist"
 
-spelling_ignore_pypi_package_names = True
-
 # We mock the ctypes and ctypes.util modules during the documentation build,
 # so that Sphinx autodoc is able to import and inspect rubicon.objc even on systems without an Objective-C runtime.
 # For more details, see the docstring of _mocked_modules/ctypes/__init__.py.
