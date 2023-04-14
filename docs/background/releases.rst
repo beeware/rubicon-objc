@@ -3,6 +3,22 @@ Release History
 
 .. towncrier release notes start
 
+0.4.6 (2023-04-14)
+==================
+
+Bugfixes
+--------
+
+* The error message returned when a selector has the wrong type has been improved. (`#271 <https://github.com/beeware/rubicon-objc/issues/271>`__)
+* Rubicon now uses an implicit namespace package, instead of relying on the deprecated ``pkg_resources`` API. (`#292 <https://github.com/beeware/rubicon-objc/issues/292>`__)
+
+
+Misc
+----
+
+* #267, #268, #269, #270, #273, #274, #275, #276, #277, #278, #279, #280, #281, #282, #283, #284, #285, #286, #287, #288, #289, #290, #291, #294
+
+
 0.4.5 (2023-02-03)
 ==================
 
