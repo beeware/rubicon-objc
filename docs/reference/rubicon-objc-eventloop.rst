@@ -6,7 +6,8 @@
 
 .. note::
 
-    The documentation for this module is incomplete. You can help by :doc:`contributing to the documentation <../how-to/contribute-docs>`.
+    The documentation for this module is incomplete. You can help by
+    :doc:`contributing to the documentation <../how-to/contribute-docs>`.
 
 .. autoclass:: EventLoopPolicy
 

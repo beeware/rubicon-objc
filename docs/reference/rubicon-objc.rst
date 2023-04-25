@@ -4,12 +4,19 @@
 
 .. module:: rubicon.objc
 
-This is the main namespace of Rubicon-ObjC. Rubicon is structured into multiple submodules of :mod:`rubicon.objc`, and the most commonly used attributes from these submodules are exported via the :mod:`rubicon.objc` module. This means that most users only need to import and use the main :mod:`rubicon.objc` module; the individual submodules only need to be used for attributes that are not also available on :mod:`rubicon.objc`.
+This is the main namespace of Rubicon-ObjC. Rubicon is structured into multiple
+submodules of :mod:`rubicon.objc`, and the most commonly used attributes from
+these submodules are exported via the :mod:`rubicon.objc` module. This means
+that most users only need to import and use the main :mod:`rubicon.objc`
+module; the individual submodules only need to be used for attributes that are
+not also available on :mod:`rubicon.objc`.
 
 Exported Attributes
 -------------------
 
-This is a full list of all attributes exported on the :mod:`rubicon.objc` module. For detailed documentation on these attributes, click the links below to visit the relevant sections of the submodules' documentation.
+This is a full list of all attributes exported on the :mod:`rubicon.objc`
+module. For detailed documentation on these attributes, click the links below
+to visit the relevant sections of the submodules' documentation.
 
 From :mod:`rubicon.objc.api`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -2,7 +2,9 @@
 Getting Started with Rubicon
 ============================
 
-To use Rubicon, create a new virtual environment, and install it::
+To use Rubicon, create a new virtual environment, and install it:
+
+.. code-block:: console
 
     $ python3 -m venv venv
     $ source venv/bin/activate.sh
