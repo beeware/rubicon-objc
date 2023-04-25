@@ -352,20 +352,43 @@ Mapping methods like ``keys`` and ``values`` are also supported:
 Manual conversions
 ------------------
 
-If necessary, you can also manually call Rubicon's type conversion functions, to convert objects between Python and Objective-C when Rubicon doesn't do so automatically.
+If necessary, you can also manually call Rubicon's type conversion functions,
+to convert objects between Python and Objective-C when Rubicon doesn't do so
+automatically.
 
 Converting from Python to Objective-C
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The function :func:`~rubicon.objc.api.ns_from_py` (also available as :func:`~rubicon.objc.api.at` for short) can convert most standard Python objects to Foundation equivalents. For a full list of possible conversions, see the reference documentation for :func:`~rubicon.objc.api.ns_from_py`.
+The function :func:`~rubicon.objc.api.ns_from_py` (also available as
+:func:`~rubicon.objc.api.at` for short) can convert most standard Python
+objects to Foundation equivalents. For a full list of possible conversions, see
+the reference documentation for :func:`~rubicon.objc.api.ns_from_py`.
 
-These conversions are performed automatically when a Python object is passed into an Objective-C method parameter that expects an object - in that case you do not need to call :func:`~rubicon.objc.api.ns_from_py` manually (see :ref:`argument_conversion`).
+These conversions are performed automatically when a Python object is passed
+into an Objective-C method parameter that expects an object - in that case you
+do not need to call :func:`~rubicon.objc.api.ns_from_py` manually (see
+:ref:`argument_conversion`).
 
 Converting from Objective-C to Python
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The function :func:`~rubicon.objc.api.py_from_ns` can convert many common Foundation objects to Python equivalents. For a full list of possible conversions, see the reference documentation for :func:`~rubicon.objc.api.py_from_ns`.
+The function :func:`~rubicon.objc.api.py_from_ns` can convert many common
+Foundation objects to Python equivalents. For a full list of possible
+conversions, see the reference documentation for
+:func:`~rubicon.objc.api.py_from_ns`.
 
-These conversions are not performed automatically by Rubicon. For example, if an Objective-C method returns an ``NSString``, Rubicon will return it as an :class:`~rubicon.objc.api.ObjCInstance` (with some additional Python methods - see :ref:`python_style_apis_for_objc`). Using :func:`~rubicon.objc.api.py_from_ns`, you can convert the ``NSString`` to a real Python ``str``.
+These conversions are not performed automatically by Rubicon. For example, if
+an Objective-C method returns an ``NSString``, Rubicon will return it as an
+:class:`~rubicon.objc.api.ObjCInstance` (with some additional Python methods -
+see :ref:`python_style_apis_for_objc`). Using
+:func:`~rubicon.objc.api.py_from_ns`, you can convert the ``NSString`` to a
+real Python :class:`str`.
 
-When converting collections, such as ``NSArray`` or ``NSDictionary``, :func:`~rubicon.objc.api.py_from_ns` will convert them recursively to a pure Python object. For example, if ``nsarray`` is an ``NSArray`` containing ``NSString``\s, ``py_from_ns(nsarray)`` will return a ``list`` of ``str``\s. In most cases, that is the desired behavior, but you can also avoid this recursive conversion by passing the Foundation collection into a Python collection constructor: for example ``list(nsarray)`` will return a ``list`` of ``NSString``\s.
+When converting collections, such as ``NSArray`` or ``NSDictionary``,
+:func:`~rubicon.objc.api.py_from_ns` will convert them recursively to a pure
+Python object. For example, if ``nsarray`` is an ``NSArray`` containing
+``NSString``\s, ``py_from_ns(nsarray)`` will return a :class:`list` of
+:class:`str`\s. In most cases, that is the desired behavior, but you can also
+avoid this recursive conversion by passing the Foundation collection into a
+Python collection constructor: for example ``list(nsarray)`` will return a
+:class:`list` of ``NSString``\s.

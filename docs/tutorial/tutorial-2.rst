@@ -7,12 +7,13 @@ a class instance as an argument. For example, when using macOS and iOS GUI
 classes, you often need to define "delegate" classes to describe how a GUI
 element will respond to mouse clicks and key presses.
 
-Let's define a `Handler` class, with two methods:
+Let's define a ``Handler`` class, with two methods:
 
-    * an `-initWithValue:` constructor that accepts an integer; and
+    * an ``-initWithValue:`` constructor that accepts an integer; and
 
-    * a `-pokeWithValue:andName:` method that accepts an integer and a string,
-      prints the string, and returns a float that is one half of the value.
+    * a ``-pokeWithValue:andName:`` method that accepts an integer and a
+      string, prints the string, and returns a float that is one half of the
+      value.
 
 The declaration for this class would be::
 
@@ -32,33 +33,35 @@ The declaration for this class would be::
 
 This code has several interesting implementation details:
 
-    * The `Handler` class extends `NSObject`. This instructs Rubicon to
+    * The ``Handler`` class extends ``NSObject``. This instructs Rubicon to
       construct the class in a way that it can be registered with the
       Objective-C runtime.
 
     * Each method that we want to expose to Objective-C is decorated with
-      `@objc_method`.The method names match the Objective-C descriptor that
+      ``@objc_method``.The method names match the Objective-C descriptor that
       you want to expose, but with colons replaced by underscores. This matches
       the "long form" way of invoking methods discussed in :doc:`tutorial-1`.
 
-    * The `v` argument on `initWithValue_()` uses a Python 3 type annotation
-      to declare it's type. Objective-C is a language with static typing, so
-      any methods defined in Python must provide this typing information.
-      Any argument that isn't annotated is assumed to be of type `id` - that is,
-      a pointer to an Objective-C object.
+    * The ``v`` argument on ``initWithValue_()`` uses a Python 3 type
+      annotation to declare it's type. Objective-C is a language with static
+      typing, so any methods defined in Python must provide this typing
+      information. Any argument that isn't annotated is assumed to be of type
+      ``id`` - that is, a pointer to an Objective-C object.
 
-    * The `pokeWithValue_andName_()` method has it's integer argument
+    * The ``pokeWithValue_andName_()`` method has it's integer argument
       annotated, and has it's return type annotated as float. Again, this is
       to support Objective-C typing operations. Any function that has no
-      return type annotation is assumed to return `id`. A return type
-      annotation of `None` will be interpreted as a `void` method in
-      Objective-C. The `name` argument doesn't need to be annotated because it
-      will be passed in as a string, and strings are `NSObject` subclasses
+      return type annotation is assumed to return ``id``. A return type
+      annotation of ``None`` will be interpreted as a ``void`` method in
+      Objective-C. The ``name`` argument doesn't need to be annotated because it
+      will be passed in as a string, and strings are ``NSObject`` subclasses
       in Objective-C.
 
-    * `initWithValue_()` is a constructor, so it returns `self`.
+    * ``initWithValue_()`` is a constructor, so it returns ``self``.
 
-Having declared the class, you can then instantiate and use it::
+Having declared the class, you can then instantiate and use it:
+
+.. code-block:: pycon
 
     >>> my_handler = Handler.alloc().initWithValue(42)
     >>> print(my_handler.value)
@@ -70,15 +73,14 @@ Having declared the class, you can then instantiate and use it::
 Objective-C properties
 ======================
 
-When we defined the initializer for `Handler`, we stored the provided value
-as the `value` attribute of the class. However, as this attribute wasn't
+When we defined the initializer for ``Handler``, we stored the provided value
+as the ``value`` attribute of the class. However, as this attribute wasn't
 declared to Objective-C, it won't be visible to the Objective-C runtime.
-You can access `value` from within Python - but Objective-C code won't be able
-to access it.
+You can access ``value`` from within Python - but Objective-C code won't be
+able to access it.
 
 To expose value to the Objective-C runtime, we need to make one small change,
 and explicitly declare value as an Objective-C property::
-
 
     from rubicon.objc import NSObject, objc_method, objc_property()
 
@@ -97,10 +99,12 @@ Class naming
 ============
 
 In this revised example, you'll note that we also used a different class name
-- `PureHandler`. This was deliberate, because Objective-C doesn't have any
+- ``PureHandler``. This was deliberate, because Objective-C doesn't have any
 concept of namespaces. As a result, you can only define one class of any given
-name in a process - so, you wont be able to define a second `Handler` class in
-the same Python shell. If you try, you'll get an error::
+name in a process - so, you wont be able to define a second ``Handler`` class in
+the same Python shell. If you try, you'll get an error:
+
+.. code-block:: pycon
 
     >>> class Handler(NSObject):
     ...     pass
@@ -111,14 +115,14 @@ the same Python shell. If you try, you'll get an error::
 You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.
 
-What, no `__init__()`?
-======================
+What, no ``__init__()``?
+========================
 
-You'll also notice that our example code *doesn't* have an `__init__()` method
-like you'd normally expect of Python code. As we're defining an Objective-C
-class, we need to follow the Objective-C object life cycle - which means
-defining initializer methods that are visible to the Objective-C runtime, and
-invoking them over that bridge.
+You'll also notice that our example code *doesn't* have an ``__init__()``
+method like you'd normally expect of Python code. As we're defining an
+Objective-C class, we need to follow the Objective-C object life cycle - which
+means defining initializer methods that are visible to the Objective-C runtime,
+and invoking them over that bridge.
 
 Next steps
 ==========

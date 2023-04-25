@@ -4,16 +4,20 @@
 
 .. module:: rubicon.objc.runtime
 
-This module contains types, functions, and C libraries used for low-level access to the Objective-C runtime.
+This module contains types, functions, and C libraries used for low-level
+access to the Objective-C runtime.
 
-In most cases there is no need to use this module directly --- the :mod:`rubicon.objc.api` module provides the same functionality through a high-level interface.
+In most cases there is no need to use this module directly --- the
+:mod:`rubicon.objc.api` module provides the same functionality through a
+high-level interface.
 
 .. _predefined-c-libraries:
 
 C libraries
 -----------
 
-Some commonly used C libraries are provided as :class:`~ctypes.CDLL`\s. Other libraries can be loaded using the :func:`load_library` function.
+Some commonly used C libraries are provided as :class:`~ctypes.CDLL`\s. Other
+libraries can be loaded using the :func:`load_library` function.
 
 .. data:: libc
     :annotation: = load_library('c')
@@ -101,7 +105,8 @@ Some commonly used C libraries are provided as :class:`~ctypes.CDLL`\s. Other li
 .. data:: Foundation
     :annotation: = load_library('Foundation')
 
-    The `Foundation <https://developer.apple.com/documentation/foundation>`__ framework.
+    The `Foundation <https://developer.apple.com/documentation/foundation>`__
+    framework.
 
 .. autofunction:: load_library
 
@@ -149,18 +154,24 @@ These are various types used by the Objective-C runtime functions.
 
     .. attribute:: super_class
 
-        The class in which to start searching for method implementations, as a :class:`Class`.
+        The class in which to start searching for method implementations, as a
+        :class:`Class`.
 
 Objective-C runtime utility functions
 -------------------------------------
 
-These utility functions provide easier access from Python to certain parts of the Objective-C runtime.
+These utility functions provide easier access from Python to certain parts of
+the Objective-C runtime.
 
 .. function:: object_isClass(obj)
 
     Return whether the given Objective-C object is a class (or a metaclass).
 
-    This is equivalent to the :data:`libobjc` function `object_isClass <https://developer.apple.com/documentation/objectivec/1418659-object_isclass?language=objc>`__ from ``<objc/runtime.h>``, which is only available since OS X 10.10 and iOS 8. This module-level function is provided to support older systems --- it uses the :data:`libobjc` function if available, and otherwise emulates it.
+    This is equivalent to the :data:`libobjc` function `object_isClass
+    <https://developer.apple.com/documentation/objectivec/1418659-object_isclass?language=objc>`__
+    from ``<objc/runtime.h>``, which is only available since OS X 10.10 and iOS
+    8. This module-level function is provided to support older systems --- it
+    uses the :data:`libobjc` function if available, and otherwise emulates it.
 
 .. autofunction:: get_class
 .. autofunction:: should_use_stret

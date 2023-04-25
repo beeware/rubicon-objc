@@ -96,12 +96,12 @@ Objective-C classes:
 There are two notable differences between creating classes and protocols:
 
 1. Protocols do not need to extend exactly one other protocol - they can also
-extend multiple protocols, or none at all. When not extending other protocols,
-as is the case here, we need to explicitly add ``metaclass=ObjCProtocol`` to
-the base class list, to tell Python that this is a protocol and not a regular
-Python class. When extending other protocols, Python detects this
-automatically.
+   extend multiple protocols, or none at all. When not extending other
+   protocols, as is the case here, we need to explicitly add
+   ``metaclass=ObjCProtocol`` to the base class list, to tell Python that this
+   is a protocol and not a regular Python class. When extending other
+   protocols, Python detects this automatically.
 2. Protocol methods do not have a body. Python has no dedicated syntax for
-functions without a body, so we put ``...`` in the body instead. (You could
-technically put code in the body, but this would be misleading and is not
-recommended.)
+   functions without a body, so we put ``...`` in the body instead. (You could
+   technically put code in the body, but this would be misleading and is not
+   recommended.)
