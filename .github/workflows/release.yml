@@ -56,6 +56,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # This permission is required for trusted publishing.
+      id-token: write
     steps:
       - name: Get packages
         uses: actions/download-artifact@v3.0.2
@@ -67,4 +69,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository_url: https://test.pypi.org/legacy/
-          password: ${{ secrets.TEST_PYPI_PASSWORD }}
