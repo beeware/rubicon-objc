@@ -3,6 +3,7 @@ import decimal
 import enum
 import inspect
 import threading
+import typing
 import weakref
 from ctypes import (
     CFUNCTYPE,
@@ -93,11 +94,19 @@ _keep_alive_objects = {}
 
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
+    # typing evaluates a return type of None as <class NoneType>;
+    # convert that back to a None. E721 is the "don't compare types,
+    # use isinstance()" flake8 error. Which is good advice... except
+    # that we're not checking an instance - we *are* comparing types.
+    hints = {
+        var: None if hint == type(None) else hint  # noqa: E721
+        for var, hint in typing.get_type_hints(f).items()
+    }
 
-    encoding = [argspec.annotations.get("return", ObjCInstance), ObjCInstance, SEL]
+    encoding = [hints.get("return", ObjCInstance), ObjCInstance, SEL]
 
     for varname in argspec.args[offset:]:
-        encoding.append(argspec.annotations.get(varname, ObjCInstance))
+        encoding.append(hints.get(varname, ObjCInstance))
 
     return encoding
 
@@ -2219,7 +2228,8 @@ class Block:
 
         .. code-block:: python
 
-            @Block def the_block(arg: NSInteger) -> NSUInteger:
+            @Block
+            def the_block(arg: NSInteger) -> NSUInteger:
                 return abs(arg)
 
         For callables without type annotations, the parameter and return types
@@ -2246,6 +2256,7 @@ class Block:
             # so try to extract them from the function's type annotations.
 
             try:
+                hints = typing.get_type_hints(func)
                 signature = inspect.signature(func)
             except (TypeError, ValueError):
                 raise ValueError(
@@ -2253,22 +2264,23 @@ class Block:
                     "please pass return and argument types directly into Block"
                 )
 
-            if signature.return_annotation == inspect.Signature.empty:
+            try:
+                restype = hints["return"]
+            except KeyError:
                 raise ValueError(
                     "Function has no return type annotation - "
                     "please add one, or pass return and argument types directly into Block"
                 )
 
-            restype = signature.return_annotation
             argtypes = []
-            for name, param in signature.parameters.items():
-                if param.annotation == inspect.Parameter.empty:
+            for name in signature.parameters:
+                try:
+                    argtypes.append(hints[name])
+                except KeyError:
                     raise ValueError(
                         f"Function has no argument type annotation for parameter {name!r} - "
                         f"please add one, or pass return and argument types directly into Block"
                     )
-
-                argtypes.append(param.annotation)
 
         signature = tuple(ctype_for_type(tp) for tp in argtypes)
 
