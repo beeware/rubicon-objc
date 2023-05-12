@@ -3,12 +3,6 @@ Release History
 
 .. towncrier release notes start
 
-0.4.7.dev0+g3fb9aa5.d20230512 (2023-05-12)
-==========================================
-
-No significant changes.
-
-
 0.4.6 (2023-04-14)
 ==================
 
