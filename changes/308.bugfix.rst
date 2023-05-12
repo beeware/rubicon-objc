@@ -1,0 +1,1 @@
+Rubicon is now compatible with PEP563 deferred annotations (``from __future__ import annotations``).
