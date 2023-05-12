@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import platform
 import unittest
 from ctypes import Structure, c_int, c_void_p
@@ -104,11 +106,21 @@ class BlockTests(unittest.TestCase):
         self.assertEqual(values, [27])
         self.assertEqual(result, 42)
 
-    def test_block_receiver_unannotated(self):
+    def test_block_receiver_no_return_annotation(self):
         BlockReceiverExample = ObjCClass("BlockReceiverExample")
         instance = BlockReceiverExample.alloc().init()
 
-        def block(a, b):
+        def block(a: int, b: int):
+            return a + b
+
+        with self.assertRaises(ValueError):
+            instance.receiverMethod_(block)
+
+    def test_block_receiver_missing_arg_annotation(self):
+        BlockReceiverExample = ObjCClass("BlockReceiverExample")
+        instance = BlockReceiverExample.alloc().init()
+
+        def block(a: int, b) -> int:
             return a + b
 
         with self.assertRaises(ValueError):
