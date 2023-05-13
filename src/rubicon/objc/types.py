@@ -114,6 +114,7 @@ __arm__ = _any_arm and not __LP64__
 
 
 _ctype_for_type_map = {
+    type(None): None,
     int: c_int,
     float: c_double,
     bool: c_bool,
