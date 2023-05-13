@@ -94,15 +94,7 @@ _keep_alive_objects = {}
 
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
-    # typing evaluates a return type of None as <class NoneType>;
-    # convert that back to a None. E721 is the "don't compare types,
-    # use isinstance()" flake8 error. Which is good advice... except
-    # that we're not checking an instance - we *are* comparing types.
-    hints = {
-        var: None if hint == type(None) else hint  # noqa: E721
-        for var, hint in typing.get_type_hints(f).items()
-    }
-
+    hints = typing.get_type_hints(f)
     encoding = [hints.get("return", ObjCInstance), ObjCInstance, SEL]
 
     for varname in argspec.args[offset:]:
