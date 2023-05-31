@@ -12,7 +12,7 @@ from asyncio import (
 )
 from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_ulong, c_void_p
 
-from .api import objc_const, ObjCClass
+from .api import ObjCClass, objc_const
 from .runtime import load_library, objc_id
 from .types import CFIndex
 
