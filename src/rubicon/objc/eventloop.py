@@ -12,7 +12,7 @@ from asyncio import (
 )
 from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_ulong, c_void_p
 
-from .api import objc_const
+from .api import objc_const, ObjCClass
 from .runtime import load_library, objc_id
 from .types import CFIndex
 
@@ -751,7 +751,8 @@ class iOSLifecycle:
     """A life cycle manager for iOS (``UIApplication``) apps."""
 
     def start(self):
-        libcf.CFRunLoopRun()
+        NSRunLoop = ObjCClass("NSRunLoop")
+        NSRunLoop.currentRunLoop.run()
 
     def stop(self):
         libcf.CFRunLoopStop(libcf.CFRunLoopGetMain())
