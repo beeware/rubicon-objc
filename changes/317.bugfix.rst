@@ -1,1 +1,1 @@
-Fixed iOS scroll issue `#316 <https://github.com/beeware/rubicon-objc/issues/316>`_
+iOS now uses a full NSRunLoop, rather than a CFRunLoop.
