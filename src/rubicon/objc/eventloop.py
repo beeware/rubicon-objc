@@ -79,6 +79,7 @@ kCFSocketWriteCallBack = 8
 kCFSocketAutomaticallyReenableReadCallBack = 1
 kCFSocketAutomaticallyReenableWriteCallBack = 8
 
+NSRunLoop = ObjCClass("NSRunLoop")
 
 ###########################################################################
 # CoreFoundation methods for async handlers
@@ -523,10 +524,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             events._set_running_loop(self)
 
         # Start the lifecycle, but invoke it as a deferred event on the event
-        # loop. iOSLifeCycle.start() invokes libcf.CFRunLoopRun(); this ensures
-        # that a full CFRunLoop is running, not just one that responds to
+        # loop. iOSLifeCycle.start() starts the NSRunLoop; this ensures
+        # that a full NSRunLoop is running, not just one that responds to
         # iOS events. See #228 for the sort of behavior that occurs on threads
-        # if the CFRunLoop isn't started.
+        # if the NSRunLoop isn't started.
         self.call_soon(self._lifecycle.start)
 
     def call_soon(self, callback, *args, context=None):
@@ -751,7 +752,6 @@ class iOSLifecycle:
     """A life cycle manager for iOS (``UIApplication``) apps."""
 
     def start(self):
-        NSRunLoop = ObjCClass("NSRunLoop")
         NSRunLoop.currentRunLoop.run()
 
     def stop(self):
