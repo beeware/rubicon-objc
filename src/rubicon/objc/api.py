@@ -1532,19 +1532,17 @@ class ObjCClass(ObjCInstance, type):
             In the standard Apple SDKs, some properties are introduced as regular
             methods in one system version, and then declared as properties in a later
             system version. For example, the ``description`` method/property of
-            :class:`NSObject` was declared as a regular method up to macOS 10.9, but
-            changed to a property as of macOS 10.10.
+            :class:`NSObject` was declared as a regular method `up to OS X 10.9
+            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.9.sdk/usr/include/objc/NSObject.h#L40>`__,
+            but changed to a property `as of OS X 10.10
+            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.10.sdk/usr/include/objc/NSObject.h#L43>`__.
 
-            Such properties cause compatibility issues when accessed from Rubicon.
+            Such properties cause compatibility issues when accessed from Rubicon:
             ``obj.description()`` works on 10.9 but is a :class:`TypeError` on 10.10,
             whereas ``obj.description`` works on 10.10 but returns a method object on
             10.9. To solve this issue, the property can be declared explicitly using
             ``NSObject.declare_property('description')``, so that it can always be
             accessed using ``obj.description``.
-
-            The `MacOSX-SDKs Github repository
-            <https://github.com/phracker/MacOSX-SDKs>`__ can be a useful resource for
-            identifying when changes like this have occurred.
         """
 
         self.forced_properties.add(name)

@@ -107,6 +107,11 @@ nitpick_ignore = [
     ("py:func", "rubicon.objc.types.UIEdgeInsetsMake"),
 ]
 
+# 2023-07-10: Github Line number anchors fail link checks when retrieved by robots. This
+# drops the line number anchor from any link checks, but still validates the base URL is
+# valid.
+linkcheck_anchors_ignore = [r"L\d+"]
+
 # -- Options for copy button ---------------------------------------------------
 
 # virtual env prefix: (venv), (beeware-venv), (testenv)
