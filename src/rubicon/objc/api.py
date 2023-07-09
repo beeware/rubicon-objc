@@ -1515,37 +1515,36 @@ class ObjCClass(ObjCInstance, type):
     def declare_property(self, name):
         """Declare the instance method ``name`` to be a property getter.
 
-        This causes the attribute named ``name`` on instances of this class to
-        be treated as a property rather than a method --- accessing it returns
-        the property's value, without requiring an explicit method call. See
-        :class:`ObjCInstance.__getattr__` for a full description of how
-        attribute access behaves for properties.
+        This causes the attribute named ``name`` on instances of this class to be
+        treated as a property rather than a method --- accessing it returns the
+        property's value, without requiring an explicit method call. See
+        :class:`ObjCInstance.__getattr__` for a full description of how attribute access
+        behaves for properties.
 
-        Most properties do not need to be declared explicitly using this method,
-        as they are detected automatically by :class:`ObjCInstance.__getattr__`.
-        This method only needs to be used for properties that are read-only and
-        don't have a ``@property`` declaration in the source code, because
-        Rubicon cannot tell such properties apart from normal zero-argument
-        methods.
+        Most properties do not need to be declared explicitly using this method, as they
+        are detected automatically by :class:`ObjCInstance.__getattr__`. This method
+        only needs to be used for properties that are read-only and don't have a
+        ``@property`` declaration in the source code, because Rubicon cannot tell such
+        properties apart from normal zero-argument methods.
 
         .. note::
 
-            In the standard Apple SDKs, some properties are introduced as
-            regular methods in one system version, and then declared as
-            properties in a later system version. For example, the
-            ``description`` method/property of :class:`NSObject` was declared as
-            a regular method `up to OS X 10.9
-            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.9.sdk/usr/include/objc/NSObject.h#L40>`__,
-            but changed to a property `as of OS X 10.10
-            <https://github.com/phracker/MacOSX-SDKs/blob/9fc3ed0ad0345950ac25c28695b0427846eea966/MacOSX10.10.sdk/usr/include/objc/NSObject.h#L43>`__.
+            In the standard Apple SDKs, some properties are introduced as regular
+            methods in one system version, and then declared as properties in a later
+            system version. For example, the ``description`` method/property of
+            :class:`NSObject` was declared as a regular method up to macOS 10.9, but
+            changed to a property as of macOS 10.10.
 
-            Such properties cause compatibility issues when accessed from
-            Rubicon: ``obj.description()`` works on 10.9 but is a
-            :class:`TypeError` on 10.10, whereas ``obj.description`` works on
-            10.10 but returns a method object on 10.9. To solve this issue, the
-            property can be declared explicitly using
-            ``NSObject.declare_property('description')``, so that it can always
-            be accessed using ``obj.description``.
+            Such properties cause compatibility issues when accessed from Rubicon.
+            ``obj.description()`` works on 10.9 but is a :class:`TypeError` on 10.10,
+            whereas ``obj.description`` works on 10.10 but returns a method object on
+            10.9. To solve this issue, the property can be declared explicitly using
+            ``NSObject.declare_property('description')``, so that it can always be
+            accessed using ``obj.description``.
+
+            The `MacOSX-SDKs Github repository
+            <https://github.com/phracker/MacOSX-SDKs>`__ can be a useful resource for
+            identifying when changes like this have occurred.
         """
 
         self.forced_properties.add(name)
