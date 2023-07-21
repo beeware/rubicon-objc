@@ -29,6 +29,7 @@ from rubicon.objc import (
     NSMakeRect,
     NSObject,
     NSObjectProtocol,
+    NSPoint,
     NSRange,
     NSRect,
     NSSize,
@@ -990,6 +991,13 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(str(tester), py_description_string)
         self.assertIn(py_debug_description_string, repr(tester))
+
+    def test_objcinstance_nspoint_repr(self):
+        """Test NSPoint repr and str returns correct value."""
+
+        my_point = NSPoint(10, 20)
+        self.assertEqual(repr(my_point), "<NSPoint(10.0, 20.0)>")
+        self.assertEqual(str(my_point), "(10.0, 20.0)")
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
