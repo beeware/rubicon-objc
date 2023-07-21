@@ -753,6 +753,12 @@ class NSPoint(Structure):
         ("y", CGFloat),
     ]
 
+    def __repr__(self):
+        return f"<NSPoint({self.x}, {self.y})>"
+
+    def __str__(self):
+        return f"({self.x}, {self.y})"
+
 
 if _CGPointEncoding == _NSPointEncoding:
     CGPoint = NSPoint
