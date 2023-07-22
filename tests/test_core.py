@@ -24,6 +24,7 @@ from enum import Enum
 
 from rubicon.objc import (
     SEL,
+    CFRange,
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
@@ -38,6 +39,7 @@ from rubicon.objc import (
     ObjCInstance,
     ObjCMetaClass,
     ObjCProtocol,
+    UIEdgeInsets,
     at,
     objc_classmethod,
     objc_const,
@@ -1005,6 +1007,41 @@ class RubiconTest(unittest.TestCase):
         my_rect = NSRect((10, 20), (5, 15))
         self.assertEqual(repr(my_rect), "<NSRect(5.0x15.0 @ 10.0, 20.0)>")
         self.assertEqual(str(my_rect), "(5.0x15.0 @ 10.0, 20.0)")
+
+    def test_objcinstance_nssize_repr(self):
+        """Test NSSize repr and str returns correct value."""
+
+        my_size = NSSize(5, 5)
+        self.assertEqual(repr(my_size), "<NSSize(5.0x5.0)>")
+        self.assertEqual(str(my_size), "(5.0x5.0)")
+
+    def test_objcinstance_nsrangerepr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_range = NSRange(5, 5)
+        self.assertEqual(repr(my_range), "<NSRange(5, 5)>")
+        self.assertEqual(str(my_range), "(5, 5)")
+
+    def test_objcinstance_cfrangerepr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_range = CFRange(5, 5)
+        self.assertEqual(repr(my_range), "<CFRange(5, 5)>")
+        self.assertEqual(str(my_range), "(5, 5)")
+
+    def test_objcinstance_nsedgeinsetsrepr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_edge_insets = NSEdgeInsets(4, 4, 4, 4)
+        self.assertEqual(repr(my_edge_insets), "<NSEdgeInsets(4.0, 4.0, 4.0, 4.0)>")
+        self.assertEqual(str(my_edge_insets), "(4.0, 4.0, 4.0, 4.0)")
+
+    def test_objcinstance_uiedgeinsetsrepr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_edge_insets = UIEdgeInsets(4, 4, 4, 4)
+        self.assertEqual(repr(my_edge_insets), "<UIEdgeInsets(4.0, 4.0, 4.0, 4.0)>")
+        self.assertEqual(str(my_edge_insets), "(4.0, 4.0, 4.0, 4.0)")
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
