@@ -1,1 +1,1 @@
-Improved repr and string calls for NSPoint and NSRect
+Improved repr and string calls for NSPoint, NSRect, NSRange, NSEdgeInsets, NSSize, CFRange and UIEdgeInsets.
