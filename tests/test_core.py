@@ -1004,7 +1004,7 @@ class RubiconTest(unittest.TestCase):
     def test_objcinstance_nsrect_repr(self):
         """Test NSRect repr and str returns correct value."""
 
-        my_rect = NSRect((10, 20), (5, 15))
+        my_rect = NSRect(NSPoint(10, 20), NSSize(5, 15))
         self.assertEqual(repr(my_rect), "<NSRect(5.0x15.0 @ 10.0, 20.0)>")
         self.assertEqual(str(my_rect), "(5.0x15.0 @ 10.0, 20.0)")
 
