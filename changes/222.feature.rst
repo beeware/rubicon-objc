@@ -1,1 +1,1 @@
-Improved repr and string calls for NSPoint
+Improved repr and string calls for NSPoint and NSRect
