@@ -810,7 +810,7 @@ class NSRect(Structure):
 
     def __str__(self):
         return (
-            f"({self.size.width}x{self.size.height} @ {self.origin.x}, {self.origin.y})"
+            f"{self.size.width}x{self.size.height} @ ({self.origin.x},{self.origin.y})"
         )
 
 
