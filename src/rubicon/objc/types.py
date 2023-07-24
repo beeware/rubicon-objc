@@ -783,7 +783,7 @@ class NSSize(Structure):
         return f"<NSSize {self.width}x{self.height}>"
 
     def __str__(self):
-        return f"({self.width}x{self.height})"
+        return f"{self.width}x{self.height}"
 
 
 if _CGSizeEncoding == _NSSizeEncoding:
