@@ -806,7 +806,7 @@ class NSRect(Structure):
     ]
 
     def __repr__(self):
-        return f"<NSRect({self.size.width}x{self.size.height} @ {self.origin.x}, {self.origin.y})>"
+        return f"<NSRect {self.size.width}x{self.size.height} @ ({self.origin.x},{self.origin.y})>"
 
     def __str__(self):
         return (
