@@ -780,7 +780,7 @@ class NSSize(Structure):
     ]
 
     def __repr__(self):
-        return f"<NSSize({self.width}x{self.height})>"
+        return f"<NSSize {self.width}x{self.height}>"
 
     def __str__(self):
         return f"({self.width}x{self.height})"
