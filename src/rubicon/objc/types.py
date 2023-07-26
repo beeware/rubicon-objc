@@ -771,6 +771,12 @@ else:
             ("y", CGFloat),
         ]
 
+        def __repr__(self):
+            return f"<CGPoint({self.x}, {self.y})>"
+
+        def __str__(self):
+            return f"({self.x}, {self.y})"
+
 
 @with_preferred_encoding(_NSSizeEncoding)
 class NSSize(Structure):
@@ -780,10 +786,10 @@ class NSSize(Structure):
     ]
 
     def __repr__(self):
-        return f"<NSSize {self.width}x{self.height}>"
+        return f"<NSSize({self.width}, {self.height})>"
 
     def __str__(self):
-        return f"{self.width}x{self.height}"
+        return f"{self.width} x {self.height}"
 
 
 if _CGSizeEncoding == _NSSizeEncoding:
@@ -797,6 +803,12 @@ else:
             ("height", CGFloat),
         ]
 
+        def __repr__(self):
+            return f"<CGSize({self.width}, {self.height})>"
+
+        def __str__(self):
+            return f"{self.width} x {self.height}"
+
 
 @with_preferred_encoding(_NSRectEncoding)
 class NSRect(Structure):
@@ -806,12 +818,14 @@ class NSRect(Structure):
     ]
 
     def __repr__(self):
-        return f"<NSRect {self.size.width}x{self.size.height} @ ({self.origin.x},{self.origin.y})>"
+        return (
+            f"<NSRect("
+            f"NSPoint({self.origin.x}, {self.origin.y}), "
+            f"NSSize({self.size.width}, {self.size.height}))>"
+        )
 
     def __str__(self):
-        return (
-            f"{self.size.width}x{self.size.height} @ ({self.origin.x},{self.origin.y})"
-        )
+        return f"{self.size} @ {self.origin}"
 
 
 if _CGRectEncoding == _NSRectEncoding:
@@ -824,6 +838,16 @@ else:
             ("origin", CGPoint),
             ("size", CGSize),
         ]
+
+    def __repr__(self):
+        return (
+            f"<CGRect("
+            f"CGPoint({self.origin.x}, {self.origin.y}), "
+            f"CGSize({self.size.width}, {self.size.height}))>"
+        )
+
+    def __str__(self):
+        return f"{self.size} @ {self.origin}"
 
 
 def NSMakeSize(w, h):
@@ -861,10 +885,10 @@ class UIEdgeInsets(Structure):
     ]
 
     def __repr__(self):
-        return f"<UIEdgeInsets({self.top}, {self.bottom}, {self.left}, {self.right})>"
+        return f"<UIEdgeInsets({self.top}, {self.left}, {self.bottom}, {self.right})>"
 
     def __str__(self):
-        return f"({self.top}, {self.bottom}, {self.left}, {self.right})"
+        return f"top={self.top}, left={self.left}, bottom={self.bottom}, right={self.right}"
 
 
 def UIEdgeInsetsMake(top, left, bottom, right):
@@ -885,10 +909,10 @@ class NSEdgeInsets(Structure):
     ]
 
     def __repr__(self):
-        return f"<NSEdgeInsets({self.top}, {self.bottom}, {self.left}, {self.right})>"
+        return f"<NSEdgeInsets({self.top}, {self.left}, {self.bottom}, {self.right})>"
 
     def __str__(self):
-        return f"({self.top}, {self.bottom}, {self.left}, {self.right})"
+        return f"top={self.top}, left={self.left}, bottom={self.bottom}, right={self.right}"
 
 
 def NSEdgeInsetsMake(top, left, bottom, right):
@@ -919,7 +943,7 @@ class CFRange(Structure):
         return f"<CFRange({self.location}, {self.length})>"
 
     def __str__(self):
-        return f"({self.location}, {self.length})"
+        return f"location={self.location}, length={self.length}"
 
 
 # NSRange.h  (Note, not defined the same as CFRange)
@@ -934,7 +958,7 @@ class NSRange(Structure):
         return f"<NSRange({self.location}, {self.length})>"
 
     def __str__(self):
-        return f"({self.location}, {self.length})"
+        return f"location={self.location}, length={self.length}"
 
 
 NSZeroPoint = NSPoint(0, 0)
