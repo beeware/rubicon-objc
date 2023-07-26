@@ -24,6 +24,10 @@ from enum import Enum
 
 from rubicon.objc import (
     SEL,
+    CFRange,
+    CGPoint,
+    CGRect,
+    CGSize,
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
@@ -38,6 +42,7 @@ from rubicon.objc import (
     ObjCInstance,
     ObjCMetaClass,
     ObjCProtocol,
+    UIEdgeInsets,
     at,
     objc_classmethod,
     objc_const,
@@ -50,6 +55,7 @@ from rubicon.objc import (
     types,
 )
 from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
+from rubicon.objc.types import __LP64__
 
 from . import OSX_VERSION, rubiconharness
 
@@ -992,13 +998,6 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(str(tester), py_description_string)
         self.assertIn(py_debug_description_string, repr(tester))
 
-    def test_objcinstance_nspoint_repr(self):
-        """Test NSPoint repr and str returns correct value."""
-
-        my_point = NSPoint(10, 20)
-        self.assertEqual(repr(my_point), "<NSPoint(10.0, 20.0)>")
-        self.assertEqual(str(my_point), "(10.0, 20.0)")
-
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
         debugDescription are nil."""
@@ -1009,6 +1008,99 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertIsNot(str(tester), None)
         self.assertIsNot(repr(tester), None)
+
+    def test_nspoint_repr(self):
+        """Test NSPoint repr and str returns correct value."""
+
+        my_point = NSPoint(10, 20)
+        self.assertEqual(repr(my_point), "<NSPoint(10.0, 20.0)>")
+        self.assertEqual(str(my_point), "(10.0, 20.0)")
+
+    def test_cgpoint_repr(self):
+        """Test CGPoint repr and str returns correct value."""
+
+        my_point = CGPoint(10, 20)
+        if __LP64__:
+            self.assertEqual(repr(my_point), "<NSPoint(10.0, 20.0)>")
+        else:
+            self.assertEqual(repr(my_point), "<CGPoint(10.0, 20.0)>")
+        self.assertEqual(str(my_point), "(10.0, 20.0)")
+
+    def test_nsrect_repr(self):
+        """Test NSRect repr and str returns correct value."""
+
+        my_rect = NSRect(NSPoint(10, 20), NSSize(5, 15))
+        self.assertEqual(
+            repr(my_rect),
+            "<NSRect(NSPoint(10.0, 20.0), NSSize(5.0, 15.0))>",
+        )
+        self.assertEqual(str(my_rect), "5.0 x 15.0 @ (10.0, 20.0)")
+
+    def test_cgrect_repr(self):
+        """Test CGRect repr and str returns correct value."""
+
+        my_rect = CGRect(CGPoint(10, 20), CGSize(5, 15))
+        if __LP64__:
+            self.assertEqual(
+                repr(my_rect),
+                "<NSRect(NSPoint(10.0, 20.0), NSSize(5.0, 15.0))>",
+            )
+        else:
+            self.assertEqual(
+                repr(my_rect),
+                "<CGRect(CGPoint(10.0, 20.0), CGSize(5.0, 15.0))>",
+            )
+
+        self.assertEqual(str(my_rect), "5.0 x 15.0 @ (10.0, 20.0)")
+
+    def test_nssize_repr(self):
+        """Test NSSize repr and str returns correct value."""
+
+        my_size = NSSize(5, 15)
+        self.assertEqual(repr(my_size), "<NSSize(5.0, 15.0)>")
+        self.assertEqual(str(my_size), "5.0 x 15.0")
+
+    def test_cgsize_repr(self):
+        """Test NSSize repr and str returns correct value."""
+
+        my_size = CGSize(5, 15)
+        if __LP64__:
+            self.assertEqual(repr(my_size), "<NSSize(5.0, 15.0)>")
+        else:
+            self.assertEqual(repr(my_size), "<CGSize(5.0, 15.0)>")
+        self.assertEqual(str(my_size), "5.0 x 15.0")
+
+    def test_nsrange_repr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_range = NSRange(5, 6)
+        self.assertEqual(repr(my_range), "<NSRange(5, 6)>")
+        self.assertEqual(str(my_range), "location=5, length=6")
+
+    def test_cfrange_repr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_range = CFRange(5, 6)
+        self.assertEqual(repr(my_range), "<CFRange(5, 6)>")
+        self.assertEqual(str(my_range), "location=5, length=6")
+
+    def test_nsedgeinsets_repr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_edge_insets = NSEdgeInsets(4, 5, 6, 7)
+        self.assertEqual(repr(my_edge_insets), "<NSEdgeInsets(4.0, 5.0, 6.0, 7.0)>")
+        self.assertEqual(
+            str(my_edge_insets), "top=4.0, left=5.0, bottom=6.0, right=7.0"
+        )
+
+    def test_uiedgeinsets_repr(self):
+        """Test NSRange repr and str returns correct value."""
+
+        my_edge_insets = UIEdgeInsets(4, 5, 6, 7)
+        self.assertEqual(repr(my_edge_insets), "<UIEdgeInsets(4.0, 5.0, 6.0, 7.0)>")
+        self.assertEqual(
+            str(my_edge_insets), "top=4.0, left=5.0, bottom=6.0, right=7.0"
+        )
 
     def test_duplicate_class_registration(self):
         """If you define a class name twice in the same runtime, you get an error."""

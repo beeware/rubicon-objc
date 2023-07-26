@@ -1,1 +1,1 @@
-Improved repr and string calls for NSPoint
+The ``__repr__`` and ``__str__`` implementations for ``NSPoint``, ``CGPoint``, ``NSRect``, ``CGRect``, ``NSSize``, ``CGSize``, ``NSRange``, ``CFRange``, ``NSEdgeInsets`` and ``UIEdgeInsets`` have been improved.
