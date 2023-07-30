@@ -309,10 +309,9 @@ class CFSocketHandle(events.Handle):
     def cancel(self):
         """(Potentially) cancel the socket handle.
 
-        A socket handle can have both reader and writer components; a
-        call to cancel a socket handle will only be successfull if
-        *both* the reader and writer component have been disabled. If
-        either is still active, cancel() will be a no-op.
+        A socket handle can have both reader and writer components; a call to cancel a
+        socket handle will only be successful if *both* the reader and writer component
+        have been disabled. If either is still active, cancel() will be a no-op.
         """
         if self._reader is None and self._writer is None and self._src:
             super().cancel()

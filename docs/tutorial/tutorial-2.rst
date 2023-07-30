@@ -101,7 +101,7 @@ Class naming
 In this revised example, you'll note that we also used a different class name
 - ``PureHandler``. This was deliberate, because Objective-C doesn't have any
 concept of namespaces. As a result, you can only define one class of any given
-name in a process - so, you wont be able to define a second ``Handler`` class in
+name in a process - so, you won't be able to define a second ``Handler`` class in
 the same Python shell. If you try, you'll get an error:
 
 .. code-block:: pycon
