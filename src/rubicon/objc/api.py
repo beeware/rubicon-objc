@@ -279,7 +279,7 @@ class ObjCBoundMethod:
     def __init__(self, method, receiver):
         """Initialize with a method and ObjCInstance or ObjCClass object."""
         self.method = method
-        if type(receiver) == Class:
+        if type(receiver) is Class:
             self.receiver = cast(receiver, objc_id)
         else:
             self.receiver = receiver
