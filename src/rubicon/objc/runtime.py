@@ -673,7 +673,7 @@ def should_use_stret(restype):
     """Return whether a method returning the given type must be called using
     ``objc_msgSend_stret`` on the current system."""
 
-    if type(restype) != type(Structure):
+    if type(restype) is not type(Structure):
         # Not needed when restype is not a structure.
         return False
     elif __i386__:
@@ -955,7 +955,7 @@ def send_super(
 
     if isinstance(receiver, objc_id):
         pass
-    elif type(receiver) == c_void_p:
+    elif type(receiver) is c_void_p:
         receiver = cast(receiver, objc_id)
     else:
         raise TypeError(
