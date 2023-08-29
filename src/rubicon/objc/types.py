@@ -254,10 +254,12 @@ def _create_structish_type_for_encoding(encoding, *, base):
         # Anonymous structish, has no name.
         name = None
 
-    # Create the subclass. The _fields_ are not set yet, this is done later.
-    # The structish is already registered here, so that pointers to this structish type in itself are typed correctly.
+    # Create the subclass. The _fields_ are not set yet, this is done later. The
+    # structish is already registered here, so that pointers to this structish type in
+    # itself are typed correctly. Also annotate the structure with an `__anonymous__`
+    # marker so that we can easily identify anonymous structures.
     py_name = "_Anonymous" if name is None else name.decode("utf-8")
-    structish_type = type(py_name, (base,), {})
+    structish_type = type(py_name, (base,), {"__anonymous__": True})
     # Register the structish for its own encoding, so the same type is used in the future.
     register_encoding(encoding, structish_type)
     if name is not None:
