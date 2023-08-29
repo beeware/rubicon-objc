@@ -1,0 +1,1 @@
+``objc_id`` and ``objc_block`` are now exposed as part of the ``rubicon.objc`` namespace, rather than requiring an import from ``rubicon.objc.runtime``.

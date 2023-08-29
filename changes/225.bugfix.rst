@@ -1,0 +1,1 @@
+References to blocks obtained from an Objective C API can now be invoked on M1 hardware.
