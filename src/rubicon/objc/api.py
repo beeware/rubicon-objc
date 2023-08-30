@@ -2169,11 +2169,11 @@ class ObjCBlock:
             # first required argument - the block itself.
             block_arg = [objc_id]
 
-        # Setting the restype and argtypes on the invoke function that is in the
-        # ObjCBlockStruct won't stick, because it's not a distinct Python object that
-        # ctypes can use to attach a type hint. Store the ctypes annotations, and apply
-        # them just before invocation. We're going to have to do some light type
-        # conversion in some cases anyway, so this works out well.
+        # If you set restype and argtypes on the invoke function that is in the
+        # ObjCBlockStruct, subsequent gets won't reflect those changes, because it's not
+        # a distinct Python object that ctypes can use to attach a type hint. Store the
+        # ctypes annotations, and apply them just before invocation. We're going to have
+        # to do some light type conversion in some cases anyway, so this works out well.
         self.invoke_restype = ctype_for_type(restype)
         self.invoke_argtypes = block_arg + [
             ctype_for_type(arg_type) for arg_type in argtypes
@@ -2201,13 +2201,21 @@ class ObjCBlock:
         # of type names, so even if the field types of a structure provided as an
         # argument match, ctypes will raise a TypeError.
         #
-        # To avoid this, look for the `__anonymous__` property on the structure
-        # definition. If it exists, check that the provided argument matches the "shape"
-        # of the anonymous structure. If it matches, modify the invoke signature to
-        # match the type of the argument that was actually provided. The first argument
-        # to invoke is the block being invoked, so we can ignore that type hint.
+        # To avoid this, if an argument is a structure, and the argtype for that
+        # argument is a structure, look for the `__anonymous__` property on the argtype
+        # structure definition - this property is added automatically to structures when
+        # a structure type is constructed from a type descriptor that doesn't provide a
+        # name. If it exists, the structure has been anonymously declared; so we check
+        # that the provided argument matches the "shape" of the anonymous structure. If
+        # it matches, modify the invoke signature to match the type of the argument that
+        # was actually provided. The first argument to invoke is the block being
+        # invoked, so we can ignore that type hint.
         for i, argtype in enumerate(self.invoke_argtypes[1:]):
-            if getattr(argtype, "__anonymous__", False):
+            if (
+                isinstance(args[i], Structure)
+                and issubclass(argtype, Structure)
+                and getattr(argtype, "__anonymous__", False)
+            ):
                 anon_fields = [f[1] for f in argtype._fields_]
                 arg_fields = [f[1] for f in args[i]._fields_]
                 if anon_fields != arg_fields:
