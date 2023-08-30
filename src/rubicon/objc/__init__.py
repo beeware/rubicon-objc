@@ -54,7 +54,7 @@ from .api import (
     objc_rawmethod,
     py_from_ns,
 )
-from .runtime import SEL, send_message, send_super
+from .runtime import SEL, objc_block, objc_id, send_message, send_super
 from .types import (
     CFIndex,
     CFRange,
@@ -133,8 +133,10 @@ __all__ = [
     ObjCProtocol,
     at,
     ns_from_py,
+    objc_block,
     objc_classmethod,
     objc_const,
+    objc_id,
     objc_ivar,
     objc_method,
     objc_property,

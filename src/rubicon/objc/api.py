@@ -2161,10 +2161,23 @@ class ObjCBlock:
             if not self.has_signature:
                 raise ValueError("Cannot use AUTO types for blocks without signatures")
             restype, *argtypes = ctypes_for_method_encoding(self.signature)
-        self.struct.contents.invoke.restype = ctype_for_type(restype)
-        self.struct.contents.invoke.argtypes = (objc_id,) + tuple(
+            # If the argtypes have been derived from the signature, they will include
+            # the block as the first argument.
+            block_arg = []
+        else:
+            # If the argtypes are explicitly provided, they *won't* include the
+            # first required argument - the block itself.
+            block_arg = [objc_id]
+
+        # If you set restype and argtypes on the invoke function that is in the
+        # ObjCBlockStruct, subsequent gets won't reflect those changes, because it's not
+        # a distinct Python object that ctypes can use to attach a type hint. Store the
+        # ctypes annotations, and apply them just before invocation. We're going to have
+        # to do some light type conversion in some cases anyway, so this works out well.
+        self.invoke_restype = ctype_for_type(restype)
+        self.invoke_argtypes = block_arg + [
             ctype_for_type(arg_type) for arg_type in argtypes
-        )
+        ]
 
     def __repr__(self):
         representation = f"<ObjCBlock@{hex(addressof(self.pointer))}"
@@ -2182,7 +2195,43 @@ class ObjCBlock:
         objects according to the default ``ctypes`` rules, based on the
         block's return and parameter types.
         """
-        return self.struct.contents.invoke(self.pointer, *args)
+        # If any of the arguments are structures, they may be anonymous - that is, we
+        # have a descriptor like "{=ii}", which tells us there are two integer fields,
+        # but doesn't provide a name for the structure. ctypes looks for an exact match
+        # of type names, so even if the field types of a structure provided as an
+        # argument match, ctypes will raise a TypeError.
+        #
+        # To avoid this, if an argument is a structure, and the argtype for that
+        # argument is a structure, look for the `__anonymous__` property on the argtype
+        # structure definition - this property is added automatically to structures when
+        # a structure type is constructed from a type descriptor that doesn't provide a
+        # name. If it exists, the structure has been anonymously declared; so we check
+        # that the provided argument matches the "shape" of the anonymous structure. If
+        # it matches, modify the invoke signature to match the type of the argument that
+        # was actually provided. The first argument to invoke is the block being
+        # invoked, so we can ignore that type hint.
+        for i, argtype in enumerate(self.invoke_argtypes[1:]):
+            if (
+                isinstance(args[i], Structure)
+                and issubclass(argtype, Structure)
+                and getattr(argtype, "__anonymous__", False)
+            ):
+                anon_fields = [f[1] for f in argtype._fields_]
+                arg_fields = [f[1] for f in args[i]._fields_]
+                if anon_fields != arg_fields:
+                    raise TypeError(
+                        f"Expected structure with field types {anon_fields} "
+                        f"for argument {i+1}; got {type(args[i]).__name__} "
+                        f"with field types {arg_fields}"
+                    )
+                self.invoke_argtypes[i + 1] = type(args[i])
+
+        # Apply the ctypes hints to the invoke function for the block.
+        invoke = self.struct.contents.invoke
+        invoke.restype = self.invoke_restype
+        invoke.argtypes = self.invoke_argtypes
+
+        return invoke(self.pointer, *args)
 
 
 class ObjCBlockInstance(ObjCInstance):
@@ -2274,8 +2323,7 @@ class Block:
         signature = tuple(ctype_for_type(tp) for tp in argtypes)
 
         restype = ctype_for_type(restype)
-
-        self.cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
+        cfunc_type = CFUNCTYPE(restype, c_void_p, *signature)
 
         self.literal = BlockLiteral()
         self.literal.isa = addressof(_NSConcreteStackBlock)
@@ -2285,8 +2333,9 @@ class Block:
             | BlockConsts.HAS_COPY_DISPOSE
         )
         self.literal.reserved = 0
-        self.cfunc_wrapper = self.cfunc_type(self.wrapper)
-        self.literal.invoke = cast(self.cfunc_wrapper, c_void_p)
+        cfunc_wrapper = cfunc_type(self.wrapper)
+        self.literal.invoke = cast(cfunc_wrapper, c_void_p)
+
         self.descriptor = BlockDescriptor()
         self.descriptor.reserved = 0
         self.descriptor.size = sizeof(BlockLiteral)
@@ -2305,7 +2354,10 @@ class Block:
         self.block = cast(byref(self.literal), objc_block)
         self._as_parameter_ = self.block
 
-    def wrapper(self, instance, *args):
+    def wrapper(self, block, *args):
+        # ObjC blocks take the block as the first argument when they're invoked;
+        # but since this is a wrapper around a Python object, we know the function
+        # that has to be invoked.
         return self.func(*args)
 
     def dispose_helper(self, dst):
