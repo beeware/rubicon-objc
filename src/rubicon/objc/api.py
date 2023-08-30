@@ -2207,7 +2207,7 @@ class ObjCBlock:
         # match the type of the argument that was actually provided. The first argument
         # to invoke is the block being invoked, so we can ignore that type hint.
         for i, argtype in enumerate(self.invoke_argtypes[1:]):
-            if hasattr(argtype, "__anonymous__"):
+            if getattr(argtype, "__anonymous__", False):
                 anon_fields = [f[1] for f in argtype._fields_]
                 arg_fields = [f[1] for f in args[i]._fields_]
                 if anon_fields != arg_fields:

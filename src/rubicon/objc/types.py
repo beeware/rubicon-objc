@@ -259,7 +259,7 @@ def _create_structish_type_for_encoding(encoding, *, base):
     # itself are typed correctly. Also annotate the structure with an `__anonymous__`
     # marker so that we can easily identify anonymous structures.
     py_name = "_Anonymous" if name is None else name.decode("utf-8")
-    structish_type = type(py_name, (base,), {"__anonymous__": True})
+    structish_type = type(py_name, (base,), {"__anonymous__": name is None})
     # Register the structish for its own encoding, so the same type is used in the future.
     register_encoding(encoding, structish_type)
     if name is not None:
