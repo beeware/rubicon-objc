@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import unittest
-from ctypes import Structure, c_int, c_void_p
+from ctypes import Structure, c_float, c_int, c_void_p
 
 from rubicon.objc import NSObject, ObjCBlock, ObjCClass, objc_method
 from rubicon.objc.api import Block
@@ -92,6 +92,32 @@ class BlockTests(unittest.TestCase):
         instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
         result = instance.structBlockExample()
         self.assertEqual(result, 85)
+
+    def test_block_delegate_auto_struct_mismatch(self):
+        class BadBlockStruct(Structure):
+            _fields_ = [
+                ("a", c_float),
+                ("b", c_int),
+            ]
+
+        class BadDelegateAutoStruct(NSObject):
+            @objc_method
+            def structBlockMethod_(self, block: objc_block) -> int:
+                try:
+                    # block accepts an anonymous structure with 2 int arguments
+                    # Passing in BadBlockStruct should raise a type error because
+                    # the structure's shape doesn't match.
+                    return block(BadBlockStruct(2.71828, 43))
+                except TypeError:
+                    # Ideally, this would be raised as an ObjC error;
+                    # however, at least for now, that doesn't happen.
+                    return -99
+
+        BlockObjectExample = ObjCClass("BlockObjectExample")
+        delegate = BadDelegateAutoStruct.alloc().init()
+        instance = BlockObjectExample.alloc().initWithDelegate_(delegate)
+        result = instance.structBlockExample()
+        self.assertEqual(result, -99)
 
     def test_block_receiver(self):
         BlockReceiverExample = ObjCClass("BlockReceiverExample")
