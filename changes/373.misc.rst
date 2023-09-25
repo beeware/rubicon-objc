@@ -1,0 +1,1 @@
+macOS 13 (Ventura) was added to the CI pool.
