@@ -1,14 +1,16 @@
 """This module provides a workaround to allow callback functions to return
 composite types (most importantly structs).
 
-Currently, ctypes callback functions (created by passing a Python callable to a CFUNCTYPE object) are only able to
-return what ctypes considers a "simple" type. This includes void (None), scalars (c_int, c_float, etc.), c_void_p,
-c_char_p, c_wchar_p, and py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is
-not possible. This issue has been reported on the Python bug tracker as bpo-5710 (https://bugs.python.org/issue5710).
+Currently, ctypes callback functions (created by passing a Python callable to a
+CFUNCTYPE object) are only able to return what ctypes considers a "simple" type. This
+includes void (None), scalars (c_int, c_float, etc.), c_void_p, c_char_p, c_wchar_p, and
+py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is
+not possible. This issue has been reported on the Python bug tracker
+(https://github.com/python/cpython/issues/49960).
 
-For pointers, the easiest workaround is to return a c_void_p instead of the correctly typed pointer, and to cast
-the value on both sides. For structs and unions there is no easy workaround, which is why this somewhat hacky
-workaround is necessary.
+For pointers, the easiest workaround is to return a c_void_p instead of the correctly
+typed pointer, and to cast the value on both sides. For structs and unions there is no
+easy workaround, which is why this somewhat hacky workaround is necessary.
 """
 
 import ctypes
@@ -105,9 +107,9 @@ ffi_type._fields_ = [
 
 # The GETFUNC and SETFUNC typedefs from "Modules/_ctypes/ctypes.h".
 GETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.c_ssize_t)
-# The return type of SETFUNC is declared here as a c_void_p instead of py_object
-# to work around ctypes bug bpo-36880 (https://bugs.python.org/issue36880). See
-# the comment in make_callback_returnable's setfunc for details.
+# The return type of SETFUNC is declared here as a c_void_p instead of py_object to work
+# around a ctypes bug (https://github.com/python/cpython/issues/81061). See the comment
+# in make_callback_returnable's setfunc for details.
 SETFUNC = ctypes.PYFUNCTYPE(
     ctypes.c_void_p, ctypes.c_void_p, ctypes.py_object, ctypes.c_ssize_t
 )
@@ -227,13 +229,13 @@ def make_callback_returnable(ctype):
             )
 
         ctypes.memmove(ptr, ctypes.addressof(value), actual_size)
-        # Because of ctypes bug bpo-36880 (https://bugs.python.org/issue36880),
-        # returning None from a callback with restype py_object causes a
-        # reference counting error that can crash Python. To work around this
-        # bug, the restype of SETFUNC is declared as c_void_p instead. This way
-        # ctypes performs no automatic reference counting for the returned
-        # object, which avoids the bug. However, this way we have to manually
-        # convert the Python object to a pointer and adjust its reference count.
+        # Because of a ctypes bug (https://github.com/python/cpython/issues/81061),
+        # returning None from a callback with restype py_object causes a reference
+        # counting error that can crash Python. To work around this bug, the restype of
+        # SETFUNC is declared as c_void_p instead. This way ctypes performs no automatic
+        # reference counting for the returned object, which avoids the bug. However,
+        # this way we have to manually convert the Python object to a pointer and adjust
+        # its reference count.
         none_ptr = ctypes.cast(id(None), ctypes.POINTER(PyObject))
         # The return value of a SETFUNC is expected to have an extra reference
         # (which will be owned by the caller of the SETFUNC).
