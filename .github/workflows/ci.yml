@@ -40,6 +40,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
+      fail-fast: false
       matrix:
         platform: [
           # X86-64 runners
