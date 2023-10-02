@@ -41,11 +41,16 @@ jobs:
     continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        platform: [ "macOS-11", "macOS-12", "macOS-13" ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12-dev" ]
+        platform: [
+          # X86-64 runners
+          "macos-11", "macos-12", "macos-13",
+          # M1 runners
+          "macos-13-xlarge"
+        ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
         include:
           - experimental: false
-          - python-version: "3.12-dev"
+          - python-version: "3.13-dev"
             experimental: true
     steps:
     - name: Checkout
