@@ -2,6 +2,12 @@
 requires = ["setuptools>=60", "setuptools_scm[toml]>=7.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.codespell]
+skip = ".git,*.pdf,*.svg"
+# the way to make case sensitive skips of words etc
+ignore-regex = "\bNd\b"
+ignore-words-list = "re-use"
+
 [tool.isort]
 profile = "black"
 split_on_trailing_comma = true
