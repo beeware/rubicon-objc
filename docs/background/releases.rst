@@ -3,6 +3,42 @@ Release History
 
 .. towncrier release notes start
 
+0.4.7 (2023-10-19)
+==================
+
+Features
+--------
+
+* The ``__repr__`` and ``__str__`` implementations for ``NSPoint``, ``CGPoint``, ``NSRect``, ``CGRect``, ``NSSize``, ``CGSize``, ``NSRange``, ``CFRange``, ``NSEdgeInsets`` and ``UIEdgeInsets`` have been improved. (`#222 <https://github.com/beeware/rubicon-objc/pulls/222>`_)
+* ``objc_id`` and ``objc_block`` are now exposed as part of the ``rubicon.objc`` namespace, rather than requiring an import from ``rubicon.objc.runtime``. (`#357 <https://github.com/beeware/rubicon-objc/pulls/357>`_)
+
+
+Bugfixes
+--------
+
+* References to blocks obtained from an Objective C API can now be invoked on M1 hardware. (`#225 <https://github.com/beeware/rubicon-objc/issues/225>`_)
+* Rubicon is now compatible with PEP563 deferred annotations (``from __future__ import annotations``). (`#308 <https://github.com/beeware/rubicon-objc/issues/308>`_)
+* iOS now uses a full ``NSRunLoop``, rather than a ``CFRunLoop``. (`#317 <https://github.com/beeware/rubicon-objc/issues/317>`_)
+
+
+Backward Incompatible Changes
+-----------------------------
+
+* Support for Python 3.7 was dropped. (`#334 <https://github.com/beeware/rubicon-objc/pulls/334>`_)
+
+
+Documentation
+-------------
+
+* All code blocks were updated to add a button to copy the relevant contents on to the user's clipboard. (`#300 <https://github.com/beeware/rubicon-objc/pull/300>`_)
+
+
+Misc
+----
+
+* #295, #296, #297, #298, #299, #301, #302, #303, #305, #306, #307, #310, #311, #312, #314, #315, #319, #320, #321, #326, #327, #328, #329, #330, #331, #332, #335, #336, #337, #338, #341, #342, #343, #344, #345, #346, #348, #349, #350, #351, #353, #354, #355, #356, #358, #359, #360, #361, #362, #363, #364, #365, #366, #367, #368, #369, #370, #371, #372, #373, #375, #376, #377, #378, #379, #380
+
+
 0.4.6 (2023-04-14)
 ==================
 
