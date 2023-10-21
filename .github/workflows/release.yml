@@ -9,6 +9,14 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
+  docs:
+    name: Verify Docs Build
+    uses: beeware/.github/.github/workflows/docs-build-verify.yml@main
+    secrets: inherit
+    with:
+      project-name: "rubicon-objc"
+      project-version: ${{ github.ref_name }}
+
   release:
     name: Create Release
     needs: ci
