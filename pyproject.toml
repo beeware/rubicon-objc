@@ -11,7 +11,7 @@ name = "rubicon-objc"
 description = "A bridge between an Objective C runtime environment and Python."
 readme = "README.rst"
 requires-python = ">= 3.8"
-license.file = "LICENSE"
+license.text = "New BSD"
 authors = [
     {name="Russell Keith-Magee", email="russell@keith-magee.com"},
 ]
@@ -39,7 +39,7 @@ classifiers = [
 ]
 
 [project.urls]
-Project = "https://beeware.org/rubicon"
+Homepage = "https://beeware.org/rubicon"
 Funding = "https://beeware.org/contributing/membership/"
 Documentation = "https://rubicon-objc.readthedocs.io/en/latest/"
 Tracker = "https://github.com/beeware/rubicon-objc/issues"
