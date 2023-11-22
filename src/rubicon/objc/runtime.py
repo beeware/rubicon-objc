@@ -666,8 +666,8 @@ def get_class(name):
     return libobjc.objc_getClass(ensure_bytes(name))
 
 
-# http://www.sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
-# http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
+# https://www.sealiesoftware.com/blog/archive/2008/10/30/objc_explain_objc_msgSend_stret.html
+# https://web.archive.org/web/20160810184034/http://www.x86-64.org/documentation/abi-0.99.pdf  (pp.17-23)
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
     """Return whether a method returning the given type must be called using
@@ -693,7 +693,7 @@ def should_use_stret(restype):
         return False
 
 
-# http://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
+# https://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
     """Return whether a method returning the given type must be called using
     ``objc_msgSend_fpret`` on the current system."""
@@ -859,7 +859,7 @@ class objc_super(Structure):
     ]
 
 
-# http://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
+# https://stackoverflow.com/questions/3095360/what-exactly-is-super-in-objective-c
 def send_super(
     cls,
     receiver,
