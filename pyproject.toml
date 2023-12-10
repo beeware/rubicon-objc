@@ -47,7 +47,9 @@ Source = "https://github.com/beeware/rubicon-objc"
 
 [project.optional-dependencies]
 dev = [
-    "pre-commit == 3.6.0",
+    # Pre-commit 3.6.0 deprecated support for Python 3.8
+    "pre-commit == 3.5.0 ; python_version < '3.9'",
+    "pre-commit == 3.6.0 ; python_version >= '3.9'",
     "pytest == 7.4.3",
     "pytest-tldr == 0.2.5",
     "setuptools_scm == 8.0.4",
