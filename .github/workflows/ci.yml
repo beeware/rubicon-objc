@@ -30,7 +30,8 @@ jobs:
 
   package:
     name: Python Package
-    uses: beeware/.github/.github/workflows/python-package-create.yml@main
+#    uses: beeware/.github/.github/workflows/python-package-create.yml@main
+    uses: rmartin16/.github-beeware/.github/workflows/python-package-create.yml@artifacts
     with:
       runner-os: "macos-latest"
 
