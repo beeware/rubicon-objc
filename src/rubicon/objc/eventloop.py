@@ -267,7 +267,7 @@ class CFSocketHandle(events.Handle):
         libcf.CFSocketSetSocketFlags(
             self._cf_socket,
             kCFSocketAutomaticallyReenableReadCallBack
-            | kCFSocketAutomaticallyReenableWriteCallBack
+            | kCFSocketAutomaticallyReenableWriteCallBack,
             # # This extra flag is to ensure that CF doesn't (destructively,
             # # because destructively is the only way to do it) retrieve
             # # SO_ERROR
