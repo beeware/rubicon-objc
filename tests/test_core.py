@@ -404,9 +404,11 @@ class RubiconTest(unittest.TestCase):
             + (
                 r"TypeError: 'float' object cannot be interpreted as an integer; argtypes: c_int"
                 if sys.version_info >= (3, 12)
-                else r"TypeError: wrong type; argtypes: c_int"
-                if sys.version_info >= (3, 10)
-                else r"<class 'TypeError'>: wrong type; argtypes: c_int"
+                else (
+                    r"TypeError: wrong type; argtypes: c_int"
+                    if sys.version_info >= (3, 10)
+                    else r"<class 'TypeError'>: wrong type; argtypes: c_int"
+                )
             ),
         ):
             obj.mutateIntFieldWithValue_(1.234)

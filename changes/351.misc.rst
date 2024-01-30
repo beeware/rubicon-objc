@@ -1,1 +1,0 @@
-A separate Sphinx pin was added for Python 3.8, because Sphinx 7.2 deprecated support for Python 3.8.
