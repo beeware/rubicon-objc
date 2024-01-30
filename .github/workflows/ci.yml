@@ -53,6 +53,15 @@ jobs:
           - experimental: false
           - python-version: "3.13-dev"
             experimental: true
+
+        exclude:
+          # actions/setup-python doesn't provide Python3.8 or 3.9 for M1.
+          - platform: "macos-14"
+            python-version : "3.8"
+
+          - platform: "macos-14"
+            python-version : "3.9"
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
