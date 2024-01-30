@@ -46,7 +46,7 @@ jobs:
           # X86-64 runners
           "macos-11", "macos-12", "macos-13",
           # M1 runners
-          "macos-13-xlarge"
+          "macos-14"
         ]
         python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
         include:
