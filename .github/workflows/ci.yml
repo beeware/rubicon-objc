@@ -40,13 +40,28 @@ jobs:
     runs-on: ${{ matrix.platform }}
     continue-on-error: ${{ matrix.experimental }}
     strategy:
+      fail-fast: false
       matrix:
-        platform: [ "macOS-11", "macOS-12", "macOS-13" ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12-dev" ]
+        platform: [
+          # X86-64 runners
+          "macos-11", "macos-12", "macos-13",
+          # M1 runners
+          "macos-14"
+        ]
+        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
         include:
           - experimental: false
-          - python-version: "3.12-dev"
+          - python-version: "3.13-dev"
             experimental: true
+
+        exclude:
+          # actions/setup-python doesn't provide Python3.8 or 3.9 for M1.
+          - platform: "macos-14"
+            python-version : "3.8"
+
+          - platform: "macos-14"
+            python-version : "3.9"
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
