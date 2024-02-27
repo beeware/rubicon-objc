@@ -1206,6 +1206,10 @@ class ObjCClass(ObjCInstance, type):
         protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
+    auto_rename = False
+    """A :class:`bool` value whether a defined class should be renamed automatically
+    if a class with the same name is already exists."""
+
     @classmethod
     def _new_from_name(cls, name):
         name = ensure_bytes(name)
@@ -1229,11 +1233,20 @@ class ObjCClass(ObjCInstance, type):
         return ptr, name
 
     @classmethod
-    def _new_from_class_statement(cls, name, bases, attrs, *, protocols):
+    def _new_from_class_statement(cls, name, bases, attrs, *, protocols, auto_rename):
+        basename = name
         name = ensure_bytes(name)
 
         if get_class(name).value is not None:
-            raise RuntimeError(f"An Objective-C class named {name!r} already exists")
+            if auto_rename or auto_rename is None and cls.auto_rename:
+                suffix = 1
+                while get_class(name).value is not None:
+                    suffix += 1
+                    name = f"{basename}_{suffix}".encode()
+            else:
+                raise RuntimeError(
+                    f"An Objective-C class named {name!r} already exists"
+                )
 
         try:
             (superclass,) = bases
@@ -1316,7 +1329,9 @@ class ObjCClass(ObjCInstance, type):
 
         return ptr, name, attrs
 
-    def __new__(cls, name_or_ptr, bases=None, attrs=None, *, protocols=()):
+    def __new__(
+        cls, name_or_ptr, bases=None, attrs=None, *, protocols=(), auto_rename=None
+    ):
         """The constructor accepts either the name of an Objective-C class to
         look up (as :class:`str` or :class:`bytes`), or a pointer to an existing
         class object (in any form accepted by :class:`ObjCInstance`).
@@ -1335,7 +1350,11 @@ class ObjCClass(ObjCInstance, type):
         The bases list must contain exactly one :class:`ObjCClass` to be
         extended by the new class. An optional ``protocols`` keyword argument is
         also accepted, which must be a sequence of :class:`ObjCProtocol`\\s for
-        the new class to adopt.
+        the new class to adopt. In addition, another optional keyword argument
+        `auto_rename` determines whether to rename the defined class if a class
+        with the same name has already been defined. (For example, ``MyClass``
+        is renamed to ``MyClass_2``.) If its value is ``None``,
+        :attr:`ObjCClass.auto_rename` is preferred.
         """
 
         if (bases is None) ^ (attrs is None):
@@ -1362,7 +1381,7 @@ class ObjCClass(ObjCInstance, type):
                     return ObjCMetaClass(ptr)
         else:
             ptr, name, attrs = cls._new_from_class_statement(
-                name_or_ptr, bases, attrs, protocols=protocols
+                name_or_ptr, bases, attrs, protocols=protocols, auto_rename=auto_rename
             )
 
         objc_class_name = name.decode("utf-8")
@@ -1852,7 +1871,11 @@ class ObjCProtocol(ObjCInstance):
         protocols_ptr = libobjc.protocol_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
-    def __new__(cls, name_or_ptr, bases=None, ns=None):
+    auto_rename = False
+    """A :class:`bool` value whether a defined protocol should be renamed
+    automatically if a protocol with the same name is already exists."""
+
+    def __new__(cls, name_or_ptr, bases=None, ns=None, auto_rename=None):
         """The constructor accepts either the name of an Objective-C protocol
         to look up (as :class:`str` or :class:`bytes`), or a pointer to an
         existing protocol object (in any form accepted by
@@ -1869,7 +1892,11 @@ class ObjCProtocol(ObjCInstance):
         Objective-C protocol from Python (see
         :ref:`custom-classes-and-protocols`). The bases list can contain any
         number of :class:`ObjCProtocol` objects to be extended by the new
-        protocol.
+        protocol. Also, an optional keyword argument `auto_rename` determines
+        whether to rename the defined protocol if a protocol with the same name
+        has already been defined. (For example, ``MyProtocol`` is renamed to
+        ``MyProtocol_2``.) If its value is ``None``,
+        :attr:`ObjCProtocol.auto_rename` is preferred.
         """
 
         if (bases is None) ^ (ns is None):
@@ -1892,12 +1919,20 @@ class ObjCProtocol(ObjCInstance):
                         f"Pointer {ptr} ({ptr.value:#x}) does not refer to a protocol"
                     )
         else:
+            basename = name_or_ptr
             name = ensure_bytes(name_or_ptr)
 
+            # Rename the protocol that will be defined if the auto_rename option is True.
             if libobjc.objc_getProtocol(name).value is not None:
-                raise RuntimeError(
-                    f"An Objective-C protocol named {name!r} already exists"
-                )
+                if auto_rename or auto_rename is None and cls.auto_rename:
+                    suffix = 1
+                    while libobjc.objc_getProtocol(name).value is not None:
+                        suffix += 1
+                        name = f"{basename}_{suffix}".encode()
+                else:
+                    raise RuntimeError(
+                        f"An Objective-C protocol named {name!r} already exists"
+                    )
 
             # Check that all bases are protocols.
             for base in bases:

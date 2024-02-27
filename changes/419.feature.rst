@@ -1,0 +1,1 @@
+Added automatic renaming options to ObjCClass and ObjCProtocol.
