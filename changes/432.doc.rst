@@ -1,0 +1,1 @@
+Fixed `NSURL.debugDescription` example in `tutorial-1.rst` page.
