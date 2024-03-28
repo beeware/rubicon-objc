@@ -115,6 +115,21 @@ the same Python shell. If you try, you'll get an error:
 You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.
 
+To allow defining classes with duplicate names, you need to set a class variable
+:attr:`~rubicon.objc.api.ObjCClass.auto_rename` to ``True``. This option enables
+automatic renaming of duplicate classes.
+
+.. code-block:: pycon
+
+    >>> ObjCClass.auto_rename = True
+
+You can also do this by using the ``auto_rename`` argument.
+
+.. code-block:: pycon
+
+    >>> class Handler(NSObject, auto_rename=True):
+    ...     pass
+
 What, no ``__init__()``?
 ========================
 

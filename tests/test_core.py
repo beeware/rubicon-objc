@@ -1118,6 +1118,40 @@ class RubiconTest(unittest.TestCase):
             class MyClass(NSObject):  # noqa: F811
                 pass
 
+    def test_class_auto_rename(self):
+        """Test automatic renaming system of ObjCClass."""
+
+        ObjCClass.auto_rename = True
+
+        for _ in range(2):
+
+            class TestClass2(NSObject):
+                pass
+
+        ObjCClass.auto_rename = False
+
+        for _ in range(2):
+
+            class TestClass(NSObject, auto_rename=True):
+                pass
+
+    def test_protocol_auto_rename(self):
+        """Test automatic renaming system of ObjCProtocol."""
+
+        ObjCProtocol.auto_rename = True
+
+        for _ in range(2):
+
+            class TestProtocol(metaclass=ObjCProtocol):
+                pass
+
+        ObjCProtocol.auto_rename = False
+
+        for _ in range(2):
+
+            class TestProtocol2(metaclass=ObjCProtocol, auto_rename=True):
+                pass
+
     def test_interface(self):
         """An ObjC protocol implementation can be defined in Python."""
 
