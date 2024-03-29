@@ -98,7 +98,7 @@ property ``description``, or for debugging output, ``debugDescription``:
     'https://beeware.org/contributing/how/first-time/'
 
     >>> longer.debugDescription
-    'https://beeware.org/contributing/how/first-time/>'
+    'https://beeware.org/contributing/how/first-time/'
 
 Internally, ``description`` and ``debugDescription`` are hooked up to their
 Python equivalents, ``__str__()`` and ``__repr__()``, respectively:
