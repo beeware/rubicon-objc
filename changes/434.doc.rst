@@ -1,3 +1,0 @@
-The following points in the documentation (`tutorial-1.rst`) have been fixed:
-* The `absolute` variable, an instance of `NSURL`, has been fixed to be consistent.
-* The `print(NSURL)` example has been fixed to return only URL.
