@@ -1,2 +1,1 @@
-- Fix the error message in the documentation (`tutorial-2.rst`) to the current one.
-- Remove the `.sh` extension from the venv activation path in the documentation (`get-started.rst`).
+Some typos in the documentation were corrected.
