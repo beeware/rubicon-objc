@@ -109,7 +109,7 @@ Python equivalents, ``__str__()`` and ``__repr__()``, respectively:
     'https://beeware.org/contributing/'
 
     >>> repr(absolute)
-    '<rubicon.objc.api.ObjCInstance 0x1114a3cf8: NSURL at 0x7fb2abdd0b20: https://beeware.org/contributing/>'
+    '<ObjCInstance: NSURL at 0x1114a3cf8: https://beeware.org/contributing/>'
 
     >>> print(absolute)
     https://beeware.org/contributing/

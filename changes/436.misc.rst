@@ -1,0 +1,1 @@
+Improved `__repr__` methods of `ObjCBoundMethod`, `ObjCClass`, `ObjCInstance`, `ObjCMethod`, `ObjCPartialMethod`, and `ObjCProtocol`.

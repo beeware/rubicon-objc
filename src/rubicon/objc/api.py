@@ -137,7 +137,7 @@ class ObjCMethod:
         self.method_argtypes = self.imp_argtypes[2:]
 
     def __repr__(self):
-        return f"<ObjCMethod: {self.name} {self.encoding}>"
+        return f"<{type(self).__qualname__}: {self.name} {self.encoding}>"
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method on an object with the given arguments.
@@ -243,7 +243,7 @@ class ObjCPartialMethod:
         self.methods = {}  # Initialized in ObjCClass._load_methods
 
     def __repr__(self):
-        return f"{type(self).__module__}.{type(self).__qualname__}({self.name_start!r})"
+        return f"{type(self).__qualname__}({self.name_start!r})"
 
     def __call__(self, receiver, first_arg=_sentinel, **kwargs):
         if first_arg is ObjCPartialMethod._sentinel:
@@ -285,7 +285,7 @@ class ObjCBoundMethod:
             self.receiver = receiver
 
     def __repr__(self):
-        return f"{type(self).__module__}.{type(self).__qualname__}({self.method}, {self.receiver})"
+        return f"{type(self).__qualname__}({self.method}, {self.receiver})"
 
     def __call__(self, *args, **kwargs):
         """Call the method with the given arguments."""
@@ -995,10 +995,10 @@ class ObjCInstance:
 
     def __repr__(self):
         """Get a debugging representation of ``self``, which includes the
-        Objective-C object's address, class, and ``debugDescription``."""
+        Objective-C object's class and ``debugDescription``."""
         return (
-            f"<{type(self).__module__}.{type(self).__qualname__} {id(self):#x}: "
-            f"{self.objc_class.name} at {self.ptr.value:#x}: {self.debugDescription}>"
+            f"<{type(self).__qualname__}: {self.objc_class.name} at "
+            f"{id(self):#x}: {self.debugDescription}>"
         )
 
     def __getattr__(self, name):
@@ -1557,7 +1557,7 @@ class ObjCClass(ObjCInstance, type):
         self.objc_class.forced_properties.add(name)
 
     def __repr__(self):
-        return f"<{type(self).__module__}.{type(self).__qualname__}: {self.name} at {self.ptr.value:#x}>"
+        return f"<{type(self).__qualname__}: {self.name}>"
 
     def __str__(self):
         return f"{type(self).__name__}({self.name!r})"
@@ -1927,7 +1927,7 @@ class ObjCProtocol(ObjCInstance):
         return super().__new__(cls, ptr)
 
     def __repr__(self):
-        return f"<{type(self).__module__}.{type(self).__qualname__}: {self.name} at {self.ptr.value:#x}>"
+        return f"<{type(self).__qualname__}: {self.name}>"
 
     def __instancecheck__(self, instance):
         """Check whether the given object conforms to this protocol.

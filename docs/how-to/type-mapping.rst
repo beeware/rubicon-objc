@@ -133,11 +133,11 @@ other Objective-C and Python strings.
     # Call an Objective-C method that returns a string.
     # We're using NSBundle to give us a string version of a path
     >>> NSBundle.mainBundle.bundlePath
-    <rubicon.objc.collections.ObjCStrInstance 0x114a94d68: __NSCFString at 0x7fec8ba7fbd0: /Users/brutus/path/to/somewhere>
+    <ObjCStrInstance: __NSCFString at 0x114a94d68: /Users/brutus/path/to/somewhere>
 
     # Slice the Objective-C string
     >>> NSBundle.mainBundle.bundlePath[:14]
-    <rubicon.objc.collections.ObjCStrInstance 0x114aa80f0: __NSCFString at 0x7fec8ba7fbd0: /Users/brutus/>
+    <ObjCStrInstance: __NSCFString at 0x114aa80f0: /Users/brutus/>
 
 .. note::
 
@@ -171,7 +171,7 @@ Conversely, if you have a :class:`str`, and you specifically require a
     >>> py_str = 'hello world'
     # Convert to an Objective-C string
     >>> at(py_str)
-    <rubicon.objc.collections.ObjCStrInstance 0x114a94e48: __NSCFString at 0x7fec8ba7fc10: hello world>
+    <ObjCStrInstance: __NSCFString at 0x114a94e48: hello world>
 
 :class:`~rubicon.objc.api.NSString` also supports all the utility methods that
 are available on :class:`str`, such as ``replace`` and ``split``. When these
@@ -216,7 +216,7 @@ sequence - they can be indexed, sliced, etc. and standard operations like
     >>> array[0]
     0
     >>> array[1:3]
-    <rubicon.objc.collections.ObjCListInstance 0x10b855208: __NSArrayI at 0x7f86f8e61950: <__NSArrayI 0x7f86f8e61950>(
+    <ObjCListInstance: _NSArrayI at 0x10b855208: <__NSArrayI 0x7f86f8e61950>(
     1,
     2
     )
@@ -247,7 +247,7 @@ operations, like item and slice assignment:
     >>> mutarray = NSMutableArray.arrayWithArray(list(range(4)))
     >>> mutarray[0] = 42
     >>> mutarray
-    <rubicon.objc.collections.ObjCMutableListInstance 0x10b8558d0: __NSArrayM at 0x7f86fb04d9f0: <__NSArrayM 0x7f86fb04d9f0>(
+    <ObjCMutableListInstance: __NSArrayM at 0x10b8558d0: <__NSArrayM 0x7f86fb04d9f0>(
     42,
     1,
     2,
@@ -256,7 +256,7 @@ operations, like item and slice assignment:
     >
     >>> mutarray[1:3] = [9, 8, 7]
     >>> mutarray
-    <rubicon.objc.collections.ObjCMutableListInstance 0x10b8558d0: __NSArrayM at 0x7f86fb04d9f0: <__NSArrayM 0x7f86fb04d9f0>(
+    <ObjCMutableListInstance: __NSArrayM at 0x10b8558d0: <__NSArrayM 0x7f86fb04d9f0>(
     42,
     9,
     8,
@@ -318,7 +318,7 @@ mutating operations, like item assignment:
     >>> md = objc.NSMutableDictionary.dictionaryWithDictionary({"one": 1, "two": 2})
     >>> md["three"] = 3
     >>> md
-    <rubicon.objc.collections.ObjCMutableDictInstance 0x10b8a7860: __NSDictionaryM at 0x7f86fb164b60: {
+    <ObjCMutableDictInstance: __NSDictionaryM at 0x10b8a7860: {
         one = 1;
         three = 3;
         two = 2;
@@ -329,13 +329,13 @@ Mapping methods like ``keys`` and ``values`` are also supported:
 .. code-block:: python
 
     >>> d.keys()
-    <rubicon.objc.collections.ObjCListInstance 0x10b898a90: __NSArrayI at 0x7f86f8db6b70: <__NSArrayI 0x7f86f8db6b70>(
+    <ObjCListInstance: __NSArrayI at 0x10b898a90: <__NSArrayI 0x7f86f8db6b70>(
     one,
     two
     )
     >
     >>> d.values()
-    <rubicon.objc.collections.ObjCListInstance 0x10b8a7b38: __NSArrayI at 0x7f86f8c00370: <__NSArrayI 0x7f86f8c00370>(
+    <ObjCListInstance: __NSArrayI at 0x10b8a7b38: <__NSArrayI 0x7f86f8c00370>(
     1,
     2
     )
