@@ -1356,15 +1356,15 @@ class ObjCClass(ObjCInstance, type):
         The bases list must contain exactly one :class:`ObjCClass` to be
         extended by the new class. An optional ``protocols`` keyword argument is
         also accepted, which must be a sequence of :class:`ObjCProtocol`\\s for
-        the new class to adopt. 
-        
+        the new class to adopt.
+
         If the name of the class has already registered with the Objective C
         runtime, the ``auto_rename`` option can be used to ensure that the
         Objective C name for the new class will be unique. A numeric suffix will
         be appended to the Objective C name to ensure uniqueness (for example,
         ``MyClass`` will be renamed to ``MyClass_2``, ``MyClass_3`` etc until a
         unique name is found). By default, classes will *not* be renamed, unless
-        :attr:`ObjCProtocol.auto_rename` is set at the class level.
+        :attr:`ObjCClass.auto_rename` is set at the class level.
         """
 
         if (bases is None) ^ (attrs is None):
@@ -1906,14 +1906,15 @@ class ObjCProtocol(ObjCInstance):
         Objective-C protocol from Python (see
         :ref:`custom-classes-and-protocols`). The bases list can contain any
         number of :class:`ObjCProtocol` objects to be extended by the new
-        protocol. 
-        
-        If the name of the class has already registered with the Objective C
+        protocol.
+
+        If the name of the protocol has already registered with the Objective C
         runtime, the ``auto_rename`` option can be used to ensure that the
-        Objective C name for the new class will be unique. A numeric suffix will
-        be appended to the Objective C name to ensure uniqueness (for example,
-        ``MyClass`` will be renamed to ``MyClass_2``, ``MyClass_3`` etc until a
-        unique name is found). By default, classes will *not* be renamed, unless
+        Objective C name for the new protocol will be unique. A numeric suffix
+        will be appended to the Objective C name to ensure uniqueness (for
+        example, ``MyProtocol`` will be renamed to ``MyProtocol_2``,
+        ``MyProtocol_3`` etc until a unique name is found). By default,
+        protocols will *not* be renamed, unless
         :attr:`ObjCProtocol.auto_rename` is set at the class level.
         """
 
