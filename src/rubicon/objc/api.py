@@ -1330,7 +1330,7 @@ class ObjCClass(ObjCInstance, type):
         return ptr, name, attrs
 
     def __new__(
-        cls, name_or_ptr, bases=None, attrs=None, *, protocols=(), auto_rename=None
+        cls, name_or_ptr, bases=None, attrs=None, *, protocols=(), auto_rename=None,
     ):
         """The constructor accepts either the name of an Objective-C class to
         look up (as :class:`str` or :class:`bytes`), or a pointer to an existing
@@ -1381,7 +1381,7 @@ class ObjCClass(ObjCInstance, type):
                     return ObjCMetaClass(ptr)
         else:
             ptr, name, attrs = cls._new_from_class_statement(
-                name_or_ptr, bases, attrs, protocols=protocols, auto_rename=auto_rename
+                name_or_ptr, bases, attrs, protocols=protocols, auto_rename=auto_rename,
             )
 
         objc_class_name = name.decode("utf-8")
