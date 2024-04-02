@@ -54,6 +54,7 @@ from rubicon.objc import (
     send_super,
     types,
 )
+from rubicon.objc.api import ObjCBoundMethod, ObjCMethod, ObjCPartialMethod
 from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
 from rubicon.objc.types import __LP64__
 
@@ -986,6 +987,32 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
+    def test_objcmethod_objcpartialmethod_objcboundmethod_repr(self):
+        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod repr"""
+
+        obj = NSObject.new()
+        bound_method = obj.init
+        method = bound_method.method
+        receiver = bound_method.receiver
+        partial_method = obj.performSelector.method
+
+        # Check ObjCBoundMethod repr
+        objcboundmethod_repr = repr(obj.init)
+        self.assertIn(ObjCBoundMethod.__qualname__, objcboundmethod_repr)
+        self.assertIn(repr(method), objcboundmethod_repr)
+        self.assertIn(str(receiver), objcboundmethod_repr)
+
+        # Check ObjCMethod repr
+        objcmethod_repr = repr(method)
+        self.assertIn(ObjCMethod.__qualname__, objcmethod_repr)
+        self.assertIn(str(method.name), objcmethod_repr)
+        self.assertIn(str(method.encoding), objcmethod_repr)
+
+        # Check ObjCPartialMethod repr
+        objcpartialmethod_repr = repr(partial_method)
+        self.assertIn(ObjCPartialMethod.__qualname__, objcpartialmethod_repr)
+        self.assertIn(repr(partial_method.name_start), objcpartialmethod_repr)
+
     def test_objcinstance_str_repr(self):
         """An ObjCInstance's str and repr contain the object's description and
         debugDescription, respectively."""
@@ -997,8 +1024,16 @@ class RubiconTest(unittest.TestCase):
             py_description_string,
             debugDescriptionString=py_debug_description_string,
         )
+
+        # Check str
         self.assertEqual(str(tester), py_description_string)
-        self.assertIn(py_debug_description_string, repr(tester))
+
+        # Check repr
+        objcinstance_repr = repr(tester)
+        self.assertIn(ObjCInstance.__qualname__, objcinstance_repr)
+        self.assertIn(DescriptionTester.name, objcinstance_repr)
+        self.assertIn(str(hex(id(tester))), objcinstance_repr)
+        self.assertIn(py_debug_description_string, objcinstance_repr)
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
@@ -1010,6 +1045,17 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertIsNot(str(tester), None)
         self.assertIsNot(repr(tester), None)
+
+    def test_objcclass_repr(self):
+        """Test ObjCClass repr and str return correct value."""
+
+        self.assertEqual(repr(NSObject), "<ObjCClass: NSObject>")
+        self.assertEqual(str(NSObject), "ObjCClass('NSObject')")
+
+    def test_objcprotocol_repr(self):
+        """Test ObjCProtocol repr return correct value."""
+
+        self.assertEqual(repr(NSObjectProtocol), "<ObjCProtocol: NSObject>")
 
     def test_nspoint_repr(self):
         """Test NSPoint repr and str returns correct value."""
