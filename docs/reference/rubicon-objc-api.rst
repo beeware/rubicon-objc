@@ -35,7 +35,7 @@ Objective-C objects
 Objective-C classes
 -------------------
 
-.. autoclass:: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(), [auto_rename=None]]])
+.. autoclass:: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(), auto_rename=None]])
 
     .. attribute:: name
 

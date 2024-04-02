@@ -1207,8 +1207,8 @@ class ObjCClass(ObjCInstance, type):
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
     auto_rename = False
-    """A :class:`bool` value whether a defined class should be renamed automatically
-    if a class with the same name is already exists."""
+    """A :any:`bool` value describing whether a defined class should be renamed automatically
+    if a class with the same name already exists in the Objective C runtime."""
 
     @classmethod
     def _new_from_name(cls, name):

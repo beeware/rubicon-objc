@@ -115,21 +115,24 @@ the same Python shell. If you try, you'll get an error:
 You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.
 
-To allow defining classes with duplicate names, you need to set a class variable
+To allow a class name to be re-used, you can set the class variable
 :attr:`~rubicon.objc.api.ObjCClass.auto_rename` to ``True``. This option enables
-automatic renaming of duplicate classes.
+automatic renaming of the Objective C class if a naming collision is detected:
 
 .. code-block:: pycon
 
     >>> ObjCClass.auto_rename = True
 
-You can also do this by using the ``auto_rename`` argument.
+This option can also be enabled on a per-class basis by using the
+``auto_rename`` argument in the class declaration:
 
 .. code-block:: pycon
 
     >>> class Handler(NSObject, auto_rename=True):
     ...     pass
 
+If this option is used, the Objective C class name will have a numeric suffix
+(e.g., `Handler_2`). The Python class name will be unchanged.
 What, no ``__init__()``?
 ========================
 
