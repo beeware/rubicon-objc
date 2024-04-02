@@ -1356,11 +1356,15 @@ class ObjCClass(ObjCInstance, type):
         The bases list must contain exactly one :class:`ObjCClass` to be
         extended by the new class. An optional ``protocols`` keyword argument is
         also accepted, which must be a sequence of :class:`ObjCProtocol`\\s for
-        the new class to adopt. In addition, another optional keyword argument
-        `auto_rename` determines whether to rename the defined class if a class
-        with the same name has already been defined. (For example, ``MyClass``
-        is renamed to ``MyClass_2``.) If its value is ``None``,
-        :attr:`ObjCClass.auto_rename` is preferred.
+        the new class to adopt. 
+        
+        If the name of the class has already registered with the Objective C
+        runtime, the ``auto_rename`` option can be used to ensure that the
+        Objective C name for the new class will be unique. A numeric suffix will
+        be appended to the Objective C name to ensure uniqueness (for example,
+        ``MyClass`` will be renamed to ``MyClass_2``, ``MyClass_3`` etc until a
+        unique name is found). By default, classes will *not* be renamed, unless
+        :attr:`ObjCProtocol.auto_rename` is set at the class level.
         """
 
         if (bases is None) ^ (attrs is None):
@@ -1902,11 +1906,15 @@ class ObjCProtocol(ObjCInstance):
         Objective-C protocol from Python (see
         :ref:`custom-classes-and-protocols`). The bases list can contain any
         number of :class:`ObjCProtocol` objects to be extended by the new
-        protocol. Also, an optional keyword argument `auto_rename` determines
-        whether to rename the defined protocol if a protocol with the same name
-        has already been defined. (For example, ``MyProtocol`` is renamed to
-        ``MyProtocol_2``.) If its value is ``None``,
-        :attr:`ObjCProtocol.auto_rename` is preferred.
+        protocol. 
+        
+        If the name of the class has already registered with the Objective C
+        runtime, the ``auto_rename`` option can be used to ensure that the
+        Objective C name for the new class will be unique. A numeric suffix will
+        be appended to the Objective C name to ensure uniqueness (for example,
+        ``MyClass`` will be renamed to ``MyClass_2``, ``MyClass_3`` etc until a
+        unique name is found). By default, classes will *not* be renamed, unless
+        :attr:`ObjCProtocol.auto_rename` is set at the class level.
         """
 
         if (bases is None) ^ (ns is None):
