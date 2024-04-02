@@ -1,1 +1,1 @@
-Added automatic renaming options to ObjCClass and ObjCProtocol.
+Name clashes caused by re-registering Objective C classes and protocols can now be automatically avoided by marking the class with `auto_rename`.
