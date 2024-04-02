@@ -110,7 +110,7 @@ the same Python shell. If you try, you'll get an error:
     ...     pass
     Traceback (most recent call last)
     ...
-    RuntimeError: ObjC runtime already contains a registered class named 'Handler'.
+    RuntimeError: An Objective-C class named b'Handler' already exists
 
 You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.

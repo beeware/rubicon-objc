@@ -46,7 +46,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Rubicon"
-copyright = "2014, Russell Keith-Magee"
+copyright = "Russell Keith-Magee"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -111,6 +111,11 @@ nitpick_ignore = [
 # drops the line number anchor from any link checks, but still validates the base URL is
 # valid.
 linkcheck_anchors_ignore = [r"L\d+"]
+
+linkcheck_ignore = [
+    r"^https://github.com/beeware/rubicon-objc/issues/\d+$",
+    r"^https://github.com/beeware/rubicon-objc/pull/\d+$",
+]
 
 # -- Options for copy button ---------------------------------------------------
 
