@@ -1,1 +1,0 @@
-The project was migrated to a PEP621-compatible configuration.

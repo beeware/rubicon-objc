@@ -3,6 +3,33 @@ Release History
 
 .. towncrier release notes start
 
+0.4.8 (2024-04-03)
+==================
+
+Features
+--------
+
+* Name clashes caused by re-registering Objective C classes and protocols can now be automatically avoided by marking the class with ``auto_rename``. (#181)
+* Apple Silicon is now formally tested by Rubicon's continuous integration configuration. (#374)
+* Support for Python 3.13 was added. (#374)
+* The ``__repr__`` output for  ``ObjCBoundMethod``, ``ObjCClass``, ``ObjCInstance``, ``ObjCMethod``, ``ObjCPartialMethod``, and ``ObjCProtocol`` were simplified. (#432)
+
+Bugfixes
+--------
+
+* The ``__all__`` definition for ``rubicon.objc`` was corrected to use strings, rather than symbols. (#401)
+
+Documentation
+-------------
+
+* The documentation contribution guide was updated to use a more authoritative reStructuredText reference. (#427)
+
+Misc
+----
+
+* #381, #382, #383, #384, #385, #386, #387, #388, #389, #390, #391, #392, #393, #395, #396, #397, #398, #399, #400, #402, #403, #404, #405, #407, #408, #409, #410, #411, #412, #413, #414, #415, #416, #417, #418, #420, #421, #422, #423, #424, #425, #426, #429, #430, #431, #433, #434, #435, #437, #438
+
+
 0.4.7 (2023-10-19)
 ==================
 

@@ -1,1 +1,0 @@
-The ``__repr__`` output for  ``ObjCBoundMethod``, ``ObjCClass``, ``ObjCInstance``, ``ObjCMethod``, ``ObjCPartialMethod``, and ``ObjCProtocol`` was simplified.

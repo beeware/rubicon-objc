@@ -1,1 +1,0 @@
-The ``__all__`` definition for ``rubicon.objc`` was corrected to use strings, rather than symbols.
