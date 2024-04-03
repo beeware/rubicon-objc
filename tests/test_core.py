@@ -1300,8 +1300,6 @@ class RubiconTest(unittest.TestCase):
     def test_no_duplicate_protocols(self):
         """An Objective-C class cannot adopt a protocol more than once."""
 
-        ObjCProtocol.auto_rename = False
-
         with self.assertRaises(ValueError):
 
             class DuplicateProtocol(
