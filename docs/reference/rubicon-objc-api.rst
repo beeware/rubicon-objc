@@ -35,7 +35,7 @@ Objective-C objects
 Objective-C classes
 -------------------
 
-.. autoclass:: ObjCClass(name_or_ptr, [bases, attrs, [protocols=()]])
+.. autoclass:: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(), auto_rename=None]])
 
     .. attribute:: name
 
@@ -43,6 +43,7 @@ Objective-C classes
 
     .. autoattribute:: superclass
     .. autoattribute:: protocols
+    .. autoattribute:: auto_rename
     .. automethod:: declare_property
     .. automethod:: declare_class_property
     .. automethod:: __instancecheck__
@@ -320,10 +321,11 @@ not listed here can be looked up by passing a class name to the
 Objective-C protocols
 ---------------------
 
-.. autoclass:: ObjCProtocol(name_or_ptr, [bases, attrs])
+.. autoclass:: ObjCProtocol(name_or_ptr, [bases, attrs, [auto_rename=None]])
 
     .. autoattribute:: name
     .. autoattribute:: protocols
+    .. autoattribute:: auto_rename
     .. automethod:: __instancecheck__
     .. automethod:: __subclasscheck__
 
