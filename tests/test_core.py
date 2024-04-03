@@ -1124,27 +1124,27 @@ class RubiconTest(unittest.TestCase):
         try:
             ObjCClass.auto_rename = True
 
-            class TestRenamedClass(NSObject):
+            class TestGlobalRenamedClass(NSObject):
                 @objc_method
                 def oldMethod(self):
                     pass
 
-            class1 = TestRenamedClass
+            class1 = TestGlobalRenamedClass
 
-            class TestRenamedClass_2(NSObject):
+            class TestGlobalRenamedClass_2(NSObject):
                 pass
 
-            class TestRenamedClass(NSObject):  # noqa: F811
+            class TestGlobalRenamedClass(NSObject):  # noqa: F811
                 @objc_method
                 def testMethod(self):
                     return "TEST1"
 
             # Check that the class was renamed
-            self.assertEqual(TestRenamedClass.name, "TestRenamedClass_3")
-            self.assertIsNot(class1, TestRenamedClass)
+            self.assertEqual(TestGlobalRenamedClass.name, "TestGlobalRenamedClass_3")
+            self.assertIsNot(class1, TestGlobalRenamedClass)
 
             # Check that methods are updated
-            obj = TestRenamedClass.new()
+            obj = TestGlobalRenamedClass.new()
             with self.assertRaises(AttributeError):
                 obj.oldMethod()
             self.assertEqual(obj.testMethod(), "TEST1")
@@ -1155,27 +1155,27 @@ class RubiconTest(unittest.TestCase):
     def test_class_auto_rename_per_class(self):
         """Test the per-class automatic renaming option of ObjCClass."""
 
-        class TestRenamedClass2(NSObject):
+        class TestLocalRenamedClass(NSObject):
             @objc_method
             def oldMethod(self):
                 pass
 
-        class1 = TestRenamedClass2
+        class1 = TestLocalRenamedClass
 
-        class TestRenamedClass2_2(NSObject):
+        class TestLocalRenamedClass_2(NSObject):
             pass
 
-        class TestRenamedClass2(NSObject, auto_rename=True):  # noqa: F811
+        class TestLocalRenamedClass(NSObject, auto_rename=True):  # noqa: F811
             @objc_method
             def testMethod(self):
                 return "TEST2"
 
         # Check that the class was renamed
-        self.assertEqual(TestRenamedClass2.name, "TestRenamedClass2_3")
-        self.assertIsNot(class1, TestRenamedClass2)
+        self.assertEqual(TestLocalRenamedClass.name, "TestLocalRenamedClass_3")
+        self.assertIsNot(class1, TestLocalRenamedClass)
 
         # Check that methods are updated
-        obj = TestRenamedClass2.new()
+        obj = TestLocalRenamedClass.new()
         with self.assertRaises(AttributeError):
             obj.oldMethod()
         self.assertEqual(obj.testMethod(), "TEST2")
@@ -1186,20 +1186,22 @@ class RubiconTest(unittest.TestCase):
         try:
             ObjCProtocol.auto_rename = True
 
-            class TestRenamedProtocol(metaclass=ObjCProtocol):
+            class TestGlobalRenamedProtocol(metaclass=ObjCProtocol):
                 pass
 
-            protocol1 = TestRenamedProtocol
+            protocol1 = TestGlobalRenamedProtocol
 
-            class TestRenamedProtocol_2(metaclass=ObjCProtocol):
+            class TestGlobalRenamedProtocol_2(metaclass=ObjCProtocol):
                 pass
 
-            class TestRenamedProtocol(metaclass=ObjCProtocol):  # noqa: F811
+            class TestGlobalRenamedProtocol(metaclass=ObjCProtocol):  # noqa: F811
                 pass
 
             # Check that the protocol was renamed
-            self.assertEqual(TestRenamedProtocol.name, "TestRenamedProtocol_3")
-            self.assertIsNot(protocol1, TestRenamedProtocol)
+            self.assertEqual(
+                TestGlobalRenamedProtocol.name, "TestGlobalRenamedProtocol_3"
+            )
+            self.assertIsNot(protocol1, TestGlobalRenamedProtocol)
 
         finally:
             ObjCProtocol.auto_rename = False
@@ -1207,23 +1209,23 @@ class RubiconTest(unittest.TestCase):
     def test_protocol_auto_rename_per_class(self):
         """Test the per-protocol automatic renaming option of ObjCProtocol."""
 
-        class TestRenamedProtocol2(metaclass=ObjCProtocol):
+        class TestLocalRenamedProtocol(metaclass=ObjCProtocol):
             pass
 
-        protocol1 = TestRenamedProtocol2
+        protocol1 = TestLocalRenamedProtocol
 
-        class TestRenamedProtocol2_2(metaclass=ObjCProtocol):
+        class TestLocalRenamedProtocol_2(metaclass=ObjCProtocol):
             pass
 
-        class TestRenamedProtocol2(
+        class TestLocalRenamedProtocol(
             metaclass=ObjCProtocol,
             auto_rename=True,
         ):  # noqa: F811
             pass
 
         # Check that the protocol was renamed
-        self.assertEqual(TestRenamedProtocol2.name, "TestRenamedProtocol2_3")
-        self.assertIsNot(protocol1, TestRenamedProtocol2)
+        self.assertEqual(TestLocalRenamedProtocol.name, "TestLocalRenamedProtocol_3")
+        self.assertIsNot(protocol1, TestLocalRenamedProtocol)
 
     def test_interface(self):
         """An ObjC protocol implementation can be defined in Python."""
