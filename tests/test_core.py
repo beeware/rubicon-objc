@@ -987,7 +987,7 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
-    def test_objcmethod_objcpartialmethod_objcboundmethod_repr(self):
+    def test_objcmethod_repr(self):
         """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod repr"""
 
         obj = NSObject.new()
