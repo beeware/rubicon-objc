@@ -60,7 +60,7 @@ jobs:
 
   test-publish:
     name: Publish test package
-    needs: [ci, release]
+    needs: [ci, docs, release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
