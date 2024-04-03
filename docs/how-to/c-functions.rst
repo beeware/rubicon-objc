@@ -267,7 +267,7 @@ Because they are so common, Rubicon provides the convenience function
     >>> from rubicon.objc.runtime import Foundation
     >>> NSMetadataItemFSNameKey = objc_const(Foundation, "NSMetadataItemFSNameKey")
     >>> NSMetadataItemFSNameKey
-    <rubicon.objc.collections.ObjCStrInstance 0x10eecf350: __NSCFConstantString at 0x1072a67e8: kMDItemFSName>
+    <ObjCStrInstance: __NSCFConstantString at 0x10eecf350: kMDItemFSName>
 
 .. note::
 

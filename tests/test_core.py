@@ -986,6 +986,33 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
+    def test_objcmethod_str_repr(self):
+        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
+
+        obj = NSObject.new()
+
+        # ObjCMethod
+        self.assertEqual(repr(obj.init.method), "<ObjCMethod: init @16@0:8>")
+        self.assertEqual(str(obj.init.method), "<ObjCMethod: init @16@0:8>")
+
+        # ObjCBoundMethod
+        self.assertRegex(
+            repr(obj.init),
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+        )
+        self.assertRegex(
+            str(obj.init),
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+        )
+
+        # ObjCPartialMethod
+        self.assertEqual(
+            repr(obj.performSelector.method), "ObjCPartialMethod('performSelector')"
+        )
+        self.assertEqual(
+            str(obj.performSelector.method), "ObjCPartialMethod('performSelector')"
+        )
+
     def test_objcinstance_str_repr(self):
         """An ObjCInstance's str and repr contain the object's description and
         debugDescription, respectively."""
@@ -997,8 +1024,15 @@ class RubiconTest(unittest.TestCase):
             py_description_string,
             debugDescriptionString=py_debug_description_string,
         )
+
+        # Check str
         self.assertEqual(str(tester), py_description_string)
-        self.assertIn(py_debug_description_string, repr(tester))
+
+        # Check repr
+        self.assertEqual(
+            repr(tester),
+            f"<ObjCInstance: DescriptionTester at {hex(id(tester))}: {py_debug_description_string}>",
+        )
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
@@ -1010,6 +1044,17 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertIsNot(str(tester), None)
         self.assertIsNot(repr(tester), None)
+
+    def test_objcclass_repr(self):
+        """Test ObjCClass repr and str return correct value."""
+
+        self.assertEqual(repr(NSObject), "<ObjCClass: NSObject>")
+        self.assertEqual(str(NSObject), "ObjCClass('NSObject')")
+
+    def test_objcprotocol_repr(self):
+        """Test ObjCProtocol repr return correct value."""
+
+        self.assertEqual(repr(NSObjectProtocol), "<ObjCProtocol: NSObject>")
 
     def test_nspoint_repr(self):
         """Test NSPoint repr and str returns correct value."""
