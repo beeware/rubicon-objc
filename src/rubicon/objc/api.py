@@ -137,7 +137,7 @@ class ObjCMethod:
         self.method_argtypes = self.imp_argtypes[2:]
 
     def __repr__(self):
-        return f"<{type(self).__qualname__}: {self.name} {self.encoding}>"
+        return f"<{type(self).__qualname__}: {self.name.decode()} {self.encoding.decode()}>"
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method on an object with the given arguments.

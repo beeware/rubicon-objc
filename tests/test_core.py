@@ -54,7 +54,6 @@ from rubicon.objc import (
     send_super,
     types,
 )
-from rubicon.objc.api import ObjCBoundMethod, ObjCMethod, ObjCPartialMethod
 from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
 from rubicon.objc.types import __LP64__
 
@@ -987,31 +986,32 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
-    def test_objcmethod_repr(self):
-        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod repr"""
+    def test_objcmethod_str_repr(self):
+        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
 
         obj = NSObject.new()
-        bound_method = obj.init
-        method = bound_method.method
-        receiver = bound_method.receiver
-        partial_method = obj.performSelector.method
 
-        # Check ObjCBoundMethod repr
-        objcboundmethod_repr = repr(obj.init)
-        self.assertIn(ObjCBoundMethod.__qualname__, objcboundmethod_repr)
-        self.assertIn(repr(method), objcboundmethod_repr)
-        self.assertIn(str(receiver), objcboundmethod_repr)
+        # ObjCMethod
+        self.assertEqual(repr(obj.init.method), "<ObjCMethod: init @16@0:8>")
+        self.assertEqual(str(obj.init.method), "<ObjCMethod: init @16@0:8>")
 
-        # Check ObjCMethod repr
-        objcmethod_repr = repr(method)
-        self.assertIn(ObjCMethod.__qualname__, objcmethod_repr)
-        self.assertIn(str(method.name), objcmethod_repr)
-        self.assertIn(str(method.encoding), objcmethod_repr)
+        # ObjCBoundMethod
+        self.assertRegex(
+            repr(obj.init),
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+        )
+        self.assertRegex(
+            str(obj.init),
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+        )
 
-        # Check ObjCPartialMethod repr
-        objcpartialmethod_repr = repr(partial_method)
-        self.assertIn(ObjCPartialMethod.__qualname__, objcpartialmethod_repr)
-        self.assertIn(repr(partial_method.name_start), objcpartialmethod_repr)
+        # ObjCPartialMethod
+        self.assertEqual(
+            repr(obj.performSelector.method), "ObjCPartialMethod('performSelector')"
+        )
+        self.assertEqual(
+            str(obj.performSelector.method), "ObjCPartialMethod('performSelector')"
+        )
 
     def test_objcinstance_str_repr(self):
         """An ObjCInstance's str and repr contain the object's description and
@@ -1029,11 +1029,10 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(str(tester), py_description_string)
 
         # Check repr
-        objcinstance_repr = repr(tester)
-        self.assertIn(ObjCInstance.__qualname__, objcinstance_repr)
-        self.assertIn(DescriptionTester.name, objcinstance_repr)
-        self.assertIn(str(hex(id(tester))), objcinstance_repr)
-        self.assertIn(py_debug_description_string, objcinstance_repr)
+        self.assertEqual(
+            repr(tester),
+            f"<ObjCInstance: DescriptionTester at {hex(id(tester))}: {py_debug_description_string}>",
+        )
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
         """An ObjCInstance's str and repr work even if description and
