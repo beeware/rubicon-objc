@@ -1,0 +1,1 @@
+Apple Silicon is now formally tested by Rubicon's continuous integration configuration.
