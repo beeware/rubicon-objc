@@ -89,9 +89,6 @@ SETFUNC = ctypes.PYFUNCTYPE(
 )
 
 
-# The StgDictObject structure from "Modules/_ctypes/ctypes.h". This structure is
-# not officially stable across Python versions, but it didn't change between being
-# introduced in 2009, and being replaced in 2004/Python 3.13.0a6.
 if sys.version_info < (3, 13):
     # The PyTypeObject structure for the dict class.
     # This is used to determine the size of the PyDictObject structure.
@@ -107,6 +104,9 @@ if sys.version_info < (3, 13):
             ("PyDictObject_opaque", (ctypes.c_ubyte * PyDict_Type.tp_basicsize)),
         ]
 
+    # The StgDictObject structure from "Modules/_ctypes/ctypes.h". This structure is
+    # not officially stable across Python versions, but it didn't change between being
+    # introduced in 2009, and being replaced in 2004/Python 3.13.0a6.
     class StgDictObject(ctypes.Structure):
         _fields_ = [
             ("dict", PyDictObject),
@@ -117,7 +117,8 @@ if sys.version_info < (3, 13):
             ("proto", ctypes.py_object),
             ("setfunc", SETFUNC),
             ("getfunc", GETFUNC),
-            # There are a few more fields, but we leave them out again because we don't need them.
+            # There are a few more fields, but we leave them out again because
+            # we don't need them.
         ]
 
     # The mappingproxyobject struct from "Objects/descrobject.c". This structure is
@@ -134,7 +135,8 @@ if sys.version_info < (3, 13):
 
         if not isinstance(proxy, types.MappingProxyType):
             raise TypeError(
-                f"Expected a mapping proxy object, not {type(proxy).__module__}.{type(proxy).__qualname__}"
+                "Expected a mapping proxy object, not "
+                f"{type(proxy).__module__}.{type(proxy).__qualname__}"
             )
 
         return mappingproxyobject.from_address(id(proxy)).mapping
@@ -151,7 +153,8 @@ if sys.version_info < (3, 13):
 
         if not isinstance(tp, type):
             raise TypeError(
-                f"Expected a type object, not {type(tp).__module__}.{type(tp).__qualname__}"
+                "Expected a type object, not "
+                f"{type(tp).__module__}.{type(tp).__qualname__}"
             )
 
         stgdict = tp.__dict__
@@ -165,7 +168,8 @@ if sys.version_info < (3, 13):
         # isinstance. Checking the name is the best we can do here.
         if type(stgdict).__name__ != "StgDict":
             raise TypeError(
-                f"The given type's dict must be a StgDict, not {type(stgdict).__module__}.{type(stgdict).__qualname__}"
+                "The given type's dict must be a StgDict, not "
+                f"{type(stgdict).__module__}.{type(stgdict).__qualname__}"
             )
 
         return StgDictObject.from_address(id(stgdict))
@@ -185,7 +189,8 @@ else:
             ("proto", ctypes.py_object),
             ("setfunc", SETFUNC),
             ("getfunc", GETFUNC),
-            # There are a few more fields, but we leave them out again because we don't need them.
+            # There are a few more fields, but we leave them out again because
+            # we don't need them.
         ]
 
     def get_stginfo_of_type(tp):
@@ -201,9 +206,9 @@ else:
             )
 
         # tp is the Python representation of the type. The StgInfo struct is the
-        # type data for that type; it can be found by starting at the memory address
-        # of the type, and offsetting by the tp_basicsize offset of the base of the
-        # CType_Type class - which is `type`.
+        # type data for that type; it can be found by starting at the memory
+        # address of the type, and offsetting by the tp_basicsize offset of the
+        # base of the CType_Type class - which is `type`.
         py_type_type = PyTypeObject.from_address(id(type))
 
         return StgInfo.from_address(id(tp) + py_type_type.tp_basicsize)
@@ -227,10 +232,8 @@ def make_callback_returnable(ctype):
     if hasattr(ctype, "_rubicon_objc_ctypes_patch_getfunc"):
         return ctype
 
-    # The implementation changed in 3.13.0a6; the inform StgDict was replaced
-    # with StgInfo
+    # The implementation changed in 3.13.0a6; StgDict was replaced with StgInfo
     if sys.version_info < (3, 13):
-        # Extract the StgDict from the ctype.
         stg = get_stgdict_of_type(ctype)
     else:
         stg = get_stginfo_of_type(ctype)
