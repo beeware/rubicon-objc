@@ -106,7 +106,7 @@ if sys.version_info < (3, 13):
 
     # The StgDictObject structure from "Modules/_ctypes/ctypes.h". This structure is
     # not officially stable across Python versions, but it didn't change between being
-    # introduced in 2009, and being replaced in 2004/Python 3.13.0a6.
+    # introduced in 2009, and being replaced in 2024/Python 3.13.0a6.
     class StgDictObject(ctypes.Structure):
         _fields_ = [
             ("dict", PyDictObject),
@@ -193,6 +193,10 @@ else:
             # we don't need them.
         ]
 
+    # void *PyObject_GetTypeData(PyObject *o, PyTypeObject *cls);
+    ctypes.pythonapi.PyObject_GetTypeData.restype = ctypes.c_void_p
+    ctypes.pythonapi.PyObject_GetTypeData.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
     def get_stginfo_of_type(tp):
         """Return the given ctypes type's StgInfo object.
 
@@ -206,12 +210,20 @@ else:
             )
 
         # tp is the Python representation of the type. The StgInfo struct is the
-        # type data for that type; it can be found by starting at the memory
-        # address of the type, and offsetting by the tp_basicsize offset of the
-        # base of the CType_Type class - which is `type`.
-        py_type_type = PyTypeObject.from_address(id(type))
+        # type data stored on ctypes.CType_Type (which is the base class of
+        # ctypes.Structure).
+        info = ctypes.pythonapi.PyObject_GetTypeData(
+            id(tp),
+            id(type(ctypes.Structure).__base__),
+        )
+        result = StgInfo.from_address(info)
+        if not result.initialized:
+            raise TypeError(
+                f"{type(tp).__module__}.{type(tp).__qualname__} has not been "
+                "initialized; it may be an abstract class"
+            )
 
-        return StgInfo.from_address(id(tp) + py_type_type.tp_basicsize)
+        return result
 
 
 ctypes.pythonapi.Py_IncRef.restype = None
