@@ -204,14 +204,19 @@ else:
         ctypes source code. We cannot use that function directly, because it is not
         part of CPython's public C API, and thus not accessible).
         """
-        if not isinstance(tp, type):
+        # Original code:
+        #     if (!PyObject_IsInstance((PyObject *)type, (PyObject *)state->PyCType_Type))
+        if not isinstance(tp, type(ctypes.Structure).__base__):
             raise TypeError(
-                f"Expected a type object, not {type(tp).__module__}.{type(tp).__qualname__}"
+                "Expected a ctypes structure type, "
+                f"not {type(tp).__module__}.{type(tp).__qualname__}"
             )
 
         # tp is the Python representation of the type. The StgInfo struct is the
         # type data stored on ctypes.CType_Type (which is the base class of
         # ctypes.Structure).
+        # Original code:
+        #     StgInfo *info = PyObject_GetTypeData((PyObject *)type, state->PyCType_Type);
         info = ctypes.pythonapi.PyObject_GetTypeData(
             id(tp),
             id(type(ctypes.Structure).__base__),
