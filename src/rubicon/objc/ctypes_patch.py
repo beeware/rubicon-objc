@@ -65,32 +65,6 @@ PyTypeObject._fields_ = [
 ]
 
 
-# The PyTypeObject structure for the dict class.
-# This is used to determine the size of the PyDictObject structure.
-PyDict_Type = PyTypeObject.from_address(id(dict))
-
-
-# The PyDictObject structure from "Include/dictobject.h". This structure is not
-# stable across Python versions, and did indeed change in recent Python
-# releases. Because we only care about the size of the structure and not its
-# actual contents, we can declare it as an opaque byte array, with the length
-# taken from PyDict_Type.
-class PyDictObject(ctypes.Structure):
-    _fields_ = [
-        ("PyDictObject_opaque", (ctypes.c_ubyte * PyDict_Type.tp_basicsize)),
-    ]
-
-
-# The mappingproxyobject struct from "Objects/descrobject.c". This structure is
-# not officially stable across Python versions, but its layout hasn't changed
-# since 2001.
-class mappingproxyobject(ctypes.Structure):
-    _fields_ = [
-        ("ob_base", PyObject),
-        ("mapping", ctypes.py_object),
-    ]
-
-
 # The ffi_type structure from libffi's "include/ffi.h". This is a forward
 # declaration, because the structure contains pointers to itself.
 class ffi_type(ctypes.Structure):
@@ -115,68 +89,150 @@ SETFUNC = ctypes.PYFUNCTYPE(
 )
 
 
-# The StgDictObject structure from "Modules/_ctypes/ctypes.h". This structure is
-# not officially stable across Python versions, but it basically hasn't changed
-# since ctypes was originally added to Python in 2009.
-class StgDictObject(ctypes.Structure):
-    _fields_ = [
-        ("dict", PyDictObject),
-        ("size", ctypes.c_ssize_t),
-        ("align", ctypes.c_ssize_t),
-        ("length", ctypes.c_ssize_t),
-        ("ffi_type_pointer", ffi_type),
-        ("proto", ctypes.py_object),
-        ("setfunc", SETFUNC),
-        ("getfunc", GETFUNC),
-        # There are a few more fields, but we leave them out again because we don't need them.
-    ]
+if sys.version_info < (3, 13):
+    # The PyTypeObject structure for the dict class.
+    # This is used to determine the size of the PyDictObject structure.
+    PyDict_Type = PyTypeObject.from_address(id(dict))
+
+    # The PyDictObject structure from "Include/dictobject.h". This structure is not
+    # stable across Python versions, and did indeed change in recent Python
+    # releases. Because we only care about the size of the structure and not its
+    # actual contents, we can declare it as an opaque byte array, with the length
+    # taken from PyDict_Type.
+    class PyDictObject(ctypes.Structure):
+        _fields_ = [
+            ("PyDictObject_opaque", (ctypes.c_ubyte * PyDict_Type.tp_basicsize)),
+        ]
+
+    # The StgDictObject structure from "Modules/_ctypes/ctypes.h". This structure is
+    # not officially stable across Python versions, but it didn't change between being
+    # introduced in 2009, and being replaced in 2024/Python 3.13.0a6.
+    class StgDictObject(ctypes.Structure):
+        _fields_ = [
+            ("dict", PyDictObject),
+            ("size", ctypes.c_ssize_t),
+            ("align", ctypes.c_ssize_t),
+            ("length", ctypes.c_ssize_t),
+            ("ffi_type_pointer", ffi_type),
+            ("proto", ctypes.py_object),
+            ("setfunc", SETFUNC),
+            ("getfunc", GETFUNC),
+            # There are a few more fields, but we leave them out again because
+            # we don't need them.
+        ]
+
+    # The mappingproxyobject struct from "Objects/descrobject.c". This structure is
+    # not officially stable across Python versions, but its layout hasn't changed
+    # since 2001.
+    class mappingproxyobject(ctypes.Structure):
+        _fields_ = [
+            ("ob_base", PyObject),
+            ("mapping", ctypes.py_object),
+        ]
+
+    def unwrap_mappingproxy(proxy):
+        """Return the mapping contained in a mapping proxy object."""
+
+        if not isinstance(proxy, types.MappingProxyType):
+            raise TypeError(
+                "Expected a mapping proxy object, not "
+                f"{type(proxy).__module__}.{type(proxy).__qualname__}"
+            )
+
+        return mappingproxyobject.from_address(id(proxy)).mapping
+
+    def get_stgdict_of_type(tp):
+        """Return the given ctypes type's StgDict object. If the object's dict is
+        not a StgDict, an error is raised.
+
+        This function is roughly equivalent to the PyType_stgdict function in the
+        ctypes source code. We cannot use that function directly, because it is not
+        part of CPython's public C API, and thus not accessible on some systems (see
+        #113).
+        """
+
+        if not isinstance(tp, type):
+            raise TypeError(
+                "Expected a type object, not "
+                f"{type(tp).__module__}.{type(tp).__qualname__}"
+            )
+
+        stgdict = tp.__dict__
+        if isinstance(stgdict, types.MappingProxyType):
+            # If the type's __dict__ is wrapped in a mapping proxy, we need to
+            # unwrap it. (This appears to always be the case, so the isinstance
+            # check above could perhaps be left out, but it doesn't hurt to check.)
+            stgdict = unwrap_mappingproxy(stgdict)
+
+        # The StgDict type is not publicly exposed anywhere, so we can't use
+        # isinstance. Checking the name is the best we can do here.
+        if type(stgdict).__name__ != "StgDict":
+            raise TypeError(
+                "The given type's dict must be a StgDict, not "
+                f"{type(stgdict).__module__}.{type(stgdict).__qualname__}"
+            )
+
+        return StgDictObject.from_address(id(stgdict))
+
+else:
+    # In Python 3.13.0a6 (https://github.com/python/cpython/issues/114314),
+    # StgDict was replaced with a new StgInfo data type that requires less
+    # metaclass magic.
+
+    class StgInfo(ctypes.Structure):
+        _fields_ = [
+            ("initialized", ctypes.c_int),
+            ("size", ctypes.c_ssize_t),
+            ("align", ctypes.c_ssize_t),
+            ("length", ctypes.c_ssize_t),
+            ("ffi_type_pointer", ffi_type),
+            ("proto", ctypes.py_object),
+            ("setfunc", SETFUNC),
+            ("getfunc", GETFUNC),
+            # There are a few more fields, but we leave them out again because
+            # we don't need them.
+        ]
+
+    # void *PyObject_GetTypeData(PyObject *o, PyTypeObject *cls);
+    ctypes.pythonapi.PyObject_GetTypeData.restype = ctypes.c_void_p
+    ctypes.pythonapi.PyObject_GetTypeData.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+
+    def get_stginfo_of_type(tp):
+        """Return the given ctypes type's StgInfo object.
+
+        This function is roughly equivalent to the PyStgInfo_FromType function in the
+        ctypes source code. We cannot use that function directly, because it is not
+        part of CPython's public C API, and thus not accessible).
+        """
+        # Original code:
+        #     if (!PyObject_IsInstance((PyObject *)type, (PyObject *)state->PyCType_Type))
+        if not isinstance(tp, type(ctypes.Structure).__base__):
+            raise TypeError(
+                "Expected a ctypes structure type, "
+                f"not {type(tp).__module__}.{type(tp).__qualname__}"
+            )
+
+        # tp is the Python representation of the type. The StgInfo struct is the
+        # type data stored on ctypes.CType_Type (which is the base class of
+        # ctypes.Structure).
+        # Original code:
+        #     StgInfo *info = PyObject_GetTypeData((PyObject *)type, state->PyCType_Type);
+        info = ctypes.pythonapi.PyObject_GetTypeData(
+            id(tp),
+            id(type(ctypes.Structure).__base__),
+        )
+        result = StgInfo.from_address(info)
+        if not result.initialized:
+            raise TypeError(
+                f"{type(tp).__module__}.{type(tp).__qualname__} has not been "
+                "initialized; it may be an abstract class"
+            )
+
+        return result
 
 
 ctypes.pythonapi.Py_IncRef.restype = None
 ctypes.pythonapi.Py_IncRef.argtypes = [ctypes.POINTER(PyObject)]
-
-
-def unwrap_mappingproxy(proxy):
-    """Return the mapping contained in a mapping proxy object."""
-
-    if not isinstance(proxy, types.MappingProxyType):
-        raise TypeError(
-            f"Expected a mapping proxy object, not {type(proxy).__module__}.{type(proxy).__qualname__}"
-        )
-
-    return mappingproxyobject.from_address(id(proxy)).mapping
-
-
-def get_stgdict_of_type(tp):
-    """Return the given ctypes type's StgDict object. If the object's dict is
-    not a StgDict, an error is raised.
-
-    This function is roughly equivalent to the PyType_stgdict function in the
-    ctypes source code. We cannot use that function directly, because it is not
-    part of CPython's public C API, and thus not accessible on some systems (see
-    #113).
-    """
-
-    if not isinstance(tp, type):
-        raise TypeError(
-            f"Expected a type object, not {type(tp).__module__}.{type(tp).__qualname__}"
-        )
-
-    stgdict = tp.__dict__
-    if isinstance(stgdict, types.MappingProxyType):
-        # If the type's __dict__ is wrapped in a mapping proxy, we need to
-        # unwrap it. (This appears to always be the case, so the isinstance
-        # check above could perhaps be left out, but it doesn't hurt to check.)
-        stgdict = unwrap_mappingproxy(stgdict)
-
-    # The StgDict type is not publicly exposed anywhere, so we can't use
-    # isinstance. Checking the name is the best we can do here.
-    if type(stgdict).__name__ != "StgDict":
-        raise TypeError(
-            f"The given type's dict must be a StgDict, not {type(stgdict).__module__}.{type(stgdict).__qualname__}"
-        )
-
-    return stgdict
 
 
 def make_callback_returnable(ctype):
@@ -193,16 +249,18 @@ def make_callback_returnable(ctype):
     if hasattr(ctype, "_rubicon_objc_ctypes_patch_getfunc"):
         return ctype
 
-    # Extract the StgDict from the ctype.
-    stgdict = get_stgdict_of_type(ctype)
-    stgdict_c = StgDictObject.from_address(id(stgdict))
+    # The implementation changed in 3.13.0a6; StgDict was replaced with StgInfo
+    if sys.version_info < (3, 13):
+        stg = get_stgdict_of_type(ctype)
+    else:
+        stg = get_stginfo_of_type(ctype)
 
     # Ensure that there is no existing getfunc or setfunc on the stgdict.
-    if ctypes.cast(stgdict_c.getfunc, ctypes.c_void_p).value is not None:
+    if ctypes.cast(stg.getfunc, ctypes.c_void_p).value is not None:
         raise ValueError(
             f"The ctype {ctype.__module__}.{ctype.__name__} already has a getfunc"
         )
-    elif ctypes.cast(stgdict_c.setfunc, ctypes.c_void_p).value is not None:
+    elif ctypes.cast(stg.setfunc, ctypes.c_void_p).value is not None:
         raise ValueError(
             f"The ctype {ctype.__module__}.{ctype.__name__} already has a setfunc"
         )
@@ -248,9 +306,10 @@ def make_callback_returnable(ctype):
     # get garbage-collected.
     ctype._rubicon_objc_ctypes_patch_getfunc = getfunc
     ctype._rubicon_objc_ctypes_patch_setfunc = setfunc
-    # Put the getfunc and setfunc into the stgdict fields.
-    stgdict_c.getfunc = getfunc
-    stgdict_c.setfunc = setfunc
+
+    # Put the getfunc and setfunc into the stg fields.
+    stg.getfunc = getfunc
+    stg.setfunc = setfunc
 
     # Return the passed in ctype, so this function can be used as a decorator.
     return ctype
