@@ -128,7 +128,7 @@ Strings
 :class:`str` objects - they can be sliced, concatenated, compared, etc. with
 other Objective-C and Python strings.
 
-.. code-block:: python
+.. code-block:: pycon
 
     # Call an Objective-C method that returns a string.
     # We're using NSBundle to give us a string version of a path
@@ -153,7 +153,7 @@ a method that does a specific type check for :class:`str`, you can use
 ``str(nsstring)`` to convert the :class:`~rubicon.objc.api.NSString` to
 :class:`str`:
 
-.. code-block:: python
+.. code-block:: pycon
 
     # Convert the Objective-C string to a Python string.
     >>> str(NSBundle.mainBundle.bundlePath)
@@ -164,7 +164,7 @@ Conversely, if you have a :class:`str`, and you specifically require a
 :func:`~rubicon.objc.api.at` function to convert the Python instance to an
 :class:`~rubicon.objc.api.NSString`.
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc import at
     # Create a Python string
@@ -181,7 +181,7 @@ the return value from these methods, you should always use :class:`str` or
 :func:`~rubicon.objc.api.at` to ensure that you have the right kind of string
 for your needs.
 
-.. code-block:: python
+.. code-block:: pycon
 
     # Is the path comprised of all lowercase letters? (Hint: it isn't)
     >>> NSBundle.mainBundle.bundlePath.islower()
@@ -209,7 +209,7 @@ Lists
 sequence - they can be indexed, sliced, etc. and standard operations like
 :func:`len` and ``in`` are supported:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc import NSArray
     >>> array = NSArray.arrayWithArray(list(range(4)))
@@ -241,7 +241,7 @@ sequence - they can be indexed, sliced, etc. and standard operations like
 :class:`~rubicon.objc.api.NSMutableArray` objects additionally support mutating
 operations, like item and slice assignment:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc import NSMutableArray
     >>> mutarray = NSMutableArray.arrayWithArray(list(range(4)))
@@ -267,7 +267,7 @@ operations, like item and slice assignment:
 
 Sequence methods like ``index`` and ``pop`` are also supported:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> mutarray.index(7)
     3
@@ -287,7 +287,7 @@ Dictionaries
 mapping - their items can be accessed and standard operations like :func:`len`
 and ``in`` are supported:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc import NSDictionary
     >>> d = objc.NSDictionary.dictionaryWithDictionary({"one": 1, "two": 2})
@@ -313,7 +313,7 @@ and ``in`` are supported:
 :class:`~rubicon.objc.api.NSMutableDictionary` objects additionally support
 mutating operations, like item assignment:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> md = objc.NSMutableDictionary.dictionaryWithDictionary({"one": 1, "two": 2})
     >>> md["three"] = 3
@@ -326,7 +326,7 @@ mutating operations, like item assignment:
 
 Mapping methods like ``keys`` and ``values`` are also supported:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> d.keys()
     <ObjCListInstance: __NSArrayI at 0x10b898a90: <__NSArrayI 0x7f86f8db6b70>(
