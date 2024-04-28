@@ -28,7 +28,7 @@ of standard C functions, this is the standard C library, ``libc``. Because this
 library is commonly used, Rubicon already loads it by default and exposes it in
 Python as :attr:`rubicon.objc.runtime.libc`.
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc.runtime import libc
     >>> libc
@@ -43,7 +43,7 @@ Python as :attr:`rubicon.objc.runtime.libc`.
     To access a library that is not predefined by Rubicon, you can use the
     :func:`~rubicon.objc.runtime.load_library` function:
 
-    .. code-block:: python
+    .. code-block:: pycon
 
         >>> from rubicon.objc.runtime import load_library
         >>> libm = load_library("m")
@@ -52,7 +52,7 @@ Python as :attr:`rubicon.objc.runtime.libc`.
 
 C functions are accessed as attributes on their library:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> libc.puts
     <_FuncPtr object at 0x110178f20>
@@ -95,7 +95,7 @@ This means that ``puts`` returns an ``int`` and takes a single argument of type
 ``const char *`` (a pointer to one or more characters, i.e. a C string). This
 translates to the following Python ``ctypes`` code:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from ctypes import c_char_p, c_int
     >>> libc.puts.restype = c_int
@@ -110,7 +110,7 @@ to print out. ``ctypes`` automatically converts the byte string object to a
 needs to be a byte string (``bytes``), because C's ``char *`` strings are
 byte-based, unlike normal Python strings (``str``), which are Unicode-based.
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> res = libc.puts(b"Hello!")
     Hello!
@@ -227,7 +227,7 @@ instead of reading them directly as attributes of the library object, you use
 the ``in_dll`` method of the variable's *type*. (Every ``ctypes`` type has an
 ``in_dll`` method.)
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from ctypes import c_double
     >>> from rubicon.objc.runtime import Foundation
@@ -240,7 +240,7 @@ returns a ``ctypes`` data object that has the variable's type, in this case
 ``c_double``. To access the variable's actual value, you can use the data
 object's ``value`` attribute:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> NSFoundationVersionNumber.value
     1575.23
@@ -261,7 +261,7 @@ Foundation's ``<Foundation/NSMetadataAttribute.h>``:
 Because they are so common, Rubicon provides the convenience function
 ``objc_const`` specifically for accessing Objective-C object constants:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> from rubicon.objc import objc_const
     >>> from rubicon.objc.runtime import Foundation

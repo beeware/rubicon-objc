@@ -12,7 +12,7 @@ Looking up a protocol
 Protocol objects can be looked up using the ``ObjCProtocol`` constructor,
 similar to how classes can be looked up using ``ObjCClass``:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> NSCopying = ObjCProtocol('NSCopying')
     >>> NSCopying
@@ -21,7 +21,7 @@ similar to how classes can be looked up using ``ObjCClass``:
 The ``isinstance`` function can be used to check whether an object conforms to
 a protocol:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> isinstance(NSObject.new(), NSCopying)
     False
@@ -63,7 +63,7 @@ like this:
 We can now use our class. The ``copy`` method (which uses our implemented
 ``copyWithZone:`` method) can also be used:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> ua = UserAccount.alloc().initWithUsername_emailAddress_(at('person'), at('person@example.com'))
     >>> ua
@@ -73,7 +73,7 @@ We can now use our class. The ``copy`` method (which uses our implemented
 
 And we can check that the class conforms to the protocol:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> isinstance(ua, NSCopying)
     True
