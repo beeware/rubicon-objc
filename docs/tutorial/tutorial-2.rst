@@ -133,6 +133,7 @@ This option can also be enabled on a per-class basis by using the
 
 If this option is used, the Objective C class name will have a numeric suffix
 (e.g., `Handler_2`). The Python class name will be unchanged.
+
 What, no ``__init__()``?
 ========================
 
