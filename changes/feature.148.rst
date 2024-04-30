@@ -1,1 +1,0 @@
-Objective-C methods with multiple identical argument names can now be called using the "__" keyword and any suffix.
