@@ -262,8 +262,10 @@ class ObjCPartialMethod:
         try:
             name = self.methods[rest]
         except KeyError:
-            assert first_arg is not self._sentinel
-            specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
+            if first_arg is self._sentinel:
+                specified_sel = self.name_start
+            else:
+                specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
             available_sels = [repr(sel) for sel in self.methods.values()]
             raise ValueError(
                 f"Invalid selector {specified_sel!r}. Available selectors are: "
