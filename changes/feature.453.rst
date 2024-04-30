@@ -1,0 +1,1 @@
+With "interleaved" syntax, the order of method arguments are now strictly checked.
