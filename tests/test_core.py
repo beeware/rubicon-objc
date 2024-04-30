@@ -1002,6 +1002,15 @@ class RubiconTest(unittest.TestCase):
             14 + 24,
         )
 
+    def test_partial_method_exception(self):
+        Example = ObjCClass("Example")
+        with self.assertRaisesRegex(
+            ValueError,
+            "Invalid selector 'dummyForException:invalid:'. Available selectors are: "
+            "'dummyForException:', 'dummyForException:arg:'",
+        ):
+            Example.dummyForException(None, invalid=None)
+
     def test_objcmethod_str_repr(self):
         """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
 

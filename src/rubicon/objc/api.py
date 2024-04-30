@@ -262,11 +262,13 @@ class ObjCPartialMethod:
         try:
             name = self.methods[rest]
         except KeyError:
+            assert first_arg is not self._sentinel
+            specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
+            available_sels = [repr(sel) for sel in self.methods.values()]
             raise ValueError(
-                f"No method was found starting with {self.name_start!r} and with keywords {(*kwargs,)}\n"
-                f"Known keywords are:\n"
-                + "\n".join(repr(keywords) for keywords in self.methods)
-            )
+                f"Invalid selector {specified_sel!r}. Available selectors are: "
+                f"{', '.join(available_sels)}"
+            ) from None
 
         meth = receiver.objc_class._cache_method(name)
 

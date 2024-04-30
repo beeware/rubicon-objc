@@ -261,6 +261,16 @@ static int _staticIntField = 11;
     return arg1 + arg2;
 }
 
++(void) dummyForException:(NSUInteger)arg
+{
+    // Dummy method for testing exception
+}
+
++(void) dummyForException:(NSUInteger)arg1 arg:(NSUInteger)arg2
+{
+    // Dummy method for testing exception
+}
+
 +(struct complex) doStuffWithStruct:(struct simple)simple
 {
     return (struct complex){
