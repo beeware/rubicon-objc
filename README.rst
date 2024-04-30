@@ -1,33 +1,37 @@
-.. image:: https://beeware.org/project/projects/bridges/rubicon/rubicon.png
+.. |logo| image:: https://beeware.org/project/projects/bridges/rubicon/rubicon.png
     :width: 72px
     :target: https://beeware.org/rubicon
+
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/rubicon-objc.svg
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Python Versions
+
+.. |version| image:: https://img.shields.io/pypi/v/rubicon-objc.svg
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Project Version
+
+.. |maturity| image:: https://img.shields.io/pypi/status/rubicon-objc.svg
+   :target: https://pypi.python.org/pypi/rubicon-objc
+   :alt: Project status
+
+.. |license| image:: https://img.shields.io/pypi/l/rubicon-objc.svg
+   :target: https://github.com/beeware/rubicon-objc/blob/main/LICENSE
+   :alt: License
+
+.. |ci| image:: https://github.com/beeware/rubicon-objc/workflows/CI/badge.svg?branch=main
+   :target: https://github.com/beeware/rubicon-objc/actions
+   :alt: Build Status
+
+.. |social| image:: https://img.shields.io/discord/836455665257021440?label=Discord%20Chat&logo=discord&style=plastic
+   :target: https://beeware.org/bee/chat/
+   :alt: Discord server
+
+|logo|
 
 Rubicon-ObjC
 ============
 
-.. image:: https://img.shields.io/pypi/pyversions/rubicon-objc.svg
-   :target: https://pypi.python.org/pypi/rubicon-objc
-   :alt: Python Versions
-
-.. image:: https://img.shields.io/pypi/v/rubicon-objc.svg
-   :target: https://pypi.python.org/pypi/rubicon-objc
-   :alt: Project Version
-
-.. image:: https://img.shields.io/pypi/status/rubicon-objc.svg
-   :target: https://pypi.python.org/pypi/rubicon-objc
-   :alt: Project status
-
-.. image:: https://img.shields.io/pypi/l/rubicon-objc.svg
-   :target: https://github.com/beeware/rubicon-objc/blob/main/LICENSE
-   :alt: License
-
-.. image:: https://github.com/beeware/rubicon-objc/workflows/CI/badge.svg?branch=main
-   :target: https://github.com/beeware/rubicon-objc/actions
-   :alt: Build Status
-
-.. image:: https://img.shields.io/discord/836455665257021440?label=Discord%20Chat&logo=discord&style=plastic
-   :target: https://beeware.org/bee/chat/
-   :alt: Discord server
+|pyversions| |version| |maturity| |license| |ci| |social|
 
 Rubicon-ObjC is a bridge between Objective-C and Python. It enables you to:
 
