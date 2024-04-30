@@ -986,6 +986,22 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
+    def test_partial_method_arg_order(self):
+        Example = ObjCClass("Example")
+
+        self.assertEqual(Example.overloaded(0, extraArg1=0, extraArg2=0), 1)
+        self.assertEqual(Example.overloaded(0, extraArg2=0, extraArg1=0), 2)
+
+        with self.assertRaises(ValueError):
+            Example.overloaded(0, orderedArg2=0, orderedArg1=0)
+
+    def test_partial_method_duplicate_arg_names(self):
+        Example = ObjCClass("Example")
+        self.assertEqual(
+            Example.overloaded(0, duplicateArg__a=14, duplicateArg__b=24),
+            14 + 24,
+        )
+
     def test_objcmethod_str_repr(self):
         """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
 

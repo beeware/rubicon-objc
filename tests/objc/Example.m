@@ -241,6 +241,26 @@ static int _staticIntField = 11;
     return arg1 + arg2;
 }
 
++(NSUInteger) overloaded:(NSUInteger)arg extraArg1:(NSUInteger)arg1 extraArg2:(NSUInteger)arg2
+{
+    return 1;
+}
+
++(NSUInteger) overloaded:(NSUInteger)arg extraArg2:(NSUInteger)arg2 extraArg1:(NSUInteger)arg1
+{
+    return 2;
+}
+
++(NSUInteger) overloaded:(NSUInteger)arg orderedArg1:(NSUInteger)arg1 orderedArg2:(NSUInteger)arg2
+{
+    return 0;
+}
+
++(NSUInteger) overloaded:(NSUInteger)arg duplicateArg:(NSUInteger)arg1 duplicateArg:(NSUInteger)arg2
+{
+    return arg1 + arg2;
+}
+
 +(struct complex) doStuffWithStruct:(struct simple)simple
 {
     return (struct complex){
