@@ -247,7 +247,7 @@ class ObjCPartialMethod:
 
     def __call__(self, receiver, first_arg=_sentinel, **kwargs):
         # Ignore parts of argument names after "__".
-        order = [argname.split("__")[0] for argname in kwargs]
+        order = tuple(argname.split("__")[0] for argname in kwargs)
         args = [arg for arg in kwargs.values()]
 
         if first_arg is ObjCPartialMethod._sentinel:
