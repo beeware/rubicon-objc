@@ -250,9 +250,8 @@ class ObjCPartialMethod:
         order = [argname.split("__")[0] for argname in kwargs]
         args = [arg for arg in kwargs.values()]
 
-        if first_arg is self._sentinel:
+        if first_arg is ObjCPartialMethod._sentinel:
             if kwargs:
-                # This will be deleted when #26 is introduced.
                 raise TypeError("Missing first (positional) argument")
             rest = (*order,)
         else:
@@ -1041,11 +1040,11 @@ class ObjCInstance:
 
         The "interleaved" syntax is usually preferred, since it looks more
         similar to normal Objective-C syntax. However, the "flat" syntax is also
-        fully supported. If two arguments have the same label (e.g.
+        fully supported. If two arguments have the same name (e.g.
         ``performSelector:withObject:withObject:``), you can use ``__`` in the
-        keywords like ``performSelector(..., withObject__1=...,
-        withObject__2=...)``. The parts after ``__`` can be anything you can use
-        as argument names.
+        keywords to disambiguate (e.g., ``performSelector(..., withObject__1=...,
+        withObject__2=...)``. Any content after and including the ``__`` in an argument
+        will be ignored.
         """
         # Search for named instance method in the class object and if it
         # exists, return callable object with self as hidden argument.

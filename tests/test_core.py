@@ -992,6 +992,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(Example.overloaded(0, extraArg1=0, extraArg2=0), 1)
         self.assertEqual(Example.overloaded(0, extraArg2=0, extraArg1=0), 2)
 
+        # Although the arguments are a unique match, they're not in the right order.
         with self.assertRaises(ValueError):
             Example.overloaded(0, orderedArg2=0, orderedArg1=0)
 

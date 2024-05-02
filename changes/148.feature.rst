@@ -1,1 +1,1 @@
-Objective-C methods with multiple identical argument names can now be called using the "__" keyword and any suffix.
+Objective-C methods with repeated argument names can now be called by using a "__" suffix in the keyword argument keyword to disambiguate the Python keyword arguments.
