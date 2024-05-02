@@ -108,9 +108,6 @@ extern NSString *const SomeGlobalStringConstant;
 +(NSUInteger) overloaded:(NSUInteger)arg orderedArg1:(NSUInteger)arg1 orderedArg2:(NSUInteger)arg2;
 +(NSUInteger) overloaded:(NSUInteger)arg duplicateArg:(NSUInteger)arg1 duplicateArg:(NSUInteger)arg2;
 
-+(void) dummyForException:(NSUInteger)arg;
-+(void) dummyForException:(NSUInteger)arg1 arg:(NSUInteger)arg2;
-
 +(struct complex) doStuffWithStruct:(struct simple)simple;
 
 -(id) processDictionary:(NSDictionary *) dict;

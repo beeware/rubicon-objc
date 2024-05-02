@@ -1007,10 +1007,12 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass("Example")
         with self.assertRaisesRegex(
             ValueError,
-            "Invalid selector 'dummyForException:invalid:'. Available selectors are: "
-            "'dummyForException:', 'dummyForException:arg:'",
+            "Invalid selector overloaded:invalidArgument:. Available selectors are: "
+            "overloaded, overloaded:, overloaded:extraArg:, "
+            "overloaded:extraArg1:extraArg2:, overloaded:extraArg2:extraArg1:, "
+            "overloaded:orderedArg1:orderedArg2:, overloaded:duplicateArg:duplicateArg:",
         ):
-            Example.dummyForException(None, invalid=None)
+            Example.overloaded(0, invalidArgument=0)
 
     def test_objcmethod_str_repr(self):
         """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""

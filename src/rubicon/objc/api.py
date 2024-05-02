@@ -265,10 +265,9 @@ class ObjCPartialMethod:
                 specified_sel = self.name_start
             else:
                 specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
-            available_sels = [repr(sel) for sel in self.methods.values()]
             raise ValueError(
-                f"Invalid selector {specified_sel!r}. Available selectors are: "
-                f"{', '.join(available_sels)}"
+                f"Invalid selector {specified_sel}. Available selectors are: "
+                f"{', '.join(sel for sel in self.methods.values())}"
             ) from None
 
         meth = receiver.objc_class._cache_method(name)
