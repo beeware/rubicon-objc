@@ -989,8 +989,8 @@ class RubiconTest(unittest.TestCase):
     def test_partial_method_arg_order(self):
         Example = ObjCClass("Example")
 
-        self.assertEqual(Example.overloaded(0, extraArg1=0, extraArg2=0), 1)
-        self.assertEqual(Example.overloaded(0, extraArg2=0, extraArg1=0), 2)
+        self.assertEqual(Example.overloaded(3, extraArg1=5, extraArg2=7), 3 + 5 + 7)
+        self.assertEqual(Example.overloaded(3, extraArg2=5, extraArg1=7), 3 * 5 * 7)
 
         # Although the arguments are a unique match, they're not in the right order.
         with self.assertRaises(ValueError):
@@ -999,8 +999,8 @@ class RubiconTest(unittest.TestCase):
     def test_partial_method_duplicate_arg_names(self):
         Example = ObjCClass("Example")
         self.assertEqual(
-            Example.overloaded(0, duplicateArg__a=14, duplicateArg__b=24),
-            14 + 24,
+            Example.overloaded(24, duplicateArg__a=16, duplicateArg__b=6),
+            24 + 2 * 16 + 3 * 6,
         )
 
     def test_partial_method_exception(self):
