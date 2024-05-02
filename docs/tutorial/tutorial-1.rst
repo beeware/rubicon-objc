@@ -52,6 +52,22 @@ The second argument (``relativeToURL``) is accessed as a keyword argument. This
 argument is declared as being of type ``NSURL *``; since ``base`` is an
 instance of ``NSURL``, Rubicon can pass through this instance.
 
+If the same argument name is used repeatedly in a method, you can use a ``__``
+keyword to avoid argument name collisions.
+
+.. code-block:: pycon
+
+    >>> obj.performSelector(
+    ...     SEL("someMethod:"),
+    ...     withObject__1=data1,
+    ...     withObject__2=data2
+    ... )
+
+In this example, the ``withObject`` arguments are duplicated, so the suffixes
+``__1`` and ``__2`` are added to avoid argument name collisions. Since ``__``
+and any part after it are ignored, it is possible to use any suffix starting
+with it.
+
 Sometimes, an Objective-C method definition will use the same keyword
 argument name twice. This is legal in Objective-C, but not in Python, as you
 can't repeat a keyword argument in a method call. In this case, you can use a
