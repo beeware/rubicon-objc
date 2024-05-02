@@ -253,10 +253,10 @@ class ObjCPartialMethod:
         if first_arg is ObjCPartialMethod._sentinel:
             if kwargs:
                 raise TypeError("Missing first (positional) argument")
-            rest = (*order,)
+            rest = order
         else:
             args.insert(0, first_arg)
-            rest = ("", *order)
+            rest = ("",) + order
 
         try:
             name = self.methods[rest]
