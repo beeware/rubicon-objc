@@ -111,6 +111,87 @@ them and access their properties. In some cases, Rubicon also provides
 additional Python methods on Objective-C objects -
 see :ref:`python_style_apis_for_objc` for details.
 
+Invoking Objective-C methods
+----------------------------
+
+Once an Objective-C class has been wrapped, the selectors on that class (or
+instances of that class) can be invoked as if they were methods on the Python
+class. Each Objective-C selector is converted into a Python method name by
+replacing the colons in the selector with underscores.
+
+For example, the Objective-C class ``NSURL`` has defines a instance selector of
+``-initWithString:relativeToURL:``; this will be converted into the Python
+method ``initWithString_relativeToURL_()``. Arguments to this method are all
+positional, and passed in the order they are defined in the selector. Selectors
+without arguments (such as ``+alloc`` or ``-init``) are defined as methods with
+no arguments, and no underscores in the name:
+
+.. code-block:: python
+
+    # Wrap the NSURL class
+    NSURL = ObjCClass("NSURL")
+    # Invoke the +alloc selector
+    my_url = NSURL.alloc()
+    # Invoke -initWithString:relativeToURL:
+    my_url.initWithString_relativeToURL_("something/", "https://example.com/")
+
+This can result in very long method names; so Rubicon also provides an alternate
+mapping for methods, using Python keyword arguments. In this approach, the first
+argument is handled as a positional argument, and all subsequent arguments are
+handled as keyword arguments, with the underscore suffixes being omitted. The
+last method in the previous example could also be invoked as:
+
+.. code-block:: python
+
+    # Invoke -initWithString:relativeToURL:
+    my_url.initWithString("something/", relativeToURL="https://example.com/")
+
+Keyword arguments *must* be passed in the order they are defined in the
+selector. For example, if you were invoking
+``-initFileURLWithPath:isDirectory:relativeToURL``, it *must* be invoked as:
+
+.. code-block:: python
+
+    # Invoke -initFileURLWithPath:isDirectory:relativeToURL
+    my_url.initFileURLWithPath(
+        "something/",
+        isDirectory=True,
+        relativeToURL="file:///Users/brutus/"
+    )
+
+Even though from a strict *Python* perspective, passing ``relativeToURL`` before
+``isDirectory`` would be syntactically equivalent, this *will not* match the
+corresponding Objective-C selector.
+
+This "interleaved" keyword syntax works for *most* Objective-C selectors without
+any problem. However, Objective-C allows arguments in a selector to be repeated.
+For example, ``NSLayoutConstraint`` defines a
+``+constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:``
+selector, duplicating the ``attribute`` keyword. Python will not allow a keyword
+argument to be duplicated, so to reach selectors of this type, Rubicon allows
+any keyword argument to be appended with a ``__`` suffix to generate a name that
+is unique in the Python code:
+
+.. code-block:: python
+
+    # Invoke +constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:
+    NSLayoutConstraint.constraintWithItem(
+        first_item,
+        attribute__1=first_attribute,
+        relatedBy=relation,
+        toItem=second_item,
+        attribute__2=second_attribute,
+        multiplier=2.0,
+        constant=1.0
+    )
+
+The name used after the ``__`` has no significance - it is only used to ensure
+that the Python keyword is unique, and is immediately stripped and ignored. By
+convention, we recommend using integers as we've done in this example; but you
+*can* use any unique text you want. For example, ``attribute__from`` and
+``attribute__to`` would also work in this situation, as would ``attribute`` and
+``atribute__to`` (as the names are unique in the Python namespace).
+
 .. _python_style_apis_for_objc:
 
 Python-style APIs and methods for Objective-C objects

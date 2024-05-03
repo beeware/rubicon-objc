@@ -52,32 +52,26 @@ The second argument (``relativeToURL``) is accessed as a keyword argument. This
 argument is declared as being of type ``NSURL *``; since ``base`` is an
 instance of ``NSURL``, Rubicon can pass through this instance.
 
-If the same argument name is used repeatedly in a method, you can use a ``__``
-keyword to avoid argument name collisions.
+Sometimes, an Objective-C method definition will use the same keyword argument
+name twice (for example, ``NSLayoutConstraint`` has a
+``+constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:``
+selector, using the ``attribute`` keyword twice). This is legal in Objective-C,
+but not in Python, as you can't repeat a keyword argument in a method call. In
+this case, you can use a ``__`` suffix on the ambiguous keyword argument to make
+it unique. Any content after and including the ``__`` will be stripped when
+making the Objective-C call:
 
 .. code-block:: pycon
 
-    >>> obj.performSelector(
-    ...     SEL("someMethod:"),
-    ...     withObject__1=data1,
-    ...     withObject__2=data2
+    >>> constraint = NSLayoutConstraint.constraintWithItem(
+    ...     first_item,
+    ...     attribute__1=first_attribute,
+    ...     relatedBy=relation,
+    ...     toItem=second_item,
+    ...     attribute__2=second_attribute,
+    ...     multiplier=2.0,
+    ...     constant=1.0
     ... )
-
-In this example, the ``withObject`` arguments are duplicated, so the suffixes
-``__1`` and ``__2`` are added to avoid argument name collisions. Since ``__``
-and any part after it are ignored, it is possible to use any suffix starting
-with it.
-
-Sometimes, an Objective-C method definition will use the same keyword
-argument name twice. This is legal in Objective-C, but not in Python, as you
-can't repeat a keyword argument in a method call. In this case, you can use a
-"long form" of the method to explicitly invoke a descriptor by replacing
-colons with underscores:
-
-.. code-block:: pycon
-
-    >>> base = NSURL.URLWithString_("https://beeware.org/")
-    >>> full = NSURL.URLWithString_relativeToURL_("contributing", base)
 
 Instance methods
 ================
