@@ -986,6 +986,34 @@ class RubiconTest(unittest.TestCase):
         )
         self.assertEqual(buf.value.decode("utf-8"), pystring)
 
+    def test_partial_method_arg_order(self):
+        Example = ObjCClass("Example")
+
+        self.assertEqual(Example.overloaded(3, extraArg1=5, extraArg2=7), 3 + 5 + 7)
+        self.assertEqual(Example.overloaded(3, extraArg2=5, extraArg1=7), 3 * 5 * 7)
+
+        # Although the arguments are a unique match, they're not in the right order.
+        with self.assertRaises(ValueError):
+            Example.overloaded(0, orderedArg2=0, orderedArg1=0)
+
+    def test_partial_method_duplicate_arg_names(self):
+        Example = ObjCClass("Example")
+        self.assertEqual(
+            Example.overloaded(24, duplicateArg__a=16, duplicateArg__b=6),
+            24 + 2 * 16 + 3 * 6,
+        )
+
+    def test_partial_method_exception(self):
+        Example = ObjCClass("Example")
+        with self.assertRaisesRegex(
+            ValueError,
+            "Invalid selector overloaded:invalidArgument:. Available selectors are: "
+            "overloaded, overloaded:, overloaded:extraArg:, "
+            "overloaded:extraArg1:extraArg2:, overloaded:extraArg2:extraArg1:, "
+            "overloaded:orderedArg1:orderedArg2:, overloaded:duplicateArg:duplicateArg:",
+        ):
+            Example.overloaded(0, invalidArgument=0)
+
     def test_objcmethod_str_repr(self):
         """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
 

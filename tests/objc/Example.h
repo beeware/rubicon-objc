@@ -103,6 +103,10 @@ extern NSString *const SomeGlobalStringConstant;
 +(NSUInteger) overloaded;
 +(NSUInteger) overloaded:(NSUInteger)arg1;
 +(NSUInteger) overloaded:(NSUInteger)arg1 extraArg:(NSUInteger)arg2;
++(NSUInteger) overloaded:(NSUInteger)arg1 extraArg1:(NSUInteger)arg2 extraArg2:(NSUInteger)arg3;
++(NSUInteger) overloaded:(NSUInteger)arg1 extraArg2:(NSUInteger)arg2 extraArg1:(NSUInteger)arg3;
++(NSUInteger) overloaded:(NSUInteger)arg1 orderedArg1:(NSUInteger)arg2 orderedArg2:(NSUInteger)arg3;
++(NSUInteger) overloaded:(NSUInteger)arg1 duplicateArg:(NSUInteger)arg2 duplicateArg:(NSUInteger)arg3;
 
 +(struct complex) doStuffWithStruct:(struct simple)simple;
 
