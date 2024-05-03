@@ -1,1 +1,0 @@
-The handling of structure and union return types was updated to be compatible with changes to ctypes introduced in Python 3.13.0a6.

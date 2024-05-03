@@ -1,1 +1,0 @@
-Objective-C methods with repeated argument names can now be called by using a "__" suffix in the Python keyword argument to provide a unique name.

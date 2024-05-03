@@ -3,6 +3,40 @@ Release History
 
 .. towncrier release notes start
 
+0.4.9 (2024-05-03)
+==================
+
+Features
+--------
+
+* Objective-C methods with repeated argument names can now be called by using a ``__`` suffix in the Python keyword argument to provide a unique name. (#148)
+* The error message has been improved when an Objective-C selector matching the provided arguments cannot be found. (#461)
+
+
+Bugfixes
+--------
+
+* The handling of structure and union return types was updated to be compatible with changes to ctypes introduced in Python 3.13.0a6. (#444)
+
+
+Backward Incompatible Changes
+-----------------------------
+
+* The order of keyword arguments used when invoking methods must now match the order they are defined in the Objective-C API. Previously arguments could be in any order. (#453)
+
+
+Documentation
+-------------
+
+* The README badges were updated to display correctly on GitHub. (#463)
+
+
+Misc
+----
+
+* #440, #441, #442, #443, #447, #448, #449, #450, #452, #454, #455, #456, #457, #458, #459, #460
+
+
 0.4.8 (2024-04-03)
 ==================
 
