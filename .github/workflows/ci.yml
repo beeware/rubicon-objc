@@ -31,8 +31,6 @@ jobs:
   package:
     name: Python Package
     uses: beeware/.github/.github/workflows/python-package-create.yml@main
-    with:
-      runner-os: "macos-latest"
 
   unit-tests:
     name: Unit tests
