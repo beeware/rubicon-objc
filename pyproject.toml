@@ -74,7 +74,7 @@ docs = [
 skip = ".git,*.pdf,*.svg"
 # the way to make case sensitive skips of words etc
 ignore-regex = "\bNd\b"
-ignore-words-list = "re-use"
+ignore-words-list = "re-use,assertIn"
 
 [tool.isort]
 profile = "black"
