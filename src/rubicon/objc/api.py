@@ -1629,11 +1629,13 @@ class ObjCClass(ObjCInstance, type):
 
         if self.superclass is not None:
             if self.superclass.methods_ptr is None:
-                self.superclass._load_methods()
+                with self.superclass.cache_lock:
+                    self.superclass._load_methods()
 
             # Prime this class' partials list with a list from the superclass.
             for first, superpartial in self.superclass.partial_methods.items():
-                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+                partial = ObjCPartialMethod(first)
+                self.partial_methods[first] = partial
                 partial.methods.update(superpartial.methods)
 
         for i in range(methods_ptr_count.value):
@@ -1655,7 +1657,8 @@ class ObjCClass(ObjCInstance, type):
             try:
                 partial = self.partial_methods[first]
             except KeyError:
-                partial = self.partial_methods[first] = ObjCPartialMethod(first)
+                partial = ObjCPartialMethod(first)
+                self.partial_methods[first] = partial
 
             partial.methods[rest] = name
 
