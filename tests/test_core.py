@@ -1026,11 +1026,11 @@ class RubiconTest(unittest.TestCase):
         # ObjCBoundMethod
         self.assertRegex(
             repr(obj.init),
-            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]+>\)",
         )
         self.assertRegex(
             str(obj.init),
-            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]{12}>\)",
+            r"ObjCBoundMethod\(<ObjCMethod: init @16@0:8>, <NSObject: 0x[0-9a-f]+>\)",
         )
 
         # ObjCPartialMethod

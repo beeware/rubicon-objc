@@ -1,0 +1,1 @@
+Protection was added against a potential race condition when loading methods defined on a superclass.
