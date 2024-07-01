@@ -60,7 +60,7 @@ jobs:
       matrix:
         platform: [
           # X86-64 runners
-          "macos-11", "macos-12", "macos-13",
+          "macos-12", "macos-13",
           # M1 runners
           "macos-14"
         ]
