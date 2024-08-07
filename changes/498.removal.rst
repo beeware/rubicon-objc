@@ -1,0 +1,1 @@
+For Python 3.14 and beyond, the event loop's support for child watchers was removed.
