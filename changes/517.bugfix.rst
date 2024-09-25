@@ -1,0 +1,1 @@
+A workaround for python/cpython#81061 was conditionally removed when running under Python 3.9 or earlier.
