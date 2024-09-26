@@ -1,1 +1,1 @@
-A workaround for python/cpython#81061 was conditionally removed when running under Python 3.9 or earlier.
+A workaround for `python/cpython#81061 <https://github.com/python/cpython/issues/81061>`__ is now conditionally applied only for the Python versions that require it (Python 3.9 and earlier).
