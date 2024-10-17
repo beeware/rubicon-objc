@@ -54,28 +54,23 @@ jobs:
     name: Unit tests
     needs: [ pre-commit, towncrier, package ]
     runs-on: ${{ matrix.platform }}
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
         platform: [
           # X86-64 runners
-          "macos-12", "macos-13",
+          "macos-13",
           # M1 runners
-          "macos-14"
+          "macos-14", "macos-15"
         ]
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13-dev" ]
-        include:
-          - experimental: false
-          - python-version: "3.13-dev"
-            experimental: true
-
+        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
         exclude:
-          # actions/setup-python doesn't provide Python3.8 or 3.9 for M1.
+          # actions/setup-python doesn't provide Python 3.9 for M1.
           - platform: "macos-14"
-            python-version : "3.8"
+            python-version : "3.9"
 
-          - platform: "macos-14"
+          - platform: "macos-15"
             python-version : "3.9"
 
     steps:
@@ -88,6 +83,7 @@ jobs:
       uses: actions/setup-python@v5.2.0
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - name: Get packages
       uses: actions/download-artifact@v4.1.8

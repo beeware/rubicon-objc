@@ -21,10 +21,10 @@ import warnings
 # This module relies on the layout of a few internal Python and ctypes
 # structures. Because of this, it's possible (but not all that likely) that
 # things will break on newer/older Python versions.
-if sys.version_info < (3, 6) or sys.version_info >= (3, 14):
+if sys.version_info < (3, 6) or sys.version_info >= (3, 15):
     v = sys.version_info
     warnings.warn(
-        "rubicon.objc.ctypes_patch has only been tested with Python 3.6 through 3.13. "
+        "rubicon.objc.ctypes_patch has only been tested with Python 3.6 through 3.15. "
         f"You are using Python {v.major}.{v.minor}.{v.micro}. Most likely things will "
         "work properly, but you may experience crashes if Python's internals have "
         "changed significantly."
