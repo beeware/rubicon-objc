@@ -54,7 +54,7 @@ jobs:
     name: Unit tests
     needs: [ pre-commit, towncrier, package ]
     runs-on: ${{ matrix.platform }}
-    continue-on-error: ${{ matrix.experimental || false }}
+    continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
@@ -65,10 +65,6 @@ jobs:
           "macos-14", "macos-15"
         ]
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
-        include:
-          - python-version: "3.14"
-            experimental: true
-
         exclude:
           # actions/setup-python doesn't provide Python 3.9 for M1.
           - platform: "macos-14"
