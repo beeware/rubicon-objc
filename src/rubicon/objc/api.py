@@ -657,7 +657,6 @@ def type_for_objcclass(objcclass):
     This method is mainly intended for internal use by Rubicon, but is exposed
     in the public API for completeness.
     """
-
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
 
@@ -893,15 +892,27 @@ class ObjCInstance:
                 # it's the correct class.
                 #
                 # Refs #249.
+                #
+                # We also need to evict the cache when the instance *class*
+                # doesn't match. This can happen when an ObjCInstance subclass
+                # (like ObjCMutableDictionary) has been used - an ObjCInstance
+                # will respond to the same selectors as ObjCMutableDictionary,
+                # but it won't have the helper methods (like __setitem__) that
+                # make the wrapper useful.
+                #
+                # Refs #539.
+                #
                 if cls == ObjCInstance or isinstance(cls, ObjCInstance):
                     cached_class_name = cached.objc_class.name
-                    current_class_name = libobjc.class_getName(
-                        libobjc.object_getClass(object_ptr)
-                    ).decode("utf-8")
+                    current_class = libobjc.object_getClass(object_ptr)
+                    current_class_name = libobjc.class_getName(current_class).decode(
+                        "utf-8"
+                    )
+                    current_type = type_for_objcclass(current_class)
                     if (
-                        current_class_name != cached_class_name
-                        and not current_class_name.endswith(f"_{cached_class_name}")
-                    ):
+                        type(cached) is not current_type
+                        or current_class_name != cached_class_name
+                    ) and not current_class_name.endswith(f"_{cached_class_name}"):
                         # There has been a cache hit, but the object is a
                         # different class, treat this as a cache miss. We don't
                         # *just* look for an *exact* class name match, because

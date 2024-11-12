@@ -1,0 +1,1 @@
+An edge case of the instance cache has been fixed. This edge case would cause collection types (such as NSMutableDictionary) to *not* have their Python helper wrappers applied.
