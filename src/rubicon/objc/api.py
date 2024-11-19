@@ -223,12 +223,7 @@ class ObjCMethod:
 
         # Convert result to python type if it is an instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = ObjCInstance(result)
-
-        # Mark for release if we acquire ownership of an object. Do not autorelease here because
-        # we might retain a Python reference while the Obj-C reference goes out of scope.
-        if self.name.startswith((b"alloc", b"new", b"copy", b"mutableCopy")):
-            result._needs_release = True
+            result = ObjCInstance(result, returned_from_method=self.name)
 
         return result
 
@@ -783,9 +778,9 @@ class ObjCInstance:
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
         except AttributeError:
             # This assumes that objects never change their class after they are
-            # seen by Rubicon. There are two reasons why this may not be true:
+            # seen by Rubicon. This can occur because:
             #
-            # 1. Objective-C runtime provides a function object_setClass that
+            #    Objective-C runtime provides a function object_setClass that
             #    can change an object's class after creation, and some code
             #    manipulates objects' isa pointers directly (although the latter
             #    is no longer officially supported by Apple). This is not
@@ -793,19 +788,6 @@ class ObjCInstance:
             #    done during object creation/initialization, so it's basically
             #    safe to assume that an object's class will never change after
             #    it's been wrapped in an ObjCInstance.
-            # 2. If a memory address is freed by the Objective-C runtime, and
-            #    then re-allocated by an object of a different type, but the
-            #    Python ObjCInstance wrapper persists, Python will assume the
-            #    object is still of the old type. If a new ObjCInstance wrapper
-            #    for the same pointer is re-created, a check is performed to
-            #    ensure the type hasn't changed; this problem only affects
-            #    pre-existing Python wrappers. If this occurs, it probably
-            #    indicates an issue with the retain count on the Python side (as
-            #    the Objective-C runtime shouldn't be able to dispose of an
-            #    object if Python still has a handle to it). If this *does*
-            #    happen, it will manifest as objects appearing to be the wrong
-            #    type, and/or objects having the wrong list of attributes
-            #    available. Refs #249.
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_objc_class", ObjCClass(libobjc.object_getClass(self))
             )
@@ -815,7 +797,9 @@ class ObjCInstance:
     def _associated_attr_key_for_name(name):
         return SEL(f"rubicon.objc.py_attr.{name}")
 
-    def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
+    def __new__(
+        cls, object_ptr, _name=None, _bases=None, _ns=None, returned_from_method=b""
+    ):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or
         anything that can be cast to one, such as a :class:`~ctypes.c_void_p`,
         or an existing :class:`ObjCInstance`.
@@ -914,6 +898,13 @@ class ObjCInstance:
             except KeyError:
                 pass
 
+            # Explicitly retain the instance on first handover to Python unless we
+            # received it from a method that gives us ownership already.
+            if not returned_from_method.startswith(
+                (b"alloc", b"new", b"copy", b"mutableCopy")
+            ):
+                send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
+
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
             if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
                 return ObjCClass(object_ptr)
@@ -932,7 +923,6 @@ class ObjCInstance:
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_as_parameter_", object_ptr
             )
-            super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
             if isinstance(object_ptr, objc_block):
                 super(ObjCInstance, type(self)).__setattr__(
                     self, "block", ObjCBlock(object_ptr)
@@ -944,39 +934,9 @@ class ObjCInstance:
 
         return self
 
-    def release(self):
-        """Manually decrement the reference count of the corresponding objc
-        object.
-
-        The objc object is sent a dealloc message when its reference
-        count reaches 0. Calling this method manually should not be
-        necessary, unless the object was explicitly ``retain``\\ed
-        before. Objects returned from ``.alloc().init...(...)`` and
-        similar calls are released automatically by Rubicon when the
-        corresponding Python object is deallocated.
-        """
-        self._needs_release = False
-        send_message(self, "release", restype=objc_id, argtypes=[])
-
-    def autorelease(self):
-        """Decrements the receiver’s reference count at the end of the current
-        autorelease pool block.
-
-        The objc object is sent a dealloc message when its reference
-        count reaches 0. If called, the object will not be released when
-        the Python object is deallocated.
-        """
-        self._needs_release = False
-        result = send_message(self, "autorelease", restype=objc_id, argtypes=[])
-        return ObjCInstance(result)
-
     def __del__(self):
-        """Release the corresponding objc instance if we own it, i.e., if it
-        was returned by a method starting with :meth:`alloc`, :meth:`new`,
-        :meth:`copy`, or :meth:`mutableCopy` and it wasn't already explicitly
-        released by calling :meth:`release` or :meth:`autorelease`."""
-        if self._needs_release:
-            send_message(self, "release", restype=objc_id, argtypes=[])
+        """Release the corresponding objc instance."""
+        send_message(self, "release", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
