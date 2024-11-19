@@ -1,0 +1,2 @@
+Retain Objective-C objects when creating Python wrappers and release them when the
+Python wrapped is garbage collected.
