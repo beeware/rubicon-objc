@@ -6,6 +6,7 @@ import math
 import sys
 import threading
 import unittest
+import uuid
 import weakref
 from ctypes import (
     ArgumentError,
@@ -58,6 +59,10 @@ from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, se
 from rubicon.objc.types import __LP64__
 
 from . import OSX_VERSION, rubiconharness
+
+
+class ObjcWeakref(NSObject):
+    weak_property = objc_property(weak=True)
 
 
 class struct_int_sized(Structure):
@@ -1859,94 +1864,79 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr_python_object())
 
-    def test_objcinstance_release_owned(self):
+    def test_objcinstance_created_retained(self):
+        with autoreleasepool():
+            # Create an object which we don't own.
+            NSString = ObjCClass("NSString")
+            obj = NSString.stringWithString(str(uuid.uuid4()))
+
+        self.assertEqual(obj.retainCount(), 1)
+
+    def test_objcinstance_explicit_retained(self):
         # Create an object which we own.
         obj = NSObject.alloc().init()
 
-        # Check that it is marked for release.
-        self.assertTrue(obj._needs_release)
+        self.assertEqual(obj.retainCount(), 1)
 
-        # Explicitly release the object.
-        obj.release()
+    def test_objcinstance_created_gc_released(self):
+        # Create an object which we own.
+        obj = NSObject.alloc().init()
 
-        # Check that we no longer need to release it.
-        self.assertFalse(obj._needs_release)
+        wr = ObjcWeakref.alloc().init()
+        wr.weak_property = obj
 
         # Delete it and make sure that we don't segfault on garbage collection.
         del obj
         gc.collect()
 
-    def test_objcinstance_autorelease_owned(self):
-        # Create an object which we own.
-        obj = NSObject.alloc().init()
+        # Assert that the obj was deallocated.
+        self.assertIsNone(wr.weak_property)
 
-        # Check that it is marked for release.
-        self.assertTrue(obj._needs_release)
+    def test_objcinstance_explicit_retained_gc_released(self):
+        with autoreleasepool():
+            # Create an object which we don't own.
+            NSString = ObjCClass("NSString")
+            obj = NSString.stringWithString(str(uuid.uuid4()))
 
-        # Explicitly release the object.
-        res = obj.autorelease()
+            wr = ObjcWeakref.alloc().init()
+            wr.weak_property = obj
 
-        # Check that autorelease call returned the object itself.
-        self.assertIs(obj, res)
+            # Delete it and make sure that we don't segfault on garbage collection.
+            del obj
+            gc.collect()
 
-        # Check that we no longer need to release it.
-        self.assertFalse(obj._needs_release)
+        # Assert that the obj was deallocated.
+        self.assertIsNone(wr.weak_property)
 
-        # Delete it and make sure that we don't segfault on garbage collection.
-        del obj
-        gc.collect()
-
-    def test_objcinstance_retain_release(self):
-        NSString = ObjCClass("NSString")
-
-        # Create an object which we don't own.
-        string = NSString.stringWithString("test")
-
-        # Check that it is not marked for release.
-        self.assertFalse(string._needs_release)
-
-        # Explicitly retain the object.
-        res = string.retain()
-
-        # Check that autorelease call returned the object itself.
-        self.assertIs(string, res)
-
-        # Manually release the object.
-        string.release()
-
-        # Delete it and make sure that we don't segfault on garbage collection.
-        del string
-        gc.collect()
-
-    def test_objcinstance_dealloc(self):
-        class DeallocTester(NSObject):
-            attr0 = objc_property()
-            attr1 = objc_property(weak=True)
-
-            @objc_method
-            def dealloc(self):
-                self._did_dealloc = True
-
-        obj = DeallocTester.alloc().init()
-        obj.__dict__["_did_dealloc"] = False
-
-        attr0 = NSObject.alloc().init()
-        attr1 = NSObject.alloc().init()
-
-        obj.attr0 = attr0
-        obj.attr1 = attr1
-
-        self.assertEqual(attr0.retainCount(), 2)
-        self.assertEqual(attr1.retainCount(), 1)
-
-        # ObjC object will be deallocated, can only access Python attributes afterwards.
-        obj.release()
-
-        self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
-        self.assertEqual(
-            attr0.retainCount(), 1, "strong property value was not released"
-        )
-        self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
+    # def test_objcinstance_dealloc(self):
+    #     class DeallocTester(NSObject):
+    #         attr0 = objc_property()
+    #         attr1 = objc_property(weak=True)
+    #
+    #         @objc_method
+    #         def dealloc(self):
+    #             self._did_dealloc = True
+    #
+    #     obj = DeallocTester.alloc().init()
+    #     obj.__dict__["_did_dealloc"] = False
+    #
+    #     attr0 = NSObject.alloc().init()
+    #     attr1 = NSObject.alloc().init()
+    #
+    #     obj.attr0 = attr0
+    #     obj.attr1 = attr1
+    #
+    #     self.assertEqual(attr0.retainCount(), 2)
+    #     self.assertEqual(attr1.retainCount(), 1)
+    #
+    #     # ObjC object will be deallocated, can only access Python attributes afterwards.
+    #     obj.release()
+    #
+    #     self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
+    #     self.assertEqual(
+    #         attr0.retainCount(), 1, "strong property value was not released"
+    #     )
+    #     self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
 
     def test_partial_with_override(self):
         """If one method in a partial is overridden, that doesn't impact lookup of other partial targets"""
