@@ -1414,7 +1414,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.height, 78)
 
     def test_class_properties(self):
-        """A Python class can have ObjC properties with synthesized getters and setters."""
+        """A Python class can have ObjC properties with synthesized getters and setters
+        of ObjCInstance type ."""
 
         NSURL = ObjCClass("NSURL")
 
@@ -1464,6 +1465,9 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(box.data)
 
     def test_class_python_properties(self):
+        """A Python class can have ObjC properties with synthesized getters and setters
+        of Python type."""
+
         class PythonObjectProperties(NSObject):
             object = objc_property(object)
 
@@ -1499,9 +1503,10 @@ class RubiconTest(unittest.TestCase):
         properties.object = o
         self.assertIs(properties.object, o)
 
-        del o
-        del properties
-        gc.collect()
+        with autoreleasepool():
+            del o
+            del properties
+            gc.collect()
 
         self.assertIsNone(wr())
 
@@ -1886,8 +1891,9 @@ class RubiconTest(unittest.TestCase):
         wr.weak_property = obj
 
         # Delete it and make sure that we don't segfault on garbage collection.
-        del obj
-        gc.collect()
+        with autoreleasepool():
+            del obj
+            gc.collect()
 
         # Assert that the obj was deallocated.
         self.assertIsNone(wr.weak_property)

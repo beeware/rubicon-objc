@@ -935,8 +935,8 @@ class ObjCInstance:
         return self
 
     def __del__(self):
-        """Release the corresponding objc instance."""
-        send_message(self, "release", restype=objc_id, argtypes=[])
+        """Autorelease the corresponding objc instance."""
+        send_message(self, "autorelease", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
