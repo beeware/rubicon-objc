@@ -16,16 +16,17 @@ Rubicon Objective-C operates at runtime, it cannot make use of ARC.
 Reference counting in Rubicon Objective-C
 -----------------------------------------
 
-You won't have to manage reference counts in Python, Rubicon Objective-C will do
-that work for you. It does so by tracking when you gain ownership of an object.
-This is the case when you create an Objective-C instance using a method whose
-name begins with ``alloc``, ``new``, ``copy``, or ``mutableCopy``. Rubicon
-Objective-C will then insert a ``release`` call when the Python variable that
-corresponds to the Objective-C instance is deallocated.
+In most cases, you won't have to manage reference counts in Python, Rubicon
+Objective-C will do that work for you. It does so by calling ``retain`` on an
+object when Rubicon creates a ``ObjCInstance`` for it on the Python side, and calling
+``autorelease`` when the ``ObjCInstance`` is garbage collected in Python. Retaining
+the object ensures it is not deallocated while it is still referenced from Python
+and releasing it again on ``__del__`` ensures that we do not leak memory.
 
 An exception to this is when you manually ``retain`` an object. Rubicon
 Objective-C will not keep track of such retain calls and you will be
-responsible to insert appropriate ``release`` calls yourself.
+responsible to insert appropriate ``release`` or ``autorelease`` calls yourself
+to prevent leaking memory.
 
 You will also need to pay attention to reference counting in case of **weak
 references**. In Objective-C, creating a **weak reference** means that the
