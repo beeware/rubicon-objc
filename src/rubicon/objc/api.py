@@ -778,16 +778,13 @@ class ObjCInstance:
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
         except AttributeError:
             # This assumes that objects never change their class after they are
-            # seen by Rubicon. This can occur because:
-            #
-            #    Objective-C runtime provides a function object_setClass that
-            #    can change an object's class after creation, and some code
-            #    manipulates objects' isa pointers directly (although the latter
-            #    is no longer officially supported by Apple). This is not
-            #    commonly done in practice, and even then it is usually only
-            #    done during object creation/initialization, so it's basically
-            #    safe to assume that an object's class will never change after
-            #    it's been wrapped in an ObjCInstance.
+            # seen by Rubicon. This can occur because the Objective-C runtime provides a
+            # function object_setClass that can change an object's class after creation,
+            # and some code manipulates objects' isa pointers directly (although the
+            # latter is no longer officially supported by Apple). This is not commonly
+            # done in practice, and even then it is usually only done during object
+            # creation/initialization, so it's basically safe to assume that an object's
+            # class will never change after it's been wrapped in an ObjCInstance.
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_objc_class", ObjCClass(libobjc.object_getClass(self))
             )
