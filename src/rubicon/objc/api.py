@@ -932,7 +932,9 @@ class ObjCInstance:
         return self
 
     def __del__(self):
-        """Autorelease the corresponding objc instance."""
+        # Autorelease our reference on garbage collection of the Python wrapper. We use
+        # release instead of autorelease allow ObjC to take ownership of an object when
+        # it is passed for example to a strong property.
         send_message(self, "autorelease", restype=objc_id, argtypes=[])
 
     def __str__(self):
