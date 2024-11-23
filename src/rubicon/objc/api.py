@@ -833,65 +833,7 @@ class ObjCInstance:
                 # If an ObjCInstance already exists for the Objective-C object,
                 # reuse it instead of creating a second ObjCInstance for the
                 # same object.
-                cached = cls._cached_objects[object_ptr.value]
-
-                # In a high-churn environment, it is possible for an object to
-                # be deallocated, and the same memory address be re-used on the
-                # Objective-C side, but the Python wrapper object for the
-                # original instance has *not* been cleaned up. In that
-                # situation, an attempt to wrap the *new* Objective-C object
-                # instance will cause a false positive cache hit; returning a
-                # Python object that has a class that doesn't match the class of
-                # the new instance.
-                #
-                # To prevent this, when we get a cache hit on an ObjCInstance,
-                # use the raw Objective-C API on the pointer to get the current
-                # class of the object referred to by the pointer. If there's a
-                # discrepancy, purge the cache for the memory address, and
-                # re-create the object.
-                #
-                # We do this both when the type *is* ObjCInstance (the case when
-                # instantiating a literal ObjCInstance()), and when type is an
-                # ObjCClass instance (e.g., ObjClass("Example"), which is the
-                # type of a directly instantiated instance of Example.
-                #
-                # We *don't* do this when the type *is* ObjCClass,
-                # ObjCMetaClass, as there's a race condition on startup -
-                # retrieving `.objc_class` causes the creation of ObjCClass
-                # objects, which will cause cache hits trying to re-use existing
-                # ObjCClass objects. However, ObjCClass instances generally
-                # won't be recycled or reused, so that should be safe to exclude
-                # from the cache freshness check.
-                #
-                # One edge case with this approach: if the old and new
-                # Objective-C objects have the same class, they won't be
-                # identified as a stale object, and they'll re-use the same
-                # Python wrapper. This effectively means id(obj) isn't a
-                # reliable instance identifier... but (a) this won't be a common
-                # case; (b) this flaw exists in pure Python and Objective-C as
-                # well, because default object identity is tied to memory
-                # allocation; and (c) the stale wrapper will *work*, because
-                # it's the correct class.
-                #
-                # Refs #249.
-                if cls == ObjCInstance or isinstance(cls, ObjCInstance):
-                    cached_class_name = cached.objc_class.name
-                    current_class_name = libobjc.class_getName(
-                        libobjc.object_getClass(object_ptr)
-                    ).decode("utf-8")
-                    if (
-                        current_class_name != cached_class_name
-                        and not current_class_name.endswith(f"_{cached_class_name}")
-                    ):
-                        # There has been a cache hit, but the object is a
-                        # different class, treat this as a cache miss. We don't
-                        # *just* look for an *exact* class name match, because
-                        # some Cocoa/UIKit classes undergo a class name change
-                        # between `alloc()` and `init()` (e.g., `NSWindow`
-                        # becomes `NSKVONotifying_NSWindow`). Refs #257.
-                        raise KeyError(object_ptr.value)
-
-                return cached
+                return cls._cached_objects[object_ptr.value]
             except KeyError:
                 pass
 
