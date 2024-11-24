@@ -814,10 +814,17 @@ class ObjCInstance:
         :func:`register_type_for_objcclass`. Creating an :class:`ObjCInstance`
         from a ``nil`` pointer returns ``None``.
 
-        Rubicon currently does not perform any automatic memory management on
-        the Objective-C object wrapped in an :class:`ObjCInstance`. It is the
-        user's responsibility to ``retain`` and ``release`` wrapped objects as
-        needed, like in Objective-C code without automatic reference counting.
+        Rubicon retains an Objective-C object when it is wrapped in an
+        :class:`ObjCInstance` and autoreleases it when the :class:`ObjCInstance` is
+        garbage collected.
+
+        The only exception to this are objects returned by methods which create an
+        object (starting with "alloc", "new", "copy", or "mutableCopy"). We do not
+        explicitly retain them because we already own objects created by us, but we do
+        autorelease them on garbage collection of the Python wrapper.
+
+        This ensures that the :class:`ObjCInstance` can always be  used from Python
+        without segfaults while preventing Rubicon from leaking memory.
         """
 
         # Make sure that object_ptr is wrapped in an objc_id.
