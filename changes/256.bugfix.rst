@@ -1,2 +1,10 @@
 Retain Objective-C objects when creating Python wrappers and release them when the
-Python wrapped is garbage collected.
+Python wrapped is garbage collected. This means that manual ``retain`` calls and
+subsequent ``release`` or ``autorelease`` calls from Python are no longer needed with
+very few exceptions such as:
+
+1. When implementing methods like ``copy`` that are supposed to create an object, if
+   the returned object is not actually newly created.
+2. When dealing with side effects of methods like ``init`` that may release an object
+   which is still referenced from Python. See for example
+   https://github.com/beeware/toga/issues/2468.

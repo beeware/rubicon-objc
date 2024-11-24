@@ -1,0 +1,4 @@
+Rubicon no longer skips releasing an Objective-C objects when its Python wrapped is
+garbage collected. This means that fewer ``retain`` than ``release`` calls will cause
+segfaults on garbage collection. Review your code carefully for unbalanced ``retain``
+and ``release`` calls before updating.
