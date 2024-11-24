@@ -223,7 +223,7 @@ class ObjCMethod:
 
         # Convert result to python type if it is an instance or class pointer.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = ObjCInstance(result, returned_from_method=self.name)
+            result = ObjCInstance(result, _returned_from_method=self.name)
 
         return result
 
@@ -795,7 +795,7 @@ class ObjCInstance:
         return SEL(f"rubicon.objc.py_attr.{name}")
 
     def __new__(
-        cls, object_ptr, _name=None, _bases=None, _ns=None, returned_from_method=b""
+        cls, object_ptr, _name=None, _bases=None, _ns=None, _returned_from_method=b""
     ):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or
         anything that can be cast to one, such as a :class:`~ctypes.c_void_p`,
@@ -839,7 +839,7 @@ class ObjCInstance:
 
             # Explicitly retain the instance on first handover to Python unless we
             # received it from a method that gives us ownership already.
-            if not returned_from_method.startswith(
+            if not _returned_from_method.startswith(
                 (b"alloc", b"new", b"copy", b"mutableCopy")
             ):
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
