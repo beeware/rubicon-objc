@@ -1914,35 +1914,39 @@ class RubiconTest(unittest.TestCase):
         # Assert that the obj was deallocated.
         self.assertIsNone(wr.weak_property)
 
-    # def test_objcinstance_dealloc(self):
-    #     class DeallocTester(NSObject):
-    #         attr0 = objc_property()
-    #         attr1 = objc_property(weak=True)
-    #
-    #         @objc_method
-    #         def dealloc(self):
-    #             self._did_dealloc = True
-    #
-    #     obj = DeallocTester.alloc().init()
-    #     obj.__dict__["_did_dealloc"] = False
-    #
-    #     attr0 = NSObject.alloc().init()
-    #     attr1 = NSObject.alloc().init()
-    #
-    #     obj.attr0 = attr0
-    #     obj.attr1 = attr1
-    #
-    #     self.assertEqual(attr0.retainCount(), 2)
-    #     self.assertEqual(attr1.retainCount(), 1)
-    #
-    #     # ObjC object will be deallocated, can only access Python attributes afterwards.
-    #     obj.release()
-    #
-    #     self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
-    #     self.assertEqual(
-    #         attr0.retainCount(), 1, "strong property value was not released"
-    #     )
-    #     self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
+    def test_objcinstance_dealloc(self):
+
+        class DeallocTester(NSObject):
+            did_dealloc = False
+
+            attr0 = objc_property()
+            attr1 = objc_property(weak=True)
+
+            @objc_method
+            def dealloc(self):
+                DeallocTester.did_dealloc = True
+
+        obj = DeallocTester.alloc().init()
+
+        attr0 = NSObject.alloc().init()
+        attr1 = NSObject.alloc().init()
+
+        obj.attr0 = attr0
+        obj.attr1 = attr1
+
+        self.assertEqual(attr0.retainCount(), 2)
+        self.assertEqual(attr1.retainCount(), 1)
+
+        # ObjC object will be deallocated, can only access Python attributes afterwards.
+        with autoreleasepool():
+            del obj
+            gc.collect()
+
+        self.assertTrue(DeallocTester.did_dealloc, "custom dealloc did not run")
+        self.assertEqual(
+            attr0.retainCount(), 1, "strong property value was not released"
+        )
+        self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
 
     def test_partial_with_override(self):
         """If one method in a partial is overridden, that doesn't impact lookup of other partial targets"""
