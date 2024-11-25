@@ -1869,53 +1869,54 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr_python_object())
 
-    def test_objcinstance_created_retained(self):
+    def test_objcinstance_returned_lifecycle(self):
+        """An object is retained when creating an ObjCInstance for it and autoreleased
+        when the ObjCInstance is garbage collected.
+        """
         with autoreleasepool():
-            # Create an object which we don't own.
+            # Return an object which we don't own. Using str(uuid) here instead of a
+            # common string ensure that we get have the only reference.
             NSString = ObjCClass("NSString")
             obj = NSString.stringWithString(str(uuid.uuid4()))
 
-        self.assertEqual(obj.retainCount(), 1)
+        # Check that the object is retained when we create the ObjCInstance.
+        self.assertEqual(obj.retainCount(), 1, "object was not retained")
 
-    def test_objcinstance_explicit_retained(self):
-        # Create an object which we own.
-        obj = NSObject.alloc().init()
-
-        self.assertEqual(obj.retainCount(), 1)
-
-    def test_objcinstance_created_gc_released(self):
-        # Create an object which we own.
-        obj = NSObject.alloc().init()
-
+        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
         wr = ObjcWeakref.alloc().init()
         wr.weak_property = obj
 
-        # Delete it and make sure that we don't segfault on garbage collection.
         with autoreleasepool():
             del obj
             gc.collect()
 
             self.assertIsNotNone(
-                wr.weak_property, "object was deallocated before end of autorelease pool"
+                wr.weak_property,
+                "object was deallocated before end of autorelease pool",
             )
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
-    def test_objcinstance_explicit_retained_gc_released(self):
+    def test_objcinstance_owned_lifecycle(self):
+        """An object is not additionally retained when we create it ourselves. It is
+        autoreleased when the ObjCInstance is garbage collected.
+        """
+        # Create an object which we own. Check that is has a retain count of 1.
+        obj = NSObject.alloc().init()
+
+        self.assertEqual(obj.retainCount(), 1, "object should be retained only once")
+
+        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        wr = ObjcWeakref.alloc().init()
+        wr.weak_property = obj
+
         with autoreleasepool():
-            # Create an object which we don't own.
-            NSString = ObjCClass("NSString")
-            obj = NSString.stringWithString(str(uuid.uuid4()))
-
-            wr = ObjcWeakref.alloc().init()
-            wr.weak_property = obj
-
-            # Delete it and make sure that we don't segfault on garbage collection.
             del obj
             gc.collect()
 
             self.assertIsNotNone(
-                wr.weak_property, "object was deallocated before end of autorelease pool"
+                wr.weak_property,
+                "object was deallocated before end of autorelease pool",
             )
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
