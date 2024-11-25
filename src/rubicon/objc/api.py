@@ -91,6 +91,10 @@ __all__ = [
 # the Python objects are not destroyed if they are otherwise no Python references left.
 _keep_alive_objects = {}
 
+# Methods that return an object with is implicitly retained by the caller.
+# See https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmRules.html
+_OWNERSHIP_METHOD_PREFIXES = (b"alloc", b"new", b"copy", b"mutableCopy")
+
 
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
@@ -768,6 +772,8 @@ class ObjCInstance:
     # Refs #251.
     _instance_lock = threading.RLock()
 
+    _python_refcount = 0
+
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
@@ -840,15 +846,22 @@ class ObjCInstance:
                 # If an ObjCInstance already exists for the Objective-C object,
                 # reuse it instead of creating a second ObjCInstance for the
                 # same object.
-                return cls._cached_objects[object_ptr.value]
+                cached_obj = cls._cached_objects[object_ptr.value]
+
+                # If a cached instance was returned from a call such as `copy` or
+                # `mutableCopy`, we take ownership of an additional refcount. Release
+                # it here to prevent leaking memory, Python already owns a refcount from
+                # when the item was put in the cache.
+                if _returned_from_method.startswith(_OWNERSHIP_METHOD_PREFIXES):
+                    send_message(object_ptr, "release", restype=objc_id, argtypes=[])
+
+                return cached_obj
             except KeyError:
                 pass
 
             # Explicitly retain the instance on first handover to Python unless we
             # received it from a method that gives us ownership already.
-            if not _returned_from_method.startswith(
-                (b"alloc", b"new", b"copy", b"mutableCopy")
-            ):
+            if not _returned_from_method.startswith(_OWNERSHIP_METHOD_PREFIXES):
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
