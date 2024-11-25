@@ -1921,6 +1921,39 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
+    def test_objcinstance_fake_copy_lifecycle(self):
+
+        class CopyTest(NSObject):
+            @objc_method
+            def copyWithZone_(self):
+                # Return an immutable `self` with an additional retain count. This
+                # represents the third option for implementing copyWithZone from
+                # https://developer.apple.com/documentation/foundation/nscopying#overview.
+                self.retain()
+                return self
+
+        obj0 = CopyTest.alloc().init()
+        obj1 = obj0.copy()
+        obj2 = obj0.copy()
+
+        self.assertIs(obj0, obj1)
+        self.assertIs(obj0, obj2)
+
+        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        wr = ObjcWeakref.alloc().init()
+        wr.weak_property = obj0
+
+        with autoreleasepool():
+            del obj0, obj1, obj2
+            gc.collect()
+
+            self.assertIsNotNone(
+                wr.weak_property,
+                "object was deallocated before end of autorelease pool",
+            )
+
+        self.assertIsNone(wr.weak_property, "object was not deallocated")
+
     def test_objcinstance_dealloc(self):
 
         class DeallocTester(NSObject):
