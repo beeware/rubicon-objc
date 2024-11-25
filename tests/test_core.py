@@ -1937,7 +1937,9 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(attr0.retainCount(), 2)
         self.assertEqual(attr1.retainCount(), 1)
 
-        # ObjC object will be deallocated, can only access Python attributes afterwards.
+        # Delete the Python wrapper and ensure that the Objective-C object is
+        # deallocated after ``autorelease`` on garbage collection. This will also
+        # rigger a decrement in the retain count of attr0.
         with autoreleasepool():
             del obj
             gc.collect()
