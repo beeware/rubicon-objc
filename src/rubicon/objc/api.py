@@ -823,7 +823,7 @@ class ObjCInstance:
         explicitly retain them because we already own objects created by us, but we do
         autorelease them on garbage collection of the Python wrapper.
 
-        This ensures that the :class:`ObjCInstance` can always be  used from Python
+        This ensures that the :class:`ObjCInstance` can always be used from Python
         without segfaults while preventing Rubicon from leaking memory.
         """
 
