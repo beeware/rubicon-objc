@@ -1895,8 +1895,11 @@ class RubiconTest(unittest.TestCase):
             del obj
             gc.collect()
 
-        # Assert that the obj was deallocated.
-        self.assertIsNone(wr.weak_property)
+            self.assertIsNotNone(
+                wr.weak_property, "object was deallocated before end of autorelease pool"
+            )
+
+        self.assertIsNone(wr.weak_property, "object was not deallocated")
 
     def test_objcinstance_explicit_retained_gc_released(self):
         with autoreleasepool():
@@ -1911,8 +1914,11 @@ class RubiconTest(unittest.TestCase):
             del obj
             gc.collect()
 
-        # Assert that the obj was deallocated.
-        self.assertIsNone(wr.weak_property)
+            self.assertIsNotNone(
+                wr.weak_property, "object was deallocated before end of autorelease pool"
+            )
+
+        self.assertIsNone(wr.weak_property, "object was not deallocated")
 
     def test_objcinstance_dealloc(self):
 
