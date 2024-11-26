@@ -1962,7 +1962,7 @@ class RubiconTest(unittest.TestCase):
 
         # Delete the Python wrapper and ensure that the Objective-C object is
         # deallocated after ``autorelease`` on garbage collection. This will also
-        # rigger a decrement in the retain count of attr0.
+        # trigger a decrement in the retain count of attr0.
         with autoreleasepool():
             del obj
             gc.collect()
