@@ -897,7 +897,8 @@ class ObjCInstance:
         # Autorelease our reference on garbage collection of the Python wrapper. We use
         # autorelease instead of release to allow ObjC to take ownership of an object when
         # it is returned from a factory method.
-        send_message(self, "autorelease", restype=objc_id, argtypes=[])
+        if send_message and objc_id:
+            send_message(self, "autorelease", restype=objc_id, argtypes=[])
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
