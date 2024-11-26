@@ -29,7 +29,6 @@ from rubicon.objc import (
     CGPoint,
     CGRect,
     CGSize,
-    NSDictionary,
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
