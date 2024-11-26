@@ -1911,7 +1911,7 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
-    def test_objcinstance_fake_copy_lifecycle(self):
+    def test_objcinstance_immutable_copy_lifecycle(self):
         """If the same object is returned from multiple creation methods, it is still
         freed on Python garbage collection."""
         with autoreleasepool():
