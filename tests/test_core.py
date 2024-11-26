@@ -29,6 +29,7 @@ from rubicon.objc import (
     CGPoint,
     CGRect,
     CGSize,
+    NSDictionary,
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
@@ -1922,17 +1923,11 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
     def test_objcinstance_fake_copy_lifecycle(self):
-
-        class CopyTest(NSObject):
-            @objc_method
-            def copyWithZone_(self):
-                # Return an immutable `self` with an additional retain count. This
-                # represents the third option for implementing copyWithZone from
-                # https://developer.apple.com/documentation/foundation/nscopying#overview.
-                self.retain()
-                return self
-
-        obj0 = CopyTest.alloc().init()
+        """If the same object is returned from multipe creation methods, it is still
+        freed on Python garbage collection."""
+        obj0 = NSDictionary.alloc().initWithObjects(
+            [str(uuid.uuid4())], forKeys=[str(uuid.uuid4())]
+        )
         obj1 = obj0.copy()
         obj2 = obj0.copy()
 
