@@ -91,7 +91,7 @@ __all__ = [
 # the Python objects are not destroyed if they are otherwise no Python references left.
 _keep_alive_objects = {}
 
-# Methods that return an object with is implicitly retained by the caller.
+# Methods that return an object which is implicitly retained by the caller.
 # See https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmRules.html
 _OWNERSHIP_METHOD_PREFIXES = (b"alloc", b"new", b"copy", b"mutableCopy")
 
