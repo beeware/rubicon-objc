@@ -771,6 +771,7 @@ class ObjCInstance:
     #
     # Refs #251.
     _instance_lock = threading.RLock()
+
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
