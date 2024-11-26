@@ -771,9 +771,6 @@ class ObjCInstance:
     #
     # Refs #251.
     _instance_lock = threading.RLock()
-
-    _python_refcount = 0
-
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
