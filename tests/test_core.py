@@ -61,6 +61,9 @@ from rubicon.objc.types import __LP64__
 
 from . import OSX_VERSION, rubiconharness
 
+NSArray = ObjCClass("NSArray")
+NSString = ObjCClass("NSString")
+
 
 class ObjcWeakref(NSObject):
     weak_property = objc_property(weak=True)
@@ -278,10 +281,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcclass_instancecheck(self):
         """isinstance works with an ObjCClass as the second argument."""
-
-        NSArray = ObjCClass("NSArray")
-        NSString = ObjCClass("NSString")
-
         self.assertIsInstance(NSObject.new(), NSObject)
         self.assertIsInstance(at(""), NSString)
         self.assertIsInstance(at(""), NSObject)
@@ -294,10 +293,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcclass_subclasscheck(self):
         """issubclass works with an ObjCClass as the second argument."""
-
-        NSArray = ObjCClass("NSArray")
-        NSString = ObjCClass("NSString")
-
         self.assertTrue(issubclass(NSObject, NSObject))
         self.assertTrue(issubclass(NSString, NSObject))
         self.assertTrue(issubclass(NSObject.objc_class, NSObject))
@@ -329,8 +324,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcprotocol_subclasscheck(self):
         """issubclass works with an ObjCProtocol as the second argument."""
-
-        NSString = ObjCClass("NSString")
         NSCopying = ObjCProtocol("NSCopying")
         NSCoding = ObjCProtocol("NSCoding")
         NSSecureCoding = ObjCProtocol("NSSecureCoding")
@@ -448,8 +441,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_method_varargs_send(self):
         """A variadic method can be called using send_message."""
-
-        NSString = ObjCClass("NSString")
         formatted = send_message(
             NSString,
             "stringWithFormat:",
@@ -1877,7 +1868,6 @@ class RubiconTest(unittest.TestCase):
         with autoreleasepool():
             # Return an object which we don't own. Using str(uuid) here instead of a
             # common string ensure that we get have the only reference.
-            NSString = ObjCClass("NSString")
             obj = NSString.stringWithString(str(uuid.uuid4()))
 
         # Check that the object is retained when we create the ObjCInstance.
@@ -1925,11 +1915,10 @@ class RubiconTest(unittest.TestCase):
     def test_objcinstance_fake_copy_lifecycle(self):
         """If the same object is returned from multipe creation methods, it is still
         freed on Python garbage collection."""
-        obj0 = NSDictionary.alloc().initWithObjects(
-            [str(uuid.uuid4())], forKeys=[str(uuid.uuid4())]
-        )
-        obj1 = obj0.copy()
-        obj2 = obj0.copy()
+        with autoreleasepool():
+            obj0 = NSString.stringWithString(str(uuid.uuid4()))
+            obj1 = obj0.copy()
+            obj2 = obj0.copy()
 
         self.assertIs(obj0, obj1)
         self.assertIs(obj0, obj2)
