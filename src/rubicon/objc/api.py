@@ -92,8 +92,8 @@ __all__ = [
 _keep_alive_objects = {}
 
 # Methods that return an object which is implicitly retained by the caller.
-# See https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/MemoryMgmt/Articles/mmRules.html
-_OWNERSHIP_METHOD_PREFIXES = (b"alloc", b"new", b"copy", b"mutableCopy")
+# See https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-method-families.
+_RETURNS_RETAINED_PREFIXES = (b"init", b"alloc", b"new", b"copy", b"mutableCopy")
 
 
 def encoding_from_annotation(f, offset=1):
@@ -213,6 +213,16 @@ class ObjCMethod:
                 converted_args.append(arg)
         else:
             converted_args = args
+
+        # Init methods consume their `self` argument (the receiver), see
+        # https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-init.
+        # To avoid segfaults on garbage collection if `init` does not return `self` but
+        # a different object or None, we issue an additional retain. This needs to be
+        # done before calling the method.
+        # Note that if `init` does return the same object, it will already be in our
+        # cache and balanced with a `release` on cache retrieval.
+        if self.name.startswith(b"init"):
+            send_message(receiver, "retain", restype=objc_id, argtypes=[])
 
         result = send_message(
             receiver,
@@ -860,7 +870,7 @@ class ObjCInstance:
 
             # Explicitly retain the instance on first handover to Python unless we
             # received it from a method that gives us ownership already.
-            if not _returned_from_method.startswith(_OWNERSHIP_METHOD_PREFIXES):
+            if not _returned_from_method.startswith(_RETURNS_RETAINED_PREFIXES):
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
