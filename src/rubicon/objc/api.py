@@ -846,11 +846,12 @@ class ObjCInstance:
                 # same object.
                 cached_obj = cls._cached_objects[object_ptr.value]
 
-                # If a cached instance was returned from a call such as `copy` or
-                # `mutableCopy`, we take ownership of an additional refcount. Release
-                # it here to prevent leaking memory, Python already owns a refcount from
-                # when the item was put in the cache.
-                if _returned_from_method.startswith(_OWNERSHIP_METHOD_PREFIXES):
+                # A `copy` call can return the original object if it is immutable. This
+                # is typically done for optimization. If this object is already in our
+                # cache, we take ownership of an additional reference. Release it here
+                # to prevent leaking memory.
+                # See https://developer.apple.com/documentation/foundation/nscopying.
+                if _returned_from_method.startswith(_RETURNS_RETAINED_PREFIXES):
                     send_message(object_ptr, "release", restype=objc_id, argtypes=[])
 
                 return cached_obj
