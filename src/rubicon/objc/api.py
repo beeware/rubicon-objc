@@ -93,7 +93,18 @@ _keep_alive_objects = {}
 
 # Methods that return an object which is implicitly retained by the caller.
 # See https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-method-families.
-_RETURNS_RETAINED_PREFIXES = (b"init", b"alloc", b"new", b"copy", b"mutableCopy")
+_RETURNS_RETAINED_FAMILIES = {"init", "alloc", "new", "copy", "mutableCopy"}
+
+
+def _get_method_family(method_name: str) -> str:
+    # See https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families.
+    method_name = method_name.lstrip("_").split(":")[0]
+    leading_lowercases = []
+    for c in method_name:
+        if c.isupper():
+            break
+        leading_lowercases.append(c)
+    return "".join(leading_lowercases)
 
 
 def encoding_from_annotation(f, offset=1):
@@ -221,7 +232,7 @@ class ObjCMethod:
         # done before calling the method.
         # Note that if `init` does return the same object, it will already be in our
         # cache and balanced with a `release` on cache retrieval.
-        if self.name.startswith(b"init"):
+        if _get_method_family(self.name.decode()) == "init":
             send_message(receiver, "retain", restype=objc_id, argtypes=[])
 
         result = send_message(
@@ -849,6 +860,8 @@ class ObjCInstance:
         if not object_ptr.value:
             return None
 
+        method_family = _get_method_family(_returned_from_method.decode())
+
         with ObjCInstance._instance_lock:
             try:
                 # If an ObjCInstance already exists for the Objective-C object,
@@ -861,7 +874,7 @@ class ObjCInstance:
                 # cache, we take ownership of an additional reference. Release it here
                 # to prevent leaking memory.
                 # See https://developer.apple.com/documentation/foundation/nscopying.
-                if _returned_from_method.startswith(_RETURNS_RETAINED_PREFIXES):
+                if method_family in _RETURNS_RETAINED_FAMILIES:
                     send_message(object_ptr, "release", restype=objc_id, argtypes=[])
 
                 return cached_obj
@@ -870,7 +883,7 @@ class ObjCInstance:
 
             # Explicitly retain the instance on first handover to Python unless we
             # received it from a method that gives us ownership already.
-            if not _returned_from_method.startswith(_RETURNS_RETAINED_PREFIXES):
+            if method_family not in _RETURNS_RETAINED_FAMILIES:
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
