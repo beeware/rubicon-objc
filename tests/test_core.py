@@ -55,12 +55,22 @@ from rubicon.objc import (
     send_super,
     types,
 )
-from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
+from rubicon.objc.runtime import (
+    autoreleasepool,
+    get_ivar,
+    libobjc,
+    load_library,
+    objc_id,
+    set_ivar,
+)
 from rubicon.objc.types import __LP64__
 
 from . import OSX_VERSION, rubiconharness
 
+appkit = load_library("AppKit")
+
 NSArray = ObjCClass("NSArray")
+NSImage = ObjCClass("NSImage")
 NSString = ObjCClass("NSString")
 
 
@@ -1936,6 +1946,37 @@ class RubiconTest(unittest.TestCase):
             )
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
+
+    def test_objcinstance_init_change_lifecycle(self):
+        """We do not leak memory if init returns a different object than it
+        received in alloc."""
+        with autoreleasepool():
+            obj_allocated = NSString.alloc()
+            obj_initialized = obj_allocated.initWithString(str(uuid.uuid4()))
+
+        self.assertNotEqual(obj_allocated.ptr.value, obj_initialized.ptr.value)
+
+        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        wr = ObjcWeakref.alloc().init()
+        wr.weak_property = obj_initialized
+
+        with autoreleasepool():
+            del obj_allocated, obj_initialized
+            gc.collect()
+
+            self.assertIsNotNone(
+                wr.weak_property,
+                "object was deallocated before end of autorelease pool",
+            )
+
+        self.assertIsNone(wr.weak_property, "object was not deallocated")
+
+    def test_objcinstance_init_none(self):
+        """We do segfault if init returns a different object than it received in alloc."""
+        with autoreleasepool():
+            image = NSImage.alloc().initWithContentsOfFile("/no/file/here")
+
+        self.assertIsNone(image)
 
     def test_objcinstance_dealloc(self):
 
