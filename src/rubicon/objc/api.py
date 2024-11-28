@@ -1571,16 +1571,21 @@ class ObjCClass(ObjCInstance, type):
 
         methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
 
-        if self.superclass is not None:
-            if self.superclass.methods_ptr is None:
-                with self.superclass.cache_lock:
-                    self.superclass._load_methods()
+        # Traverse superclasses and load methods.
+        superclass = self.superclass
+
+        while superclass is not None:
+            if superclass.methods_ptr is None:
+                with superclass.cache_lock:
+                    superclass._load_methods()
 
             # Prime this class' partials list with a list from the superclass.
-            for first, superpartial in self.superclass.partial_methods.items():
+            for first, superpartial in superclass.partial_methods.items():
                 partial = ObjCPartialMethod(first)
                 self.partial_methods[first] = partial
                 partial.methods.update(superpartial.methods)
+
+            superclass = superclass.superclass
 
         for i in range(methods_ptr_count.value):
             method = methods_ptr[i]
