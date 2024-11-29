@@ -55,6 +55,7 @@ from rubicon.objc import (
     send_super,
     types,
 )
+from rubicon.objc.api import get_method_family
 from rubicon.objc.runtime import (
     autoreleasepool,
     get_ivar,
@@ -2183,3 +2184,9 @@ class RubiconTest(unittest.TestCase):
             thread.start()
             work()
             thread.join()
+
+    def test_get_method_family(self):
+        self.assertEqual(get_method_family("perform"), "perform")
+        self.assertEqual(get_method_family("performWith:"), "perform")
+        self.assertEqual(get_method_family("_performWith:"), "perform")
+        self.assertEqual(get_method_family("_perform:with:"), "perform")

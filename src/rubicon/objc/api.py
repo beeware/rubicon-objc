@@ -96,8 +96,10 @@ _keep_alive_objects = {}
 _RETURNS_RETAINED_FAMILIES = {"init", "alloc", "new", "copy", "mutableCopy"}
 
 
-def _get_method_family(method_name: str) -> str:
-    # See https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families.
+def get_method_family(method_name: str) -> str:
+    """Returns the method family from the method name. See
+    https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families for
+    documentation on method families and corresponding selector names."""
     method_name = method_name.lstrip("_").split(":")[0]
     leading_lowercases = []
     for c in method_name:
@@ -232,7 +234,7 @@ class ObjCMethod:
         # done before calling the method.
         # Note that if `init` does return the same object, it will already be in our
         # cache and balanced with a `release` on cache retrieval.
-        if _get_method_family(self.name.decode()) == "init":
+        if get_method_family(self.name.decode()) == "init":
             send_message(receiver, "retain", restype=objc_id, argtypes=[])
 
         result = send_message(
@@ -860,7 +862,7 @@ class ObjCInstance:
         if not object_ptr.value:
             return None
 
-        method_family = _get_method_family(_returned_from_method.decode())
+        method_family = get_method_family(_returned_from_method.decode())
 
         with ObjCInstance._instance_lock:
             try:
