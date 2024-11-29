@@ -869,11 +869,17 @@ class ObjCInstance:
                 # same object.
                 cached_obj = cls._cached_objects[object_ptr.value]
 
-                # A `copy` call can return the original object if it is immutable. This
-                # is typically done for optimization. If this object is already in our
-                # cache, we take ownership of an additional reference. Release it here
-                # to prevent leaking memory.
-                # See https://developer.apple.com/documentation/foundation/nscopying.
+                # We can get a cache hit for methods that return an implicitly retained
+                # object. This is typically the case when:
+                #
+                # 1. A `copy` returns the original object if it is immutable. This is
+                #    typically done for optimization. See
+                #    https://developer.apple.com/documentation/foundation/nscopying.
+                # 2. An `init` call returns an object which we already own from a
+                #    previous `alloc` call. See `init` handling in ObjCMethod. __call__.
+                #
+                # If the object is already in our cache, we end up owning more than one
+                # refcount. We release this additional refcount to prevent memory leaks.
                 if method_family in _RETURNS_RETAINED_FAMILIES:
                     send_message(object_ptr, "release", restype=objc_id, argtypes=[])
 
