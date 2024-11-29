@@ -308,18 +308,25 @@ class ObjCPartialMethod:
             args.insert(0, first_arg)
             rest = ("",) + order
 
+        # Try to use cached ObjCBoundMethod
         try:
             name = self.methods[rest]
+            meth = receiver.objc_class._cache_method(name)
+            return meth(receiver, *args)
         except KeyError:
-            # Reconstruct the full method name from arguments.
-            if first_arg is self._sentinel:
-                name = self.name_start
-            else:
-                name = f"{self.name_start}:{':'.join(kwargs.keys())}:"
+            pass
+
+        # Reconstruct the full method name from arguments and look up actual method.
+        if first_arg is self._sentinel:
+            name = self.name_start
+        else:
+            name = f"{self.name_start}:{':'.join(kwargs.keys())}:"
 
         meth = receiver.objc_class._cache_method(name)
 
         if meth:
+            # Update methods cache and call method.
+            self.methods[rest] = name
             return meth(receiver, *args)
 
         raise ValueError(
