@@ -109,6 +109,31 @@ def get_method_family(method_name: str) -> str:
     return "".join(leading_lowercases)
 
 
+def method_name_to_tuple(name: str) -> (str, tuple[str, ...]):
+    """
+    Performs the following transformation:
+
+    "methodWithArg0:withArg1:withArg2" -> "methodWithArg0", ("", "withArg1", "withArg2")
+    "methodWithArg0:" -> "methodWithArg0", ("", )
+    "method" -> "method", ()
+
+    The first element of the returned tuple is the "base name" of the method. The second
+    element is a tuple with its argument names.
+    """
+    # Selectors end with a colon if the method takes arguments.
+    if name.endswith(":"):
+        first, *rest, _ = name.split(":")
+        # Insert an empty string in order to indicate that the method
+        # takes a first argument as a positional argument.
+        rest.insert(0, "")
+        rest = tuple(rest)
+    else:
+        first = name
+        rest = ()
+
+    return first, rest
+
+
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
     hints = typing.get_type_hints(f)
@@ -262,7 +287,10 @@ class ObjCPartialMethod:
         super().__init__()
 
         self.name_start = name_start
-        self.methods = {}  # Initialized in ObjCClass._load_methods
+
+        # A dictionary mapping from a tuple of argument names to the full method name.
+        # Initialized in ObjCClass._load_methods
+        self.methods: dict[tuple[str, ...], str] = {}
 
     def __repr__(self):
         return f"{type(self).__qualname__}({self.name_start!r})"
@@ -1597,24 +1625,15 @@ class ObjCClass(ObjCInstance, type):
             name = libobjc.method_getName(method).name.decode("utf-8")
             self.instance_method_ptrs[name] = method
 
-            # Selectors end with a colon if the method takes arguments.
-            if name.endswith(":"):
-                first, *rest, _ = name.split(":")
-                # Insert an empty string in order to indicate that the method
-                # takes a first argument as a positional argument.
-                rest.insert(0, "")
-                rest = tuple(rest)
-            else:
-                first = name
-                rest = ()
+            base_name, argument_names = method_name_to_tuple(name)
 
             try:
-                partial = self.partial_methods[first]
+                partial = self.partial_methods[base_name]
             except KeyError:
-                partial = ObjCPartialMethod(first)
-                self.partial_methods[first] = partial
+                partial = ObjCPartialMethod(base_name)
+                self.partial_methods[base_name] = partial
 
-            partial.methods[rest] = name
+            partial.methods[argument_names] = name
 
         # Set the list of methods for the class to the computed list.
         self.methods_ptr = methods_ptr
