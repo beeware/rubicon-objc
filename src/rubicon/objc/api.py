@@ -311,18 +311,21 @@ class ObjCPartialMethod:
         try:
             name = self.methods[rest]
         except KeyError:
+            # Reconstruct the full method name from arguments.
             if first_arg is self._sentinel:
-                specified_sel = self.name_start
+                name = self.name_start
             else:
-                specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
-            raise ValueError(
-                f"Invalid selector {specified_sel}. Available selectors are: "
-                f"{', '.join(sel for sel in self.methods.values())}"
-            ) from None
+                name = f"{self.name_start}:{':'.join(kwargs.keys())}:"
 
         meth = receiver.objc_class._cache_method(name)
 
-        return meth(receiver, *args)
+        if meth:
+            return meth(receiver, *args)
+
+        raise ValueError(
+            f"Invalid selector {name}. Available selectors are: "
+            f"{', '.join(sel for sel in self.methods.values())}"
+        ) from None
 
 
 class ObjCBoundMethod:
