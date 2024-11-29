@@ -1416,7 +1416,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_class_properties(self):
         """A Python class can have ObjC properties with synthesized getters and setters
-        of ObjCInstance type ."""
+        of ObjCInstance type."""
 
         NSURL = ObjCClass("NSURL")
 
