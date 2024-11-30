@@ -1613,21 +1613,16 @@ class ObjCClass(ObjCInstance, type):
         if self.methods_ptr is not None:
             raise RuntimeError(f"{self}._load_methods cannot be called more than once")
 
-        # Traverse superclasses and load methods.
-        superclass = self.superclass
-
-        while superclass is not None:
-            if superclass.methods_ptr is None:
-                with superclass.cache_lock:
-                    superclass._load_methods()
+        if self.superclass is not None:
+            if self.superclass.methods_ptr is None:
+                with self.superclass.cache_lock:
+                    self.superclass._load_methods()
 
             # Prime this class' partials list with a list from the superclass.
-            for first, superpartial in superclass.partial_methods.items():
+            for first, superpartial in self.superclass.partial_methods.items():
                 partial = ObjCPartialMethod(first)
                 self.partial_methods[first] = partial
                 partial.methods.update(superpartial.methods)
-
-            superclass = superclass.superclass
 
         # Load methods for this class.
         methods_ptr_count = c_uint(0)
