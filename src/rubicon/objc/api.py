@@ -1041,7 +1041,6 @@ class ObjCInstance:
         # ObjCBoundMethod, so that it will be able to keep the ObjCInstance
         # alive for chained calls like MyClass.alloc().init() where the
         # object created by alloc() is not assigned to a variable.
-        method = None
 
         # If there's a property with this name; return the value directly.
         # If the name ends with _, we can shortcut this step, because it's
@@ -1054,15 +1053,19 @@ class ObjCInstance:
         # See if there's a partial method starting with the given name,
         # either on self's class or any of the superclasses.
         cls = self.objc_class
-        # Load the class's methods if we haven't done so yet.
-        with cls.cache_lock:
-            if cls.methods_ptr is None:
-                cls._load_methods()
+        while cls is not None:
+            # Load the class's methods if we haven't done so yet.
+            with cls.cache_lock:
+                if cls.methods_ptr is None:
+                    cls._load_methods()
 
-        try:
-            method = cls.partial_methods[name]
-        except KeyError:
-            pass
+                try:
+                    method = cls.partial_methods[name]
+                    break
+                except KeyError:
+                    cls = cls.superclass
+        else:
+            method = None
 
         if method is None or set(method.methods) == {()}:
             # Find a method whose full name matches the given name if no partial
