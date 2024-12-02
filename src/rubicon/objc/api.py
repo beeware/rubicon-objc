@@ -259,7 +259,8 @@ class ObjCMethod:
         # done before calling the method.
         # Note that if `init` does return the same object, it will already be in our
         # cache and balanced with a `release` on cache retrieval.
-        if get_method_family(self.name.decode()) == "init":
+        method_family = get_method_family(self.name.decode())
+        if method_family == "init":
             send_message(receiver, "retain", restype=objc_id, argtypes=[])
 
         result = send_message(
@@ -274,8 +275,11 @@ class ObjCMethod:
             return result
 
         # Convert result to python type if it is an instance or class pointer.
+        # Explicitly retain the instance on first handover to Python unless we
+        # received it from a method that gives us ownership already.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = ObjCInstance(result, _returned_from_method=self.name)
+            implicitly_owned = method_family in _RETURNS_RETAINED_FAMILIES
+            result = ObjCInstance(result, _implicitly_owned=implicitly_owned)
 
         return result
 
@@ -860,7 +864,7 @@ class ObjCInstance:
         return SEL(f"rubicon.objc.py_attr.{name}")
 
     def __new__(
-        cls, object_ptr, _name=None, _bases=None, _ns=None, _returned_from_method=b""
+        cls, object_ptr, _name=None, _bases=None, _ns=None, _implicitly_owned=False
     ):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or
         anything that can be cast to one, such as a :class:`~ctypes.c_void_p`,
@@ -900,8 +904,6 @@ class ObjCInstance:
         if not object_ptr.value:
             return None
 
-        method_family = get_method_family(_returned_from_method.decode())
-
         with ObjCInstance._instance_lock:
             try:
                 # If an ObjCInstance already exists for the Objective-C object,
@@ -920,7 +922,7 @@ class ObjCInstance:
                 #
                 # If the object is already in our cache, we end up owning more than one
                 # refcount. We release this additional refcount to prevent memory leaks.
-                if method_family in _RETURNS_RETAINED_FAMILIES:
+                if _implicitly_owned:
                     send_message(object_ptr, "release", restype=objc_id, argtypes=[])
 
                 return cached_obj
@@ -929,7 +931,7 @@ class ObjCInstance:
 
             # Explicitly retain the instance on first handover to Python unless we
             # received it from a method that gives us ownership already.
-            if method_family not in _RETURNS_RETAINED_FAMILIES:
+            if not _implicitly_owned:
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
