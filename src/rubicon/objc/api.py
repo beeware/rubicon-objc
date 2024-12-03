@@ -1382,15 +1382,19 @@ class ObjCClass(ObjCInstance, type):
         new_attrs = {
             "name": objc_class_name,
             "methods_ptr": None,
-            # Mapping of name -> method pointer
+            # Mapping of name -> method pointer. Populated on first attribute access,
+            # does not contain methods from superclasses.
             "instance_method_ptrs": {},
-            # Mapping of name -> instance method
+            # Cache of ObjCMethod instance keyed by selector name. Cache misses are
+            # looked up on instance_method_ptrs for this class and its superclasses.
             "instance_methods": {},
-            # Mapping of name -> (accessor method, mutator method)
+            # Mapping of name -> (accessor method, mutator method).
             "instance_properties": {},
             # Explicitly declared properties
             "forced_properties": set(),
-            # Mapping of first keyword -> ObjCPartialMethod instances
+            # Cache of ObjCPartialMethod instances keyed by first keyword of the
+            # selector name. Cache misses are looked up on instance_method_ptrs for this
+            # class and its superclasses.
             "partial_methods": {},
             # A re-entrant thread lock moderating access to the ObjCClass
             # method/property cache. This ensures that only one thread populates
@@ -1626,10 +1630,10 @@ class ObjCClass(ObjCInstance, type):
                 except KeyError:
                     self.partial_methods[first] = superpartial
 
+        # Load methods for this class if not already done.
         if self.methods_ptr is not None:
             return
 
-        # Load methods for this class.
         methods_ptr_count = c_uint(0)
         methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
 
