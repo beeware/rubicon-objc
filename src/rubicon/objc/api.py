@@ -104,7 +104,7 @@ def get_method_family(method_name: str) -> str:
     for family in _RETURNS_RETAINED_FAMILIES:
         if first_component.startswith(family):
             remainder = first_component.removeprefix(family)
-            if remainder == "" or remainder[0].isupper():
+            if remainder == "" or not remainder[0].islower():
                 return family
 
     return ""
