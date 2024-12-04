@@ -1973,7 +1973,7 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
     def test_objcinstance_init_none(self):
-        """We do segfault if init returns a different object than it received in alloc."""
+        """We do not segfault if init returns nil."""
         with autoreleasepool():
             image = NSImage.alloc().initWithContentsOfFile("/no/file/here")
 
