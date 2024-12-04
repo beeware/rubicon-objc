@@ -254,9 +254,9 @@ class ObjCMethod:
 
         # Init methods consume their `self` argument (the receiver), see
         # https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-init.
-        # To avoid segfaults on garbage collection if `init` does not return `self` but
-        # a different object or None, we issue an additional retain. This needs to be
-        # done before calling the method.
+        # To ensure the receiver pointer remains valid if `init` does not return `self`
+        # but a different object or None, we issue an additional retain. This needs to
+        # be done before calling the method.
         # Note that if `init` does return the same object, it will already be in our
         # cache and balanced with a `release` on cache retrieval.
         method_family = get_method_family(self.name.decode())
