@@ -114,7 +114,7 @@ def method_name_to_tuple(name: str) -> (str, tuple[str, ...]):
     """
     Performs the following transformation:
 
-    "methodWithArg0:withArg1:withArg2" -> "methodWithArg0", ("", "withArg1", "withArg2")
+    "methodWithArg0:withArg1:withArg2:" -> "methodWithArg0", ("", "withArg1", "withArg2")
     "methodWithArg0:" -> "methodWithArg0", ("", )
     "method" -> "method", ()
 
