@@ -2214,4 +2214,5 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(get_method_family("_mutableCopy:"), "mutableCopy")
         self.assertEqual(get_method_family("_mutableCopy:with:"), "mutableCopy")
         self.assertEqual(get_method_family("_mutableCopyWith:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy_with:"), "mutableCopy")
         self.assertEqual(get_method_family("_mutableCopying:"), "")
