@@ -2186,7 +2186,9 @@ class RubiconTest(unittest.TestCase):
             thread.join()
 
     def test_get_method_family(self):
-        self.assertEqual(get_method_family("perform"), "perform")
-        self.assertEqual(get_method_family("performWith:"), "perform")
-        self.assertEqual(get_method_family("_performWith:"), "perform")
-        self.assertEqual(get_method_family("_perform:with:"), "perform")
+        self.assertEqual(get_method_family("mutableCopy"), "mutableCopy")
+        self.assertEqual(get_method_family("mutableCopy:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy:with:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopyWith:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopying:"), "")

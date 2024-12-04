@@ -100,13 +100,14 @@ def get_method_family(method_name: str) -> str:
     """Returns the method family from the method name. See
     https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families for
     documentation on method families and corresponding selector names."""
-    method_name = method_name.lstrip("_").split(":")[0]
-    leading_lowercases = []
-    for c in method_name:
-        if c.isupper():
-            break
-        leading_lowercases.append(c)
-    return "".join(leading_lowercases)
+    first_component = method_name.lstrip("_").split(":")[0]
+    for family in _RETURNS_RETAINED_FAMILIES:
+        if first_component.startswith(family):
+            remainder = first_component.removeprefix(family)
+            if remainder == "" or remainder[0].isupper():
+                return family
+
+    return ""
 
 
 def method_name_to_tuple(name: str) -> (str, tuple[str, ...]):
