@@ -1883,7 +1883,7 @@ class RubiconTest(unittest.TestCase):
         # Check that the object is retained when we create the ObjCInstance.
         self.assertEqual(obj.retainCount(), 1, "object was not retained")
 
-        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
         wr = ObjcWeakref.alloc().init()
         wr.weak_property = obj
 
@@ -1907,7 +1907,7 @@ class RubiconTest(unittest.TestCase):
 
         self.assertEqual(obj.retainCount(), 1, "object should be retained only once")
 
-        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
         wr = ObjcWeakref.alloc().init()
         wr.weak_property = obj
 
@@ -1933,7 +1933,7 @@ class RubiconTest(unittest.TestCase):
         self.assertIs(obj0, obj1)
         self.assertIs(obj0, obj2)
 
-        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
         wr = ObjcWeakref.alloc().init()
         wr.weak_property = obj0
 
@@ -1957,12 +1957,35 @@ class RubiconTest(unittest.TestCase):
 
         self.assertNotEqual(obj_allocated.ptr.value, obj_initialized.ptr.value)
 
-        # Assign the object to an Obj-C weakref and delete it check that it is dealloced.
+        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
         wr = ObjcWeakref.alloc().init()
         wr.weak_property = obj_initialized
 
         with autoreleasepool():
             del obj_allocated, obj_initialized
+            gc.collect()
+
+            self.assertIsNotNone(
+                wr.weak_property,
+                "object was deallocated before end of autorelease pool",
+            )
+
+        self.assertIsNone(wr.weak_property, "object was not deallocated")
+
+    def test_objcinstance_alloc_lifecycle(self):
+        """We properly retain and release objects that are allocated but never
+        initialized."""
+        with autoreleasepool():
+            obj_allocated = NSObject.alloc()
+
+        self.assertEqual(obj_allocated.retainCount(), 1)
+
+        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
+        wr = ObjcWeakref.alloc().init()
+        wr.weak_property = obj_allocated
+
+        with autoreleasepool():
+            del obj_allocated
             gc.collect()
 
             self.assertIsNotNone(
