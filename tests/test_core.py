@@ -1895,7 +1895,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_returned_lifecycle(self):
         """An object is retained when creating an ObjCInstance for it without implicit
-        ownership It is autoreleased when the ObjCInstance is garbage collected.
+        ownership. It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
