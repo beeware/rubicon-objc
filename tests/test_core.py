@@ -22,6 +22,7 @@ from ctypes import (
 )
 from decimal import Decimal
 from enum import Enum
+from typing import Callable
 
 from rubicon.objc import (
     SEL,
@@ -32,6 +33,7 @@ from rubicon.objc import (
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
+    NSMutableArray,
     NSObject,
     NSObjectProtocol,
     NSPoint,
@@ -89,6 +91,26 @@ class struct_oddly_sized(Structure):
 
 class struct_large(Structure):
     _fields_ = [("x", c_char * 17)]
+
+
+def assert_lifecycle(
+    test: unittest.TestCase, object_constructor: Callable[[], ObjCInstance]
+) -> None:
+    obj = object_constructor()
+
+    wr = ObjcWeakref.alloc().init()
+    wr.weak_property = obj
+
+    with autoreleasepool():
+        del obj
+        gc.collect()
+
+        test.assertIsNotNone(
+            wr.weak_property,
+            "object was deallocated before end of autorelease pool",
+        )
+
+    test.assertIsNone(wr.weak_property, "object was not deallocated")
 
 
 class RubiconTest(unittest.TestCase):
@@ -1898,102 +1920,104 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr.weak_property, "object was not deallocated")
 
-    def test_objcinstance_owned_lifecycle(self):
-        """An object is not additionally retained when we create it ourselves. It is
-        autoreleased when the ObjCInstance is garbage collected.
+    def test_objcinstance_alloc_lifecycle(self):
+        """We properly retain and release objects that are allocated but never
+        initialized."""
+
+        def create_object():
+            with autoreleasepool():
+                return NSObject.alloc()
+
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_alloc_init_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it
+        through an alloc().init() chain. It is autoreleased when the ObjCInstance is
+        garbage collected.
         """
-        # Create an object which we own. Check that is has a retain count of 1.
-        obj = NSObject.alloc().init()
 
-        self.assertEqual(obj.retainCount(), 1, "object should be retained only once")
+        def create_object():
+            return NSObject.alloc().init()
 
-        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
-        wr = ObjcWeakref.alloc().init()
-        wr.weak_property = obj
+        assert_lifecycle(self, create_object)
 
-        with autoreleasepool():
-            del obj
-            gc.collect()
+    def test_objcinstance_new_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a new call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
 
-            self.assertIsNotNone(
-                wr.weak_property,
-                "object was deallocated before end of autorelease pool",
-            )
+        def create_object():
+            return NSObject.new()
 
-        self.assertIsNone(wr.weak_property, "object was not deallocated")
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_copy_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a copy call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
+
+        def create_object():
+            obj = NSMutableArray.alloc().init()
+            copy = obj.copy()
+
+            # Check that the copy is a new object.
+            self.assertIsNot(obj, copy)
+            self.assertNotEqual(obj.ptr.value, copy.ptr.value)
+
+            return copy
+
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_mutable_copy_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a mutableCopy call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
+
+        def create_object():
+            obj = NSMutableArray.alloc().init()
+            copy = obj.mutableCopy()
+
+            # Check that the copy is a new object.
+            self.assertIsNot(obj, copy)
+            self.assertNotEqual(obj.ptr.value, copy.ptr.value)
+
+            return copy
+
+        assert_lifecycle(self, create_object)
 
     def test_objcinstance_immutable_copy_lifecycle(self):
         """If the same object is returned from multiple creation methods, it is still
         freed on Python garbage collection."""
-        with autoreleasepool():
-            obj0 = NSString.stringWithString(str(uuid.uuid4()))
-            obj1 = obj0.copy()
-            obj2 = obj0.copy()
 
-        self.assertIs(obj0, obj1)
-        self.assertIs(obj0, obj2)
+        def create_object():
+            with autoreleasepool():
+                obj = NSString.stringWithString(str(uuid.uuid4()))
+                copy = obj.copy()
 
-        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
-        wr = ObjcWeakref.alloc().init()
-        wr.weak_property = obj0
+            # Check that the copy the same object as the original.
+            self.assertIs(obj, copy)
+            self.assertEqual(obj.ptr.value, copy.ptr.value)
 
-        with autoreleasepool():
-            del obj0, obj1, obj2
-            gc.collect()
+            return obj
 
-            self.assertIsNotNone(
-                wr.weak_property,
-                "object was deallocated before end of autorelease pool",
-            )
-
-        self.assertIsNone(wr.weak_property, "object was not deallocated")
+        assert_lifecycle(self, create_object)
 
     def test_objcinstance_init_change_lifecycle(self):
         """We do not leak memory if init returns a different object than it
         received in alloc."""
-        with autoreleasepool():
-            obj_allocated = NSString.alloc()
-            obj_initialized = obj_allocated.initWithString(str(uuid.uuid4()))
 
-        self.assertNotEqual(obj_allocated.ptr.value, obj_initialized.ptr.value)
+        def create_object():
+            with autoreleasepool():
+                obj_allocated = NSString.alloc()
+                obj_initialized = obj_allocated.initWithString(str(uuid.uuid4()))
 
-        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
-        wr = ObjcWeakref.alloc().init()
-        wr.weak_property = obj_initialized
+            # Check that the initialized object is a different one than the allocated.
+            self.assertIsNot(obj_allocated, obj_initialized)
+            self.assertNotEqual(obj_allocated.ptr.value, obj_initialized.ptr.value)
 
-        with autoreleasepool():
-            del obj_allocated, obj_initialized
-            gc.collect()
+            return obj_initialized
 
-            self.assertIsNotNone(
-                wr.weak_property,
-                "object was deallocated before end of autorelease pool",
-            )
-
-        self.assertIsNone(wr.weak_property, "object was not deallocated")
-
-    def test_objcinstance_alloc_lifecycle(self):
-        """We properly retain and release objects that are allocated but never
-        initialized."""
-        with autoreleasepool():
-            obj_allocated = NSObject.alloc()
-
-        self.assertEqual(obj_allocated.retainCount(), 1)
-
-        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
-        wr = ObjcWeakref.alloc().init()
-        wr.weak_property = obj_allocated
-
-        with autoreleasepool():
-            del obj_allocated
-            gc.collect()
-
-            self.assertIsNotNone(
-                wr.weak_property,
-                "object was deallocated before end of autorelease pool",
-            )
-
-        self.assertIsNone(wr.weak_property, "object was not deallocated")
+        assert_lifecycle(self, create_object)
 
     def test_objcinstance_init_none(self):
         """We do not segfault if init returns nil."""
