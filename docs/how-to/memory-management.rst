@@ -2,6 +2,9 @@
 Memory management for Objective-C instances
 ===========================================
 
+Reference counting in Objective-C
+=================================
+
 Reference counting works differently in Objective-C compared to Python. Python
 will automatically track where variables are referenced and free memory when
 the reference count drops to zero whereas Objective-C uses explicit reference
@@ -13,28 +16,36 @@ When enabling automatic reference counting (ARC), the appropriate calls for
 memory management will be inserted for you at compile-time. However, since
 Rubicon Objective-C operates at runtime, it cannot make use of ARC.
 
-Reference counting in Rubicon Objective-C
------------------------------------------
+Reference management in Rubicon
+===============================
 
-You won't have to manage reference counts in Python, Rubicon Objective-C will do
-that work for you. It does so by tracking when you gain ownership of an object.
-This is the case when you create an Objective-C instance using a method whose
-name begins with ``alloc``, ``new``, ``copy``, or ``mutableCopy``. Rubicon
-Objective-C will then insert a ``release`` call when the Python variable that
-corresponds to the Objective-C instance is deallocated.
+In most cases, you won't have to manage reference counts in Python, Rubicon
+Objective-C will do that work for you. It does so by calling ``retain`` on an
+object when Rubicon creates a ``ObjCInstance`` for it on the Python side, and calling
+``autorelease`` when the ``ObjCInstance`` is garbage collected in Python. Retaining
+the object ensures it is not deallocated while it is still referenced from Python
+and releasing it again on ``__del__`` ensures that we do not leak memory.
 
-An exception to this is when you manually ``retain`` an object. Rubicon
-Objective-C will not keep track of such retain calls and you will be
-responsible to insert appropriate ``release`` calls yourself.
+The only exception to this is when you create an object -- which is always done
+through methods starting with "alloc", "new", "copy", or "mutableCopy". Rubicon does
+not explicitly retain such objects because we own objects created by us, but Rubicon
+does autorelease them when the Python wrapper is garbage collected.
 
-You will also need to pay attention to reference counting in case of **weak
-references**. In Objective-C, creating a **weak reference** means that the
-reference count of the object is not incremented and the object will still be
+Rubicon Objective-C will not keep track if you additionally manually ``retain`` an
+object. You will be responsible to insert appropriate ``release`` or ``autorelease``
+calls yourself to prevent leaking memory.
+
+Weak references in Objective-C
+------------------------------
+
+You will need to pay attention to reference counting in case of **weak
+references**. In Objective-C, as in Python, creating a weak reference means that
+the reference count of the object is not incremented and the object will be
 deallocated when no strong references remain. Any weak references to the object
 are then set to ``nil``.
 
-Some objects will store references to other objects as a weak reference. Such
-properties will be declared in the Apple developer documentation as
+Some Objective-C objects store references to other objects as a weak reference.
+Such properties will be declared in the Apple developer documentation as
 "@property(weak)" or "@property(assign)". This is commonly the case for
 delegates. For example, in the code below, the ``NSOutlineView`` only stores a
 weak reference to the object which is assigned to its delegate property:

@@ -6,6 +6,7 @@ import math
 import sys
 import threading
 import unittest
+import uuid
 import weakref
 from ctypes import (
     ArgumentError,
@@ -21,6 +22,7 @@ from ctypes import (
 )
 from decimal import Decimal
 from enum import Enum
+from typing import Callable
 
 from rubicon.objc import (
     SEL,
@@ -31,6 +33,7 @@ from rubicon.objc import (
     NSEdgeInsets,
     NSEdgeInsetsMake,
     NSMakeRect,
+    NSMutableArray,
     NSObject,
     NSObjectProtocol,
     NSPoint,
@@ -54,10 +57,28 @@ from rubicon.objc import (
     send_super,
     types,
 )
-from rubicon.objc.runtime import autoreleasepool, get_ivar, libobjc, objc_id, set_ivar
+from rubicon.objc.api import get_method_family
+from rubicon.objc.runtime import (
+    autoreleasepool,
+    get_ivar,
+    libobjc,
+    load_library,
+    objc_id,
+    set_ivar,
+)
 from rubicon.objc.types import __LP64__
 
 from . import OSX_VERSION, rubiconharness
+
+appkit = load_library("AppKit")
+
+NSArray = ObjCClass("NSArray")
+NSImage = ObjCClass("NSImage")
+NSString = ObjCClass("NSString")
+
+
+class ObjcWeakref(NSObject):
+    weak_property = objc_property(weak=True)
 
 
 class struct_int_sized(Structure):
@@ -70,6 +91,26 @@ class struct_oddly_sized(Structure):
 
 class struct_large(Structure):
     _fields_ = [("x", c_char * 17)]
+
+
+def assert_lifecycle(
+    test: unittest.TestCase, object_constructor: Callable[[], ObjCInstance]
+) -> None:
+    obj = object_constructor()
+
+    wr = ObjcWeakref.alloc().init()
+    wr.weak_property = obj
+
+    with autoreleasepool():
+        del obj
+        gc.collect()
+
+        test.assertIsNotNone(
+            wr.weak_property,
+            "object was deallocated before end of autorelease pool",
+        )
+
+    test.assertIsNone(wr.weak_property, "object was not deallocated")
 
 
 class RubiconTest(unittest.TestCase):
@@ -272,10 +313,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcclass_instancecheck(self):
         """isinstance works with an ObjCClass as the second argument."""
-
-        NSArray = ObjCClass("NSArray")
-        NSString = ObjCClass("NSString")
-
         self.assertIsInstance(NSObject.new(), NSObject)
         self.assertIsInstance(at(""), NSString)
         self.assertIsInstance(at(""), NSObject)
@@ -288,10 +325,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcclass_subclasscheck(self):
         """issubclass works with an ObjCClass as the second argument."""
-
-        NSArray = ObjCClass("NSArray")
-        NSString = ObjCClass("NSString")
-
         self.assertTrue(issubclass(NSObject, NSObject))
         self.assertTrue(issubclass(NSString, NSObject))
         self.assertTrue(issubclass(NSObject.objc_class, NSObject))
@@ -323,8 +356,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcprotocol_subclasscheck(self):
         """issubclass works with an ObjCProtocol as the second argument."""
-
-        NSString = ObjCClass("NSString")
         NSCopying = ObjCProtocol("NSCopying")
         NSCoding = ObjCProtocol("NSCoding")
         NSSecureCoding = ObjCProtocol("NSSecureCoding")
@@ -442,8 +473,6 @@ class RubiconTest(unittest.TestCase):
 
     def test_method_varargs_send(self):
         """A variadic method can be called using send_message."""
-
-        NSString = ObjCClass("NSString")
         formatted = send_message(
             NSString,
             "stringWithFormat:",
@@ -1409,7 +1438,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(r.size.height, 78)
 
     def test_class_properties(self):
-        """A Python class can have ObjC properties with synthesized getters and setters."""
+        """A Python class can have ObjC properties with synthesized getters and setters
+        of ObjCInstance type."""
 
         NSURL = ObjCClass("NSURL")
 
@@ -1459,6 +1489,9 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(box.data)
 
     def test_class_python_properties(self):
+        """A Python class can have ObjC properties with synthesized getters and setters
+        of Python type."""
+
         class PythonObjectProperties(NSObject):
             object = objc_property(object)
 
@@ -1494,9 +1527,10 @@ class RubiconTest(unittest.TestCase):
         properties.object = o
         self.assertIs(properties.object, o)
 
-        del o
-        del properties
-        gc.collect()
+        with autoreleasepool():
+            del o
+            del properties
+            gc.collect()
 
         self.assertIsNone(wr())
 
@@ -1859,76 +1893,136 @@ class RubiconTest(unittest.TestCase):
 
         self.assertIsNone(wr_python_object())
 
-    def test_objcinstance_release_owned(self):
-        # Create an object which we own.
-        obj = NSObject.alloc().init()
+    def test_objcinstance_returned_lifecycle(self):
+        """An object is retained when creating an ObjCInstance for it without implicit
+        ownership. It is autoreleased when the ObjCInstance is garbage collected.
+        """
 
-        # Check that it is marked for release.
-        self.assertTrue(obj._needs_release)
+        def create_object():
+            with autoreleasepool():
+                return NSString.stringWithString(str(uuid.uuid4()))
 
-        # Explicitly release the object.
-        obj.release()
+        assert_lifecycle(self, create_object)
 
-        # Check that we no longer need to release it.
-        self.assertFalse(obj._needs_release)
+    def test_objcinstance_alloc_lifecycle(self):
+        """We properly retain and release objects that are allocated but never
+        initialized."""
 
-        # Delete it and make sure that we don't segfault on garbage collection.
-        del obj
-        gc.collect()
+        def create_object():
+            with autoreleasepool():
+                return NSObject.alloc()
 
-    def test_objcinstance_autorelease_owned(self):
-        # Create an object which we own.
-        obj = NSObject.alloc().init()
+        assert_lifecycle(self, create_object)
 
-        # Check that it is marked for release.
-        self.assertTrue(obj._needs_release)
+    def test_objcinstance_alloc_init_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it
+        through an alloc().init() chain. It is autoreleased when the ObjCInstance is
+        garbage collected.
+        """
 
-        # Explicitly release the object.
-        res = obj.autorelease()
+        def create_object():
+            return NSObject.alloc().init()
 
-        # Check that autorelease call returned the object itself.
-        self.assertIs(obj, res)
+        assert_lifecycle(self, create_object)
 
-        # Check that we no longer need to release it.
-        self.assertFalse(obj._needs_release)
+    def test_objcinstance_new_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a new call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
 
-        # Delete it and make sure that we don't segfault on garbage collection.
-        del obj
-        gc.collect()
+        def create_object():
+            return NSObject.new()
 
-    def test_objcinstance_retain_release(self):
-        NSString = ObjCClass("NSString")
+        assert_lifecycle(self, create_object)
 
-        # Create an object which we don't own.
-        string = NSString.stringWithString("test")
+    def test_objcinstance_copy_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a copy call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
 
-        # Check that it is not marked for release.
-        self.assertFalse(string._needs_release)
+        def create_object():
+            obj = NSMutableArray.alloc().init()
+            copy = obj.copy()
 
-        # Explicitly retain the object.
-        res = string.retain()
+            # Check that the copy is a new object.
+            self.assertIsNot(obj, copy)
+            self.assertNotEqual(obj.ptr.value, copy.ptr.value)
 
-        # Check that autorelease call returned the object itself.
-        self.assertIs(string, res)
+            return copy
 
-        # Manually release the object.
-        string.release()
+        assert_lifecycle(self, create_object)
 
-        # Delete it and make sure that we don't segfault on garbage collection.
-        del string
-        gc.collect()
+    def test_objcinstance_mutable_copy_lifecycle(self):
+        """An object is not additionally retained when we create and initialize it with
+        a mutableCopy call. It is autoreleased when the ObjCInstance is garbage collected.
+        """
+
+        def create_object():
+            obj = NSMutableArray.alloc().init()
+            copy = obj.mutableCopy()
+
+            # Check that the copy is a new object.
+            self.assertIsNot(obj, copy)
+            self.assertNotEqual(obj.ptr.value, copy.ptr.value)
+
+            return copy
+
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_immutable_copy_lifecycle(self):
+        """If the same object is returned from multiple creation methods, it is still
+        freed on Python garbage collection."""
+
+        def create_object():
+            with autoreleasepool():
+                obj = NSString.stringWithString(str(uuid.uuid4()))
+                copy = obj.copy()
+
+            # Check that the copy the same object as the original.
+            self.assertIs(obj, copy)
+            self.assertEqual(obj.ptr.value, copy.ptr.value)
+
+            return obj
+
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_init_change_lifecycle(self):
+        """We do not leak memory if init returns a different object than it
+        received in alloc."""
+
+        def create_object():
+            with autoreleasepool():
+                obj_allocated = NSString.alloc()
+                obj_initialized = obj_allocated.initWithString(str(uuid.uuid4()))
+
+            # Check that the initialized object is a different one than the allocated.
+            self.assertIsNot(obj_allocated, obj_initialized)
+            self.assertNotEqual(obj_allocated.ptr.value, obj_initialized.ptr.value)
+
+            return obj_initialized
+
+        assert_lifecycle(self, create_object)
+
+    def test_objcinstance_init_none(self):
+        """We do not segfault if init returns nil."""
+        with autoreleasepool():
+            image = NSImage.alloc().initWithContentsOfFile("/no/file/here")
+
+        self.assertIsNone(image)
 
     def test_objcinstance_dealloc(self):
+
         class DeallocTester(NSObject):
+            did_dealloc = False
+
             attr0 = objc_property()
             attr1 = objc_property(weak=True)
 
             @objc_method
             def dealloc(self):
-                self._did_dealloc = True
+                DeallocTester.did_dealloc = True
 
         obj = DeallocTester.alloc().init()
-        obj.__dict__["_did_dealloc"] = False
 
         attr0 = NSObject.alloc().init()
         attr1 = NSObject.alloc().init()
@@ -1939,10 +2033,14 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(attr0.retainCount(), 2)
         self.assertEqual(attr1.retainCount(), 1)
 
-        # ObjC object will be deallocated, can only access Python attributes afterwards.
-        obj.release()
+        # Delete the Python wrapper and ensure that the Objective-C object is
+        # deallocated after ``autorelease`` on garbage collection. This will also
+        # trigger a decrement in the retain count of attr0.
+        with autoreleasepool():
+            del obj
+            gc.collect()
 
-        self.assertTrue(obj._did_dealloc, "custom dealloc did not run")
+        self.assertTrue(DeallocTester.did_dealloc, "custom dealloc did not run")
         self.assertEqual(
             attr0.retainCount(), 1, "strong property value was not released"
         )
@@ -1961,70 +2059,6 @@ class RubiconTest(unittest.TestCase):
         # The base class implementation can still be found an invoked.
         obj.method(2)
         self.assertEqual(obj.baseIntField, 2)
-
-    def test_stale_instance_cache(self):
-        """Instances returned by the ObjCInstance cache are checked for staleness (#249)"""
-        # Wrap 2 classes with different method lists
-        Example = ObjCClass("Example")
-        Thing = ObjCClass("Thing")
-
-        # Create objects of 2 different types.
-        old = Example.alloc().init()
-        thing = Thing.alloc().init()
-
-        # Deliberately poison the ObjCInstance Cache, making the memory address
-        # for thing point at the "old" example. This matches what happens when a
-        # memory address is re-allocated by the Objective-C runtime
-        ObjCInstance._cached_objects[thing.ptr.value] = old
-
-        # Obtain a fresh address-based wrapper for the same Thing instance.
-        new_thing = Thing(thing.ptr.value)
-        self.assertEqual(new_thing.objc_class, Thing)
-        self.assertIsInstance(new_thing, ObjCInstance)
-
-        try:
-            # Try to access an method known to exist on Thing
-            new_thing.computeSize(NSSize(37, 42))
-        except AttributeError:
-            # If a stale wrapper is returned, new_example will be of type Example,
-            # so the expected method won't exist, causing an AttributeError.
-            self.fail("Stale wrapper returned")
-
-    def test_stale_instance_cache_implicit(self):
-        """Implicit instances returned by the ObjCInstance cache are checked for staleness (#249)"""
-        # Wrap 2 classes with different method lists
-        Example = ObjCClass("Example")
-        Thing = ObjCClass("Thing")
-
-        # Create objects of 2 different types.
-        old = Example.alloc().init()
-        example = Example.alloc().init()
-        thing = Thing.alloc().init()
-
-        # Store the reference to Thing on example.
-        example.thing = thing
-
-        # Deliberately poison the ObjCInstance cache, making the memory address
-        # for thing point at the "old" example. This matches what happens when a memory
-        # address is re-allocated by the Objective-C runtime.
-        ObjCInstance._cached_objects[thing.ptr.value] = old
-
-        # When accessing a property that returns an ObjC id, we don't have
-        # type information, so the metaclass at time of construction is ObjCInstance,
-        # rather than an instance of ObjCClass.
-        #
-        # Access the thing property to return the generic instance wrapper
-        new_thing = example.thing
-        self.assertEqual(new_thing.objc_class, Thing)
-        self.assertIsInstance(new_thing, ObjCInstance)
-
-        try:
-            # Try to access an method known to exist on Thing
-            new_thing.computeSize(NSSize(37, 42))
-        except AttributeError:
-            # If a stale wrapper is returned, new_example will be of type Example,
-            # so the expected method won't exist, causing an AttributeError.
-            self.fail("Stale wrapper returned")
 
     def test_compatible_class_name_change(self):
         """If the class name changes in a compatible way, the wrapper isn't recreated (#257)"""
@@ -2181,3 +2215,12 @@ class RubiconTest(unittest.TestCase):
             thread.start()
             work()
             thread.join()
+
+    def test_get_method_family(self):
+        self.assertEqual(get_method_family("mutableCopy"), "mutableCopy")
+        self.assertEqual(get_method_family("mutableCopy:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy:with:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopyWith:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopy_with:"), "mutableCopy")
+        self.assertEqual(get_method_family("_mutableCopying:"), "")

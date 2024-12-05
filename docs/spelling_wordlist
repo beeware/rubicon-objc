@@ -1,6 +1,9 @@
 Alea
+alloc
 Autorelease
+autorelease
 autoreleased
+autoreleases
 Bugfixes
 callables
 CPython
@@ -22,6 +25,7 @@ lookups
 macOS
 metaclass
 metaclasses
+mutableCopy
 namespace
 namespaces
 ObjC

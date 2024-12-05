@@ -91,6 +91,49 @@ __all__ = [
 # the Python objects are not destroyed if they are otherwise no Python references left.
 _keep_alive_objects = {}
 
+# Methods that return an object which is implicitly retained by the caller.
+# See https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-method-families.
+_RETURNS_RETAINED_FAMILIES = {"init", "alloc", "new", "copy", "mutableCopy"}
+
+
+def get_method_family(method_name: str) -> str:
+    """Returns the method family from the method name. See
+    https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families for
+    documentation on method families and corresponding selector names."""
+    first_component = method_name.lstrip("_").split(":")[0]
+    for family in _RETURNS_RETAINED_FAMILIES:
+        if first_component.startswith(family):
+            remainder = first_component.removeprefix(family)
+            if remainder == "" or not remainder[0].islower():
+                return family
+
+    return ""
+
+
+def method_name_to_tuple(name: str) -> (str, tuple[str, ...]):
+    """
+    Performs the following transformation:
+
+    "methodWithArg0:withArg1:withArg2:" -> "methodWithArg0", ("", "withArg1", "withArg2")
+    "methodWithArg0:" -> "methodWithArg0", ("", )
+    "method" -> "method", ()
+
+    The first element of the returned tuple is the "base name" of the method. The second
+    element is a tuple with its argument names.
+    """
+    # Selectors end with a colon if the method takes arguments.
+    if name.endswith(":"):
+        first, *rest, _ = name.split(":")
+        # Insert an empty string in order to indicate that the method
+        # takes a first argument as a positional argument.
+        rest.insert(0, "")
+        rest = tuple(rest)
+    else:
+        first = name
+        rest = ()
+
+    return first, rest
+
 
 def encoding_from_annotation(f, offset=1):
     argspec = inspect.getfullargspec(inspect.unwrap(f))
@@ -210,6 +253,17 @@ class ObjCMethod:
         else:
             converted_args = args
 
+        # Init methods consume their `self` argument (the receiver), see
+        # https://clang.llvm.org/docs/AutomaticReferenceCounting.html#semantics-of-init.
+        # To ensure the receiver pointer remains valid if `init` does not return `self`
+        # but a different object or None, we issue an additional retain. This needs to
+        # be done before calling the method.
+        # Note that if `init` does return the same object, it will already be in our
+        # cache and balanced with a `release` on cache retrieval.
+        method_family = get_method_family(self.name.decode())
+        if method_family == "init":
+            send_message(receiver, "retain", restype=objc_id, argtypes=[])
+
         result = send_message(
             receiver,
             self.selector,
@@ -222,13 +276,11 @@ class ObjCMethod:
             return result
 
         # Convert result to python type if it is an instance or class pointer.
+        # Explicitly retain the instance on first handover to Python unless we
+        # received it from a method that gives us ownership already.
         if self.restype is not None and issubclass(self.restype, objc_id):
-            result = ObjCInstance(result)
-
-        # Mark for release if we acquire ownership of an object. Do not autorelease here because
-        # we might retain a Python reference while the Obj-C reference goes out of scope.
-        if self.name.startswith((b"alloc", b"new", b"copy", b"mutableCopy")):
-            result._needs_release = True
+            implicitly_owned = method_family in _RETURNS_RETAINED_FAMILIES
+            result = ObjCInstance(result, _implicitly_owned=implicitly_owned)
 
         return result
 
@@ -240,7 +292,10 @@ class ObjCPartialMethod:
         super().__init__()
 
         self.name_start = name_start
-        self.methods = {}  # Initialized in ObjCClass._load_methods
+
+        # A dictionary mapping from a tuple of argument names to the full method name.
+        # Initialized in ObjCClass._load_methods
+        self.methods: dict[tuple[str, ...], str] = {}
 
     def __repr__(self):
         return f"{type(self).__qualname__}({self.name_start!r})"
@@ -258,21 +313,31 @@ class ObjCPartialMethod:
             args.insert(0, first_arg)
             rest = ("",) + order
 
+        # Try to use cached ObjCBoundMethod
         try:
             name = self.methods[rest]
+            meth = receiver.objc_class._cache_method(name)
+            return meth(receiver, *args)
         except KeyError:
-            if first_arg is self._sentinel:
-                specified_sel = self.name_start
-            else:
-                specified_sel = f"{self.name_start}:{':'.join(kwargs.keys())}:"
-            raise ValueError(
-                f"Invalid selector {specified_sel}. Available selectors are: "
-                f"{', '.join(sel for sel in self.methods.values())}"
-            ) from None
+            pass
+
+        # Reconstruct the full method name from arguments and look up actual method.
+        if first_arg is self._sentinel:
+            name = self.name_start
+        else:
+            name = f"{self.name_start}:{':'.join(kwargs.keys())}:"
 
         meth = receiver.objc_class._cache_method(name)
 
-        return meth(receiver, *args)
+        if meth:
+            # Update methods cache and call method.
+            self.methods[rest] = name
+            return meth(receiver, *args)
+
+        raise ValueError(
+            f"Invalid selector {name}. Available selectors are: "
+            f"{', '.join(sel for sel in self.methods.values())}"
+        ) from None
 
 
 class ObjCBoundMethod:
@@ -783,29 +848,13 @@ class ObjCInstance:
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
         except AttributeError:
             # This assumes that objects never change their class after they are
-            # seen by Rubicon. There are two reasons why this may not be true:
-            #
-            # 1. Objective-C runtime provides a function object_setClass that
-            #    can change an object's class after creation, and some code
-            #    manipulates objects' isa pointers directly (although the latter
-            #    is no longer officially supported by Apple). This is not
-            #    commonly done in practice, and even then it is usually only
-            #    done during object creation/initialization, so it's basically
-            #    safe to assume that an object's class will never change after
-            #    it's been wrapped in an ObjCInstance.
-            # 2. If a memory address is freed by the Objective-C runtime, and
-            #    then re-allocated by an object of a different type, but the
-            #    Python ObjCInstance wrapper persists, Python will assume the
-            #    object is still of the old type. If a new ObjCInstance wrapper
-            #    for the same pointer is re-created, a check is performed to
-            #    ensure the type hasn't changed; this problem only affects
-            #    pre-existing Python wrappers. If this occurs, it probably
-            #    indicates an issue with the retain count on the Python side (as
-            #    the Objective-C runtime shouldn't be able to dispose of an
-            #    object if Python still has a handle to it). If this *does*
-            #    happen, it will manifest as objects appearing to be the wrong
-            #    type, and/or objects having the wrong list of attributes
-            #    available. Refs #249.
+            # seen by Rubicon. This can occur because the Objective-C runtime provides a
+            # function object_setClass that can change an object's class after creation,
+            # and some code manipulates objects' isa pointers directly (although the
+            # latter is no longer officially supported by Apple). This is not commonly
+            # done in practice, and even then it is usually only done during object
+            # creation/initialization, so it's basically safe to assume that an object's
+            # class will never change after it's been wrapped in an ObjCInstance.
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_objc_class", ObjCClass(libobjc.object_getClass(self))
             )
@@ -815,7 +864,9 @@ class ObjCInstance:
     def _associated_attr_key_for_name(name):
         return SEL(f"rubicon.objc.py_attr.{name}")
 
-    def __new__(cls, object_ptr, _name=None, _bases=None, _ns=None):
+    def __new__(
+        cls, object_ptr, _name=None, _bases=None, _ns=None, _implicitly_owned=False
+    ):
         """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or
         anything that can be cast to one, such as a :class:`~ctypes.c_void_p`,
         or an existing :class:`ObjCInstance`.
@@ -833,10 +884,17 @@ class ObjCInstance:
         :func:`register_type_for_objcclass`. Creating an :class:`ObjCInstance`
         from a ``nil`` pointer returns ``None``.
 
-        Rubicon currently does not perform any automatic memory management on
-        the Objective-C object wrapped in an :class:`ObjCInstance`. It is the
-        user's responsibility to ``retain`` and ``release`` wrapped objects as
-        needed, like in Objective-C code without automatic reference counting.
+        Rubicon retains an Objective-C object when it is wrapped in an
+        :class:`ObjCInstance` and autoreleases it when the :class:`ObjCInstance` is
+        garbage collected.
+
+        The only exception to this are objects returned by methods which create an
+        object (starting with "alloc", "new", "copy", or "mutableCopy"). We do not
+        explicitly retain them because we already own objects created by us, but we do
+        autorelease them on garbage collection of the Python wrapper.
+
+        This ensures that the :class:`ObjCInstance` can always be used from Python
+        without segfaults while preventing Rubicon from leaking memory.
         """
 
         # Make sure that object_ptr is wrapped in an objc_id.
@@ -852,67 +910,30 @@ class ObjCInstance:
                 # If an ObjCInstance already exists for the Objective-C object,
                 # reuse it instead of creating a second ObjCInstance for the
                 # same object.
-                cached = cls._cached_objects[object_ptr.value]
+                cached_obj = cls._cached_objects[object_ptr.value]
 
-                # In a high-churn environment, it is possible for an object to
-                # be deallocated, and the same memory address be re-used on the
-                # Objective-C side, but the Python wrapper object for the
-                # original instance has *not* been cleaned up. In that
-                # situation, an attempt to wrap the *new* Objective-C object
-                # instance will cause a false positive cache hit; returning a
-                # Python object that has a class that doesn't match the class of
-                # the new instance.
+                # We can get a cache hit for methods that return an implicitly retained
+                # object. This is typically the case when:
                 #
-                # To prevent this, when we get a cache hit on an ObjCInstance,
-                # use the raw Objective-C API on the pointer to get the current
-                # class of the object referred to by the pointer. If there's a
-                # discrepancy, purge the cache for the memory address, and
-                # re-create the object.
+                # 1. A `copy` returns the original object if it is immutable. This is
+                #    typically done for optimization. See
+                #    https://developer.apple.com/documentation/foundation/nscopying.
+                # 2. An `init` call returns an object which we already own from a
+                #    previous `alloc` call. See `init` handling in ObjCMethod. __call__.
                 #
-                # We do this both when the type *is* ObjCInstance (the case when
-                # instantiating a literal ObjCInstance()), and when type is an
-                # ObjCClass instance (e.g., ObjClass("Example"), which is the
-                # type of a directly instantiated instance of Example.
-                #
-                # We *don't* do this when the type *is* ObjCClass,
-                # ObjCMetaClass, as there's a race condition on startup -
-                # retrieving `.objc_class` causes the creation of ObjCClass
-                # objects, which will cause cache hits trying to re-use existing
-                # ObjCClass objects. However, ObjCClass instances generally
-                # won't be recycled or reused, so that should be safe to exclude
-                # from the cache freshness check.
-                #
-                # One edge case with this approach: if the old and new
-                # Objective-C objects have the same class, they won't be
-                # identified as a stale object, and they'll re-use the same
-                # Python wrapper. This effectively means id(obj) isn't a
-                # reliable instance identifier... but (a) this won't be a common
-                # case; (b) this flaw exists in pure Python and Objective-C as
-                # well, because default object identity is tied to memory
-                # allocation; and (c) the stale wrapper will *work*, because
-                # it's the correct class.
-                #
-                # Refs #249.
-                if cls == ObjCInstance or isinstance(cls, ObjCInstance):
-                    cached_class_name = cached.objc_class.name
-                    current_class_name = libobjc.class_getName(
-                        libobjc.object_getClass(object_ptr)
-                    ).decode("utf-8")
-                    if (
-                        current_class_name != cached_class_name
-                        and not current_class_name.endswith(f"_{cached_class_name}")
-                    ):
-                        # There has been a cache hit, but the object is a
-                        # different class, treat this as a cache miss. We don't
-                        # *just* look for an *exact* class name match, because
-                        # some Cocoa/UIKit classes undergo a class name change
-                        # between `alloc()` and `init()` (e.g., `NSWindow`
-                        # becomes `NSKVONotifying_NSWindow`). Refs #257.
-                        raise KeyError(object_ptr.value)
+                # If the object is already in our cache, we end up owning more than one
+                # refcount. We release this additional refcount to prevent memory leaks.
+                if _implicitly_owned:
+                    send_message(object_ptr, "release", restype=objc_id, argtypes=[])
 
-                return cached
+                return cached_obj
             except KeyError:
                 pass
+
+            # Explicitly retain the instance on first handover to Python unless we
+            # received it from a method that gives us ownership already.
+            if not _implicitly_owned:
+                send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
             # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
             if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
@@ -932,7 +953,6 @@ class ObjCInstance:
             super(ObjCInstance, type(self)).__setattr__(
                 self, "_as_parameter_", object_ptr
             )
-            super(ObjCInstance, type(self)).__setattr__(self, "_needs_release", False)
             if isinstance(object_ptr, objc_block):
                 super(ObjCInstance, type(self)).__setattr__(
                     self, "block", ObjCBlock(object_ptr)
@@ -944,39 +964,16 @@ class ObjCInstance:
 
         return self
 
-    def release(self):
-        """Manually decrement the reference count of the corresponding objc
-        object.
-
-        The objc object is sent a dealloc message when its reference
-        count reaches 0. Calling this method manually should not be
-        necessary, unless the object was explicitly ``retain``\\ed
-        before. Objects returned from ``.alloc().init...(...)`` and
-        similar calls are released automatically by Rubicon when the
-        corresponding Python object is deallocated.
-        """
-        self._needs_release = False
-        send_message(self, "release", restype=objc_id, argtypes=[])
-
-    def autorelease(self):
-        """Decrements the receiver’s reference count at the end of the current
-        autorelease pool block.
-
-        The objc object is sent a dealloc message when its reference
-        count reaches 0. If called, the object will not be released when
-        the Python object is deallocated.
-        """
-        self._needs_release = False
-        result = send_message(self, "autorelease", restype=objc_id, argtypes=[])
-        return ObjCInstance(result)
-
     def __del__(self):
-        """Release the corresponding objc instance if we own it, i.e., if it
-        was returned by a method starting with :meth:`alloc`, :meth:`new`,
-        :meth:`copy`, or :meth:`mutableCopy` and it wasn't already explicitly
-        released by calling :meth:`release` or :meth:`autorelease`."""
-        if self._needs_release:
-            send_message(self, "release", restype=objc_id, argtypes=[])
+        # Autorelease our reference on garbage collection of the Python wrapper. We use
+        # autorelease instead of release to allow ObjC to take ownership of an object when
+        # it is returned from a factory method.
+        try:
+            send_message(self, "autorelease", restype=objc_id, argtypes=[])
+        except (NameError, TypeError):
+            # Handle interpreter shutdown gracefully where send_message might be deleted
+            # (NameError) or set to None (TypeError).
+            pass
 
     def __str__(self):
         """Get a human-readable representation of ``self``.
@@ -1623,44 +1620,40 @@ class ObjCClass(ObjCInstance, type):
         if self.methods_ptr is not None:
             raise RuntimeError(f"{self}._load_methods cannot be called more than once")
 
-        methods_ptr_count = c_uint(0)
+        # Traverse superclasses and load methods.
+        superclass = self.superclass
 
-        methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
-
-        if self.superclass is not None:
-            if self.superclass.methods_ptr is None:
-                with self.superclass.cache_lock:
-                    self.superclass._load_methods()
+        while superclass is not None:
+            if superclass.methods_ptr is None:
+                with superclass.cache_lock:
+                    superclass._load_methods()
 
             # Prime this class' partials list with a list from the superclass.
-            for first, superpartial in self.superclass.partial_methods.items():
+            for first, superpartial in superclass.partial_methods.items():
                 partial = ObjCPartialMethod(first)
                 self.partial_methods[first] = partial
                 partial.methods.update(superpartial.methods)
+
+            superclass = superclass.superclass
+
+        # Load methods for this class.
+        methods_ptr_count = c_uint(0)
+        methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
 
         for i in range(methods_ptr_count.value):
             method = methods_ptr[i]
             name = libobjc.method_getName(method).name.decode("utf-8")
             self.instance_method_ptrs[name] = method
 
-            # Selectors end with a colon if the method takes arguments.
-            if name.endswith(":"):
-                first, *rest, _ = name.split(":")
-                # Insert an empty string in order to indicate that the method
-                # takes a first argument as a positional argument.
-                rest.insert(0, "")
-                rest = tuple(rest)
-            else:
-                first = name
-                rest = ()
+            base_name, argument_names = method_name_to_tuple(name)
 
             try:
-                partial = self.partial_methods[first]
+                partial = self.partial_methods[base_name]
             except KeyError:
-                partial = ObjCPartialMethod(first)
-                self.partial_methods[first] = partial
+                partial = ObjCPartialMethod(base_name)
+                self.partial_methods[base_name] = partial
 
-            partial.methods[rest] = name
+            partial.methods[argument_names] = name
 
         # Set the list of methods for the class to the computed list.
         self.methods_ptr = methods_ptr
