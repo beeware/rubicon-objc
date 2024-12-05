@@ -1894,31 +1894,15 @@ class RubiconTest(unittest.TestCase):
         self.assertIsNone(wr_python_object())
 
     def test_objcinstance_returned_lifecycle(self):
-        """An object is retained when creating an ObjCInstance for it and autoreleased
-        when the ObjCInstance is garbage collected.
+        """An object is retained when creating an ObjCInstance for it without implicit
+        ownership It is autoreleased when the ObjCInstance is garbage collected.
         """
-        with autoreleasepool():
-            # Return an object which we don't own. Using str(uuid) here instead of a
-            # common string ensure that we get have the only reference.
-            obj = NSString.stringWithString(str(uuid.uuid4()))
 
-        # Check that the object is retained when we create the ObjCInstance.
-        self.assertEqual(obj.retainCount(), 1, "object was not retained")
+        def create_object():
+            with autoreleasepool():
+                return NSString.stringWithString(str(uuid.uuid4()))
 
-        # Assign the object to an Obj-C weakref and delete it to check that it is dealloced.
-        wr = ObjcWeakref.alloc().init()
-        wr.weak_property = obj
-
-        with autoreleasepool():
-            del obj
-            gc.collect()
-
-            self.assertIsNotNone(
-                wr.weak_property,
-                "object was deallocated before end of autorelease pool",
-            )
-
-        self.assertIsNone(wr.weak_property, "object was not deallocated")
+        assert_lifecycle(self, create_object)
 
     def test_objcinstance_alloc_lifecycle(self):
         """We properly retain and release objects that are allocated but never
