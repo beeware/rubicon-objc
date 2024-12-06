@@ -1382,8 +1382,8 @@ class ObjCClass(ObjCInstance, type):
         new_attrs = {
             "name": objc_class_name,
             "methods_ptr": None,
-            # Mapping of name -> method pointer. Populated on first attribute access,
-            # does not contain methods from superclasses.
+            # Mapping of name -> method pointer. Populated on first attribute access
+            # with all methods of this class but **not** its superclasses.
             "instance_method_ptrs": {},
             # Cache of ObjCMethod instance keyed by selector name. Cache misses are
             # looked up on instance_method_ptrs for this class and its superclasses.
@@ -1392,9 +1392,9 @@ class ObjCClass(ObjCInstance, type):
             "instance_properties": {},
             # Explicitly declared properties
             "forced_properties": set(),
-            # Cache of ObjCPartialMethod instances keyed by first keyword of the
-            # selector name. Cache misses are looked up on instance_method_ptrs for this
-            # class and its superclasses.
+            # ObjCPartialMethod instances keyed by first keyword of the selector name.
+            # Populated on first attribute access with all methods of this class and its
+            # superclasses. Updated on misses, e.g., when the class hierarchy changes.
             "partial_methods": {},
             # A re-entrant thread lock moderating access to the ObjCClass
             # method/property cache. This ensures that only one thread populates
