@@ -1466,33 +1466,32 @@ class ObjCClass(ObjCInstance, type):
             # If the requested name ends with _, that's a marker that we're
             # dealing with a method call, not a property, so we can shortcut
             # the process.
-            methods = None
-        else:
-            # Check 1: Does the class respond to the property?
-            responds = libobjc.class_getProperty(self, name.encode("utf-8"))
+            return None
 
-            # Check 2: Does the class have an instance method to retrieve the given name
-            accessor = self._cache_method(name)
+        # Check 1: Does the class respond to the property?
+        responds = libobjc.class_getProperty(self, name.encode("utf-8"))
 
-            # Check 3: Is there a setName: method to set the property with the given name
-            mutator = self._cache_method("set" + name[0].title() + name[1:] + ":")
+        # Check 2: Does the class have an instance method to retrieve the given name
+        accessor = self._cache_method(name)
 
-            # Check 4: Is this a forced property on this class or a superclass?
-            forced = False
-            superclass = self
-            while superclass is not None:
-                if name in superclass.forced_properties:
-                    forced = True
-                    break
-                superclass = superclass.superclass
+        # Check 3: Is there a setName: method to set the property with the given name
+        mutator = self._cache_method("set" + name[0].title() + name[1:] + ":")
 
-            # If the class responds as a property, or it has both an accessor *and*
-            # and mutator, then treat it as a property in Python.
-            if responds or (accessor and mutator) or forced:
-                methods = (accessor, mutator)
-            else:
-                methods = None
-        return methods
+        # Check 4: Is this a forced property on this class or a superclass?
+        forced = False
+        superclass = self
+        while superclass is not None:
+            if name in superclass.forced_properties:
+                forced = True
+                break
+            superclass = superclass.superclass
+
+        # If the class responds as a property, or it has both an accessor *and*
+        # and mutator, then treat it as a property in Python.
+        if responds or (accessor and mutator) or forced:
+            return accessor, mutator
+
+        return None
 
     def _cache_property_accessor(self, name):
         """Returns a python representation of an accessor for the named
