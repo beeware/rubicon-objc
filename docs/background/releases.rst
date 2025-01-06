@@ -3,6 +3,39 @@ Release History
 
 .. towncrier release notes start
 
+0.5.0 (2025-01-07)
+==================
+
+Features
+--------
+
+* Retain Objective-C objects when creating Python wrappers and release them when the Python wrapped is garbage collected. This means that manual ``retain`` calls and subsequent ``release`` or ``autorelease`` calls from Python are no longer needed with very few exceptions, for example when writing implementations of ``copy`` that return an existing object. (#256)
+* Support for Python 3.14 was added. (#529)
+
+Bugfixes
+--------
+
+* Protection was added against a potential race condition when loading methods defined on a superclass. (#473)
+* A workaround for `python/cpython#81061 <https://github.com/python/cpython/issues/81061>`__ is now conditionally applied only for the Python versions that require it (Python 3.9 and earlier). (#517)
+
+
+Backward Incompatible Changes
+-----------------------------
+
+* Manual calls to ``release`` or ``autorelease`` no longer cause Rubicon to skip releasing an Objective-C object when its Python wrapper is garbage collected. This means that fewer ``retain`` than ``release`` calls will cause segfaults on garbage collection. Review your code carefully for unbalanced ``retain`` and ``release`` calls before updating. (#256)
+* Python 3.8 is no longer a supported platform. (#529)
+
+
+Documentation
+-------------
+
+* Building Rubicon ObjC's documentation now requires the use of Python 3.12. (#496)
+
+Misc
+----
+
+* #464, #466, #467, #469, #470, #472, #473, #474, #475, #476, #477, #478, #479, #480, #481, #482, #483, #484, #485, #486, #487, #488, #489, #490, #491, #492, #493, #494, #499, #500, #502, #503, #505, #506, #507, #508, #509, #510, #511, #512, #513, #514, #515, #516, #518, #519, #520, #521, #522, #523, #524, #525, #526, #527, #528, #530, #531, #532, #533, #534, #535, #536, #537, #538, #541, #544, #546, #548, #549, #550
+
 0.4.9 (2024-05-03)
 ==================
 

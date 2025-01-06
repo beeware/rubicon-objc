@@ -1,5 +1,0 @@
-Retain Objective-C objects when creating Python wrappers and release them when the
-Python wrapped is garbage collected. This means that manual ``retain`` calls and
-subsequent ``release`` or ``autorelease`` calls from Python are no longer needed with
-very few exceptions, for example when writing implementations of ``copy`` that return an
-existing object.
