@@ -190,7 +190,7 @@ Bugfixes
 * Background threads will no longer lock up on iOS when an asyncio event loop is
   in use. (`#228 <https://github.com/beeware/rubicon-objc/issues/228>`__)
 * The ``ObjCInstance`` cache no longer returns a stale wrapper objects if a memory
-  address is re-used by the Objective C runtime. (`#249
+  address is reused by the Objective C runtime. (`#249
   <https://github.com/beeware/rubicon-objc/issues/249>`__)
 * It is now safe to open an asyncio event loop on a secondary thread. Previously
   this would work, but would intermittently fail with a segfault when then loop

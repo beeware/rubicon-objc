@@ -115,7 +115,7 @@ the same Python shell. If you try, you'll get an error:
 You'll need to be careful (and sometimes, painfully verbose) when choosing class
 names.
 
-To allow a class name to be re-used, you can set the class variable
+To allow a class name to be reused, you can set the class variable
 :attr:`~rubicon.objc.api.ObjCClass.auto_rename` to ``True``. This option enables
 automatic renaming of the Objective C class if a naming collision is detected:
 
