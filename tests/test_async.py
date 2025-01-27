@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import time
 import unittest
 
-from rubicon.objc.eventloop import EventLoopPolicy
+from rubicon.objc.eventloop import RubiconEventLoop
 
 
 # Some coroutines with known behavior for testing purposes.
@@ -21,11 +22,11 @@ async def stop_loop(loop, delay):
 
 class AsyncRunTests(unittest.TestCase):
     def setUp(self):
-        asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.new_event_loop()
+        self.loop = RubiconEventLoop()
 
     def tearDown(self):
-        asyncio.set_event_loop_policy(None)
+        if sys.version_info < (3, 14):
+            asyncio.set_event_loop_policy(None)
         self.loop.close()
 
     def test_run_until_complete(self):
@@ -59,11 +60,11 @@ class AsyncRunTests(unittest.TestCase):
 
 class AsyncCallTests(unittest.TestCase):
     def setUp(self):
-        asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.new_event_loop()
+        self.loop = RubiconEventLoop()
 
     def tearDown(self):
-        asyncio.set_event_loop_policy(None)
+        if sys.version_info < (3, 14):
+            asyncio.set_event_loop_policy(None)
         self.loop.close()
 
     def test_call_soon(self):
@@ -158,11 +159,11 @@ class AsyncReaderWriterTests(unittest.TestCase):
 
 class AsyncSubprocessTests(unittest.TestCase):
     def setUp(self):
-        asyncio.set_event_loop_policy(EventLoopPolicy())
-        self.loop = asyncio.new_event_loop()
+        self.loop = RubiconEventLoop()
 
     def tearDown(self):
-        asyncio.set_event_loop_policy(None)
+        if sys.version_info < (3, 14):
+            asyncio.set_event_loop_policy(None)
         self.loop.close()
 
     def test_subprocess(self):
