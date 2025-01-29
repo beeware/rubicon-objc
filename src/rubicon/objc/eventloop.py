@@ -22,7 +22,6 @@ if sys.version_info < (3, 14):
         AbstractEventLoopPolicy,
         DefaultEventLoopPolicy,
         SafeChildWatcher,
-        new_event_loop,
         set_event_loop_policy,
     )
 elif sys.version_info < (3, 16):
@@ -783,7 +782,7 @@ if sys.version_info < (3, 14):
             )
             policy = EventLoopPolicy()
         set_event_loop_policy(policy)
-        return new_event_loop()
+        return policy.new_event_loop()
 
 else:
     RubiconEventLoop = CFEventLoop
