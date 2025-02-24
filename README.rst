@@ -1,4 +1,4 @@
-.. |logo| image:: https://beeware.org/project/projects/bridges/rubicon/rubicon.png
+.. |logo| image:: https://beeware.org/project/utilities/rubicon/rubicon.png
     :width: 72px
     :target: https://beeware.org/rubicon
 
