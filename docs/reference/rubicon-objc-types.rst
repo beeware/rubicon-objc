@@ -173,9 +173,8 @@ These are commonly used C types from various frameworks.
 
 .. class:: UniChar([value])
 
-    The `UniChar
-    <https://developer.apple.com/documentation/kernel/unichar?language=objc>`__
-    type from ``<MacTypes.h>``. Equivalent to :class:`~ctypes.c_ushort`.
+    The ``UniChar`` type from ``<MacTypes.h>``. Equivalent to
+    :class:`~ctypes.c_ushort`.
 
 .. class:: unichar([value])
 
