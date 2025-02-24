@@ -1057,22 +1057,17 @@ class ObjCInstance:
             if method:
                 return ObjCBoundMethod(method, self)()
 
+        # Load the class's methods if we haven't done so yet.
+        with self.objc_class.cache_lock:
+            self.objc_class._load_methods()
+
+        method = None
         # See if there's a partial method starting with the given name,
         # either on self's class or any of the superclasses.
-        cls = self.objc_class
-        while cls is not None:
-            # Load the class's methods if we haven't done so yet.
-            with cls.cache_lock:
-                if cls.methods_ptr is None:
-                    cls._load_methods()
-
-                try:
-                    method = cls.partial_methods[name]
-                    break
-                except KeyError:
-                    cls = cls.superclass
-        else:
-            method = None
+        try:
+            method = self.objc_class.partial_methods[name]
+        except KeyError:
+            pass
 
         if method is None or set(method.methods) == {()}:
             # Find a method whose full name matches the given name if no partial
@@ -1387,15 +1382,19 @@ class ObjCClass(ObjCInstance, type):
         new_attrs = {
             "name": objc_class_name,
             "methods_ptr": None,
-            # Mapping of name -> method pointer
+            # Mapping of name -> method pointer. Populated on first attribute access
+            # with all methods of this class but **not** its superclasses.
             "instance_method_ptrs": {},
-            # Mapping of name -> instance method
+            # Cache of ObjCMethod instance keyed by selector name. Cache misses are
+            # looked up on instance_method_ptrs for this class and its superclasses.
             "instance_methods": {},
-            # Mapping of name -> (accessor method, mutator method)
+            # Mapping of name -> (accessor method, mutator method).
             "instance_properties": {},
             # Explicitly declared properties
             "forced_properties": set(),
-            # Mapping of first keyword -> ObjCPartialMethod instances
+            # ObjCPartialMethod instances keyed by first keyword of the selector name.
+            # Populated on first attribute access with all methods of this class and its
+            # superclasses. Updated on misses, e.g., when the class hierarchy changes.
             "partial_methods": {},
             # A re-entrant thread lock moderating access to the ObjCClass
             # method/property cache. This ensures that only one thread populates
@@ -1430,36 +1429,36 @@ class ObjCClass(ObjCInstance, type):
         by looking it up in the cached list of methods or by searching for and
         creating a new method object."""
         with self.cache_lock:
+            # Try to return an existing cached method for the name
             try:
-                # Try to return an existing cached method for the name
                 return self.instance_methods[name]
             except KeyError:
-                supercls = self
-                objc_method = None
-                while supercls is not None:
-                    # Load the class's methods if we haven't done so yet.
-                    if supercls.methods_ptr is None:
-                        supercls._load_methods()
+                pass
 
-                    try:
-                        objc_method = supercls.instance_methods[name]
+            # Load the class's methods if we haven't done so yet.
+            if self.methods_ptr is None:
+                self._load_methods()
+
+            # Try to find a cached ObjCMethod method. Those are stored directly with us.
+            objc_method = self.instance_methods.get(name)
+
+            # Try to find a method pointer in the class hierarchy. Those are stored
+            # with each superclass.
+            if objc_method is None:
+                cls = self
+                while cls is not None:
+                    objc_method_ptr = cls.instance_method_ptrs.get(name)
+                    if objc_method_ptr is not None:
+                        objc_method = ObjCMethod(objc_method_ptr)
                         break
-                    except KeyError:
-                        pass
 
-                    try:
-                        objc_method = ObjCMethod(supercls.instance_method_ptrs[name])
-                        break
-                    except KeyError:
-                        pass
+                    cls = cls.superclass
 
-                    supercls = supercls.superclass
+            if objc_method is None:
+                return None
 
-                if objc_method is None:
-                    return None
-                else:
-                    self.instance_methods[name] = objc_method
-                    return objc_method
+            self.instance_methods[name] = objc_method
+            return objc_method
 
     def _cache_property_methods(self, name):
         """Return the accessor and mutator for the named property."""
@@ -1467,33 +1466,32 @@ class ObjCClass(ObjCInstance, type):
             # If the requested name ends with _, that's a marker that we're
             # dealing with a method call, not a property, so we can shortcut
             # the process.
-            methods = None
-        else:
-            # Check 1: Does the class respond to the property?
-            responds = libobjc.class_getProperty(self, name.encode("utf-8"))
+            return None
 
-            # Check 2: Does the class have an instance method to retrieve the given name
-            accessor = self._cache_method(name)
+        # Check 1: Does the class respond to the property?
+        responds = libobjc.class_getProperty(self, name.encode("utf-8"))
 
-            # Check 3: Is there a setName: method to set the property with the given name
-            mutator = self._cache_method("set" + name[0].title() + name[1:] + ":")
+        # Check 2: Does the class have an instance method to retrieve the given name
+        accessor = self._cache_method(name)
 
-            # Check 4: Is this a forced property on this class or a superclass?
-            forced = False
-            superclass = self
-            while superclass is not None:
-                if name in superclass.forced_properties:
-                    forced = True
-                    break
-                superclass = superclass.superclass
+        # Check 3: Is there a setName: method to set the property with the given name
+        mutator = self._cache_method("set" + name[0].title() + name[1:] + ":")
 
-            # If the class responds as a property, or it has both an accessor *and*
-            # and mutator, then treat it as a property in Python.
-            if responds or (accessor and mutator) or forced:
-                methods = (accessor, mutator)
-            else:
-                methods = None
-        return methods
+        # Check 4: Is this a forced property on this class or a superclass?
+        forced = False
+        superclass = self
+        while superclass is not None:
+            if name in superclass.forced_properties:
+                forced = True
+                break
+            superclass = superclass.superclass
+
+        # If the class responds as a property, or it has both an accessor *and*
+        # and mutator, then treat it as a property in Python.
+        if responds or (accessor and mutator) or forced:
+            return accessor, mutator
+
+        return None
 
     def _cache_property_accessor(self, name):
         """Returns a python representation of an accessor for the named
@@ -1617,26 +1615,24 @@ class ObjCClass(ObjCInstance, type):
             )
 
     def _load_methods(self):
+        # Traverse superclasses and load methods. Always do this, even if _load_methods
+        # was called previously, because the class hierarchy may have changed.
+        if self.superclass is not None:
+            with self.superclass.cache_lock:
+                self.superclass._load_methods()
+
+            # Update this class' partials list with a list from the superclass.
+            for first, superpartial in self.superclass.partial_methods.items():
+                try:
+                    partial = self.partial_methods[first]
+                    partial.methods.update(superpartial.methods)
+                except KeyError:
+                    self.partial_methods[first] = superpartial
+
+        # Load methods for this class if not already done.
         if self.methods_ptr is not None:
-            raise RuntimeError(f"{self}._load_methods cannot be called more than once")
+            return
 
-        # Traverse superclasses and load methods.
-        superclass = self.superclass
-
-        while superclass is not None:
-            if superclass.methods_ptr is None:
-                with superclass.cache_lock:
-                    superclass._load_methods()
-
-            # Prime this class' partials list with a list from the superclass.
-            for first, superpartial in superclass.partial_methods.items():
-                partial = ObjCPartialMethod(first)
-                self.partial_methods[first] = partial
-                partial.methods.update(superpartial.methods)
-
-            superclass = superclass.superclass
-
-        # Load methods for this class.
         methods_ptr_count = c_uint(0)
         methods_ptr = libobjc.class_copyMethodList(self, byref(methods_ptr_count))
 
