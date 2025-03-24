@@ -194,7 +194,7 @@ class Class(objc_id):
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/objective-c_runtime/imp?language=objc>`__
+    """The `IMP <https://developer.apple.com/documentation/objectivec/imp?language=objc>`__
     type from ``<objc/objc.h>``.
 
     An :class:`IMP` cannot be called directly --- it must be cast to the
