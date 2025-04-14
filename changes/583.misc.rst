@@ -1,0 +1,1 @@
+Contribution documentation was normalized against other Beeware projects.

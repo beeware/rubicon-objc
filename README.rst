@@ -72,7 +72,8 @@ guides may help.
 Community
 ---------
 
-Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
+Rubicon is part of the `BeeWare suite <https://beeware.org>`__. You can talk to
+the community through:
 
 * `@beeware@fosstodon.org on Mastodon <https://fosstodon.org/@beeware>`__
 
@@ -83,22 +84,21 @@ Rubicon is part of the `BeeWare suite`_. You can talk to the community through:
 Code of Conduct
 ---------------
 
-The BeeWare community has a strict `Code of Conduct`_. All users and
-developers are expected to adhere to this code.
+The BeeWare community has a strict `Code of Conduct
+<https://beeware.org/community/behavior/>`__. All users and developers are
+expected to adhere to this code.
 
 If you have any concerns about this code of conduct, or you wish to report a
 violation of this code, please contact the project founder `Russell Keith-
-Magee`.
+Magee <mailto:russell@beeware.org>`__.
 
 Contributing
 ------------
 
-If you experience problems with this backend, `log them on GitHub`_. If you
-want to contribute code, please `fork the code`_ and `submit a pull request`_.
+If you experience problems with Rubicon-ObjC, `log them on GitHub
+<https://github.com/beeware/rubicon-objc/issues>`__.
 
-.. _BeeWare suite: https://beeware.org
-.. _Read The Docs: https://rubicon-objc.readthedocs.org
-.. _Code of Conduct: https://beeware.org/community/behavior/
-.. _log them on GitHub: https://github.com/beeware/rubicon-objc/issues
-.. _fork the code: https://github.com/beeware/rubicon-objc
-.. _submit a pull request: https://github.com/beeware/rubicon-objc/pulls
+If you'd like to contribute to Rubicon-ObjC development, our `contribution guide
+<https://rubicon-objc.readthedocs.io/en/latest/how-to/contribute/index.html>`__
+details how to set up a development environment, and other requirements we have
+as part of our contribution process.

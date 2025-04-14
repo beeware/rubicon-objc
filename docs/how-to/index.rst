@@ -19,6 +19,5 @@ stand alone.
    protocols
    async
    c-functions
-   contribute-code
-   contribute-docs
+   contribute/index
    internal/index
