@@ -762,7 +762,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
     .. note::
 
         Some Objective-C methods take variadic arguments (``varargs``), for example
-        `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/1497275-stringwithformat?language=objc>`_.
+        `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/stringwithformat:?language=objc>`_.
         When using :func:`send_message`, variadic arguments are treated
         differently from regular arguments: they are not passed as normal
         function arguments in ``*args``, but as a list in a separate ``varargs``
