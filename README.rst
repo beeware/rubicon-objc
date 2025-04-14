@@ -96,9 +96,9 @@ Contributing
 ------------
 
 If you experience problems with Rubicon-ObjC, `log them on GitHub
-<https://github.com/beeware/rubicon-objc/issues>`__. If you want to contribute
-code, please `fork the code <https://github.com/beeware/rubicon-objc>`__ and
-`submit a pull request <https://github.com/beeware/rubicon-objc/pulls>`__. The
-documentation also contains `a detailed guide on how to contribute to
-Rubicon-ObjC
-<https://rubicon-objc.readthedocs.io/en/latest/how-to/contribute/index.html>`__.
+<https://github.com/beeware/rubicon-objc/issues>`__.
+
+If you'd like to contribute to Rubicon-ObjC development, our `contribution guide
+<https://rubicon-objc.readthedocs.io/en/latest/how-to/contribute/index.html>`__
+details how to set up a development environment, and other requirements we have
+as part of our contribution process.
