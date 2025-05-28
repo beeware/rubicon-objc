@@ -1,1 +1,0 @@
-Fix a warning message the supported versions of ``rubicon.objc.ctypes_patch``.
