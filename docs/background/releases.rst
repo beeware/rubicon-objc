@@ -3,6 +3,30 @@ Release History
 
 .. towncrier release notes start
 
+0.5.1 (2025-06-03)
+==================
+
+Features
+--------
+
+* ``RubiconEventLoop()`` is now exposed as an interface for creating a CoreFoundation compatible event loop. (#557)
+
+Bugfixes
+--------
+
+* The interface with EventLoopPolicy was updated to account for the eventual deprecation of that API in Python. (#557)
+
+Backward Incompatible Changes
+-----------------------------
+
+* Python 3.14 deprecated the use of custom event loop policies, in favor of directly instantiating event loops. Instead of calling ``asyncio.new_event_loop()`` after installing an instance of ``rubicon.objc.eventloop.EventLoopPolicy``, you can call ``RubiconEventLoop()`` to instantiate an instance of an event loop and use that instance directly. This approach can be used on all versions of Python; on Python 3.13 and earlier, ``RubiconEventLoop()`` is a shim that performs the older event loop policy-based instantiation. (#557)
+
+Misc
+----
+
+* #551, #552, #554, #555, #556, #559, #560, #561, #562, #564, #565, #566, #567, #568, #569, #570, #571, #572, #573, #574, #575, #576, #577, #578, #579, #580, #581, #582, #583, #584, #585, #586, #587, #588, #589, #590, #591, #592, #593, #594, #595, #596, #597
+
+
 0.5.0 (2025-01-07)
 ==================
 

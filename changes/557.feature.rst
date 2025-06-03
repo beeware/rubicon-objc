@@ -1,1 +1,0 @@
-``RubiconEventLoop()`` is now exposed as an interface for creating a CoreFoundation compatible event loop.

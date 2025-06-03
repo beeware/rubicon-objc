@@ -1,1 +1,0 @@
-The interface with EventLoopPolicy was updated to account for the eventual deprecation of that API in Python.
