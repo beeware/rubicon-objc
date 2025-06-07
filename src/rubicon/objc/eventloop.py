@@ -773,14 +773,7 @@ if sys.version_info < (3, 14):
 
     def RubiconEventLoop():
         """Create a new Rubicon CFEventLoop instance."""
-        # If they're using RubiconEventLoop(), they've done the necessary adaptation.
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=r"^Custom EventLoopPolicy instances have been deprecated by Python 3.14",
-                category=DeprecationWarning,
-            )
-            policy = EventLoopPolicy()
+        policy = EventLoopPolicy()
         set_event_loop_policy(policy)
         return policy.new_event_loop()
 
