@@ -95,7 +95,7 @@ extend-select = [
 ignore = [
     "B018",    # useless expression
     "SIM105",  # use contextlib.suppress() instead of try-except-pass
-    "SIM108",    # use ternary operator instead of if-else block
+    "SIM108",  # use ternary operator instead of if-else block
 ]
 
 [tool.setuptools_scm]
