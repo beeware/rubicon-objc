@@ -1,18 +1,22 @@
 """Bare minimum mock version of ctypes.
 
 This shadows the real ctypes module when building the documentation,
-so that :mod:`rubicon.objc` can be imported by Sphinx autodoc even when no Objective-C runtime is available.
+so that :mod:`rubicon.objc` can be imported by Sphinx autodoc even when no Objective-C
+runtime is available.
 
 This module only emulates enough of ctypes to make the docs build.
-Most parts are in no way accurately implemented, and some ctypes features are missing entirely.
+Most parts are in no way accurately implemented, and some ctypes features are missing
+entirely.
 
 Parts of this file are based on the source code of the ctypes module from CPython,
 under the terms of the PSF License Version 2, included below.
 The code in question has all parts removed that we don't need,
-and any remaining dependencies on the native _ctypes module have been replaced with pure Python code.
+and any remaining dependencies on the native _ctypes module have been replaced with pure
+Python code.
 Specifically, the following parts are (partially) based on CPython source code:
 
-* the definitions of the "ctypes primitive types" (the :class:`_SimpleCData` subclasses and their aliases)
+* the definitions of the "ctypes primitive types" (the :class:`_SimpleCData` subclasses
+and their aliases)
 * the implementations of :func:`CFUNCTYPE` and :func:`PYFUNCTYPE`
 * the implementations of :class:`CDLL`, :class:`PyDLL` and :class:`LibraryLoader`
 * the definitions of the :data:`pythonapi`, :data:`cdll` and :data:`pydll` globals

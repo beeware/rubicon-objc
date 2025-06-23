@@ -27,12 +27,14 @@ if sys.version_info < (3, 6) or sys.version_info >= (3, 15):
         "rubicon.objc.ctypes_patch has only been tested with Python 3.6 through 3.14. "
         f"You are using Python {v.major}.{v.minor}.{v.micro}. Most likely things will "
         "work properly, but you may experience crashes if Python's internals have "
-        "changed significantly."
+        "changed significantly.",
+        stacklevel=2,
     )
 
 
 # The PyTypeObject struct from "Include/object.h".
-# This is a forward declaration, fields are set later once PyVarObject has been declared.
+# This is a forward declaration, fields are set later once PyVarObject
+# has been declared.
 class PyTypeObject(ctypes.Structure):
     pass
 
@@ -82,9 +84,10 @@ ffi_type._fields_ = [
 # The GETFUNC and SETFUNC typedefs from "Modules/_ctypes/ctypes.h".
 GETFUNC = ctypes.PYFUNCTYPE(ctypes.py_object, ctypes.c_void_p, ctypes.c_ssize_t)
 if sys.version_info < (3, 10):
-    # The return type of SETFUNC is declared here as a c_void_p instead of py_object to work
-    # around a ctypes bug (https://github.com/python/cpython/issues/81061). See the comment
-    # in make_callback_returnable's setfunc for details. This bug was fixed in 3.10.
+    # The return type of SETFUNC is declared here as a c_void_p instead of py_object
+    # to work around a ctypes bug (https://github.com/python/cpython/issues/81061).
+    # See the comment in make_callback_returnable's setfunc for details. This bug was
+    # fixed in 3.10.
     SETFUNC = ctypes.PYFUNCTYPE(
         ctypes.c_void_p, ctypes.c_void_p, ctypes.py_object, ctypes.c_ssize_t
     )
@@ -210,7 +213,7 @@ else:
         part of CPython's public C API, and thus not accessible).
         """
         # Original code:
-        #     if (!PyObject_IsInstance((PyObject *)type, (PyObject *)state->PyCType_Type))
+        #   if (!PyObject_IsInstance((PyObject *)type, (PyObject *)state->PyCType_Type))
         if not isinstance(tp, type(ctypes.Structure).__base__):
             raise TypeError(
                 "Expected a ctypes structure type, "
@@ -221,7 +224,7 @@ else:
         # type data stored on ctypes.CType_Type (which is the base class of
         # ctypes.Structure).
         # Original code:
-        #     StgInfo *info = PyObject_GetTypeData((PyObject *)type, state->PyCType_Type);
+        #   StgInfo *info = PyObject_GetTypeData((PyObject *)type, state->PyCType_Type);
         info = ctypes.pythonapi.PyObject_GetTypeData(
             id(tp),
             id(type(ctypes.Structure).__base__),
@@ -296,11 +299,11 @@ def make_callback_returnable(ctype):
         if sys.version_info < (3, 10):
             # Because of a ctypes bug (https://github.com/python/cpython/issues/81061),
             # returning None from a callback with restype py_object causes a reference
-            # counting error that can crash Python. To work around this bug, the restype of
-            # SETFUNC is declared as c_void_p instead. This way ctypes performs no automatic
-            # reference counting for the returned object, which avoids the bug. However,
-            # this way we have to manually convert the Python object to a pointer and adjust
-            # its reference count. This bug was fixed in 3.10.
+            # counting error that can crash Python. To work around this bug, the restype
+            # of SETFUNC is declared as c_void_p instead. This way ctypes performs no
+            # automatic reference counting for the returned object, which avoids the
+            # bug. However, this way we have to manually convert the Python object to a
+            # pointer and adjust its reference count. This bug was fixed in 3.10.
             none_ptr = ctypes.cast(id(None), ctypes.POINTER(PyObject))
             # The return value of a SETFUNC is expected to have an extra reference
             # (which will be owned by the caller of the SETFUNC).

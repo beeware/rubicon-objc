@@ -13,6 +13,8 @@ import os
 import sys
 from importlib.metadata import version as metadata_version
 
+import enchant  # noqa: F401
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -30,6 +32,7 @@ extensions = [
     "sphinx_tabs.tabs",
     "sphinx_copybutton",
     "sphinx.ext.intersphinx",
+    "sphinxcontrib.spelling",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -305,15 +308,6 @@ texinfo_documents = [
 # texinfo_show_urls = 'footnote'
 
 # -- Options for spelling -------------------------------------------
-
-# Spelling check needs an additional module that is not installed by default.
-# Add it only if spelling check is requested so docs can be generated without it.
-if "spelling" in sys.argv:
-    extensions.append("sphinxcontrib.spelling")
-    # Load the enchant package here before `ctypes` is mocked out.
-    # Otherwise, it will not be able to load its external library later.
-    import enchant  # noqa: F401, E402
-
 # Spelling language.
 spelling_lang = "en_US"
 
@@ -321,7 +315,8 @@ spelling_lang = "en_US"
 spelling_word_list_filename = "spelling_wordlist"
 
 # We mock the ctypes and ctypes.util modules during the documentation build,
-# so that Sphinx autodoc is able to import and inspect rubicon.objc even on systems without an Objective-C runtime.
+# so that Sphinx autodoc is able to import and inspect rubicon.objc even on systems
+# without an Objective-C runtime.
 # For more details, see the docstring of _mocked_modules/ctypes/__init__.py.
 sys.path.insert(0, os.path.abspath("_mocked_modules"))
 sys.modules.pop("ctypes", None)

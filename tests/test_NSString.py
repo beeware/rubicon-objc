@@ -25,7 +25,8 @@ class NSStringTests(unittest.TestCase):
             ns_method = getattr(ns_value, method)
         except AttributeError:
             self.fail(
-                f"Rubicon analog for type '{type(py_value)}' does not have method '{method}'"
+                f"Rubicon analog for type '{type(py_value)}' does not have "
+                f"method '{method}'"
             )
 
         try:
@@ -46,22 +47,26 @@ class NSStringTests(unittest.TestCase):
             self.assertEqual(
                 py_result,
                 ns_result,
-                f"Different results for {method}: Python = {py_result}; ObjC = {ns_result}",
+                f"Different results for {method}: Python = {py_result}; "
+                f"ObjC = {ns_result}",
             )
         elif py_exception is not None:
             if ns_exception is not None:
                 self.assertEqual(
                     type(py_exception),
                     type(ns_exception),
-                    f"Different exceptions for {method}: Python = {py_result}; ObjC = {ns_result}",
+                    f"Different exceptions for {method}: Python = {py_result}; "
+                    f"ObjC = {ns_result}",
                 )
             else:
                 self.fail(
-                    f"Python call for {method} raised {type(py_exception)}, but ObjC did not"
+                    f"Python call for {method} raised {type(py_exception)}, but "
+                    f"ObjC did not"
                 )
         else:
             self.fail(
-                f"ObjC call for {method} raised {type(py_exception)}, but Python did not"
+                f"ObjC call for {method} raised {type(py_exception)}, but "
+                f"Python did not"
             )
 
     def test_str_nsstring_conversion(self):
