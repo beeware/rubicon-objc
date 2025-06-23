@@ -226,7 +226,7 @@ def _end_of_encoding(encoding, start):
 
     if paren_depth > 0:
         raise ValueError(
-            f"Incomplete encoding, missing {paren_depth} closingparentheses: {encoding}"
+            f"Incomplete encoding, missing {paren_depth} closing parentheses: {encoding}"
         )
     else:
         raise ValueError(
