@@ -778,8 +778,10 @@ if sys.version_info < (3, 14):
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
-                message=r"^Custom EventLoopPolicy instances have been "
-                r"deprecated by Python 3.14",
+                message=(
+                    r"^Custom EventLoopPolicy instances have been "
+                    r"deprecated by Python 3.14"
+                ),
                 category=DeprecationWarning,
             )
             policy = EventLoopPolicy()
