@@ -1054,7 +1054,7 @@ class RubiconTest(unittest.TestCase):
             "Invalid selector overloaded:invalidArgument:. Available selectors are: "
             "overloaded, overloaded:, overloaded:extraArg:, "
             "overloaded:extraArg1:extraArg2:, overloaded:extraArg2:extraArg1:, "
-            "overloaded:orderedArg1:orderedArg2:,"
+            "overloaded:orderedArg1:orderedArg2:, "
             "overloaded:duplicateArg:duplicateArg:",
         ):
             Example.overloaded(0, invalidArgument=0)
