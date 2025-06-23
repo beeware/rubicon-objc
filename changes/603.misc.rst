@@ -1,0 +1,1 @@
+Switches to the Ruff linter and formatter, from Flake8, isort, and Black.
