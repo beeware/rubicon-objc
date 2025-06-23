@@ -32,7 +32,7 @@ elif sys.version_info < (3, 16):
     # finalized in Python 3.16; there was some symbol renaming to assist in
     # making the deprecation visible. See
     # https://github.com/python/cpython/issues/127949 for details.
-    from asyncio import (
+    from asyncio import (  # noqa: I001
         _AbstractEventLoopPolicy as AbstractEventLoopPolicy,
         _DefaultEventLoopPolicy as DefaultEventLoopPolicy,
     )
@@ -695,7 +695,8 @@ if sys.version_info < (3, 16):
             warnings.warn(
                 "Custom EventLoopPolicy instances have been deprecated by Python 3.14. "
                 "Create and use a `RubiconEventLoop` instance directly instead of "
-                "installing an event loop policy and calling `asyncio.new_event_loop()`.",
+                "installing an event loop policy and calling "
+                "`asyncio.new_event_loop()`.",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -777,7 +778,10 @@ if sys.version_info < (3, 14):
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
-                message=r"^Custom EventLoopPolicy instances have been deprecated by Python 3.14",
+                message=(
+                    r"^Custom EventLoopPolicy instances have been "
+                    r"deprecated by Python 3.14"
+                ),
                 category=DeprecationWarning,
             )
             policy = EventLoopPolicy()

@@ -14,9 +14,9 @@ try:
     rubiconharness = load_library(
         os.path.abspath("tests/objc/build/librubiconharness.dylib")
     )
-except ValueError:
+except ValueError as exc:
     raise ValueError(
         "Couldn't load Rubicon test harness library. Did you remember to run make?"
-    )
+    ) from exc
 
 faulthandler.enable()

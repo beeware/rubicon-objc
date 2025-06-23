@@ -77,9 +77,8 @@ class CtypesPatchTest(unittest.TestCase):
         """Primitive types cannot be patched."""
 
         for tp in (ctypes.c_int, ctypes.c_double, ctypes.c_char_p, ctypes.c_void_p):
-            with self.subTest(tp):
-                with self.assertRaises(ValueError):
-                    ctypes_patch.make_callback_returnable(tp)
+            with self.subTest(tp), self.assertRaises(ValueError):
+                ctypes_patch.make_callback_returnable(tp)
 
     def test_patch_idempotent(self):
         """Patching a type multiple times is equivalent to patching once."""

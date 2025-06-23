@@ -73,10 +73,30 @@ skip = ".git,*.pdf,*.svg"
 ignore-regex = "\bNd\b"
 ignore-words-list = "re-use,assertIn"
 
-[tool.isort]
-profile = "black"
-split_on_trailing_comma = true
-combine_as_imports = true
+[tool.ruff.lint]
+# In addition to the default rules, these additional rules will be used:
+extend-select = [
+    "E",      # pycodestyle
+    "W",      # pycodestyle
+    "F",      # pyflakes
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "SIM",    # flake8-simplify
+    "YTT",    # flake8-2020
+    "ASYNC",  # flake8-async
+    "C4",     # flake8-comprehensions
+    "I",      # isort
+]
+
+# Below is a list of ignored rules.  Many (if not all) of these have been disabled
+# to facilitate a smooth transition from tools like black and isort to ruff, where
+# instances of these errors were caught.  Many if not all of these are candidates
+# for future fixes throughout the project.
+ignore = [
+    "B018",    # useless expression
+    "SIM105",  # use contextlib.suppress() instead of try-except-pass
+    "SIM108",  # use ternary operator instead of if-else block
+]
 
 [tool.setuptools_scm]
 # To enable SCM versioning, we need an empty tool configuration for setuptools_scm

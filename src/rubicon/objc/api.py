@@ -114,8 +114,11 @@ def method_name_to_tuple(name: str) -> (str, tuple[str, ...]):
     """
     Performs the following transformation:
 
-    "methodWithArg0:withArg1:withArg2:" -> "methodWithArg0", ("", "withArg1", "withArg2")
+    "methodWithArg0:withArg1:withArg2:" ->
+    "methodWithArg0", ("", "withArg1", "withArg2")
+
     "methodWithArg0:" -> "methodWithArg0", ("", )
+
     "method" -> "method", ()
 
     The first element of the returned tuple is the "base name" of the method. The second
@@ -180,7 +183,10 @@ class ObjCMethod:
         self.method_argtypes = self.imp_argtypes[2:]
 
     def __repr__(self):
-        return f"<{type(self).__qualname__}: {self.name.decode()} {self.encoding.decode()}>"
+        return (
+            f"<{type(self).__qualname__}: {self.name.decode()} "
+            f"{self.encoding.decode()}>"
+        )
 
     def __call__(self, receiver, *args, convert_args=True, convert_result=True):
         """Call the method on an object with the given arguments.
@@ -217,7 +223,8 @@ class ObjCMethod:
 
         if len(args) != len(self.method_argtypes):
             raise TypeError(
-                f"Method {self.name} takes {len(args)} arguments, but got {len(self.method_argtypes)} arguments"
+                f"Method {self.name} takes {len(args)} arguments, but got "
+                f"{len(self.method_argtypes)} arguments"
             )
 
         if convert_args:
@@ -303,7 +310,7 @@ class ObjCPartialMethod:
     def __call__(self, receiver, first_arg=_sentinel, **kwargs):
         # Ignore parts of argument names after "__".
         order = tuple(argname.split("__")[0] for argname in kwargs)
-        args = [arg for arg in kwargs.values()]
+        args = list(kwargs.values())
 
         if first_arg is ObjCPartialMethod._sentinel:
             if kwargs:
@@ -538,8 +545,8 @@ class objc_property:
 
         if self.weak and not (self._is_py_object or self._is_objc_object):
             raise TypeError(
-                "Incompatible type for ivar {!r}: Weak properties are only supported "
-                "for Objective-C or Python object types".format(vartype)
+                f"Incompatible type for ivar {vartype!r}: Weak properties are only "
+                f"supported for Objective-C or Python object types"
             )
 
     def _get_property_attributes(self):
@@ -842,8 +849,8 @@ class ObjCInstance:
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
 
-        # This property is used inside __getattr__, so any attribute accesses must be done through
-        # super(...).__getattribute__ to prevent infinite recursion.
+        # This property is used inside __getattr__, so any attribute accesses must be
+        # done through super(...).__getattribute__ to prevent infinite recursion.
         try:
             return super(ObjCInstance, type(self)).__getattribute__(self, "_objc_class")
         except AttributeError:
@@ -935,13 +942,15 @@ class ObjCInstance:
             if not _implicitly_owned:
                 send_message(object_ptr, "retain", restype=objc_id, argtypes=[])
 
-            # If the given pointer points to a class, return an ObjCClass instead (if we're not already creating one).
+            # If the given pointer points to a class, return an ObjCClass instead
+            # (if we're not already creating one).
             if not issubclass(cls, ObjCClass) and object_isClass(object_ptr):
                 return ObjCClass(object_ptr)
 
             # Otherwise, create a new ObjCInstance.
             if issubclass(cls, type):
-                # Special case for ObjCClass to pass on the class name, bases and namespace to the type constructor.
+                # Special case for ObjCClass to pass on the class name, bases and
+                # namespace to the type constructor.
                 self = super().__new__(cls, _name, _bases, _ns)
             else:
                 if isinstance(object_ptr, objc_block):
@@ -966,8 +975,8 @@ class ObjCInstance:
 
     def __del__(self):
         # Autorelease our reference on garbage collection of the Python wrapper. We use
-        # autorelease instead of release to allow ObjC to take ownership of an object when
-        # it is returned from a factory method.
+        # autorelease instead of release to allow ObjC to take ownership of an object
+        # when it is returned from a factory method.
         try:
             send_message(self, "autorelease", restype=objc_id, argtypes=[])
         except (NameError, TypeError):
@@ -1092,7 +1101,8 @@ class ObjCInstance:
 
         if pyo_wrapper.value is None:
             raise AttributeError(
-                f"{type(self).__module__}.{type(self).__qualname__} {self.objc_class.name} has no attribute {name}"
+                f"{type(self).__module__}.{type(self).__qualname__} "
+                f"{self.objc_class.name} has no attribute {name}"
             )
         address = get_ivar(pyo_wrapper, "wrapped_pointer")
         pyo = cast(address.value, py_object)
@@ -1151,7 +1161,8 @@ class ObjCInstance:
             pyo_wrapper = libobjc.objc_getAssociatedObject(self, key)
             if pyo_wrapper.value is None:
                 raise AttributeError(
-                    f"{type(self).__module__}.{type(self).__qualname__} {self.objc_class.name} has no attribute {name}"
+                    f"{type(self).__module__}.{type(self).__qualname__} "
+                    f"{self.objc_class.name} has no attribute {name}"
                 )
             # If set, clear the instance attribute / associated object.
             libobjc.objc_setAssociatedObject(self, key, None, 0x301)
@@ -1191,8 +1202,11 @@ class ObjCClass(ObjCInstance, type):
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
 
     auto_rename = False
-    """A :any:`bool` value describing whether a defined class should be renamed automatically
-    if a class with the same name already exists in the Objective C runtime."""
+    """
+    A :any:`bool` value describing whether a defined class should be renamed
+    automatically if a class with the same name already exists in the
+    Objective C runtime.
+    """
 
     @classmethod
     def _new_from_name(cls, name):
@@ -1234,10 +1248,11 @@ class ObjCClass(ObjCInstance, type):
 
         try:
             (superclass,) = bases
-        except ValueError:
+        except ValueError as exc:
             raise ValueError(
-                f"An Objective-C class must have exactly one base class, not {len(bases)}"
-            )
+                f"An Objective-C class must have exactly one base class, "
+                f"not {len(bases)}"
+            ) from exc
 
         # Check that the superclass is an ObjCClass.
         if not isinstance(superclass, ObjCClass):
@@ -1250,8 +1265,9 @@ class ObjCClass(ObjCInstance, type):
         for proto in protocols:
             if not isinstance(proto, ObjCProtocol):
                 raise TypeError(
-                    f"The protocols list of an Objective-C class must contain ObjCProtocol objects, "
-                    f"not {type(proto).__module__}.{type(proto).__qualname__}"
+                    f"The protocols list of an Objective-C class must contain "
+                    f"ObjCProtocol objects, not "
+                    f"{type(proto).__module__}.{type(proto).__qualname__}"
                 )
             elif protocols.count(proto) > 1:
                 raise ValueError(f"Protocol {proto.name} is adopted more than once")
@@ -1360,7 +1376,8 @@ class ObjCClass(ObjCInstance, type):
 
             if protocols:
                 raise ValueError(
-                    "protocols kwarg is not allowed for the single-argument form of ObjCClass"
+                    "protocols kwarg is not allowed for the single-argument form of "
+                    "ObjCClass"
                 )
 
             attrs = {}
@@ -1475,7 +1492,8 @@ class ObjCClass(ObjCInstance, type):
             # Check 2: Does the class have an instance method to retrieve the given name
             accessor = self._cache_method(name)
 
-            # Check 3: Is there a setName: method to set the property with the given name
+            # Check 3: Is there a setName: method to set the property with
+            # the given name
             mutator = self._cache_method("set" + name[0].title() + name[1:] + ":")
 
             # Check 4: Is this a forced property on this class or a superclass?
@@ -1846,7 +1864,9 @@ def ns_from_py(pyobj):
         return ObjCInstance(NSNumber.numberWithDouble_(pyobj, convert_result=False))
     else:
         raise TypeError(
-            f"Don't know how to convert a {type(pyobj).__module__}.{type(pyobj).__qualname__} to a Foundation object"
+            f"Don't know how to convert a "
+            f"{type(pyobj).__module__}.{type(pyobj).__qualname__} to a Foundation "
+            f"object"
         )
 
 
@@ -1927,7 +1947,8 @@ class ObjCProtocol(ObjCInstance):
             basename = name_or_ptr
             name = ensure_bytes(name_or_ptr)
 
-            # Rename the protocol that will be defined if the auto_rename option is True.
+            # Rename the protocol that will be defined if the auto_rename
+            # option is True.
             if libobjc.objc_getProtocol(name).value is not None:
                 if auto_rename or auto_rename is None and cls.auto_rename:
                     suffix = 1
@@ -1943,8 +1964,9 @@ class ObjCProtocol(ObjCInstance):
             for base in bases:
                 if not isinstance(base, ObjCProtocol):
                     raise TypeError(
-                        f"An Objective-C protocol can only extend ObjCProtocol objects, "
-                        f"not {type(base).__module__}.{type(base).__qualname__}"
+                        f"An Objective-C protocol can only extend ObjCProtocol "
+                        f"objects, not "
+                        f"{type(base).__module__}.{type(base).__qualname__}"
                     )
 
             # Allocate the protocol object.
@@ -2261,7 +2283,7 @@ class ObjCBlock:
                 if anon_fields != arg_fields:
                     raise TypeError(
                         f"Expected structure with field types {anon_fields} "
-                        f"for argument {i+1}; got {type(args[i]).__name__} "
+                        f"for argument {i + 1}; got {type(args[i]).__name__} "
                         f"with field types {arg_fields}"
                     )
                 self.invoke_argtypes[i + 1] = type(args[i])
@@ -2336,29 +2358,30 @@ class Block:
             try:
                 hints = typing.get_type_hints(func)
                 signature = inspect.signature(func)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError) as exc:
                 raise ValueError(
                     "Could not retrieve function signature information - "
                     "please pass return and argument types directly into Block"
-                )
+                ) from exc
 
             try:
                 restype = hints["return"]
-            except KeyError:
+            except KeyError as exc:
                 raise ValueError(
-                    "Function has no return type annotation - "
-                    "please add one, or pass return and argument types directly into Block"
-                )
+                    "Function has no return type annotation - please add one, "
+                    "or pass return and argument types directly into Block"
+                ) from exc
 
             argtypes = []
             for name in signature.parameters:
                 try:
                     argtypes.append(hints[name])
-                except KeyError:
+                except KeyError as exc:
                     raise ValueError(
-                        f"Function has no argument type annotation for parameter {name!r} - "
-                        f"please add one, or pass return and argument types directly into Block"
-                    )
+                        f"Function has no argument type annotation for parameter "
+                        f"{name!r} - please add one, or pass return and argument "
+                        f"types directly into Block"
+                    ) from exc
 
         signature = tuple(ctype_for_type(tp) for tp in argtypes)
 
