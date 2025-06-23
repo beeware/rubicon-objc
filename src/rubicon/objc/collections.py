@@ -120,7 +120,7 @@ class ObjCStrInstance(ObjCInstance):
                     chars[chars_i] = ord(self[self_i])
                 return NSString.stringWithCharacters(chars, length=len(chars))
         else:
-            index = len(self) + key if key < 0 else key
+            index = (len(self) + key) if key < 0 else key
 
             if index not in range(len(self)):
                 raise IndexError(f"{type(self).__name__} index out of range")
