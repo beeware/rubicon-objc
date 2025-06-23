@@ -226,7 +226,7 @@ class ObjCListInstance(ObjCInstance):
                     [self.objectAtIndex(x) for x in range(start, stop, step)]
                 )
         else:
-            index = len(self) + item if item < 0 else item
+            index = (len(self) + item) if item < 0 else item
 
             if index not in range(len(self)):
                 raise IndexError(f"{type(self).__name__} index out of range")
@@ -289,7 +289,7 @@ class ObjCMutableListInstance(ObjCListInstance):
                 for idx, obj in zip(indices, arr):
                     self.replaceObjectAtIndex(idx, withObject=obj)
         else:
-            index = len(self) + item if item < 0 else item
+            index = (len(self) + item) if item < 0 else item
 
             if index not in range(len(self)):
                 raise IndexError(f"{type(self).__name__} assignment index out of range")
@@ -305,7 +305,7 @@ class ObjCMutableListInstance(ObjCListInstance):
                 for idx in sorted(range(start, stop, step), reverse=True):
                     self.removeObjectAtIndex(idx)
         else:
-            index = len(self) + item if item < 0 else item
+            index = (len(self) + item) if item < 0 else item
 
             if index not in range(len(self)):
                 raise IndexError(f"{type(self).__name__} assignment index out of range")
