@@ -314,7 +314,7 @@ def _ctype_for_unknown_encoding(encoding):
     elif encoding.startswith(b"[") and encoding.endswith(b"]"):
         # Resolve array types recursively
         i = 1
-        while encoding[i] not in b"0123456789":
+        while encoding[i] in b"0123456789":
             i += 1
         assert i != 1
         array_length = int(encoding[1:i].decode("utf-8"))
