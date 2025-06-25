@@ -30,15 +30,15 @@ Guides and recipes for common problems and tasks, including how to contribute.
 
 Deeper explorations of concepts and issues related to Rubicon-ObjC usage.
 
-:ref:`About Rubicon-ObjC <about>`
---------------------------------------
-
-Frequently Asked Questions, success stories, and other details about Rubicon-ObjC as a project.
-
 :ref:`Reference <reference>`
 ------------------------------------
 
 Technical reference - commands, modules, classes, methods
+
+:ref:`About Rubicon-ObjC <about>`
+--------------------------------------
+
+Frequently Asked Questions, success stories, and other details about Rubicon-ObjC as a project.
 
 Community
 =========
@@ -59,5 +59,5 @@ Rubicon is part of the `BeeWare suite <https://beeware.org>`__. You can talk to 
    tutorial/index
    how-to/index
    topic/index
-   about/index
    reference/index
+   about/index
