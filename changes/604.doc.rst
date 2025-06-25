@@ -1,0 +1,1 @@
+Read the Docs structure now matches the BeeWare standard docs.
