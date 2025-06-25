@@ -14,10 +14,5 @@ stand alone.
    :glob:
 
    get-started
-   type-mapping
-   memory-management
-   protocols
-   async
-   c-functions
    contribute/index
    internal/index
