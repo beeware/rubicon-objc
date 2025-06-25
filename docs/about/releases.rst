@@ -409,8 +409,8 @@ Improved Documentation
 * Added detailed :doc:`reference documentation </reference/index>` for all
   public APIs of :mod:`rubicon.objc`.
   (`#118 <https://github.com/beeware/rubicon-objc/pull/118>`__)
-* Added a :doc:`how-to guide for calling regular C functions
-  </how-to/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`.
+* Added a :doc:`topic guide for calling regular C functions
+  </topic/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`.
   (`#147 <https://github.com/beeware/rubicon-objc/pull/147>`__)
 
 Deprecations and Removals
