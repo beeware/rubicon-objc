@@ -25,8 +25,8 @@ Get started with a hands-on introduction for beginners.
 
 Guides and recipes for common problems and tasks, including how to contribute.
 
-:ref:`Topic guides <topic>`
----------------------------
+:ref:`Topic guides <topics>`
+----------------------------
 
 Deeper explorations of concepts and issues related to Rubicon-ObjC usage.
 
@@ -58,6 +58,6 @@ Rubicon is part of the `BeeWare suite <https://beeware.org>`__. You can talk to 
 
    tutorial/index
    how-to/index
-   topic/index
+   topics/index
    reference/index
    about/index

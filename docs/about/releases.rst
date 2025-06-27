@@ -410,7 +410,7 @@ Improved Documentation
   public APIs of :mod:`rubicon.objc`.
   (`#118 <https://github.com/beeware/rubicon-objc/pull/118>`__)
 * Added a :doc:`topic guide for calling regular C functions
-  </topic/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`.
+  </topics/c-functions>` using :mod:`ctypes` and :mod:`rubicon.objc`.
   (`#147 <https://github.com/beeware/rubicon-objc/pull/147>`__)
 
 Deprecations and Removals
