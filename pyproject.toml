@@ -91,14 +91,6 @@ extend-select = [
     # "SIM",    # flake8-simplify
 ]
 
-# Below is a list of ignored rules.  Many (if not all) of these have been disabled
-# to facilitate a smooth transition from tools like black and isort to ruff, where
-# instances of these errors were caught.  Many if not all of these are candidates
-# for future fixes throughout the project.
-ignore = [
-    "B018",    # useless expression
-]
-
 [tool.setuptools_scm]
 # To enable SCM versioning, we need an empty tool configuration for setuptools_scm
 

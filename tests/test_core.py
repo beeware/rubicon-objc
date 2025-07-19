@@ -119,7 +119,7 @@ class RubiconTest(unittest.TestCase):
 
     def test_sel_null(self):
         with self.assertRaises(ValueError):
-            SEL(None).name
+            _ = SEL(None).name
 
     def test_class_by_name(self):
         """An Objective-C class can be looked up by name."""
@@ -652,7 +652,7 @@ class RubiconTest(unittest.TestCase):
 
         # ... but retrieving like a property is an error
         with self.assertRaises(AttributeError):
-            obj1.specialValue
+            _ = obj1.specialValue
 
         # ...until you set it explicitly...
         obj1.specialValue = 37
@@ -699,11 +699,11 @@ class RubiconTest(unittest.TestCase):
 
         # Non-existent fields raise an error.
         with self.assertRaises(AttributeError):
-            obj1.field_doesnt_exist
+            _ = obj1.field_doesnt_exist
 
         # Cache warming doesn't affect anything.
         with self.assertRaises(AttributeError):
-            obj1.field_doesnt_exist
+            _ = obj1.field_doesnt_exist
 
     def test_non_existent_method(self):
         """An attribute error is raised if you invoke a non-existent method."""
@@ -725,11 +725,11 @@ class RubiconTest(unittest.TestCase):
 
         # Non-existent fields raise an error.
         with self.assertRaises(AttributeError):
-            Example.static_field_doesnt_exist
+            _ = Example.static_field_doesnt_exist
 
         # Cache warming doesn't affect anything.
         with self.assertRaises(AttributeError):
-            Example.static_field_doesnt_exist
+            _ = Example.static_field_doesnt_exist
 
     def test_non_existent_static_method(self):
         """An attribute error is raised if you invoke a non-existent static method."""
@@ -771,7 +771,7 @@ class RubiconTest(unittest.TestCase):
         obj = Example.alloc().init()
 
         with self.assertRaises(AttributeError):
-            obj.staticIntField
+            _ = obj.staticIntField
 
         with self.assertRaises(AttributeError):
             obj.get_staticIntField()
@@ -781,7 +781,7 @@ class RubiconTest(unittest.TestCase):
         Example = ObjCClass("Example")
 
         with self.assertRaises(AttributeError):
-            Example.intField
+            _ = Example.intField
 
         with self.assertRaises(AttributeError):
             Example.accessIntField()
@@ -909,7 +909,7 @@ class RubiconTest(unittest.TestCase):
 
         # Look up the method, so the return/argument types are decoded
         # and the structs are registered.
-        Example.doStuffWithStruct_
+        _ = Example.doStuffWithStruct_
 
         struct_simple = types.ctype_for_encoding(b"{simple=ii}")
         self.assertEqual(struct_simple, types.ctype_for_encoding(b"{simple}"))
@@ -1831,7 +1831,7 @@ class RubiconTest(unittest.TestCase):
         del thing.python_object_1
 
         with self.assertRaises(AttributeError):
-            thing.python_object_1
+            _ = thing.python_object_1
 
     def test_objcinstance_python_attribute_keep_alive(self):
         """Python attributes on an ObjCInstance are kept even if the object
@@ -2105,6 +2105,7 @@ class RubiconTest(unittest.TestCase):
         assert pre_init.ptr.value == post_init.ptr.value
         # The class name hasn't changed either
         assert pre_init.objc_class.name == post_init.objc_class.name == "Example"
+
         # The wrapper is the same object
         assert id(pre_init) == id(post_init)
 
@@ -2205,7 +2206,7 @@ class RubiconTest(unittest.TestCase):
             # This will also populate the property cache.
             def work():
                 try:
-                    obj.intField
+                    _ = obj.intField
                 except AttributeError:
                     self.fail("accessor should exist; property cache is corrupt")
 
