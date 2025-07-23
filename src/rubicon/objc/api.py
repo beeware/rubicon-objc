@@ -101,8 +101,7 @@ def get_method_family(method_name: str) -> str:
 
     See
     https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families
-    for
-    documentation on method families and corresponding selector names.
+    for documentation on method families and corresponding selector names.
     """
     first_component = method_name.lstrip("_").split(":")[0]
     for family in _RETURNS_RETAINED_FAMILIES:
