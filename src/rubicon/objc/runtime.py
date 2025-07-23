@@ -160,8 +160,8 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        """The constructor can be called with a :class:`bytes` or :class:`str`
-        object to obtain a selector with that value.
+        """The constructor can be called with a :class:`bytes` or :class:`str` object to
+        obtain a selector with that value.
 
         (The normal arguments supported by :class:`~ctypes.c_void_p` are
         still accepted.)
@@ -495,12 +495,10 @@ try:
 except AttributeError:
 
     def object_isClass(obj):
-        """Return whether the given Objective-C object is a class (or a
-        metaclass).
+        """Return whether the given Objective-C object is a class (or a metaclass).
 
-        This is the emulated version of the object_isClass runtime
-        function, for systems older than OS X 10.10 or iOS 8, where the
-        real function doesn't exist yet.
+        This is the emulated version of the object_isClass runtime function, for systems
+        older than OS X 10.10 or iOS 8, where the real function doesn't exist yet.
         """
 
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
@@ -663,8 +661,7 @@ def ensure_bytes(x):
 
 
 def get_class(name):
-    """Get the Objective-C class with the given name as a :class:`Class`
-    object.
+    """Get the Objective-C class with the given name as a :class:`Class` object.
 
     If no class with the given name is loaded, ``None`` is returned, and
     the Objective-C runtime will log a warning message.
@@ -723,8 +720,8 @@ _msg_send_cache = {}
 
 
 def _msg_send_for_types(restype, argtypes):
-    """Get the appropriate variant of ``objc_msgSend`` for calling a method
-    with the given return and argument types.
+    """Get the appropriate variant of ``objc_msgSend`` for calling a method with the
+    given return and argument types.
 
     :param restype: The return type of the method to be called.
     :param argtypes: The argument types of the method to be called, excluding
@@ -883,8 +880,8 @@ def send_super(
     varargs=None,
     _allow_dealloc=False,
 ):
-    """In the context of the given class, call a superclass method on the
-    receiver with the given selector and arguments.
+    """In the context of the given class, call a superclass method on the receiver with
+    the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like
     ``[super sel:args]`` in the class ``cls``.
@@ -1151,16 +1148,16 @@ def set_ivar(obj, varname, value, weak=False):
 
 @contextmanager
 def autoreleasepool():
-    """A context manager that has the same effect as a @autoreleasepool block
-    in Objective-C.
+    """A context manager that has the same effect as a @autoreleasepool block in
+    Objective-C.
 
-    Any objects that are autoreleased within the context will receive a release
-    message when exiting the context. When running an event loop, AppKit will
-    create an autorelease pool at the beginning of each cycle of the event loop
-    and drain it at the end. You therefore do not need to use @autoreleasepool
-    blocks when running an event loop. However, they may be still be useful when
-    your code temporarily allocates large amounts of memory which you want to
-    explicitly free before the end of a cycle.
+    Any objects that are autoreleased within the context will receive a release message
+    when exiting the context. When running an event loop, AppKit will create an
+    autorelease pool at the beginning of each cycle of the event loop and drain it at
+    the end. You therefore do not need to use @autoreleasepool blocks when running an
+    event loop. However, they may be still be useful when your code temporarily
+    allocates large amounts of memory which you want to explicitly free before the end
+    of a cycle.
     """
     pool = libobjc.objc_autoreleasePoolPush()
 

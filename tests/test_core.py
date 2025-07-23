@@ -223,8 +223,7 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(Example, ObjCClass)
 
     def test_objcinstance_can_produce_objcmetaclass(self):
-        """Creating an ObjCInstance for a metaclass pointer gives an
-        ObjCMetaClass."""
+        """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
 
         examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCInstance(examplemeta_ptr)
@@ -232,8 +231,7 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
 
     def test_objcclass_can_produce_objcmetaclass(self):
-        """Creating an ObjCClass for a metaclass pointer gives an
-        ObjCMetaclass."""
+        """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
 
         examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
         ExampleMeta = ObjCClass(examplemeta_ptr)
@@ -241,8 +239,7 @@ class RubiconTest(unittest.TestCase):
         self.assertIsInstance(ExampleMeta, ObjCMetaClass)
 
     def test_objcinstance_can_produce_objcprotocol(self):
-        """Creating an ObjCInstance for a protocol pointer gives an
-        ObjCProtocol."""
+        """Creating an ObjCInstance for a protocol pointer gives an ObjCProtocol."""
 
         example_protocol_ptr = libobjc.objc_getProtocol(b"ExampleProtocol")
         ExampleProtocol = ObjCInstance(example_protocol_ptr)
@@ -312,7 +309,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(DerivedProtocol.protocols, (BaseProtocolOne, BaseProtocolTwo))
 
     def test_objcclass_instancecheck(self):
-        """isinstance works with an ObjCClass as the second argument."""
+        """``isinstance()`` works with an ObjCClass as the second argument."""
         self.assertIsInstance(NSObject.new(), NSObject)
         self.assertIsInstance(at(""), NSString)
         self.assertIsInstance(at(""), NSObject)
@@ -324,7 +321,7 @@ class RubiconTest(unittest.TestCase):
         self.assertNotIsInstance(NSArray.array, NSString)
 
     def test_objcclass_subclasscheck(self):
-        """issubclass works with an ObjCClass as the second argument."""
+        """``issubclass()`` works with an ObjCClass as the second argument."""
         self.assertTrue(issubclass(NSObject, NSObject))
         self.assertTrue(issubclass(NSString, NSObject))
         self.assertTrue(issubclass(NSObject.objc_class, NSObject))
@@ -343,7 +340,7 @@ class RubiconTest(unittest.TestCase):
             issubclass(NSObjectProtocol, NSObject)
 
     def test_objcprotocol_instancecheck(self):
-        """isinstance works with an ObjCProtocol as the second argument."""
+        """``isinstance()`` works with an ObjCProtocol as the second argument."""
 
         NSCoding = ObjCProtocol("NSCoding")
         NSSecureCoding = ObjCProtocol("NSSecureCoding")
@@ -355,7 +352,7 @@ class RubiconTest(unittest.TestCase):
         self.assertNotIsInstance(NSObject.new(), NSSecureCoding)
 
     def test_objcprotocol_subclasscheck(self):
-        """issubclass works with an ObjCProtocol as the second argument."""
+        """``issubclass()`` works with an ObjCProtocol as the second argument."""
         NSCopying = ObjCProtocol("NSCopying")
         NSCoding = ObjCProtocol("NSCoding")
         NSSecureCoding = ObjCProtocol("NSSecureCoding")
@@ -377,7 +374,7 @@ class RubiconTest(unittest.TestCase):
             issubclass(NSObject.new(), NSSecureCoding)
 
     def test_field(self):
-        """A field on an instance can be accessed and mutated"""
+        """A field on an instance can be accessed and mutated."""
 
         Example = ObjCClass("Example")
 
@@ -408,8 +405,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.accessIntField(), 9999)
 
     def test_method_incorrect_argument_count(self):
-        """Attempting to call a method with an incorrect number of arguments
-        throws an exception."""
+        """Attempting to call a method with an incorrect number of arguments throws an
+        exception."""
 
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -424,9 +421,8 @@ class RubiconTest(unittest.TestCase):
             obj.mutateIntFieldWithValue_(123, "extra argument")
 
     def test_method_incorrect_argument_type(self):
-        """
-        Attempting to call a method with the wrong type of argument throws an exception.
-        """
+        """Attempting to call a method with the wrong type of argument throws an
+        exception."""
 
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -448,8 +444,8 @@ class RubiconTest(unittest.TestCase):
             obj.mutateIntFieldWithValue_(1.234)
 
     def test_method_incorrect_argument_count_send(self):
-        """Attempting to call a method with send_message with an incorrect
-        number of arguments throws an exception."""
+        """Attempting to call a method with send_message with an incorrect number of
+        arguments throws an exception."""
 
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -562,8 +558,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.baseIntField, 10)
 
     def test_send_super_incorrect_argument_count(self):
-        """Attempting to call a method with send_super with an incorrect number
-        of arguments throws an exception."""
+        """Attempting to call a method with send_super with an incorrect number of
+        arguments throws an exception."""
         SpecificExample = ObjCClass("SpecificExample")
 
         obj = SpecificExample.alloc().init()
@@ -613,7 +609,7 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.accessBaseIntField(), 11)
 
     def test_static_field(self):
-        """A static field on a class can be accessed and mutated"""
+        """A static field on a class can be accessed and mutated."""
         Example = ObjCClass("Example")
 
         Example.mutateStaticBaseIntFieldWithValue_(1)
@@ -744,7 +740,7 @@ class RubiconTest(unittest.TestCase):
             Example.static_method_doesnt_exist()
 
     def test_polymorphic_constructor(self):
-        """Check that the right constructor is activated based on arguments used"""
+        """Check that the right constructor is activated based on arguments used."""
         Example = ObjCClass("Example")
 
         obj1 = Example.alloc().init()
@@ -765,7 +761,7 @@ class RubiconTest(unittest.TestCase):
             Example.alloc().initWithString_("Hello")
 
     def test_static_access_non_static(self):
-        """An instance field/method cannot be accessed from the static context"""
+        """An instance field/method cannot be accessed from the static context."""
         Example = ObjCClass("Example")
 
         obj = Example.alloc().init()
@@ -777,7 +773,7 @@ class RubiconTest(unittest.TestCase):
             obj.get_staticIntField()
 
     def test_non_static_access_static(self):
-        """A static field/method cannot be accessed from an instance context"""
+        """A static field/method cannot be accessed from an instance context."""
         Example = ObjCClass("Example")
 
         with self.assertRaises(AttributeError):
@@ -820,24 +816,21 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.accessIntField(), MyEnum.value4.value)
 
     def test_string_return(self):
-        """If a method or field returns a string, you get a Python string back"""
+        """If a method or field returns a string, you get a Python string back."""
         Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.toString(), "This is an ObjC Example object")
 
     def test_constant_string_return(self):
-        """
-        If a method or field returns a *constant* string, you get a Python string back
-        """
+        """If a method or field returns a *constant* string, you get a Python string
+        back."""
         Example = ObjCClass("Example")
         example = Example.alloc().init()
         self.assertEqual(example.smiley(), "%-)")
 
     def test_number_return(self):
-        """
-        If a method or field returns a NSNumber, it is not automatically converted
-        to a Python number.
-        """
+        """If a method or field returns a NSNumber, it is not automatically converted to
+        a Python number."""
         Example = ObjCClass("Example")
         example = Example.alloc().init()
 
@@ -952,10 +945,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(example.largeStruct().x, b"abcdefghijklmnop")
 
     def test_struct_return_send(self):
-        """
-        Methods returning structs of different sizes by value can be handled
-        when using send_message.
-        """
+        """Methods returning structs of different sizes by value can be handled when
+        using send_message."""
         Example = ObjCClass("Example")
         example = Example.alloc().init()
 
@@ -977,10 +968,8 @@ class RubiconTest(unittest.TestCase):
         )
 
     def test_object_return(self):
-        """
-        If a method or field returns an object, you get an instance of
-        that type returned
-        """
+        """If a method or field returns an object, you get an instance of that type
+        returned."""
         Example = ObjCClass("Example")
         example = Example.alloc().init()
 
@@ -1060,7 +1049,7 @@ class RubiconTest(unittest.TestCase):
             Example.overloaded(0, invalidArgument=0)
 
     def test_objcmethod_str_repr(self):
-        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr"""
+        """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr."""
 
         obj = NSObject.new()
 
@@ -1109,8 +1098,8 @@ class RubiconTest(unittest.TestCase):
         )
 
     def test_objcinstance_str_repr_with_nil_descriptions(self):
-        """An ObjCInstance's str and repr work even if description and
-        debugDescription are nil."""
+        """An ObjCInstance's str and repr work even if description and debugDescription
+        are nil."""
 
         DescriptionTester = ObjCClass("DescriptionTester")
         tester = DescriptionTester.alloc().initWithDescriptionString(
@@ -1727,10 +1716,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(str(string_const), "Some global string constant")
 
     def test_interface_return_struct(self):
-        """
-        An ObjC protocol implementation that returns values by struct can
-        be defined in Python.
-        """
+        """An ObjC protocol implementation that returns values by struct can be defined
+        in Python."""
 
         results = {}
         Thing = ObjCClass("Thing")
@@ -1834,8 +1821,8 @@ class RubiconTest(unittest.TestCase):
             _ = thing.python_object_1
 
     def test_objcinstance_python_attribute_keep_alive(self):
-        """Python attributes on an ObjCInstance are kept even if the object
-        temporarily has no Python references."""
+        """Python attributes on an ObjCInstance are kept even if the object temporarily
+        has no Python references."""
 
         Example = ObjCClass("Example")
         example = Example.alloc().init()
@@ -1918,7 +1905,9 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_returned_lifecycle(self):
         """An object is retained when creating an ObjCInstance for it without implicit
-        ownership. It is autoreleased when the ObjCInstance is garbage collected.
+        ownership.
+
+        It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
@@ -1939,8 +1928,9 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_alloc_init_lifecycle(self):
         """An object is not additionally retained when we create and initialize it
-        through an alloc().init() chain. It is autoreleased when the ObjCInstance is
-        garbage collected.
+        through an alloc().init() chain.
+
+        It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
@@ -1950,7 +1940,9 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_new_lifecycle(self):
         """An object is not additionally retained when we create and initialize it with
-        a new call. It is autoreleased when the ObjCInstance is garbage collected.
+        a new call.
+
+        It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
@@ -1960,7 +1952,9 @@ class RubiconTest(unittest.TestCase):
 
     def test_objcinstance_copy_lifecycle(self):
         """An object is not additionally retained when we create and initialize it with
-        a copy call. It is autoreleased when the ObjCInstance is garbage collected.
+        a copy call.
+
+        It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
@@ -1976,10 +1970,10 @@ class RubiconTest(unittest.TestCase):
         assert_lifecycle(self, create_object)
 
     def test_objcinstance_mutable_copy_lifecycle(self):
-        """
-        An object is not additionally retained when we create and initialize it with
-        a mutableCopy call. It is autoreleased when the ObjCInstance is garbage
-        collected.
+        """An object is not additionally retained when we create and initialize it with
+        a mutableCopy call.
+
+        It is autoreleased when the ObjCInstance is garbage collected.
         """
 
         def create_object():
@@ -2012,8 +2006,8 @@ class RubiconTest(unittest.TestCase):
         assert_lifecycle(self, create_object)
 
     def test_objcinstance_init_change_lifecycle(self):
-        """We do not leak memory if init returns a different object than it
-        received in alloc."""
+        """We do not leak memory if init returns a different object than it received in
+        alloc."""
 
         def create_object():
             with autoreleasepool():
@@ -2071,10 +2065,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(attr1.retainCount(), 1, "weak property value was released")
 
     def test_partial_with_override(self):
-        """
-        If one method in a partial is overridden, that doesn't impact lookup of
-        other partial targets
-        """
+        """If one method in a partial is overridden, that doesn't impact lookup of other
+        partial targets."""
         SpecificExample = ObjCClass("SpecificExample")
 
         obj = SpecificExample.alloc().init()
@@ -2088,10 +2080,8 @@ class RubiconTest(unittest.TestCase):
         self.assertEqual(obj.baseIntField, 2)
 
     def test_compatible_class_name_change(self):
-        """
-        If the class name changes in a compatible way, the wrapper isn't
-        recreated (#257)
-        """
+        """If the class name changes in a compatible way, the wrapper isn't recreated
+        (#257)"""
         Example = ObjCClass("Example")
 
         pre_init = Example.alloc()
@@ -2110,10 +2100,8 @@ class RubiconTest(unittest.TestCase):
         assert id(pre_init) == id(post_init)
 
     def test_threaded_wrapper_creation(self):
-        """
-        If 2 threads try to create a wrapper for the same object, only 1
-        wrapper is created (#251)
-        """
+        """If 2 threads try to create a wrapper for the same object, only 1 wrapper is
+        created (#251)"""
         # Create an ObjC instance, and keep a track of the memory address
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -2152,8 +2140,8 @@ class RubiconTest(unittest.TestCase):
             self.assertEqual(id(wrappers[0]), id(wrappers[1]))
 
     def test_threaded_method_cache(self):
-        """If 2 threads try to access a method on the same object,
-        there's no race condition populating the cache (#252)"""
+        """If 2 threads try to access a method on the same object, there's no race
+        condition populating the cache (#252)"""
         # Wrap a class with lots of methods, and create the instance
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -2185,8 +2173,8 @@ class RubiconTest(unittest.TestCase):
             thread.join()
 
     def test_threaded_accessor_cache(self):
-        """If 2 threads try to access an accessor on the same object,
-        there's no race condition populating the cache (#252)"""
+        """If 2 threads try to access an accessor on the same object, there's no race
+        condition populating the cache (#252)"""
         # Wrap a class with lots of methods, and create the instance
         Example = ObjCClass("Example")
         obj = Example.alloc().init()
@@ -2218,8 +2206,8 @@ class RubiconTest(unittest.TestCase):
             thread.join()
 
     def test_threaded_mutator_cache(self):
-        """If 2 threads try to access a mutator on the same object,
-        there's no race condition populating the cache (#252)"""
+        """If 2 threads try to access a mutator on the same object, there's no race
+        condition populating the cache (#252)"""
         # Wrap a class with lots of methods, and create the instance
         Example = ObjCClass("Example")
         obj = Example.alloc().init()

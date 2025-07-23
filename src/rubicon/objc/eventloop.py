@@ -269,9 +269,9 @@ class CFSocketHandle(events.Handle):
             callback(*args)
 
     def __init__(self, *, loop, fd):
-        """Register a file descriptor with the CFRunLoop, or modify its state
-        so that it's listening for both notifications (read and write) rather
-        than just one; used to implement add_reader and add_writer."""
+        """Register a file descriptor with the CFRunLoop, or modify its state so that
+        it's listening for both notifications (read and write) rather than just one;
+        used to implement add_reader and add_writer."""
         super().__init__(CFSocketCallback(self._cf_socket_callback), None, loop)
 
         # Retain a reference to the Handle
@@ -384,8 +384,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def add_reader(self, fd, callback, *args):
         """Add a reader callback.
 
-        Method is a direct call through to _add_reader to reflect an
-        internal implementation detail added in Python3.5.
+        Method is a direct call through to _add_reader to reflect an internal
+        implementation detail added in Python3.5.
         """
         self._add_reader(fd, callback, *args)
 
@@ -399,8 +399,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def remove_reader(self, fd):
         """Remove a reader callback.
 
-        Method is a direct call through to _remove_reader to reflect an
-        internal implementation detail added in Python3.5.
+        Method is a direct call through to _remove_reader to reflect an internal
+        implementation detail added in Python3.5.
         """
         self._remove_reader(fd)
 
@@ -416,8 +416,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def add_writer(self, fd, callback, *args):
         """Add a writer callback.
 
-        Method is a direct call through to _add_writer to reflect an
-        internal implementation detail added in Python3.5.
+        Method is a direct call through to _add_writer to reflect an internal
+        implementation detail added in Python3.5.
         """
         self._add_writer(fd, callback, *args)
 
@@ -431,8 +431,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def remove_writer(self, fd):
         """Remove a writer callback.
 
-        Method is a direct call through to _remove_writer to reflect an
-        internal implementation detail added in Python3.5.
+        Method is a direct call through to _remove_writer to reflect an internal
+        implementation detail added in Python3.5.
         """
         self._remove_writer(fd)
 
@@ -449,8 +449,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         return self._running
 
     def run(self):
-        """Internal implementation of run using the CoreFoundation event
-        loop."""
+        """Internal implementation of run using the CoreFoundation event loop."""
         recursive = self.is_running()
         if (
             not recursive
@@ -522,10 +521,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def run_forever_cooperatively(self, lifecycle=None):
         """A non-blocking version of :meth:`run_forever`.
 
-        This may seem like nonsense; however, an iOS app is not expected to
-        invoke a blocking "main event loop" method. As a result, we need to
-        be able to *start* Python event loop handling, but then return control
-        to the main app to start the actual event loop.
+        This may seem like nonsense; however, an iOS app is not expected to invoke a
+        blocking "main event loop" method. As a result, we need to be able to *start*
+        Python event loop handling, but then return control to the main app to start the
+        actual event loop.
 
         The implementation is effectively all the parts of a call to
         :meth:`run_forever()`, but without any of the shutdown/cleanup logic.
@@ -615,17 +614,16 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def time(self):
         """Return the time according to the event loop's clock.
 
-        This is a float expressed in seconds since an epoch, but the
-        epoch, precision, accuracy and drift are unspecified and may
-        differ per event loop.
+        This is a float expressed in seconds since an epoch, but the epoch, precision,
+        accuracy and drift are unspecified and may differ per event loop.
         """
         return libcf.CFAbsoluteTimeGetCurrent()
 
     def stop(self):
         """Stop running the event loop.
 
-        Every callback already scheduled will still run.  This simply
-        informs run_forever to stop looping after a complete iteration.
+        Every callback already scheduled will still run.  This simply informs
+        run_forever to stop looping after a complete iteration.
         """
         super().stop()
         self._lifecycle.stop()
@@ -633,8 +631,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def close(self):
         """Close the event loop.
 
-        This clears the queues and shuts down the executor,
-        but does not wait for the executor to finish.
+        This clears the queues and shuts down the executor, but does not wait for the
+        executor to finish.
 
         The event loop must not be running.
         """
@@ -663,14 +661,13 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def _add_callback(self, handle):
         """Add a callback to be invoked ASAP.
 
-        The inherited behavior uses a self-pipe to wake up the event loop
-        in a thread-safe fashion, which causes the logic in run_once() to
-        empty the list of handlers that are awaiting invocation.
+        The inherited behavior uses a self-pipe to wake up the event loop in a thread-
+        safe fashion, which causes the logic in run_once() to empty the list of handlers
+        that are awaiting invocation.
 
-        CFEventLoop doesn't use run_once(), so adding handlers to
-        self._ready results in handlers that aren't invoked. Instead, we
-        create a 0-interval timer to invoke the callback as soon as
-        possible.
+        CFEventLoop doesn't use run_once(), so adding handlers to self._ready results in
+        handlers that aren't invoked. Instead, we create a 0-interval timer to invoke
+        the callback as soon as possible.
         """
         if handle._cancelled:
             return

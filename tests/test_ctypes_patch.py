@@ -105,8 +105,7 @@ class CtypesPatchTest(unittest.TestCase):
             self.assertEqual(struct.ham, 123)
 
     def test_patched_type_returned_often(self):
-        """Returning a patched type very often works properly without crashing
-        anything.
+        """Returning a patched type very often works properly without crashing anything.
 
         This checks that bpo-36880 is either fixed or worked around.
         """

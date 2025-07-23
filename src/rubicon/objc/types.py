@@ -164,9 +164,8 @@ _encoding_for_ctype_map = {}
 def _end_of_encoding(encoding, start):
     """Find the end index of the encoding starting at index start.
 
-    The encoding is not validated very extensively. There are no
-    guarantees what happens for invalid encodings; an error may be
-    raised, or a bogus end index may be returned.
+    The encoding is not validated very extensively. There are no guarantees what happens
+    for invalid encodings; an error may be raised, or a bogus end index may be returned.
     """
 
     if start < 0 or start >= len(encoding):
@@ -238,9 +237,8 @@ def _end_of_encoding(encoding, start):
 def _create_structish_type_for_encoding(encoding, *, base):
     """Create a structish type from the given encoding.
 
-    ("structish" = "structure or union")
-    The base kwarg controls which base class is used. It should be either
-    ctypes.Structure or ctypes.Union.
+    ("structish" = "structure or union") The base kwarg controls which base class is
+    used. It should be either ctypes.Structure or ctypes.Union.
     """
 
     # Split name and fields.
@@ -406,8 +404,8 @@ def encoding_for_ctype(ctype):
 
 
 def register_preferred_encoding(encoding, ctype):
-    """Register a preferred conversion between an Objective-C type encoding and
-    a C type.
+    """Register a preferred conversion between an Objective-C type encoding and a C
+    type.
 
     "Preferred" means that any existing conversions in each direction are
     overwritten with the new conversion. To register an encoding without
@@ -419,8 +417,8 @@ def register_preferred_encoding(encoding, ctype):
 
 
 def with_preferred_encoding(encoding):
-    """Register a preferred conversion between an Objective-C type encoding and
-    the decorated C type.
+    """Register a preferred conversion between an Objective-C type encoding and the
+    decorated C type.
 
     This is equivalent to calling :func:`register_preferred_encoding` on the
     decorated C type.
@@ -434,8 +432,8 @@ def with_preferred_encoding(encoding):
 
 
 def register_encoding(encoding, ctype):
-    """Register an additional conversion between an Objective-C type encoding
-    and a C type.
+    """Register an additional conversion between an Objective-C type encoding and a C
+    type.
 
     "Additional" means that any existing conversions in either direction are
     *not* overwritten with the new conversion. To register an encoding and
@@ -447,8 +445,8 @@ def register_encoding(encoding, ctype):
 
 
 def with_encoding(encoding):
-    """Register an additional conversion between an Objective-C type encoding
-    and the decorated C type.
+    """Register an additional conversion between an Objective-C type encoding and the
+    decorated C type.
 
     This is equivalent to calling :func:`register_encoding` on the
     decorated C type.
@@ -462,8 +460,8 @@ def with_encoding(encoding):
 
 
 def unregister_encoding(encoding):
-    """Unregister the conversion from an Objective-C type encoding to its
-    corresponding C type.
+    """Unregister the conversion from an Objective-C type encoding to its corresponding
+    C type.
 
     Note that this does not remove any conversions in the other direction (from
     a C type to this encoding). These conversions may be replaced with
@@ -493,8 +491,8 @@ def unregister_encoding_all(encoding):
 
 
 def unregister_ctype(ctype):
-    """Unregister the conversion from a C type to its corresponding
-    Objective-C type encoding.
+    """Unregister the conversion from a C type to its corresponding Objective-C type
+    encoding.
 
     Note that this does not remove any conversions in the other direction (from
     an encoding to this C type). These conversions may be replaced with
@@ -508,8 +506,8 @@ def unregister_ctype(ctype):
 
 
 def unregister_ctype_all(ctype):
-    """Unregister all conversions between a C type and all corresponding
-    Objective-C type encodings.
+    """Unregister all conversions between a C type and all corresponding Objective-C
+    type encodings.
 
     All conversions from any type encoding to this C type are removed
     recursively using :func:`unregister_encoding_all`.
@@ -524,15 +522,15 @@ def unregister_ctype_all(ctype):
 
 
 def get_ctype_for_encoding_map():
-    """Get a copy of all currently registered encoding-to-C type conversions
-    as a map."""
+    """Get a copy of all currently registered encoding-to-C type conversions as a
+    map."""
 
     return dict(_ctype_for_encoding_map)
 
 
 def get_encoding_for_ctype_map():
-    """Get a copy of all currently registered C type-to-encoding conversions
-    as a map."""
+    """Get a copy of all currently registered C type-to-encoding conversions as a
+    map."""
 
     return dict(_encoding_for_ctype_map)
 
@@ -540,12 +538,12 @@ def get_encoding_for_ctype_map():
 def split_method_encoding(encoding):
     """Split a method signature encoding into a sequence of type encodings.
 
-    The first type encoding represents the return type, all remaining type
-    encodings represent the argument types.
+    The first type encoding represents the return type, all remaining type encodings
+    represent the argument types.
 
-    If there are any numbers after a type encoding, they are ignored. On
-    PowerPC, these numbers indicated each argument/return value's offset on the
-    stack. These numbers are meaningless on modern architectures.
+    If there are any numbers after a type encoding, they are ignored. On PowerPC, these
+    numbers indicated each argument/return value's offset on the stack. These numbers
+    are meaningless on modern architectures.
     """
 
     encodings = []
@@ -615,8 +613,8 @@ def _array_for_sequence(seq, array_type):
 
 
 def compound_value_for_sequence(seq, tp):
-    """Create a C structure or array of type ``tp``, initialized with values
-    from ``seq``.
+    """Create a C structure or array of type ``tp``, initialized with values from
+    ``seq``.
 
     If ``tp`` is a :class:`~ctypes.Structure` type, the newly created
     structure's fields are initialized in declaration order with the values from
@@ -743,8 +741,7 @@ register_preferred_encoding(_PyObjectEncoding, py_object)
 @with_encoding(b"^{?}")
 @with_encoding(b"^(?)")
 class UnknownPointer(c_void_p):
-    """Placeholder for the "unknown pointer" types ``^?``, ``^{?}`` and
-    ``^(?)``.
+    """Placeholder for the "unknown pointer" types ``^?``, ``^{?}`` and ``^(?)``.
 
     Not to be confused with a ``^v`` void pointer.
 

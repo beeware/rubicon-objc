@@ -27,17 +27,16 @@ NSBackwardsSearch = 4
 
 @for_objcclass(NSString)
 class ObjCStrInstance(ObjCInstance):
-    """Provides Pythonic operations on NSString objects that mimic those of
-    Python's str.
+    """Provides Pythonic operations on NSString objects that mimic those of Python's
+    str.
 
-    Note that str objects consist of Unicode code points, whereas
-    NSString objects consist of UTF-16 code units. These are not
-    equivalent for code points greater than U+FFFF. For performance and
-    simplicity, ObjCStrInstance objects behave as sequences of UTF-16
-    code units, like NSString. (Individual UTF-16 code units are
-    represented as Python str objects of length 1.) If you need to
-    access or iterate over code points instead of UTF-16 code units, use
-    str(nsstring) to convert the NSString to a Python str first.
+    Note that str objects consist of Unicode code points, whereas NSString objects
+    consist of UTF-16 code units. These are not equivalent for code points greater than
+    U+FFFF. For performance and simplicity, ObjCStrInstance objects behave as sequences
+    of UTF-16 code units, like NSString. (Individual UTF-16 code units are represented
+    as Python str objects of length 1.) If you need to access or iterate over code
+    points instead of UTF-16 code units, use str(nsstring) to convert the NSString to a
+    Python str first.
     """
 
     def __str__(self):
@@ -68,10 +67,9 @@ class ObjCStrInstance(ObjCInstance):
     def _compare(self, other, want):
         """Helper method used to implement the comparison operators.
 
-        If other is a str or NSString, it is compared to self, and True
-        or False is returned depending on whether the result is one of
-        the wanted values. If other is not a string, NotImplemented is
-        returned.
+        If other is a str or NSString, it is compared to self, and True or False is
+        returned depending on whether the result is one of the wanted values. If other
+        is not a string, NotImplemented is returned.
         """
 
         if isinstance(other, str):
