@@ -1,12 +1,12 @@
-"""This module provides a workaround to allow callback functions to return
-composite types (most importantly structs).
+"""This module provides a workaround to allow callback functions to return composite
+types (most importantly structs).
 
 Currently, ctypes callback functions (created by passing a Python callable to a
 CFUNCTYPE object) are only able to return what ctypes considers a "simple" type. This
 includes void (None), scalars (c_int, c_float, etc.), c_void_p, c_char_p, c_wchar_p, and
 py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is
-not possible. This issue has been reported on the Python bug tracker
-(https://github.com/python/cpython/issues/49960).
+not possible. This issue has been reported on the Python bug tracker (
+https://github.com/python/cpython/issues/49960).
 
 For pointers, the easiest workaround is to return a c_void_p instead of the correctly
 typed pointer, and to cast the value on both sides. For structs and unions there is no
@@ -150,13 +150,12 @@ if sys.version_info < (3, 13):
         return mappingproxyobject.from_address(id(proxy)).mapping
 
     def get_stgdict_of_type(tp):
-        """Return the given ctypes type's StgDict object. If the object's dict is
-        not a StgDict, an error is raised.
+        """Return the given ctypes type's StgDict object. If the object's dict is not a
+        StgDict, an error is raised.
 
-        This function is roughly equivalent to the PyType_stgdict function in the
-        ctypes source code. We cannot use that function directly, because it is not
-        part of CPython's public C API, and thus not accessible on some systems (see
-        #113).
+        This function is roughly equivalent to the PyType_stgdict function in the ctypes
+        source code. We cannot use that function directly, because it is not part of
+        CPython's public C API, and thus not accessible on some systems (see #113).
         """
 
         if not isinstance(tp, type):
@@ -209,8 +208,8 @@ else:
         """Return the given ctypes type's StgInfo object.
 
         This function is roughly equivalent to the PyStgInfo_FromType function in the
-        ctypes source code. We cannot use that function directly, because it is not
-        part of CPython's public C API, and thus not accessible).
+        ctypes source code. We cannot use that function directly, because it is not part
+        of CPython's public C API, and thus not accessible).
         """
         # Original code:
         #   if (!PyObject_IsInstance((PyObject *)type, (PyObject *)state->PyCType_Type))
@@ -244,13 +243,12 @@ ctypes.pythonapi.Py_IncRef.argtypes = [ctypes.POINTER(PyObject)]
 
 
 def make_callback_returnable(ctype):
-    """Modify the given ctypes type so it can be returned from a callback
-    function.
+    """Modify the given ctypes type so it can be returned from a callback function.
 
     This function may be used as a decorator on a struct/union declaration.
 
-    The method is idempotent; it only modifies the type the first time it
-    is invoked on a type.
+    The method is idempotent; it only modifies the type the first time it is invoked on
+    a type.
     """
     # The presence of the _rubicon_objc_ctypes_patch_getfunc attribute is a
     # sentinel for whether the type has been modified previously.

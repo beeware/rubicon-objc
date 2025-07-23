@@ -138,7 +138,7 @@ class NSStringTests(unittest.TestCase):
                     self.assertNotIn(ns_needle, ns_haystack)
 
     def test_nsstring_len(self):
-        """len() works on NSString."""
+        """``len()`` works on NSString."""
 
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):

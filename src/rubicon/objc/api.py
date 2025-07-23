@@ -97,9 +97,12 @@ _RETURNS_RETAINED_FAMILIES = {"init", "alloc", "new", "copy", "mutableCopy"}
 
 
 def get_method_family(method_name: str) -> str:
-    """Returns the method family from the method name. See
-    https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families for
-    documentation on method families and corresponding selector names."""
+    """Returns the method family from the method name.
+
+    See
+    https://clang.llvm.org/docs/AutomaticReferenceCounting.html#method-families
+    for documentation on method families and corresponding selector names.
+    """
     first_component = method_name.lstrip("_").split(":")[0]
     for family in _RETURNS_RETAINED_FAMILIES:
         if first_component.startswith(family):
@@ -150,8 +153,8 @@ def encoding_from_annotation(f, offset=1):
 
 
 class ObjCMethod:
-    """An unbound Objective-C method. This is Rubicon's high-level equivalent
-    of :class:`~rubicon.objc.runtime.Method`.
+    """An unbound Objective-C method. This is Rubicon's high-level equivalent of
+    :class:`~rubicon.objc.runtime.Method`.
 
     :class:`ObjCMethod` objects normally don't need to be used directly. To call
     a method on an Objective-C object, you should use the method call syntax
@@ -168,8 +171,8 @@ class ObjCMethod:
     """
 
     def __init__(self, method):
-        """The constructor takes a :class:`~rubicon.objc.runtime.Method`
-        object, whose information is used to create an :class:`ObjCMethod`.
+        """The constructor takes a :class:`~rubicon.objc.runtime.Method` object, whose
+        information is used to create an :class:`ObjCMethod`.
 
         This can be used to call or introspect a
         :class:`~rubicon.objc.runtime.Method` pointer received from the
@@ -348,9 +351,8 @@ class ObjCPartialMethod:
 
 
 class ObjCBoundMethod:
-    """This represents an Objective-C method (an IMP) which has been bound to
-    some id which will be passed as the first parameter to the method.
-    """
+    """This represents an Objective-C method (an IMP) which has been bound to some id
+    which will be passed as the first parameter to the method."""
 
     def __init__(self, method, receiver):
         """Initialize with a method and ObjCInstance or ObjCClass object."""
@@ -369,9 +371,8 @@ class ObjCBoundMethod:
 
 
 def convert_method_arguments(encoding, args):
-    """Used to convert Objective-C method arguments to Python values before
-    passing them on to the Python-defined method.
-    """
+    """Used to convert Objective-C method arguments to Python values before passing them
+    on to the Python-defined method."""
     new_args = []
     for e, a in zip(encoding[3:], args):
         if issubclass(e, (objc_id, ObjCInstance)):
@@ -382,8 +383,8 @@ def convert_method_arguments(encoding, args):
 
 
 class objc_method:
-    """Exposes the decorated method as an Objective-C instance method in a
-    custom class or protocol.
+    """Exposes the decorated method as an Objective-C instance method in a custom class
+    or protocol.
 
     In a custom Objective-C class, decorating a method with :func:`@objc_method
     <objc_method>` makes it available to Objective-C: a corresponding
@@ -431,12 +432,12 @@ class objc_method:
 
 
 class objc_classmethod:
-    """Exposes the decorated method as an Objective-C class method in a custom
-    class or protocol.
+    """Exposes the decorated method as an Objective-C class method in a custom class or
+    protocol.
 
-    This decorator behaves exactly like :func:`@objc_method <objc_method>`,
-    except that the decorated method becomes a class method, so it is exposed
-    on the Objective-C class rather than its instances.
+    This decorator behaves exactly like :func:`@objc_method <objc_method>`, except that
+    the decorated method becomes a class method, so it is exposed on the Objective-C
+    class rather than its instances.
     """
 
     def __init__(self, py_method):
@@ -673,8 +674,8 @@ class objc_property:
 
 
 class objc_rawmethod:
-    """Exposes the decorated method as an Objective-C instance method in a
-    custom class, with fewer convenience features than :func:`objc_method`.
+    """Exposes the decorated method as an Objective-C instance method in a custom class,
+    with fewer convenience features than :func:`objc_method`.
 
     This decorator behaves similarly to :func:`@objc_method <objc_method>`.
     However, unlike with :func:`objc_method`, no automatic conversions are
@@ -716,8 +717,8 @@ _type_for_objcclass_map = {}
 
 
 def type_for_objcclass(objcclass):
-    """Look up the :class:`ObjCInstance` subclass used to represent instances
-    of the given Objective-C class in Python.
+    """Look up the :class:`ObjCInstance` subclass used to represent instances of the
+    given Objective-C class in Python.
 
     If the exact Objective-C class is not registered, each superclass is also
     checked, defaulting to :class:`ObjCInstance` if none of the classes in the
@@ -752,8 +753,8 @@ def type_for_objcclass(objcclass):
 
 
 def register_type_for_objcclass(pytype, objcclass):
-    """Register a conversion from an Objective-C class to an
-    :class:`ObjCInstance` subclass.
+    """Register a conversion from an Objective-C class to an :class:`ObjCInstance`
+    subclass.
 
     After a call of this function, when Rubicon wraps an Objective-C object that
     is an instance of ``objcclass`` (or a subclass), the Python object will have
@@ -776,8 +777,8 @@ def register_type_for_objcclass(pytype, objcclass):
 
 
 def unregister_type_for_objcclass(objcclass):
-    """Unregister a conversion from an Objective-C class to an
-    :class:`ObjCInstance` subclass.
+    """Unregister a conversion from an Objective-C class to an :class:`ObjCInstance`
+    subclass.
 
     .. warning::
 
@@ -795,8 +796,8 @@ def unregister_type_for_objcclass(objcclass):
 
 
 def get_type_for_objcclass_map():
-    """Get a copy of all currently registered :class:`ObjCInstance` subclasses
-    as a mapping.
+    """Get a copy of all currently registered :class:`ObjCInstance` subclasses as a
+    mapping.
 
     Keys are Objective-C class addresses as :class:`int`\\s.
     """
@@ -874,9 +875,9 @@ class ObjCInstance:
     def __new__(
         cls, object_ptr, _name=None, _bases=None, _ns=None, _implicitly_owned=False
     ):
-        """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or
-        anything that can be cast to one, such as a :class:`~ctypes.c_void_p`,
-        or an existing :class:`ObjCInstance`.
+        """The constructor accepts an :class:`~rubicon.objc.runtime.objc_id` or anything
+        that can be cast to one, such as a :class:`~ctypes.c_void_p`, or an existing
+        :class:`ObjCInstance`.
 
         :class:`ObjCInstance` objects are cached --- this means that for every
         Objective-C object there can be at most one :class:`ObjCInstance` object
@@ -1004,16 +1005,16 @@ class ObjCInstance:
         return repr(self)
 
     def __repr__(self):
-        """Get a debugging representation of ``self``, which includes the
-        Objective-C object's class and ``debugDescription``."""
+        """Get a debugging representation of ``self``, which includes the Objective-C
+        object's class and ``debugDescription``."""
         return (
             f"<{type(self).__qualname__}: {self.objc_class.name} at "
             f"{id(self):#x}: {self.debugDescription}>"
         )
 
     def __getattr__(self, name):
-        """Allows accessing Objective-C properties and methods using Python
-        attribute syntax.
+        """Allows accessing Objective-C properties and methods using Python attribute
+        syntax.
 
         If ``self`` has a Python attribute with the given name, its value is
         returned.
@@ -1184,8 +1185,8 @@ class ObjCClass(ObjCInstance, type):
 
     @property
     def superclass(self):
-        """The superclass of this class, or ``None`` if this is a root class
-        (such as :class:`NSObject`)."""
+        """The superclass of this class, or ``None`` if this is a root class (such as
+        :class:`NSObject`)."""
 
         super_ptr = libobjc.class_getSuperclass(self)
         if super_ptr.value is None:
@@ -1338,9 +1339,9 @@ class ObjCClass(ObjCInstance, type):
         protocols=(),
         auto_rename=None,
     ):
-        """The constructor accepts either the name of an Objective-C class to
-        look up (as :class:`str` or :class:`bytes`), or a pointer to an existing
-        class object (in any form accepted by :class:`ObjCInstance`).
+        """The constructor accepts either the name of an Objective-C class to look up
+        (as :class:`str` or :class:`bytes`), or a pointer to an existing class object
+        (in any form accepted by :class:`ObjCInstance`).
 
         If given a pointer, it must refer to an Objective-C class; pointers to
         other objects are not accepted. (Use :class:`ObjCInstance` to wrap a
@@ -1443,9 +1444,9 @@ class ObjCClass(ObjCInstance, type):
         super().__init__(*args)
 
     def _cache_method(self, name):
-        """Returns a python representation of the named instance method, either
-        by looking it up in the cached list of methods or by searching for and
-        creating a new method object."""
+        """Returns a python representation of the named instance method, either by
+        looking it up in the cached list of methods or by searching for and creating a
+        new method object."""
         with self.cache_lock:
             try:
                 # Try to return an existing cached method for the name
@@ -1514,11 +1515,9 @@ class ObjCClass(ObjCInstance, type):
         return methods
 
     def _cache_property_accessor(self, name):
-        """Returns a python representation of an accessor for the named
-        property.
+        """Returns a python representation of an accessor for the named property.
 
-        Existence of a property is done by looking for the write
-        selector (set<Name>:).
+        Existence of a property is done by looking for the write selector (set<Name>:).
         """
         with self.cache_lock:
             try:
@@ -1531,11 +1530,9 @@ class ObjCClass(ObjCInstance, type):
         return None
 
     def _cache_property_mutator(self, name):
-        """Returns a python representation of an accessor for the named
-        property.
+        """Returns a python representation of an accessor for the named property.
 
-        Existence of a property is done by looking for the write
-        selector (set<Name>:).
+        Existence of a property is done by looking for the write selector (set<Name>:).
         """
         with self.cache_lock:
             try:
@@ -1690,10 +1687,9 @@ class ObjCMetaClass(ObjCClass):
     """
 
     def __new__(cls, name_or_ptr):
-        """The constructor accepts either the name of an Objective-C metaclass
-        to look up (as :class:`str` or :class:`bytes`), or a pointer to an
-        existing metaclass object (in any form accepted by
-        :class:`ObjCInstance`).
+        """The constructor accepts either the name of an Objective-C metaclass to look
+        up (as :class:`str` or :class:`bytes`), or a pointer to an existing metaclass
+        object (in any form accepted by :class:`ObjCInstance`).
 
         If given a pointer, it must refer to an Objective-C metaclass; pointers
         to other objects are not accepted. (Use :class:`ObjCInstance` to wrap a
@@ -1738,8 +1734,7 @@ Protocol = ObjCClass("Protocol")
 
 
 def py_from_ns(nsobj):
-    """Convert a Foundation object into an equivalent Python object if
-    possible.
+    """Convert a Foundation object into an equivalent Python object if possible.
 
     Currently supported types:
 
@@ -1801,8 +1796,8 @@ def py_from_ns(nsobj):
 
 
 def ns_from_py(pyobj):
-    """Convert a Python object into an equivalent Foundation object. The
-    returned object is autoreleased.
+    """Convert a Python object into an equivalent Foundation object. The returned object
+    is autoreleased.
 
     This function is also available under the name :func:`at`, because its
     functionality is very similar to that of the Objective-C ``@`` operator and
@@ -1896,10 +1891,9 @@ class ObjCProtocol(ObjCInstance):
     automatically if a protocol with the same name is already exists."""
 
     def __new__(cls, name_or_ptr, bases=None, ns=None, auto_rename=None):
-        """The constructor accepts either the name of an Objective-C protocol
-        to look up (as :class:`str` or :class:`bytes`), or a pointer to an
-        existing protocol object (in any form accepted by
-        :class:`ObjCInstance`).
+        """The constructor accepts either the name of an Objective-C protocol to look up
+        (as :class:`str` or :class:`bytes`), or a pointer to an existing protocol object
+        (in any form accepted by :class:`ObjCInstance`).
 
         If given a pointer, it must refer to an Objective-C protocol; pointers
         to other objects are not accepted. (Use :class:`ObjCInstance` to wrap a
@@ -2090,9 +2084,9 @@ def objc_const(dll, name):
     """Create an :class:`ObjCInstance` from a global pointer variable in a
     :class:`~ctypes.CDLL`.
 
-    This function is most commonly used to access constant object pointers
-    defined by a library/framework, such as `NSCocoaErrorDomain
-    <https://developer.apple.com/documentation/foundation/nscocoaerrordomain?language=objc>`__.
+    This function is most commonly used to access constant object pointers defined by a
+    library/framework, such as
+    `NSCocoaErrorDomain <https://developer.apple.com/documentation/foundation/nscocoaerrordomain?language=objc>`__.
     """
 
     return ObjCInstance(objc_id.in_dll(dll, name))
@@ -2188,8 +2182,7 @@ class ObjCBlock:
 
     def __init__(self, pointer, restype=AUTO, *argtypes):
         """The constructor takes a block object, which can be either an
-        :class:`ObjCInstance`, or a raw :class:`~rubicon.objc.runtime.objc_id`
-        pointer.
+        :class:`ObjCInstance`, or a raw :class:`~rubicon.objc.runtime.objc_id` pointer.
 
         .. note::
 
@@ -2308,8 +2301,7 @@ NOTHING = object()
 
 
 class Block:
-    """A wrapper that exposes a Python callable object to Objective-C as a
-    block.
+    """A wrapper that exposes a Python callable object to Objective-C as a block.
 
     .. note::
 
