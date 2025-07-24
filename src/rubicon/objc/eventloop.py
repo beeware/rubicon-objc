@@ -29,12 +29,13 @@ elif sys.version_info < (3, 16):
     # replacement API; the feature can be removed.
     #
     # Python 3.14 also started the deprecation of event loop policies, to be
-    # finalized in Python 3.16; there was some symbol renaming to assist in
-    # making the deprecation visible. See
-    # https://github.com/python/cpython/issues/127949 for details.
+    # finalized in Python 3.16. In the 3.14 betas, the symbols were prefixed
+    # with an underscore; that was reverted for RC1. See
+    # https://github.com/python/cpython/issues/127949 and
+    # https://github.com/python/cpython/issues/134657 for details.
     from asyncio import (  # noqa: I001
-        _AbstractEventLoopPolicy as AbstractEventLoopPolicy,
-        _DefaultEventLoopPolicy as DefaultEventLoopPolicy,
+        AbstractEventLoopPolicy,
+        DefaultEventLoopPolicy,
     )
 
 __all__ = [
