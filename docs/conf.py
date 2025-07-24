@@ -1,4 +1,4 @@
-# Rubicon documentation build configuration file, created by
+# Rubicon ObjC documentation build configuration file, created by
 # sphinx-quickstart on Sat Jul 27 14:58:42 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -13,7 +13,24 @@ import os
 import sys
 from importlib.metadata import version as metadata_version
 
+import beeware_theme
 import enchant  # noqa: F401
+
+# BeeWare theme override for Furo Sphinx theme to add BeeWare features.
+templates_path = []
+html_static_path = []
+html_css_files = []
+html_context = {}
+html_theme_options = {}
+
+beeware_theme.init(
+    project_name="rubicon-objc",
+    templates=templates_path,
+    context=html_context,
+    static=html_static_path,
+    css=html_css_files,
+    theme_options=html_theme_options,
+)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -36,7 +53,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path.append("_templates")
 
 # The suffix of source filenames.
 source_suffix = ".rst"
@@ -48,7 +65,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "Rubicon"
+project = "Rubicon ObjC"
 copyright = "Russell Keith-Magee"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -159,14 +176,14 @@ copybutton_copy_empty_lines = False
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+# html_theme_options.update({})
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = f"Rubicon {release}"
+html_title = f"Rubicon ObjC {release}"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
@@ -183,7 +200,7 @@ html_logo = "_static/images/rubicon.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path.append("_static")
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -245,7 +262,13 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "rubicon.tex", "Rubicon Documentation", "Russell Keith-Magee", "manual"),
+    (
+        "index",
+        "rubicon.tex",
+        "Rubicon ObjC Documentation",
+        "Russell Keith-Magee",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -274,7 +297,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ("index", "rubicon", "Rubicon Documentation", ["Russell Keith-Magee"], 1),
+    ("index", "rubicon", "Rubicon ObjC Documentation", ["Russell Keith-Magee"], 1),
 ]
 
 # If true, show URL addresses after external links.
@@ -289,10 +312,10 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "rubicon",
-        "Rubicon Documentation",
+        "rubicon-objc",
+        "Rubicon ObjC Documentation",
         "Russell Keith-Magee",
-        "Rubicon",
+        "Rubicon ObjC",
         "A bridge between an Objective-C runtime environment and Python.",
         "Miscellaneous",
     ),
