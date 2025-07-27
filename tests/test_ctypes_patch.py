@@ -75,7 +75,6 @@ class CtypesPatchTest(unittest.TestCase):
 
     def test_no_patch_primitives(self):
         """Primitive types cannot be patched."""
-
         for tp in (ctypes.c_int, ctypes.c_double, ctypes.c_char_p, ctypes.c_void_p):
             with self.subTest(tp), self.assertRaises(ValueError):
                 ctypes_patch.make_callback_returnable(tp)
