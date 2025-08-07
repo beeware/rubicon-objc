@@ -4,6 +4,25 @@ Release History
 
 .. towncrier release notes start
 
+0.5.2 (2025-08-07)
+==================
+
+Bugfixes
+--------
+
+* The name of the deprecated ``AbstractEventLoopPolicy`` symbol has been corrected to reflect the restoration of the original name in 3.14.0rc1. (#619)
+
+Documentation
+-------------
+
+* The structure of Rubicon's documentation now matches other BeeWare projects. (#604)
+* The Rubicon docs now use the BeeWare theme. (#621)
+
+Misc
+----
+
+* #599, #600, #601, #602, #603, #605, #606, #607, #608, #611, #612, #613, #615, #616, #617, #618, #623, #624, #626, #627
+
 0.5.1 (2025-06-03)
 ==================
 

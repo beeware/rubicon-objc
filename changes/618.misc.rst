@@ -1,1 +1,0 @@
-A docformatter pre-commit check was added.

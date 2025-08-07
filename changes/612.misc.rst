@@ -1,2 +1,0 @@
-- Resolves Ruff B018 warnings by replacing useless expressions.
-- Ruff now runs without any ignored rules.
