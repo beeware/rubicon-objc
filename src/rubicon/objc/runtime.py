@@ -85,7 +85,6 @@ def load_library(name):
     locations, as a fallback for systems where ``find_library`` does not work
     (such as iOS).
     """
-
     path = util.find_library(name)
     if path is not None:
         return CDLL(path)
@@ -153,7 +152,6 @@ class SEL(c_void_p):
     @property
     def name(self):
         """The selector's name as :class:`bytes`."""
-
         if self.value is None:
             raise ValueError("Cannot get name of null selector")
 
@@ -166,7 +164,6 @@ class SEL(c_void_p):
         (The normal arguments supported by :class:`~ctypes.c_void_p` are
         still accepted.)
         """
-
         if isinstance(init, (bytes, str)):
             self = libobjc.sel_registerName(ensure_bytes(init))
             self._inited = True
@@ -500,7 +497,6 @@ except AttributeError:
         This is the emulated version of the object_isClass runtime function, for systems
         older than OS X 10.10 or iOS 8, where the real function doesn't exist yet.
         """
-
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
 
 else:
@@ -649,7 +645,6 @@ def ensure_bytes(x):
     If the argument is already :class:`bytes`, it is returned unchanged;
     if it is :class:`str`, it is encoded as UTF-8.
     """
-
     if isinstance(x, bytes):
         return x
     # "All char * in the runtime API should be considered to have UTF-8 encoding."
@@ -666,7 +661,6 @@ def get_class(name):
     If no class with the given name is loaded, ``None`` is returned, and
     the Objective-C runtime will log a warning message.
     """
-
     return libobjc.objc_getClass(ensure_bytes(name))
 
 
@@ -677,7 +671,6 @@ def get_class(name):
 def should_use_stret(restype):
     """Return whether a method returning the given type must be called using
     ``objc_msgSend_stret`` on the current system."""
-
     if type(restype) is not type(Structure):
         # Not needed when restype is not a structure.
         retval = False
@@ -704,7 +697,6 @@ def should_use_stret(restype):
 def should_use_fpret(restype):
     """Return whether a method returning the given type must be called using
     ``objc_msgSend_fpret`` on the current system."""
-
     if __x86_64__:
         # On x86_64: Use only for long double.
         return restype == c_longdouble
@@ -731,7 +723,6 @@ def _msg_send_for_types(restype, argtypes):
         and ``argtypes`` arguments. The ``restype`` and ``argtypes`` attributes
         of the returned function *must not* be modified.
     """
-
     try:
         # Looking up a C function is relatively slow, so use an existing cached
         # function if possible.
@@ -814,7 +805,6 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         Defaults to ``[]``. These arguments are converted according to the
         default :mod:`ctypes` conversion rules.
     """
-
     try:
         receiver = receiver._as_parameter_
     except AttributeError:
@@ -919,7 +909,6 @@ def send_super(
         Defaults to ``[]``. These arguments are converted according to the
         default :mod:`ctypes` conversion rules.
     """
-
     # Unwrap ObjCClass to Class if necessary
     try:
         cls = cls._as_parameter_
@@ -1035,7 +1024,6 @@ def add_method(cls, selector, method, encoding, replace=False):
         this function pointer object to ensure that it isn't garbage-collected.
         Rubicon now does this automatically.)
     """
-
     signature = [ctype_for_type(tp) for tp in encoding]
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
@@ -1062,7 +1050,6 @@ def add_method(cls, selector, method, encoding, replace=False):
 
 def add_ivar(cls, name, vartype):
     """Add a new instance variable of type ``vartype`` to ``cls``."""
-
     return libobjc.class_addIvar(
         cls,
         ensure_bytes(name),
@@ -1086,7 +1073,6 @@ def get_ivar(obj, varname, weak=False):
     memory. This is because object ``ivars`` may be weak, and thus cannot always
     be accessed directly by their address.
     """
-
     try:
         obj = obj._as_parameter_
     except AttributeError:
@@ -1107,18 +1093,16 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's ``ivar`` ``varname`` to value. If ``weak`` is ``True``, only a weak
-    reference to the value is stored.
+    """Set obj's ``ivar`` ``varname`` to value. reference to the value is stored. If
+    ``weak`` is ``True``, only a weak.
 
     value must be a :mod:`ctypes` data object whose type matches that of
     the ``ivar``.
     """
-
     try:
         obj = obj._as_parameter_
     except AttributeError:
         pass
-
     ivar = libobjc.class_getInstanceVariable(
         libobjc.object_getClass(obj), ensure_bytes(varname)
     )

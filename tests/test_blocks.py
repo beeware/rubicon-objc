@@ -184,7 +184,6 @@ class BlockTests(unittest.TestCase):
     def test_block_round_trip_no_arguments(self):
         """A block that takes no arguments can be created with both ways of specifying
         types."""
-
         BlockRoundTrip = ObjCClass("BlockRoundTrip")
         instance = BlockRoundTrip.alloc().init()
 

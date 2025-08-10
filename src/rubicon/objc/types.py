@@ -134,26 +134,22 @@ def ctype_for_type(tp):
     :mod:`ctypes` equivalents. Unregistered types (including types that are
     already ctypes) are returned unchanged.
     """
-
     return _ctype_for_type_map.get(tp, tp)
 
 
 def register_ctype_for_type(tp, ctype):
     """Register a conversion from a Python type to a C type."""
-
     _ctype_for_type_map[tp] = ctype
 
 
 def unregister_ctype_for_type(tp):
     """Unregister a conversion from a Python type to a C type."""
-
     del _ctype_for_type_map[tp]
 
 
 def get_ctype_for_type_map():
     """Get a copy of all currently registered type-to-C type conversions as a
     mapping."""
-
     return dict(_ctype_for_type_map)
 
 
@@ -167,7 +163,6 @@ def _end_of_encoding(encoding, start):
     The encoding is not validated very extensively. There are no guarantees what happens
     for invalid encodings; an error may be raised, or a bogus end index may be returned.
     """
-
     if start < 0 or start >= len(encoding):
         raise ValueError(f"Start index {start} not in range({len(encoding)})")
 
@@ -367,7 +362,6 @@ def ctype_for_encoding(encoding):
 
     :raises ValueError: if the conversion fails at any point
     """
-
     # Remove qualifiers, as documented in Table 6-2 here:
     # https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
     encoding = encoding.lstrip(b"NORVnor")
@@ -393,7 +387,6 @@ def encoding_for_ctype(ctype):
 
     :raises ValueError: if the conversion fails at any point
     """
-
     try:
         return _encoding_for_ctype_map[ctype]
     except KeyError:
@@ -411,7 +404,6 @@ def register_preferred_encoding(encoding, ctype):
     overwritten with the new conversion. To register an encoding without
     overwriting existing conversions, use :func:`register_encoding`.
     """
-
     _ctype_for_encoding_map[encoding] = ctype
     _encoding_for_ctype_map[ctype] = encoding
 
@@ -439,7 +431,6 @@ def register_encoding(encoding, ctype):
     *not* overwritten with the new conversion. To register an encoding and
     overwrite existing conversions, use :func:`register_preferred_encoding`.
     """
-
     _ctype_for_encoding_map.setdefault(encoding, ctype)
     _encoding_for_ctype_map.setdefault(ctype, encoding)
 
@@ -470,7 +461,6 @@ def unregister_encoding(encoding):
 
     If the encoding was not registered previously, nothing happens.
     """
-
     _ctype_for_encoding_map.pop(encoding, None)
 
 
@@ -483,7 +473,6 @@ def unregister_encoding_all(encoding):
 
     If the encoding was not registered previously, nothing happens.
     """
-
     _ctype_for_encoding_map.pop(encoding, None)
     for ct, enc in list(_encoding_for_ctype_map.items()):
         if enc == encoding:
@@ -501,7 +490,6 @@ def unregister_ctype(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-
     _encoding_for_ctype_map.pop(ctype, default=None)
 
 
@@ -514,7 +502,6 @@ def unregister_ctype_all(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-
     _encoding_for_ctype_map.pop(ctype, default=None)
     for enc, ct in list(_ctype_for_encoding_map.items()):
         if ct == ctype:
@@ -524,14 +511,12 @@ def unregister_ctype_all(ctype):
 def get_ctype_for_encoding_map():
     """Get a copy of all currently registered encoding-to-C type conversions as a
     map."""
-
     return dict(_ctype_for_encoding_map)
 
 
 def get_encoding_for_ctype_map():
     """Get a copy of all currently registered C type-to-encoding conversions as a
     map."""
-
     return dict(_encoding_for_ctype_map)
 
 
@@ -545,7 +530,6 @@ def split_method_encoding(encoding):
     numbers indicated each argument/return value's offset on the stack. These numbers
     are meaningless on modern architectures.
     """
-
     encodings = []
     start = 0
     while start < len(encoding):
@@ -567,7 +551,6 @@ def ctypes_for_method_encoding(encoding):
     :func:`split_method_encoding`, and then converting each individual type
     encoding using :func:`ctype_for_encoding`.
     """
-
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
 
@@ -628,7 +611,6 @@ def compound_value_for_sequence(seq, tp):
     a structure or array type, the corresponding value from ``seq`` is
     recursively converted as well.
     """
-
     if issubclass(tp, Structure):
         return _struct_for_sequence(seq, tp)
     elif issubclass(tp, Array):

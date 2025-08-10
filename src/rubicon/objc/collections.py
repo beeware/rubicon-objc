@@ -71,7 +71,6 @@ class ObjCStrInstance(ObjCInstance):
         returned depending on whether the result is one of the wanted values. If other
         is not a string, NotImplemented is returned.
         """
-
         if isinstance(other, str):
             ns_other = ns_from_py(other)
         elif isinstance(other, NSString):
