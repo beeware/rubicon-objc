@@ -71,7 +71,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_str_nsstring_conversion(self):
         """Python str and NSString can be converted to each other manually."""
-
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):
                 nsstr = ns_from_py(pystr)
@@ -81,7 +80,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_eq_nsstring(self):
         """Two NSStrings can be checked for equality."""
-
         first = ns_from_py("first")
         second = ns_from_py("second")
 
@@ -91,7 +89,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_str_eq_nsstring(self):
         """A Python str and a NSString can be checked for equality."""
-
         py_first = "first"
         py_second = "second"
         ns_first = ns_from_py(py_first)
@@ -106,13 +103,11 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_as_fspath(self):
         """An NSString can be interpreted as a 'path-like' object."""
-
         # os.path.dirname requires a 'path-like' object.
         self.assertEqual(os.path.dirname(ns_from_py("/path/base/leaf")), "/path/base")
 
     def test_nsstring_compare(self):
         """A NSString can be compared to other strings."""
-
         for py_left in type(self).TEST_STRINGS:
             for py_right in type(self).TEST_STRINGS:
                 with self.subTest(py_left=py_left, py_right=py_right):
@@ -126,7 +121,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_in(self):
         """The in operator works on NSString."""
-
         py_haystack = type(self).HAYSTACK
         ns_haystack = ns_from_py(py_haystack)
         for py_needle in type(self).NEEDLES:
@@ -139,7 +133,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_len(self):
         """``len()`` works on NSString."""
-
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):
                 nsstr = ns_from_py(pystr)
@@ -147,7 +140,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_getitem_index(self):
         """The individual elements of a NSString can be accessed."""
-
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):
                 nsstr = ns_from_py(pystr)
@@ -156,7 +148,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_getitem_slice(self):
         """A NSString can be sliced."""
-
         for pystr in type(self).TEST_STRINGS:
             for step in (None, 1, 2, -1, -2):
                 with self.subTest(pystr=pystr, step=step):
@@ -168,7 +159,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_iter(self):
         """A NSString can be iterated over."""
-
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):
                 nsstr = ns_from_py(pystr)
@@ -177,7 +167,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_find_rfind(self):
         """The find and rfind methods work on NSString."""
-
         py_haystack = type(self).HAYSTACK
         ns_haystack = ns_from_py(py_haystack)
         for py_needle in type(self).NEEDLES:
@@ -195,7 +184,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_index_rindex(self):
         """The index and rindex methods work on NSString."""
-
         py_haystack = type(self).HAYSTACK
         ns_haystack = ns_from_py(py_haystack)
         for py_needle in type(self).NEEDLES:
@@ -225,7 +213,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_add_radd(self):
         """The + operator works on NSString."""
-
         for py_left in type(self).TEST_STRINGS:
             for py_right in type(self).TEST_STRINGS:
                 with self.subTest(py_left=py_left, py_right=py_right):
@@ -239,7 +226,6 @@ class NSStringTests(unittest.TestCase):
 
     def test_nsstring_mul_rmul(self):
         """The * operator works on NSString."""
-
         for py_str in type(self).TEST_STRINGS:
             for n in (-5, 0, 1, 2, 5):
                 with self.subTest(py_str=py_str, n=n):

@@ -153,8 +153,8 @@ def encoding_from_annotation(f, offset=1):
 
 
 class ObjCMethod:
-    """An unbound Objective-C method. This is Rubicon's high-level equivalent of
-    :class:`~rubicon.objc.runtime.Method`.
+    """An unbound Objective-C method. :class:`~rubicon.objc.runtime.Method`. This is
+    Rubicon's high-level equivalent of.
 
     :class:`ObjCMethod` objects normally don't need to be used directly. To call
     a method on an Objective-C object, you should use the method call syntax
@@ -223,7 +223,6 @@ class ObjCMethod:
         --- the method's :attr:`selector` is automatically added between the
         receiver and the method arguments.
         """
-
         if len(args) != len(self.method_argtypes):
             raise TypeError(
                 f"Method {self.name} takes {len(args)} arguments, but got "
@@ -730,7 +729,6 @@ def type_for_objcclass(objcclass):
     This method is mainly intended for internal use by Rubicon, but is exposed
     in the public API for completeness.
     """
-
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
 
@@ -769,7 +767,6 @@ def register_type_for_objcclass(pytype, objcclass):
         not change, and mappings for subclasses of ``objcclass`` are not
         updated.
     """
-
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
 
@@ -788,7 +785,6 @@ def unregister_type_for_objcclass(objcclass):
         not change, and mappings for subclasses of ``objcclass`` are not
         removed.
     """
-
     if isinstance(objcclass, ObjCClass):
         objcclass = objcclass.ptr
 
@@ -801,7 +797,6 @@ def get_type_for_objcclass_map():
 
     Keys are Objective-C class addresses as :class:`int`\\s.
     """
-
     return dict(_type_for_objcclass_map)
 
 
@@ -849,7 +844,6 @@ class ObjCInstance:
     @property
     def objc_class(self):
         """The Objective-C object's class, as an :class:`ObjCClass`."""
-
         # This property is used inside __getattr__, so any attribute accesses must be
         # done through super(...).__getattribute__ to prevent infinite recursion.
         try:
@@ -904,7 +898,6 @@ class ObjCInstance:
         This ensures that the :class:`ObjCInstance` can always be used from Python
         without segfaults while preventing Rubicon from leaking memory.
         """
-
         # Make sure that object_ptr is wrapped in an objc_id.
         if not isinstance(object_ptr, objc_id):
             object_ptr = cast(object_ptr, objc_id)
@@ -1117,7 +1110,6 @@ class ObjCInstance:
         Otherwise, the name should refer to an Objective-C property, whose
         setter method is called with ``value``.
         """
-
         if name in self.__dict__:
             # For attributes already in __dict__, use the default __setattr__.
             super(ObjCInstance, type(self)).__setattr__(self, name, value)
@@ -1187,7 +1179,6 @@ class ObjCClass(ObjCInstance, type):
     def superclass(self):
         """The superclass of this class, or ``None`` if this is a root class (such as
         :class:`NSObject`)."""
-
         super_ptr = libobjc.class_getSuperclass(self)
         if super_ptr.value is None:
             return None
@@ -1197,7 +1188,6 @@ class ObjCClass(ObjCInstance, type):
     @property
     def protocols(self):
         """The protocols adopted by this class."""
-
         out_count = c_uint()
         protocols_ptr = libobjc.class_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
@@ -1367,7 +1357,6 @@ class ObjCClass(ObjCInstance, type):
         unique name is found). By default, classes will *not* be renamed, unless
         :attr:`ObjCClass.auto_rename` is set at the class level.
         """
-
         if (bases is None) ^ (attrs is None):
             raise TypeError("ObjCClass arguments 2 and 3 must be given together")
 
@@ -1576,7 +1565,6 @@ class ObjCClass(ObjCInstance, type):
             ``NSObject.declare_property('description')``, so that it can always be
             accessed using ``obj.description``.
         """
-
         self.forced_properties.add(name)
 
     def declare_class_property(self, name):
@@ -1585,7 +1573,6 @@ class ObjCClass(ObjCInstance, type):
         This is equivalent to
         ``self.objc_class.declare_property(name)``.
         """
-
         self.objc_class.forced_properties.add(name)
 
     def __repr__(self):
@@ -1606,7 +1593,6 @@ class ObjCClass(ObjCInstance, type):
         of :func:`isinstance`: ``isinstance(obj, NSString)`` is equivalent to
         ``obj.isKindOfClass(NSString)``.
         """
-
         if isinstance(instance, ObjCInstance):
             return bool(instance.isKindOfClass(self))
         else:
@@ -1622,7 +1608,6 @@ class ObjCClass(ObjCInstance, type):
         of :func:`issubclass`: ``issubclass(cls, NSValue)`` is equivalent to
         ``obj.isSubclassOfClass(NSValue)``.
         """
-
         if isinstance(subclass, ObjCClass):
             return bool(subclass.isSubclassOfClass(self))
         else:
@@ -1696,7 +1681,6 @@ class ObjCMetaClass(ObjCClass):
         pointer that might also refer to other kinds of objects.) Creating an
         :class:`ObjCMetaClass` from a ``Nil`` pointer returns ``None``.
         """
-
         if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
             ptr = libobjc.objc_getMetaClass(name)
@@ -1752,7 +1736,6 @@ def py_from_ns(nsobj):
 
     Other objects are returned unmodified as an :class:`ObjCInstance`.
     """
-
     if isinstance(nsobj, (objc_id, Class)):
         nsobj = ObjCInstance(nsobj)
     if not isinstance(nsobj, ObjCInstance):
@@ -1796,8 +1779,8 @@ def py_from_ns(nsobj):
 
 
 def ns_from_py(pyobj):
-    """Convert a Python object into an equivalent Foundation object. The returned object
-    is autoreleased.
+    """Convert a Python object into an equivalent Foundation object. is autoreleased.
+    The returned object.
 
     This function is also available under the name :func:`at`, because its
     functionality is very similar to that of the Objective-C ``@`` operator and
@@ -1820,7 +1803,6 @@ def ns_from_py(pyobj):
 
     Other types cause a :class:`TypeError`.
     """
-
     if isinstance(pyobj, enum.Enum):
         pyobj = pyobj.value
 
@@ -1875,13 +1857,11 @@ class ObjCProtocol(ObjCInstance):
     @property
     def name(self):
         """The name of this protocol, as a :class:`str`."""
-
         return libobjc.protocol_getName(self).decode("utf-8")
 
     @property
     def protocols(self):
         """The protocols that this protocol extends."""
-
         out_count = c_uint()
         protocols_ptr = libobjc.protocol_copyProtocolList(self, byref(out_count))
         return tuple(ObjCProtocol(protocols_ptr[i]) for i in range(out_count.value))
@@ -1917,7 +1897,6 @@ class ObjCProtocol(ObjCInstance):
         protocols will *not* be renamed, unless
         :attr:`ObjCProtocol.auto_rename` is set at the class level.
         """
-
         if (bases is None) ^ (ns is None):
             raise TypeError("ObjCProtocol arguments 2 and 3 must be given together")
 
@@ -1994,7 +1973,6 @@ class ObjCProtocol(ObjCInstance):
         of :func:`isinstance`: ``isinstance(obj, NSCopying)`` is equivalent to
         ``obj.conformsToProtocol(NSCopying)``.
         """
-
         if isinstance(instance, ObjCInstance):
             return bool(instance.conformsToProtocol(self))
         else:
@@ -2012,7 +1990,6 @@ class ObjCProtocol(ObjCInstance):
         NSCopying)`` is equivalent to ``protocol_conformsToProtocol(proto,
         NSCopying))``.
         """
-
         if isinstance(subclass, ObjCClass):
             return bool(subclass.conformsToProtocol(self))
         elif isinstance(subclass, ObjCProtocol):
@@ -2088,7 +2065,6 @@ def objc_const(dll, name):
     library/framework, such as
     `NSCocoaErrorDomain <https://developer.apple.com/documentation/foundation/nscocoaerrordomain?language=objc>`__.
     """
-
     return ObjCInstance(objc_id.in_dll(dll, name))
 
 
@@ -2199,7 +2175,6 @@ class ObjCBlock:
         return type and parameter types to :class:`ObjCBlock` using the
         ``restype`` and ``argtypes`` parameters.
         """
-
         if isinstance(pointer, ObjCInstance):
             pointer = pointer.ptr
         self.pointer = pointer
