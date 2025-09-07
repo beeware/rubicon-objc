@@ -51,7 +51,7 @@ Source = "https://github.com/beeware/rubicon-objc"
 [project.optional-dependencies]
 dev = [
     "pre-commit == 4.3.0",
-    "pytest == 8.4.1",
+    "pytest == 8.4.2",
     "setuptools_scm == 9.2.0",
     "tox == 4.29.0",
 ]
