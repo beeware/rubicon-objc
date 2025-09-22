@@ -190,6 +190,6 @@ class AsyncSubprocessTests(unittest.TestCase):
         # Everything in the sample set, less everything from the result,
         # should be an empty set.
         self.assertEqual(
-            {"README.rst"} - task.result(),
+            {"README.md"} - task.result(),
             set(),
         )
