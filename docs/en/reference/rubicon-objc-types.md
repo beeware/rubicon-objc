@@ -1,4 +1,4 @@
-# `rubicon.objc.types`{.interpreted-text role="mod"} --- Non-Objective-C types and utilities { #rubicon.objc.types-----non-objective-c-types-and-utilities }
+# `rubicon.objc.types` - Non-Objective-C types and utilities
 
 rubicon.objc.types
 
@@ -9,14 +9,14 @@ utilities for working with C types.
 
 These are commonly used C types from various frameworks.
 
-::: c_ptrdiff_t([value])  <!-- TODO: stub candidate -->
+<:> c_ptrdiff_t([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The [ptrdiff_t](https://en.cppreference.com/w/c/types/ptrdiff_t) type
 from `<stddef.h>`. Equivalent to `~ctypes.c_long`{.interpreted-text
 role="class"} on 64-bit systems and `~ctypes.c_int`{.interpreted-text
 role="class"} on 32-bit systems.
 
-::: NSInteger([value])  <!-- TODO: stub candidate -->
+<:> NSInteger([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSInteger](https://developer.apple.com/documentation/objectivec/nsinteger?language=objc)
@@ -24,7 +24,7 @@ type from `<objc/NSObjCRuntime.h>`. Equivalent to
 `~ctypes.c_long`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_int`{.interpreted-text role="class"} on 32-bit systems.
 
-::: NSUInteger([value])  <!-- TODO: stub candidate -->
+<:> NSUInteger([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSUInteger](https://developer.apple.com/documentation/objectivec/nsuinteger?language=objc)
@@ -32,7 +32,7 @@ type from `<objc/NSObjCRuntime.h>`. Equivalent to
 `~ctypes.c_ulong`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_uint`{.interpreted-text role="class"} on 32-bit systems.
 
-::: CGFloat([value])  <!-- TODO: stub candidate -->
+<:> CGFloat([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CGFloat](https://developer.apple.com/documentation/corefoundation/cgfloat?language=objc)
@@ -40,7 +40,7 @@ type from `<CoreGraphics/CGBase.h>`. Equivalent to
 `~ctypes.c_double`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_float`{.interpreted-text role="class"} on 32-bit systems.
 
-::: NSPoint([x, .y])  <!-- TODO: stub candidate -->
+<:> NSPoint([x, .y])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSPoint](https://developer.apple.com/documentation/foundation/nspoint?language=objc)
@@ -53,25 +53,25 @@ role="class"}.
 
 ///
 
-::: x y <!-- TODO: attribute -->
+<:> x y <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: CGPoint([x, .y])  <!-- TODO: stub candidate -->
+<:> CGPoint([x, .y])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CGPoint](https://developer.apple.com/documentation/corefoundation/cgpoint?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: x y <!-- TODO: attribute -->
+<:> x y <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: NSSize([width, .height])  <!-- TODO: stub candidate -->
+<:> NSSize([width, .height])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSSize](https://developer.apple.com/documentation/foundation/nssize?language=objc)
@@ -84,25 +84,25 @@ role="class"}.
 
 ///
 
-::: width height <!-- TODO: attribute -->
+<:> width height <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: CGSize([width, .height])  <!-- TODO: stub candidate -->
+<:> CGSize([width, .height])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CGSize](https://developer.apple.com/documentation/corefoundation/cgsize?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: width height <!-- TODO: attribute -->
+<:> width height <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: NSRect([origin, .size])  <!-- TODO: stub candidate -->
+<:> NSRect([origin, .size])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSRect](https://developer.apple.com/documentation/foundation/nsrect?language=objc)
@@ -115,66 +115,66 @@ role="class"}.
 
 ///
 
-::: origin <!-- TODO: attribute -->
+<:> origin <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The origin as a `NSPoint`{.interpreted-text role="class"}.
 
 
-::: size <!-- TODO: attribute -->
+<:> size <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The size as a `NSSize`{.interpreted-text role="class"}.
 
 
 
-::: CGRect([origin, .size])  <!-- TODO: stub candidate -->
+<:> CGRect([origin, .size])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CGRect](https://developer.apple.com/documentation/corefoundation/cgrect?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: origin <!-- TODO: attribute -->
+<:> origin <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The origin as a `CGPoint`{.interpreted-text role="class"}.
 
 
-::: size <!-- TODO: attribute -->
+<:> size <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The size as a `CGSize`{.interpreted-text role="class"}.
 
 
 
-::: UIEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
+<:> UIEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [UIEdgeInsets](https://developer.apple.com/documentation/uikit/uiedgeinsets?language=objc)
 structure from `<UIKit/UIGeometry.h>`.
 
-::: top left bottom right <!-- TODO: attribute -->
+<:> top left bottom right <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: NSEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
+<:> NSEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSEdgeInsets](https://developer.apple.com/documentation/foundation/nsedgeinsets?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-::: top left bottom right <!-- TODO: attribute -->
+<:> top left bottom right <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
 
 
-::: NSTimeInterval([value])  <!-- TODO: stub candidate -->
+<:> NSTimeInterval([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSTimeInterval](https://developer.apple.com/documentation/foundation/nstimeinterval?language=objc)
 type from `<Foundation/NSDate.h>`. Equivalent to
 `~ctypes.c_double`{.interpreted-text role="class"}.
 
-::: CFIndex([value])  <!-- TODO: stub candidate -->
+<:> CFIndex([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CFIndex](https://developer.apple.com/documentation/corefoundation/cfindex?language=objc)
@@ -182,44 +182,44 @@ type from `<CoreFoundation/CFBase.h>`. Equivalent to
 `~ctypes.c_longlong`{.interpreted-text role="class"} on 64-bit systems
 and `~ctypes.c_long`{.interpreted-text role="class"} on 32-bit systems.
 
-::: UniChar([value])  <!-- TODO: stub candidate -->
+<:> UniChar([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The `UniChar` type from `<MacTypes.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
 
-::: unichar([value])  <!-- TODO: stub candidate -->
+<:> unichar([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [unichar](https://developer.apple.com/documentation/foundation/unichar?language=objc)
 type from `<Foundation/NSString.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
 
-::: CGGlyph([value])  <!-- TODO: stub candidate -->
+<:> CGGlyph([value])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CGGlyph](https://developer.apple.com/documentation/coregraphics/cgglyph?language=objc)
 type from `<CoreGraphics/CGFont.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
 
-::: CFRange([location, .length])  <!-- TODO: stub candidate -->
+<:> CFRange([location, .length])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [CFRange](https://developer.apple.com/documentation/corefoundation/cfrange?language=objc)
 type from `<CoreFoundation/CFBase.h>`.
 
-::: location length <!-- TODO: attribute -->
+<:> location length <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The location and length as `CFIndex`{.interpreted-text role="class"}es.
 
 
 
-::: NSRange([location, .length])  <!-- TODO: stub candidate -->
+<:> NSRange([location, .length])  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
 type from `<Foundation/NSRange.h>`.
 
-::: location length <!-- TODO: attribute -->
+<:> location length <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The location and length as `NSUInteger`{.interpreted-text
 role="class"}s.
@@ -228,14 +228,14 @@ role="class"}s.
 
 These are commonly used C constants from various frameworks.
 
-::: UIEdgeInsetsZero <!-- TODO: data -->
+<:> UIEdgeInsetsZero <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
 a `UIEdgeInsets`{.interpreted-text role="class"} instance with all
 insets set to zero.
 
-::: NSZeroPoint <!-- TODO: data -->
+<:> NSZeroPoint <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
@@ -243,7 +243,7 @@ a `NSPoint`{.interpreted-text role="class"} instance with the X and Y
 coordinates set to zero.
 
 
-::: NSIntegerMax <!-- TODO: data -->
+<:> NSIntegerMax <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The macro constant
 [NSIntegerMax](https://developer.apple.com/documentation/objectivec/nsintegermax?language=objc)
@@ -251,7 +251,7 @@ from `<objc/NSObjCRuntime.h>`: the maximum value that a
 `NSInteger`{.interpreted-text role="class"} can hold.
 
 
-::: NSNotFound <!-- TODO: data -->
+<:> NSNotFound <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [NSNotFound](https://developer.apple.com/documentation/foundation/nsnotfound?language=objc)
@@ -266,13 +266,13 @@ The following constants provide information about the architecture of
 the current environment. All of them are equivalent to the C compiler
 macros of the same names.
 
-::: LP64 <!-- TODO: data -->
+<:> LP64 <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 Indicates whether the current environment is 64-bit. If true, C `long`s
 and pointers are 64 bits in size, otherwise 32 bits.
 
 
-::: i386   x86_64   arm   arm64 <!-- TODO: data -->
+<:> i386   x86_64   arm   arm64 <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 Each of these constants is true if the current environment uses the
 named architecture. At most one of these constants is true at once in a
@@ -290,33 +290,33 @@ All Objective-C encoding strings are represented as
 `bytes`{.interpreted-text role="class"} rather than
 `str`{.interpreted-text role="class"}.
 
-::: ctype_for_encoding <!-- TODO: function -->
+<:> ctype_for_encoding <!-- TODO: function -->
 
-::: encoding_for_ctype <!-- TODO: function -->
+<:> encoding_for_ctype <!-- TODO: function -->
 
-::: register_preferred_encoding <!-- TODO: function -->
+<:> register_preferred_encoding <!-- TODO: function -->
 
-::: with_preferred_encoding <!-- TODO: function -->
+<:> with_preferred_encoding <!-- TODO: function -->
 
-::: register_encoding <!-- TODO: function -->
+<:> register_encoding <!-- TODO: function -->
 
-::: with_encoding <!-- TODO: function -->
+<:> with_encoding <!-- TODO: function -->
 
-::: unregister_encoding <!-- TODO: function -->
+<:> unregister_encoding <!-- TODO: function -->
 
-::: unregister_encoding_all <!-- TODO: function -->
+<:> unregister_encoding_all <!-- TODO: function -->
 
-::: unregister_ctype <!-- TODO: function -->
+<:> unregister_ctype <!-- TODO: function -->
 
-::: unregister_ctype_all <!-- TODO: function -->
+<:> unregister_ctype_all <!-- TODO: function -->
 
-::: get_ctype_for_encoding_map <!-- TODO: function -->
+<:> get_ctype_for_encoding_map <!-- TODO: function -->
 
-::: get_encoding_for_ctype_map <!-- TODO: function -->
+<:> get_encoding_for_ctype_map <!-- TODO: function -->
 
-::: split_method_encoding <!-- TODO: function -->
+<:> split_method_encoding <!-- TODO: function -->
 
-::: ctypes_for_method_encoding <!-- TODO: function -->
+<:> ctypes_for_method_encoding <!-- TODO: function -->
 
 ### Default registered type encodings
 
@@ -360,7 +360,7 @@ than typing encodings out by hand.
 | `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"} | `:` |  |
 | `~rubicon.objc.runtime.Class`{.interpreted-text role="class"} | `#` |  |
 
-::: UnknownPointer <!-- TODO: class -->
+<:> UnknownPointer <!-- TODO: class -->
 
 In addition, the following types defined by Rubicon are registered, but
 their encodings may vary depending on the system and architecture:
@@ -395,7 +395,7 @@ mainly used internally by Rubicon, to allow passing Python sequences as
 method parameters where a C structure or array would normally be
 required. Most users will not need to use this function directly.
 
-::: compound_value_for_sequence <!-- TODO: function -->
+<:> compound_value_for_sequence <!-- TODO: function -->
 
 ## Python to `ctypes`{.interpreted-text role="mod"} type mapping
 
@@ -408,13 +408,13 @@ role="class"} to be used instead of
 method type annotations. Most users will not need to use these functions
 directly.
 
-::: ctype_for_type <!-- TODO: function -->
+<:> ctype_for_type <!-- TODO: function -->
 
-::: register_ctype_for_type <!-- TODO: function -->
+<:> register_ctype_for_type <!-- TODO: function -->
 
-::: unregister_ctype_for_type <!-- TODO: function -->
+<:> unregister_ctype_for_type <!-- TODO: function -->
 
-::: get_ctype_for_type_map <!-- TODO: function -->
+<:> get_ctype_for_type_map <!-- TODO: function -->
 
 ### Default registered mappings
 

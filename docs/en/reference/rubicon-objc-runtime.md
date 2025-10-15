@@ -1,4 +1,4 @@
-# `rubicon.objc.runtime`{.interpreted-text role="mod"} --- Low-level Objective-C runtime access { #rubicon.objc.runtime-----low-level-objective-c-runtime-access }
+# `rubicon.objc.runtime` - Low-level Objective-C runtime access
 
 rubicon.objc.runtime
 
@@ -15,7 +15,7 @@ Some commonly used C libraries are provided as
 `~ctypes.CDLL`{.interpreted-text role="class"}s. Other libraries can be
 loaded using the `load_library`{.interpreted-text role="func"} function.
 
-::: data annotation="= load_library('c')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('c')"  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 libc
 
@@ -27,7 +27,7 @@ The following functions are accessible by default:
 
 * `free`
 
-::: data annotation="= load_library('objc')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('objc')"  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 libobjc
 
@@ -67,70 +67,70 @@ The following functions are accessible by default:
 `sel_isEqual` * `sel_registerName`
 
 
-::: data annotation="= load_library('Foundation')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('Foundation')"  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 Foundation
 
 The [Foundation](https://developer.apple.com/documentation/foundation)
 framework.
 
-::: load_library <!-- TODO: function -->
+<:> load_library <!-- TODO: function -->
 
 ## Objective-C runtime types
 
 These are various types used by the Objective-C runtime functions.
 
-::: objc_id([value]) <!-- TODO: class -->
+<:> objc_id([value]) <!-- TODO: class -->
 
-::: objc_block([value]) <!-- TODO: class -->
+<:> objc_block([value]) <!-- TODO: class -->
 
-::: SEL([value]) <!-- TODO: class -->
+<:> SEL([value]) <!-- TODO: class -->
 
-::: name <!-- TODO: attribute -->
+<:> name <!-- TODO: attribute -->
 
 
-::: Class([value]) <!-- TODO: class -->
+<:> Class([value]) <!-- TODO: class -->
 
-::: IMP([value]) <!-- TODO: class -->
+<:> IMP([value]) <!-- TODO: class -->
 
-::: Method([value]) <!-- TODO: class -->
+<:> Method([value]) <!-- TODO: class -->
 
-::: Ivar([value]) <!-- TODO: class -->
+<:> Ivar([value]) <!-- TODO: class -->
 
-::: objc_property_t([value]) <!-- TODO: class -->
+<:> objc_property_t([value]) <!-- TODO: class -->
 
-::: objc_property_attribute_t([name, value]) <!-- TODO: class -->
+<:> objc_property_attribute_t([name, value]) <!-- TODO: class -->
 
-::: name value <!-- TODO: attribute -->
+<:> name value <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The attribute name and value as C strings (`bytes`{.interpreted-text
 role="class"}).
 
 
 
-::: objc_method_description([name, value]) <!-- TODO: class -->
+<:> objc_method_description([name, value]) <!-- TODO: class -->
 
-::: name <!-- TODO: attribute -->
+<:> name <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The method name as a `SEL`{.interpreted-text role="class"}.
 
 
-::: types <!-- TODO: attribute -->
+<:> types <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The method's signature encoding as a C string (`bytes`{.interpreted-text
 role="class"}).
 
 
 
-::: objc_super([receiver, super_class]) <!-- TODO: class -->
+<:> objc_super([receiver, super_class]) <!-- TODO: class -->
 
-::: receiver <!-- TODO: attribute -->
+<:> receiver <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The receiver of the call, as an `objc_id`{.interpreted-text
 role="class"}.
 
 
-::: super_class <!-- TODO: attribute -->
+<:> super_class <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The class in which to start searching for method implementations, as a
 `Class`{.interpreted-text role="class"}.
@@ -142,7 +142,7 @@ The class in which to start searching for method implementations, as a
 These utility functions provide easier access from Python to certain
 parts of the Objective-C runtime.
 
-::: object_isClass(obj) <!-- TODO: function -->
+<:> object_isClass(obj) <!-- TODO: function -->
 <!-- TODO: Doc notes -->
 Return whether the given Objective-C object is a class (or a metaclass).
 
@@ -155,20 +155,20 @@ iOS 8. This module-level function is provided to support older systems
 available, and otherwise emulates it.
 
 
-::: get_class <!-- TODO: function -->
+<:> get_class <!-- TODO: function -->
 
-::: should_use_stret <!-- TODO: function -->
+<:> should_use_stret <!-- TODO: function -->
 
-::: should_use_fpret <!-- TODO: function -->
+<:> should_use_fpret <!-- TODO: function -->
 
-::: send_message <!-- TODO: function -->
+<:> send_message <!-- TODO: function -->
 
-::: send_super <!-- TODO: function -->
+<:> send_super <!-- TODO: function -->
 
-::: add_method <!-- TODO: function -->
+<:> add_method <!-- TODO: function -->
 
-::: add_ivar <!-- TODO: function -->
+<:> add_ivar <!-- TODO: function -->
 
-::: get_ivar <!-- TODO: function -->
+<:> get_ivar <!-- TODO: function -->
 
-::: set_ivar <!-- TODO: function -->
+<:> set_ivar <!-- TODO: function -->

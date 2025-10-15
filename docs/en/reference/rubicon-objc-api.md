@@ -1,4 +1,4 @@
-# `rubicon.objc.api`{.interpreted-text role="mod"} --- The high-level Rubicon API { #rubicon.objc.api-----the-high-level-rubicon-api }
+# `rubicon.objc.api` - The high-level Rubicon API
 
 {.module}
 rubicon.objc.api
@@ -13,9 +13,10 @@ that module should be used instead of importing
 
 ## Objective-C objects
 
-::: ObjCInstance(ptr) <!-- TODO: class -->
+::: rubicon.objc.api.ObjCInstance
+<!-- TODO: class, add `ptr` to args? -->
 
-::: ptr <span id="as_parameter">as_parameter</span>  <!-- TODO: attribute, stub candidate -->
+<:> ptr <span id="as_parameter">as_parameter</span>  <!-- TODO: attribute, stub candidate -->
 <!-- TODO: stub notes -->
 
 
@@ -25,42 +26,47 @@ attribute is also available as `_as_parameter_` to allow
 `ObjCInstance`{.interpreted-text role="class"}s to be passed into
 `ctypes`{.interpreted-text role="mod"} functions.
 
-::: objc_class <!-- TODO: attribute -->
+::: rubicon.objc.api.objc_const
+<!-- TODO: function -->
 
-::: str <!-- TODO: method -->
+<:> objc_class <!-- TODO: attribute -->
 
-::: repr <!-- TODO: method -->
+<:> str <!-- TODO: method -->
 
-::: getattr <!-- TODO: method -->
+<:> repr <!-- TODO: method -->
 
-::: setattr <!-- TODO: method -->
+<:> getattr <!-- TODO: method -->
 
-::: objc_const <!-- TODO: function -->
+<:> setattr <!-- TODO: method -->
+
 
 ## Objective-C classes
 
-::: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(),auto_rename=None]]) <!-- TODO: class -->
+::: rubicon.objc.api.ObjCClass
 
-::: name <!-- TODO: attribute -->
+(name_or_ptr, [bases, attrs, [protocols=(),auto_rename=None]]) <!-- TODO: add to args? -->
+
+::: rubicon.objc.api.ObjCMetaClass
+(name_or_ptr) <!-- TODO: add to args? -->
+
+<:> name <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The name of this class, as a `str`{.interpreted-text role="class"}.
 
 
-::: superclass <!-- TODO: attribute -->
+<:> superclass <!-- TODO: attribute -->
 
-::: protocols <!-- TODO: attribute -->
+<:> protocols <!-- TODO: attribute -->
 
-::: auto_rename <!-- TODO: attribute -->
+<:> auto_rename <!-- TODO: attribute -->
 
-::: declare_property <!-- TODO: method -->
+<:> declare_property <!-- TODO: method -->
 
-::: declare_class_property <!-- TODO: method -->
+<:> declare_class_property <!-- TODO: method -->
 
-::: instancecheck <!-- TODO: method -->
+<:> instancecheck <!-- TODO: method -->
 
-::: subclasscheck <!-- TODO: method -->
-
-::: ObjCMetaClass(name_or_ptr) <!-- TODO: class -->
+<:> subclasscheck <!-- TODO: method -->
 
 ### Standard Objective-C and Foundation classes
 
@@ -85,7 +91,11 @@ value `hello`.
 
 ///
 
-::: NSObject  <!-- TODO: stub candidate -->
+::: NSObject
+    options:
+        find_stubs_package: true
+
+<!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSObject](https://developer.apple.com/documentation/objectivec/nsobject?language=objc)
@@ -98,7 +108,7 @@ a list of operations that Rubicon supports on all objects.
 
 ///
 
-::: debugDescription description <!-- TODO: attribute -->
+<:> debugDescription description <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 These Objective-C properties have been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
@@ -106,7 +116,7 @@ always be accessed using attribute syntax.
 
 
 
-::: Protocol  <!-- TODO: stub candidate -->
+<:> Protocol  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [Protocol](https://developer.apple.com/documentation/objectivec/protocol?language=objc)
@@ -123,7 +133,7 @@ provides an easier interface for working with protocols.
 ///
 
 
-::: NSNumber  <!-- TODO: stub candidate -->
+<:> NSNumber  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSNumber](https://developer.apple.com/documentation/foundation/nsnumber?language=objc)
@@ -138,7 +148,7 @@ role="func"} and `ns_from_py`{.interpreted-text role="func"}.
 ///
 
 
-::: NSDecimalNumber  <!-- TODO: stub candidate -->
+<:> NSDecimalNumber  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSDecimalNumber](https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc)
@@ -153,7 +163,7 @@ This class can be converted to and from Python `decimal.Decimal` using
 ///
 
 
-::: NSString  <!-- TODO: stub candidate -->
+<:> NSString  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSString](https://developer.apple.com/documentation/foundation/nsstring?language=objc)
@@ -180,13 +190,13 @@ role="class"} to `str`{.interpreted-text role="class"} first.
 
 ///
 
-::: str () <!-- TODO: method -->
+<:> str () <!-- TODO: method -->
 <!-- TODO: Doc notes -->
 Return the value of this `NSString`{.interpreted-text role="class"} as a
 `str`{.interpreted-text role="class"}.
 
 
-::: UTF8String <!-- TODO: attribute -->
+<:> UTF8String <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 This Objective-C property has been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
@@ -194,7 +204,7 @@ always be accessed using attribute syntax.
 
 
 
-::: NSData  <!-- TODO: stub candidate -->
+<:> NSData  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSData](https://developer.apple.com/documentation/foundation/nsdata?language=objc)
@@ -209,7 +219,7 @@ role="class"} using `py_from_ns`{.interpreted-text role="func"} and
 ///
 
 
-::: NSArray  <!-- TODO: stub candidate -->
+<:> NSArray  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSArray](https://developer.apple.com/documentation/foundation/nsarray?language=objc)
@@ -233,7 +243,7 @@ is raised.
 
 ///
 
-::: getitem (index)  len ()  iter ()
+<:> getitem (index)  len ()  iter ()
  contains (value)  eq (other)  ne (other) index(value)
 count(value) copy() <!-- TODO: method -->
 <!-- TODO: Doc notes -->
@@ -241,7 +251,7 @@ Python-style sequence interface.
 
 
 
-::: NSMutableArray  <!-- TODO: stub candidate -->
+<:> NSMutableArray  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSMutableArray](https://developer.apple.com/documentation/foundation/nsmutablearray?language=objc)
@@ -254,7 +264,7 @@ superclass `NSArray`.
 
 ///
 
-::: setitem (index, value)  delitem (index) append(value)
+<:> setitem (index, value)  delitem (index) append(value)
 clear() extend(values) insert(index, value) pop([index=-1])
 remove(value) reverse() <!-- TODO: method -->
 <!-- TODO: Doc notes -->
@@ -262,7 +272,7 @@ Python-style mutable sequence interface.
 
 
 
-::: NSDictionary  <!-- TODO: stub candidate -->
+<:> NSDictionary  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSDictionary](https://developer.apple.com/documentation/foundation/nsdictionary?language=objc)
@@ -326,7 +336,7 @@ role="class"} first.
 
 
 
-::: NSMutableDictionary  <!-- TODO: stub candidate -->
+<:> NSMutableDictionary  <!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The
 [NSMutableDictionary](https://developer.apple.com/documentation/foundation/nsmutabledictionary?language=objc)
@@ -339,7 +349,7 @@ superclass `NSDictionary`.
 
 ///
 
-::: setitem (key, value)  delitem (key) clear() pop(item,
+<:> setitem (key, value)  delitem (key) clear() pop(item,
 [default]) popitem() setdefault(key, [default=None])
 update([other], **kwargs) <!-- TODO: method -->
 <!-- TODO: Doc notes -->
@@ -349,17 +359,17 @@ Python-style mutable mapping interface.
 
 ## Objective-C protocols
 
-::: ObjCProtocol(name_or_ptr, [bases, attrs, [auto_rename=None]]) <!-- TODO: class -->
+<:> ObjCProtocol(name_or_ptr, [bases, attrs, [auto_rename=None]]) <!-- TODO: class -->
 
-::: name <!-- TODO: attribute -->
+<:> name <!-- TODO: attribute -->
 
-::: protocols <!-- TODO: attribute -->
+<:> protocols <!-- TODO: attribute -->
 
-::: auto_rename <!-- TODO: attribute -->
+<:> auto_rename <!-- TODO: attribute -->
 
-::: instancecheck <!-- TODO: method -->
+<:> instancecheck <!-- TODO: method -->
 
-::: subclasscheck <!-- TODO: method -->
+<:> subclasscheck <!-- TODO: method -->
 
 ### Standard Objective-C and Foundation protocols
 
@@ -372,7 +382,7 @@ role="class"}s for convenience. (Other protocols not listed here can be
 looked up by passing a protocol name to the
 `ObjCProtocol`{.interpreted-text role="class"} constructor.)
 
-::: NSObjectProtocol <!-- TODO: data -->
+<:> NSObjectProtocol <!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The
 [NSObject](https://developer.apple.com/documentation/objectivec/1418956-nsobject?language=objc)
@@ -384,11 +394,11 @@ role="class"} class.
 
 ## Converting objects between Objective-C and Python
 
-::: py_from_ns(nsobj) <!-- TODO: function -->
+<:> py_from_ns(nsobj) <!-- TODO: function -->
 
-::: ns_from_py <!-- TODO: function -->
+<:> ns_from_py <!-- TODO: function -->
 
-::: at(pyobj) <!-- TODO: function -->
+<:> at(pyobj) <!-- TODO: function -->
 <!-- TODO: Doc notes -->
 Alias for `ns_from_py`{.interpreted-text role="func"}.
 
@@ -452,9 +462,9 @@ class MyProtocol(metaclass=ObjCProtocol):
 
 ### Defining methods
 
-::: objc_method <!-- TODO: function -->
+<:> objc_method <!-- TODO: function -->
 
-::: objc_classmethod <!-- TODO: function -->
+<:> objc_classmethod <!-- TODO: function -->
 
 #### Method naming
 
@@ -515,17 +525,17 @@ is normally redundant and not needed. If needed, the `_cmd` parameter
 can be accessed by using `objc_rawmethod`{.interpreted-text role="func"}
 instead of `objc_method`{.interpreted-text role="func"}.
 
-::: objc_rawmethod <!-- TODO: function -->
+<:> objc_rawmethod <!-- TODO: function -->
 
 ### Defining properties and `ivars`
 
-::: objc_property <!-- TODO: function -->
+<:> objc_property <!-- TODO: function -->
 
-::: objc_ivar <!-- TODO: function -->
+<:> objc_ivar <!-- TODO: function -->
 
-::: get_ivar <!-- TODO: function -->
+<:> get_ivar <!-- TODO: function -->
 
-::: set_ivar <!-- TODO: function -->
+<:> set_ivar <!-- TODO: function -->
 
 ## Objective-C blocks { #objc_blocks }
 
@@ -600,12 +610,12 @@ and vice versa. You may need to use them to perform these conversions
 outside of Objective-C method calls, or if you need more control over
 the block's type signature.
 
-::: ObjCBlock(pointer, [return_type, *arg_types]) <!-- TODO: class -->
+<:> ObjCBlock(pointer, [return_type, *arg_types]) <!-- TODO: class -->
 
-::: call <!-- TODO: method -->
+<:> call <!-- TODO: method -->
 
 
-::: Block(func, [restype, *argtypes]) <!-- TODO: class -->
+<:> Block(func, [restype, *argtypes]) <!-- TODO: class -->
 
 ## Defining custom subclasses of `ObjCInstance`{.interpreted-text role="class"}
 
@@ -616,12 +626,12 @@ used by Rubicon to provide Python-style operators and methods on
 standard Foundation classes, such as `NSString`{.interpreted-text
 role="class"} and `NSDictionary`{.interpreted-text role="class"}.
 
-::: register_type_for_objcclass <!-- TODO: function -->
+<:> register_type_for_objcclass <!-- TODO: function -->
 
-::: for_objcclass <!-- TODO: function -->
+<:> for_objcclass <!-- TODO: function -->
 
-::: type_for_objcclass <!-- TODO: function -->
+<:> type_for_objcclass <!-- TODO: function -->
 
-::: unregister_type_for_objcclass <!-- TODO: function -->
+<:> unregister_type_for_objcclass <!-- TODO: function -->
 
-::: get_type_for_objcclass_map <!-- TODO: function -->
+<:> get_type_for_objcclass_map <!-- TODO: function -->

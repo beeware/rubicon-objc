@@ -1,4 +1,4 @@
-# `rubicon.objc.eventloop`{.interpreted-text role="mod"} --- Integrating native event loops with `asyncio`{.interpreted-text role="mod"} { #rubicon.objc.eventloop-----integrating-native-event-loops-with-asyncio }
+# `rubicon.objc.eventloop` - Integrating native event loops with `asyncio`
 
 rubicon.objc.eventloop
 
@@ -10,26 +10,26 @@ role="doc"}.
 
 ///
 
-::: EventLoopPolicy <!-- TODO: class -->
+<:> EventLoopPolicy <!-- TODO: class -->
 
-::: new_event_loop <!-- TODO: method -->
+<:> new_event_loop <!-- TODO: method -->
 
-::: get_default_loop <!-- TODO: method -->
+<:> get_default_loop <!-- TODO: method -->
 
-::: get_child_watcher <!-- TODO: method -->
+<:> get_child_watcher <!-- TODO: method -->
 
-::: set_child_watcher <!-- TODO: method -->
-
-
-::: CocoaLifecycle <!-- TODO: class -->
-
-::: start <!-- TODO: method -->
-
-::: stop <!-- TODO: method -->
+<:> set_child_watcher <!-- TODO: method -->
 
 
-::: iOSLifecycle <!-- TODO: class -->
+<:> CocoaLifecycle <!-- TODO: class -->
 
-::: start <!-- TODO: method -->
+<:> start <!-- TODO: method -->
 
-::: stop <!-- TODO: method -->
+<:> stop <!-- TODO: method -->
+
+
+<:> iOSLifecycle <!-- TODO: class -->
+
+<:> start <!-- TODO: method -->
+
+<:> stop <!-- TODO: method -->

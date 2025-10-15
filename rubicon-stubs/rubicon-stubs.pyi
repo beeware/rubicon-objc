@@ -1,4 +1,4 @@
-def NSObject():
+def NSObject(self):
     """
         The
         [NSObject](https://developer.apple.com/documentation/objectivec/nsobject?language
@@ -11,6 +11,6 @@ def NSObject():
 
 
     """
-
+    ...
     def debugDescription(): ...
     def description(): ...
