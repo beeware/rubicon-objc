@@ -108,10 +108,7 @@ for convenience. (Other classes not listed here can be looked up by
 passing a class name to the `ObjCClass`{.interpreted-text role="class"}
 constructor.)
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 None of the following classes have a usable Python-style constructor -
 for example, you *cannot* call `NSString("hello")` to create an
@@ -120,21 +117,20 @@ classes, you should use `ns_from_py`{.interpreted-text role="func"}
 (also called `at`{.interpreted-text role="func"}): `ns_from_py("hello")`
 returns a `NSString`{.interpreted-text role="class"} instance with the
 value `hello`.
-::::
+
+///
 
 :::::: {.NSObject}
 The
 [NSObject](https://developer.apple.com/documentation/objectivec/nsobject?language=objc)
 class from `<objc/NSObject.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 See the `ObjCInstance`{.interpreted-text role="class"} documentation for
 a list of operations that Rubicon supports on all objects.
-::::
+
+///
 
 ::: {.attribute}
 debugDescription description
@@ -150,17 +146,15 @@ The
 [Protocol](https://developer.apple.com/documentation/objectivec/protocol?language=objc)
 class from `<objc/Protocol.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class has no (non-deprecated) Objective-C methods; protocol objects
 can only be manipulated using Objective-C runtime functions. Rubicon
 automatically wraps all `Protocol`{.interpreted-text role="class"}
 objects using `ObjCProtocol`{.interpreted-text role="class"}, which
 provides an easier interface for working with protocols.
-::::
+
+///
 :::::
 
 ::::: {.NSNumber}
@@ -168,15 +162,13 @@ The
 [NSNumber](https://developer.apple.com/documentation/foundation/nsnumber?language=objc)
 class from `<Foundation/NSValue.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from standard Python primitives
 (`bool`, `int`, `float`) using `py_from_ns`{.interpreted-text
 role="func"} and `ns_from_py`{.interpreted-text role="func"}.
-::::
+
+///
 :::::
 
 ::::: {.NSDecimalNumber}
@@ -184,15 +176,13 @@ The
 [NSDecimalNumber](https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc)
 class from `<Foundation/NSDecimalNumber.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python `decimal.Decimal` using
 `py_from_ns`{.interpreted-text role="func"} and
 `ns_from_py`{.interpreted-text role="func"}.
-::::
+
+///
 :::::
 
 ::::::: {.NSString}
@@ -203,10 +193,7 @@ class from `<Foundation/NSString.h>`.
 This class also supports all methods that `str`{.interpreted-text
 role="class"} does.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python `str`{.interpreted-text
 role="class"} using `py_from_ns`{.interpreted-text role="func"} and
@@ -221,7 +208,8 @@ indices and iteration are based on UTF-16, even when using the
 Python-style operations/methods. If indexing or iteration based on code
 points is required, convert the `NSString`{.interpreted-text
 role="class"} to `str`{.interpreted-text role="class"} first.
-::::
+
+///
 
 ::: {.method}
  str ()
@@ -244,15 +232,13 @@ The
 [NSData](https://developer.apple.com/documentation/foundation/nsdata?language=objc)
 class from `<Foundation/NSData.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python `bytes`{.interpreted-text
 role="class"} using `py_from_ns`{.interpreted-text role="func"} and
 `ns_from_py`{.interpreted-text role="func"}.
-::::
+
+///
 :::::
 
 :::::: {.NSArray}
@@ -260,10 +246,7 @@ The
 [NSArray](https://developer.apple.com/documentation/foundation/nsarray?language=objc)
 class from `<Foundation/NSArray.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python `list`{.interpreted-text
 role="class"} using `py_from_ns`{.interpreted-text role="func"} and
@@ -278,7 +261,8 @@ Objective-C. As there is no way to store Python object references as
 Objective-C objects yet, this recursive conversion cannot be avoided. If
 any of `pylist`'s elements cannot be converted to Objective-C, an error
 is raised.
-::::
+
+///
 
 ::: {.method}
  getitem (index)  len ()  iter ()
@@ -294,14 +278,12 @@ The
 [NSMutableArray](https://developer.apple.com/documentation/foundation/nsmutablearray?language=objc)
 class from `<Foundation/NSArray.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python exactly like its
 superclass `NSArray`.
-::::
+
+///
 
 ::: {.method}
  setitem (index, value)  delitem (index) append(value)
@@ -317,10 +299,7 @@ The
 [NSDictionary](https://developer.apple.com/documentation/foundation/nsdictionary?language=objc)
 class from `<Foundation/NSDictionary.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python `dict`{.interpreted-text
 role="class"} using `py_from_ns`{.interpreted-text role="func"} and
@@ -340,7 +319,8 @@ to Objective-C. As there is no way to store Python object references as
 Objective-C objects yet, this recursive conversion cannot be avoided. If
 any of `pydict`'s keys or values cannot be converted to Objective-C, an
 error is raised.
-::::
+
+///
 
 ::::: {.method}
  getitem (key)  len ()  iter ()  contains (key)
@@ -349,10 +329,7 @@ keys() items() values()
 
 Python-style mapping interface.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Unlike most Python mappings, `NSDictionary`{.interpreted-text
 role="class"}'s `keys`{.interpreted-text role="attr"},
@@ -375,7 +352,8 @@ iterate over `items`{.interpreted-text role="attr"} more than once or
 perform other operations on it, you should convert it to a Python
 `set`{.interpreted-text role="class"} or `list`{.interpreted-text
 role="class"} first.
-::::
+
+///
 :::::
 ::::::::
 
@@ -384,14 +362,12 @@ The
 [NSMutableDictionary](https://developer.apple.com/documentation/foundation/nsmutabledictionary?language=objc)
 class from `<Foundation/NSDictionary.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This class can be converted to and from Python exactly like its
 superclass `NSDictionary`.
-::::
+
+///
 
 ::: {.method}
  setitem (key, value)  delitem (key) clear() pop(item,
@@ -487,10 +463,7 @@ class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
     # method, property, etc. definitions go here
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Rubicon requires specifying a superclass when defining a custom
 Objective-C class. If you don't need to extend any specific class, use
@@ -504,7 +477,8 @@ In practice, this feature is only used in the definitions of core
 Objective-C classes like `NSObject`{.interpreted-text role="class"}.
 Because of this, Rubicon does not support defining Objective-C root
 classes.
-::::
+
+///
 
 Similar syntax is used to define custom Objective-C protocols. Unlike
 classes, protocols can extend multiple other protocols:
@@ -542,10 +516,7 @@ method's name, but with all underscores (`_`) replaced with colons (`:`)
 --- for example, `initWithWidth_height_` becomes
 `initWithWidth:height:`.
 
-:::: {.warning}
-::: {.title}
-Warning
-:::
+/// warning | Warning
 
 The Objective-C *language* imposes certain requirements on the usage of
 colons in method names: a method's name must contain exactly as many
@@ -566,7 +537,8 @@ names are considered bad style and never used in practice. For example,
 
 Future versions of Rubicon may warn about or disallow such nonstandard
 method names.
-::::
+
+///
 
 #### Parameter and return types
 
@@ -669,10 +641,7 @@ class AnObjCClass(NSObject):
         result_handler(res)
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 These automatic conversions are mostly equivalent to the manual
 conversions described in the next section. There are internal technical
@@ -684,7 +653,8 @@ The internals of automatic conversion and
 handling may change in the future, so if you need more control over the
 block conversion process, you should use the manual conversions
 described in the next section.
-::::
+
+///
 
 ### Manual conversion
 

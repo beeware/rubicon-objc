@@ -47,14 +47,12 @@ The
 [NSPoint](https://developer.apple.com/documentation/foundation/nspoint?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 On 64-bit systems this is an alias for `CGPoint`{.interpreted-text
 role="class"}.
-::::
+
+///
 
 ::: {.attribute}
 x y
@@ -80,14 +78,12 @@ The
 [NSSize](https://developer.apple.com/documentation/foundation/nssize?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 On 64-bit systems this is an alias for `CGSize`{.interpreted-text
 role="class"}.
-::::
+
+///
 
 ::: {.attribute}
 width height
@@ -113,14 +109,12 @@ The
 [NSRect](https://developer.apple.com/documentation/foundation/nsrect?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 On 64-bit systems this is an alias for `CGRect`{.interpreted-text
 role="class"}.
-::::
+
+///
 
 ::: {.attribute}
 origin

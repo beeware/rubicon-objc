@@ -96,14 +96,12 @@ role="class"} to `NSData`, etc. Collections are also supported:
 role="class"} are converted to `NSArray` and `NSDictionary`, and their
 elements are converted recursively.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 All of these conversions can also be performed manually - see
 `manual_conversions`{.interpreted-text role="ref"} for details.
-::::
+
+///
 
 ### Return value conversion and wrapping
 
@@ -229,10 +227,7 @@ Objective-C and Python strings.
 <ObjCStrInstance: __NSCFString at 0x114aa80f0: /Users/brutus/>
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
 wrapping a `~rubicon.objc.api.NSString`{.interpreted-text role="class"}
@@ -241,7 +236,8 @@ in the `repr`{.interpreted-text role="func"} of
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects.
 This is an implementation detail - you should not refer to the
 `ObjCStrInstance` class explicitly in your code.
-::::
+
+///
 
 If you have an `~rubicon.objc.api.NSString`{.interpreted-text
 role="class"}, and you need to pass it to a method that does a specific
@@ -292,10 +288,7 @@ False
 '/users/rkm/projects/beeware/venv3.6/bin'
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects
 behave slightly differently than Python `str`{.interpreted-text
@@ -308,7 +301,8 @@ hashable in Python, which means they cannot be used as
 handles Unicode code points above `U+FFFF` differently than Python
 `str`{.interpreted-text role="class"}, because the former is based on
 UTF-16.
-::::
+
+///
 
 ### Lists
 
@@ -336,10 +330,7 @@ True
 False
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
 wrapping a `~rubicon.objc.api.NSArray`{.interpreted-text role="class"}
@@ -350,7 +341,8 @@ internally have the class `ObjCListInstance` or
 This is an implementation detail - you should not refer to the
 `ObjCListInstance` and `ObjCMutableListInstance` classes explicitly in
 your code.
-::::
+
+///
 
 `~rubicon.objc.api.NSMutableArray`{.interpreted-text role="class"}
 objects additionally support mutating operations, like item and slice
@@ -389,16 +381,14 @@ Sequence methods like `index` and `pop` are also supported:
 7
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Python objects stored in an
 `~rubicon.objc.api.NSArray`{.interpreted-text role="class"} are
 converted to Objective-C objects using the rules described in
 `argument_conversion`{.interpreted-text role="ref"}.
-::::
+
+///
 
 ### Dictionaries
 
@@ -420,10 +410,7 @@ True
 False
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
 wrapping a `~rubicon.objc.api.NSDictionary`{.interpreted-text
@@ -434,7 +421,8 @@ role="class"} internally have the class `ObjCDictInstance` or
 objects. This is an implementation detail - you should not refer to the
 `ObjCDictInstance` and `ObjCMutableDictInstance` classes explicitly in
 your code.
-::::
+
+///
 
 `~rubicon.objc.api.NSMutableDictionary`{.interpreted-text role="class"}
 objects additionally support mutating operations, like item assignment:
@@ -467,16 +455,14 @@ two
 >
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Python objects stored in an
 `~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} are
 converted to Objective-C objects using the rules described in
 `argument_conversion`{.interpreted-text role="ref"}.
-::::
+
+///
 
 ## Manual conversions { #manual_conversions }
 

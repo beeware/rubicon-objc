@@ -4,15 +4,13 @@
 rubicon.objc.eventloop
 :::
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 The documentation for this module is incomplete. You can help by
 `contributing to the documentation <../how-to/contribute/docs>`{.interpreted-text
 role="doc"}.
-::::
+
+///
 
 ::::::: {.autoclass}
 EventLoopPolicy

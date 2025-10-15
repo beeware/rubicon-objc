@@ -33,10 +33,7 @@ loads it by default and exposes it in Python as
 <CDLL '/usr/lib/libc.dylib', handle 7fff60d0cb90 at 0x105850b38>
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 For a list of all C libraries that Rubicon loads and exposes by default,
 see the `predefined-c-libraries`{.interpreted-text role="ref"} section
@@ -53,7 +50,8 @@ function:
 >>> libm
 <CDLL '/usr/lib/libm.dylib', handle 7fff60d0cb90 at 0x10596be10>
 ```
-::::
+
+///
 
 C functions are accessed as attributes on their library:
 
@@ -79,10 +77,7 @@ the terminal:
 $ open "$(xcrun --show-sdk-path)/usr/include"
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 This command requires a version of the macOS developer tools to be
 installed. If you do not have Xcode or the command-line developer tools
@@ -92,7 +87,8 @@ command-line developer tools:
 ``` console
 $ xcode-select --install
 ```
-::::
+
+///
 
 Once you have opened the relevant header file in a text editor, you need
 to search for the declaration of the function you're looking for. In the
@@ -127,10 +123,7 @@ which are Unicode-based.
 Hello!
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 If you're running this code from an editor or IDE and don't see `Hello!`
 printed out, try running the code from a Python REPL in a terminal
@@ -151,7 +144,8 @@ that errors from the function call are detected and handled. Unlike in
 Python, if you forget to check whether a C function call failed, any
 errors from that call are silently ignored, which often leads to bad
 behavior or crashes.
-::::
+
+///
 
 Most real examples of C functions are more complicated than `puts`, but
 the basic procedure for calling them is the same: import or load the
@@ -213,10 +207,7 @@ def NSLocationInRange(loc, range):
 You can then put this translated function into your Python code and call
 it in place of the corresponding C inline function.
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Python code translated from C like this is sometimes more complicated
 than necessary and can be simplified. In this case for example,
@@ -229,7 +220,8 @@ might look like this:
 def NSLocationInRange(loc, range):
     return loc >= range.location and loc - range.location < range.length
 ```
-::::
+
+///
 
 ## Global variables and constants (e.g. `NSFoundationVersionNumber`) { #global-variables-and-constants-e.g.-nsfoundationversionnumber }
 
@@ -288,10 +280,7 @@ Because they are so common, Rubicon provides the convenience function
 <ObjCStrInstance: __NSCFConstantString at 0x10eecf350: kMDItemFSName>
 ```
 
-:::: {.note}
-::: {.title}
-Note
-:::
+/// note | Note
 
 Sometimes it's not obvious that a constant is an Objective-C object,
 because its actual type is hidden behind a `typedef`. This is common
@@ -314,7 +303,8 @@ their actual type is still `NSString *`, based on the `typedef` before.
 In some cases, constants use a `typedef` from a different header (or
 even a different library) than the one defining the constants, which can
 make it even harder to tell that they are actually Objective-C objects.
-::::
+
+///
 
 ## A complex example: `dispatch_get_main_queue`
 
