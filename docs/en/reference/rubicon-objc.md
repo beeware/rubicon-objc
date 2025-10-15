@@ -21,7 +21,8 @@ relevant sections of the submodules' documentation.
 
 ### From `rubicon.objc.api`{.interpreted-text role="mod"} { #from-rubicon.objc.api }
 
-::: {.hlist}
+<!-- TODO: style into list -->
+
 - `~rubicon.objc.api.Block`{.interpreted-text role="class"}
 - `~rubicon.objc.api.NSArray`{.interpreted-text role="data"}
 - `~rubicon.objc.api.NSDictionary`{.interpreted-text role="data"}
@@ -43,19 +44,21 @@ relevant sections of the submodules' documentation.
 - `~rubicon.objc.api.objc_property`{.interpreted-text role="func"}
 - `~rubicon.objc.api.objc_rawmethod`{.interpreted-text role="func"}
 - `~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"}
-:::
+
 
 ### From `rubicon.objc.runtime`{.interpreted-text role="mod"} { #from-rubicon.objc.runtime }
 
-::: {.hlist}
+<!-- TODO: style into list -->
+
 - `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"}
 - `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
 - `~rubicon.objc.runtime.send_super`{.interpreted-text role="func"}
-:::
+
 
 ### From `rubicon.objc.types`{.interpreted-text role="mod"} { #from-rubicon.objc.types }
 
-::: {.hlist}
+<!-- TODO: style into list -->
+
 - `~rubicon.objc.types.CFIndex`{.interpreted-text role="class"}
 - `~rubicon.objc.types.CFRange`{.interpreted-text role="class"}
 - `~rubicon.objc.types.CGFloat`{.interpreted-text role="class"}
@@ -84,4 +87,3 @@ relevant sections of the submodules' documentation.
 - `~rubicon.objc.types.UIEdgeInsetsZero`{.interpreted-text role="data"}
 - `~rubicon.objc.types.UniChar`{.interpreted-text role="class"}
 - `~rubicon.objc.types.unichar`{.interpreted-text role="class"}
-:::

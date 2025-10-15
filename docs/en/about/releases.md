@@ -482,10 +482,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   removing some previously allowed shortcuts and features that were
   rarely used, or likely to be used by accident in an unsafe way.
 
-  :::: {.note}
-  ::: {.title}
-  Note
-  :::
+  /// note | Note
 
   In most cases, Rubicon's high-level method call syntax provided by
   `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} can
@@ -495,7 +492,8 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   less error-prone.
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
   should only be used in cases not supported by the high-level syntax.
-  ::::
+
+  ///
 
 - Disallowed passing class names as `str`{.interpreted-text
   role="class"}/`bytes`{.interpreted-text role="class"} as the

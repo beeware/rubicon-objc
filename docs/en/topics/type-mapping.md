@@ -55,11 +55,13 @@ signatures, and converts them to matching primitive
 `float`{.interpreted-text role="class"} is treated as
 `~ctypes.c_double`{.interpreted-text role="class"}.
 
-::: {.seealso}
+/// note | See also
+
 The `rubicon.objc.types`{.interpreted-text role="mod"} reference
 documentation lists all C type definitions provided by Rubicon, and
 provides additional information about how Rubicon converts types.
-:::
+
+///
 
 ## Type conversions
 

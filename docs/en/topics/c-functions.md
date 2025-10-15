@@ -7,12 +7,14 @@ interface at all. Calling C functions is quite different from calling
 Objective-C methods and requires some additional work, which will be
 explained in this how-to.
 
-::: {.seealso}
+/// note | See also
+
 The [ctypes
 tutorial](https://docs.python.org/3/library/ctypes.html#ctypes-tutorial)
 in the Python documentation, which explains how to call C functions in
 general (without a specific focus on Apple platforms and Objective-C).
-:::
+
+///
 
 ## A simple example: `puts`
 

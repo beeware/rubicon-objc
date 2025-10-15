@@ -9,38 +9,39 @@ utilities for working with C types.
 
 These are commonly used C types from various frameworks.
 
-::: {.c_ptrdiff_t([value])}
+::: c_ptrdiff_t([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The [ptrdiff_t](https://en.cppreference.com/w/c/types/ptrdiff_t) type
 from `<stddef.h>`. Equivalent to `~ctypes.c_long`{.interpreted-text
 role="class"} on 64-bit systems and `~ctypes.c_int`{.interpreted-text
 role="class"} on 32-bit systems.
-:::
 
-::: {.NSInteger([value])}
+::: NSInteger([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSInteger](https://developer.apple.com/documentation/objectivec/nsinteger?language=objc)
 type from `<objc/NSObjCRuntime.h>`. Equivalent to
 `~ctypes.c_long`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_int`{.interpreted-text role="class"} on 32-bit systems.
-:::
 
-::: {.NSUInteger([value])}
+::: NSUInteger([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSUInteger](https://developer.apple.com/documentation/objectivec/nsuinteger?language=objc)
 type from `<objc/NSObjCRuntime.h>`. Equivalent to
 `~ctypes.c_ulong`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_uint`{.interpreted-text role="class"} on 32-bit systems.
-:::
 
-::: {.CGFloat([value])}
+::: CGFloat([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CGFloat](https://developer.apple.com/documentation/corefoundation/cgfloat?language=objc)
 type from `<CoreGraphics/CGBase.h>`. Equivalent to
 `~ctypes.c_double`{.interpreted-text role="class"} on 64-bit systems and
 `~ctypes.c_float`{.interpreted-text role="class"} on 32-bit systems.
-:::
 
-:::::: {.NSPoint([x, .y])}
+::: NSPoint([x, .y])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSPoint](https://developer.apple.com/documentation/foundation/nspoint?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
@@ -56,9 +57,10 @@ role="class"}.
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
-::::::
 
-:::: {.CGPoint([x, .y])}
+
+::: CGPoint([x, .y])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CGPoint](https://developer.apple.com/documentation/corefoundation/cgpoint?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
@@ -67,9 +69,10 @@ structure from `<CoreGraphics/CGGeometry.h>`.
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
-::::
 
-:::::: {.NSSize([width, .height])}
+
+::: NSSize([width, .height])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSSize](https://developer.apple.com/documentation/foundation/nssize?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
@@ -85,9 +88,10 @@ role="class"}.
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
-::::::
 
-:::: {.CGSize([width, .height])}
+
+::: CGSize([width, .height])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CGSize](https://developer.apple.com/documentation/corefoundation/cgsize?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
@@ -96,9 +100,10 @@ structure from `<CoreGraphics/CGGeometry.h>`.
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
-::::
 
-::::::: {.NSRect([origin, .size])}
+
+::: NSRect([origin, .size])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSRect](https://developer.apple.com/documentation/foundation/nsrect?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
@@ -119,9 +124,10 @@ The origin as a `NSPoint`{.interpreted-text role="class"}.
 <!-- TODO: Doc notes -->
 The size as a `NSSize`{.interpreted-text role="class"}.
 
-:::::::
 
-::::: {.CGRect([origin, .size])}
+
+::: CGRect([origin, .size])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CGRect](https://developer.apple.com/documentation/corefoundation/cgrect?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
@@ -135,9 +141,10 @@ The origin as a `CGPoint`{.interpreted-text role="class"}.
 <!-- TODO: Doc notes -->
 The size as a `CGSize`{.interpreted-text role="class"}.
 
-:::::
 
-:::: {.UIEdgeInsets([top, .left, .bottom, .right])}
+
+::: UIEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [UIEdgeInsets](https://developer.apple.com/documentation/uikit/uiedgeinsets?language=objc)
 structure from `<UIKit/UIGeometry.h>`.
@@ -146,9 +153,10 @@ structure from `<UIKit/UIGeometry.h>`.
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
-::::
 
-:::: {.NSEdgeInsets([top, .left, .bottom, .right])}
+
+::: NSEdgeInsets([top, .left, .bottom, .right])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSEdgeInsets](https://developer.apple.com/documentation/foundation/nsedgeinsets?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
@@ -157,43 +165,44 @@ structure from `<Foundation/NSGeometry.h>`.
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
-::::
 
-::: {.NSTimeInterval([value])}
+
+::: NSTimeInterval([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSTimeInterval](https://developer.apple.com/documentation/foundation/nstimeinterval?language=objc)
 type from `<Foundation/NSDate.h>`. Equivalent to
 `~ctypes.c_double`{.interpreted-text role="class"}.
-:::
 
-::: {.CFIndex([value])}
+::: CFIndex([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CFIndex](https://developer.apple.com/documentation/corefoundation/cfindex?language=objc)
 type from `<CoreFoundation/CFBase.h>`. Equivalent to
 `~ctypes.c_longlong`{.interpreted-text role="class"} on 64-bit systems
 and `~ctypes.c_long`{.interpreted-text role="class"} on 32-bit systems.
-:::
 
-::: {.UniChar([value])}
+::: UniChar([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The `UniChar` type from `<MacTypes.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
-:::
 
-::: {.unichar([value])}
+::: unichar([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [unichar](https://developer.apple.com/documentation/foundation/unichar?language=objc)
 type from `<Foundation/NSString.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
-:::
 
-::: {.CGGlyph([value])}
+::: CGGlyph([value])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CGGlyph](https://developer.apple.com/documentation/coregraphics/cgglyph?language=objc)
 type from `<CoreGraphics/CGFont.h>`. Equivalent to
 `~ctypes.c_ushort`{.interpreted-text role="class"}.
-:::
 
-:::: {.CFRange([location, .length])}
+::: CFRange([location, .length])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [CFRange](https://developer.apple.com/documentation/corefoundation/cfrange?language=objc)
 type from `<CoreFoundation/CFBase.h>`.
@@ -202,9 +211,10 @@ type from `<CoreFoundation/CFBase.h>`.
 <!-- TODO: Doc notes -->
 The location and length as `CFIndex`{.interpreted-text role="class"}es.
 
-::::
 
-:::: {.NSRange([location, .length])}
+
+::: NSRange([location, .length])  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
 type from `<Foundation/NSRange.h>`.
@@ -213,8 +223,6 @@ type from `<Foundation/NSRange.h>`.
 <!-- TODO: Doc notes -->
 The location and length as `NSUInteger`{.interpreted-text
 role="class"}s.
-
-::::
 
 ## Common C constants
 
@@ -226,7 +234,6 @@ The constant
 [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
 a `UIEdgeInsets`{.interpreted-text role="class"} instance with all
 insets set to zero.
-
 
 ::: NSZeroPoint <!-- TODO: data -->
 <!-- TODO: Doc notes -->
@@ -358,7 +365,8 @@ than typing encodings out by hand.
 In addition, the following types defined by Rubicon are registered, but
 their encodings may vary depending on the system and architecture:
 
-::: {.hlist}
+<!-- TODO: style into list -->
+
 - `ctypes.py_object`{.interpreted-text role="class"}
 - `NSInteger`{.interpreted-text role="class"}
 - `NSUInteger`{.interpreted-text role="class"}
@@ -377,7 +385,6 @@ their encodings may vary depending on the system and architecture:
 - `unichar`{.interpreted-text role="class"}
 - `CGGlyph`{.interpreted-text role="class"}
 - `NSRange`{.interpreted-text role="class"}
-:::
 
 ## Conversion of Python sequences to C structures and arrays
 

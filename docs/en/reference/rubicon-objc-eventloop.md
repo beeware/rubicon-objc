@@ -19,18 +19,17 @@ role="doc"}.
 ::: get_child_watcher <!-- TODO: method -->
 
 ::: set_child_watcher <!-- TODO: method -->
-:::::::
+
 
 ::: CocoaLifecycle <!-- TODO: class -->
 
 ::: start <!-- TODO: method -->
 
 ::: stop <!-- TODO: method -->
-:::::
+
 
 ::: iOSLifecycle <!-- TODO: class -->
 
 ::: start <!-- TODO: method -->
 
 ::: stop <!-- TODO: method -->
-:::::

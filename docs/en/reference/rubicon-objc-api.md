@@ -15,15 +15,15 @@ that module should be used instead of importing
 
 ::: ObjCInstance(ptr) <!-- TODO: class -->
 
-::: {.attribute}
-ptr <span id="as_parameter">as_parameter</span>
+::: ptr <span id="as_parameter">as_parameter</span>  <!-- TODO: attribute, stub candidate -->
+<!-- TODO: stub notes -->
+
 
 The wrapped object pointer as an
 `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"}. This
 attribute is also available as `_as_parameter_` to allow
 `ObjCInstance`{.interpreted-text role="class"}s to be passed into
 `ctypes`{.interpreted-text role="mod"} functions.
-:::
 
 ::: objc_class <!-- TODO: attribute -->
 
@@ -85,7 +85,8 @@ value `hello`.
 
 ///
 
-:::::: {.NSObject}
+::: NSObject  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSObject](https://developer.apple.com/documentation/objectivec/nsobject?language=objc)
 class from `<objc/NSObject.h>`.
@@ -103,9 +104,10 @@ These Objective-C properties have been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
 always be accessed using attribute syntax.
 
-::::::
 
-::::: {.Protocol}
+
+::: Protocol  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [Protocol](https://developer.apple.com/documentation/objectivec/protocol?language=objc)
 class from `<objc/Protocol.h>`.
@@ -119,9 +121,10 @@ objects using `ObjCProtocol`{.interpreted-text role="class"}, which
 provides an easier interface for working with protocols.
 
 ///
-:::::
 
-::::: {.NSNumber}
+
+::: NSNumber  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSNumber](https://developer.apple.com/documentation/foundation/nsnumber?language=objc)
 class from `<Foundation/NSValue.h>`.
@@ -133,9 +136,10 @@ This class can be converted to and from standard Python primitives
 role="func"} and `ns_from_py`{.interpreted-text role="func"}.
 
 ///
-:::::
 
-::::: {.NSDecimalNumber}
+
+::: NSDecimalNumber  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSDecimalNumber](https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc)
 class from `<Foundation/NSDecimalNumber.h>`.
@@ -147,9 +151,10 @@ This class can be converted to and from Python `decimal.Decimal` using
 `ns_from_py`{.interpreted-text role="func"}.
 
 ///
-:::::
 
-::::::: {.NSString}
+
+::: NSString  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSString](https://developer.apple.com/documentation/foundation/nsstring?language=objc)
 class from `<Foundation/NSString.h>`.
@@ -187,9 +192,10 @@ This Objective-C property has been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
 always be accessed using attribute syntax.
 
-:::::::
 
-::::: {.NSData}
+
+::: NSData  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSData](https://developer.apple.com/documentation/foundation/nsdata?language=objc)
 class from `<Foundation/NSData.h>`.
@@ -201,9 +207,10 @@ role="class"} using `py_from_ns`{.interpreted-text role="func"} and
 `ns_from_py`{.interpreted-text role="func"}.
 
 ///
-:::::
 
-:::::: {.NSArray}
+
+::: NSArray  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSArray](https://developer.apple.com/documentation/foundation/nsarray?language=objc)
 class from `<Foundation/NSArray.h>`.
@@ -232,9 +239,10 @@ count(value) copy() <!-- TODO: method -->
 <!-- TODO: Doc notes -->
 Python-style sequence interface.
 
-::::::
 
-:::::: {.NSMutableArray}
+
+::: NSMutableArray  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSMutableArray](https://developer.apple.com/documentation/foundation/nsmutablearray?language=objc)
 class from `<Foundation/NSArray.h>`.
@@ -252,9 +260,10 @@ remove(value) reverse() <!-- TODO: method -->
 <!-- TODO: Doc notes -->
 Python-style mutable sequence interface.
 
-::::::
 
-:::::::: {.NSDictionary}
+
+::: NSDictionary  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSDictionary](https://developer.apple.com/documentation/foundation/nsdictionary?language=objc)
 class from `<Foundation/NSDictionary.h>`.
@@ -314,10 +323,11 @@ perform other operations on it, you should convert it to a Python
 role="class"} first.
 
 ///
-:::::
-::::::::
 
-:::::: {.NSMutableDictionary}
+
+
+::: NSMutableDictionary  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 The
 [NSMutableDictionary](https://developer.apple.com/documentation/foundation/nsmutabledictionary?language=objc)
 class from `<Foundation/NSDictionary.h>`.
@@ -335,7 +345,7 @@ update([other], **kwargs) <!-- TODO: method -->
 <!-- TODO: Doc notes -->
 Python-style mutable mapping interface.
 
-::::::
+
 
 ## Objective-C protocols
 
@@ -593,7 +603,7 @@ the block's type signature.
 ::: ObjCBlock(pointer, [return_type, *arg_types]) <!-- TODO: class -->
 
 ::: call <!-- TODO: method -->
-::::
+
 
 ::: Block(func, [restype, *argtypes]) <!-- TODO: class -->
 

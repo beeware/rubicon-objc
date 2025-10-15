@@ -15,19 +15,20 @@ Some commonly used C libraries are provided as
 `~ctypes.CDLL`{.interpreted-text role="class"}s. Other libraries can be
 loaded using the `load_library`{.interpreted-text role="func"} function.
 
-:::: {.data annotation="= load_library('c')"}
+::: data annotation="= load_library('c')"  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 libc
 
 The [C standard library](https://en.cppreference.com/w/c).
 
 The following functions are accessible by default:
 
-::: {.hlist}
-* `free`
-:::
-::::
+<!-- TODO: style into list -->
 
-:::: {.data annotation="= load_library('objc')"}
+* `free`
+
+::: data annotation="= load_library('objc')"  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 libobjc
 
 The [Objective-C runtime
@@ -35,7 +36,8 @@ library](https://developer.apple.com/documentation/objectivec).
 
 The following functions are accessible by default:
 
-::: {.hlist}
+<!-- TODO: style into list -->
+
 * `class_addIvar` * `class_addMethod` * `class_addProperty` *
 `class_addProtocol` * `class_copyIvarList` * `class_copyMethodList` *
 `class_copyPropertyList` * `class_copyProtocolList` *
@@ -63,15 +65,14 @@ The following functions are accessible by default:
 `protocol_copyProtocolList` * `protocol_getMethodDescription` *
 `protocol_getName` * `objc_registerProtocol` * `sel_getName` *
 `sel_isEqual` * `sel_registerName`
-:::
-::::
 
-::: {.data annotation="= load_library('Foundation')"}
+
+::: data annotation="= load_library('Foundation')"  <!-- TODO: stub candidate -->
+<!-- TODO: stub notes -->
 Foundation
 
 The [Foundation](https://developer.apple.com/documentation/foundation)
 framework.
-:::
 
 ::: load_library <!-- TODO: function -->
 
@@ -86,7 +87,7 @@ These are various types used by the Objective-C runtime functions.
 ::: SEL([value]) <!-- TODO: class -->
 
 ::: name <!-- TODO: attribute -->
-::::
+
 
 ::: Class([value]) <!-- TODO: class -->
 
@@ -105,7 +106,7 @@ These are various types used by the Objective-C runtime functions.
 The attribute name and value as C strings (`bytes`{.interpreted-text
 role="class"}).
 
-::::
+
 
 ::: objc_method_description([name, value]) <!-- TODO: class -->
 
@@ -119,7 +120,7 @@ The method name as a `SEL`{.interpreted-text role="class"}.
 The method's signature encoding as a C string (`bytes`{.interpreted-text
 role="class"}).
 
-:::::
+
 
 ::: objc_super([receiver, super_class]) <!-- TODO: class -->
 
@@ -134,7 +135,7 @@ role="class"}.
 The class in which to start searching for method implementations, as a
 `Class`{.interpreted-text role="class"}.
 
-:::::
+
 
 ## Objective-C runtime utility functions
 
