@@ -49,31 +49,29 @@ there are any markup problems, they'll raise an error.
 Before committing and pushing documentation updates, run linting for the
 documentation:
 
-:::::: {.tabs}
-::: {.group-tab}
-macOS
+/// tab | macOS
 
 ``` console
 (venv) $ tox -e docs-lint
 ```
-:::
 
-::: {.group-tab}
-Linux
+///
+
+/// tab | Linux
 
 ``` console
 (venv) $ tox -e docs-lint
 ```
-:::
 
-::: {.group-tab}
-Windows
+///
+
+/// tab | Windows
 
 ``` doscon
 C:\...>tox -e docs-lint
 ```
-:::
-::::::
+
+///
 
 This will validate the documentation does not contain:
 
@@ -89,31 +87,29 @@ the spellchecker's
 
 To force a rebuild for all of the documentation:
 
-:::::: {.tabs}
-::: {.group-tab}
-macOS
+/// tab | macOS
 
 ``` console
 (venv) $ tox -e docs-all
 ```
-:::
 
-::: {.group-tab}
-Linux
+///
+
+/// tab | Linux
 
 ``` console
 (venv) $ tox -e docs-all
 ```
-:::
 
-::: {.group-tab}
-Windows
+///
+
+/// tab | Windows
 
 ``` doscon
 C:\...>tox -e docs-all
 ```
-:::
-::::::
+
+///
 
 The documentation should be fully rebuilt in the `docs/_build/html`
 folder. If there are any markup problems, they'll raise an error.
@@ -123,31 +119,29 @@ folder. If there are any markup problems, they'll raise an error.
 To support rapid editing of documentation, Rubicon also has a "live
 preview" mode:
 
-:::::: {.tabs}
-::: {.group-tab}
-macOS
+/// tab | macOS
 
 ``` console
 (venv) $ tox -e docs-live
 ```
-:::
 
-::: {.group-tab}
-Linux
+///
+
+/// tab | Linux
 
 ``` console
 (venv) $ tox -e docs-live
 ```
-:::
 
-::: {.group-tab}
-Windows
+///
+
+/// tab | Windows
 
 ``` doscon
 (venv) C:\...>tox -e docs-live
 ```
-:::
-::::::
+
+///
 
 This will build the documentation, start a web server to serve the build
 documentation, and watch the file system for any changes to the
@@ -159,31 +153,29 @@ Live preview mode will only monitor the `docs` directory for changes. If
 you're updating the inline documentation associated with Toga source
 code, you'll need to use the `docs-live-src` target to build docs:
 
-:::::: {.tabs}
-::: {.group-tab}
-macOS
+/// tab | macOS
 
 ``` console
 (venv) $ tox -e docs-live-src
 ```
-:::
 
-::: {.group-tab}
-Linux
+///
+
+/// tab | Linux
 
 ``` console
 (venv) $ tox -e docs-live-src
 ```
-:::
 
-::: {.group-tab}
-Windows
+///
+
+/// tab | Windows
 
 ``` doscon
 (venv) C:\...>tox -e docs-live-src
 ```
-:::
-::::::
+
+///
 
 This behaves the same as `docs-live`, but will also monitor any changes
 to the `src/rubicon/objc` folder, reflecting any changes to inline

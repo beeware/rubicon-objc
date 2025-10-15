@@ -1,8 +1,7 @@
 # `rubicon.objc.api`{.interpreted-text role="mod"} --- The high-level Rubicon API { #rubicon.objc.api-----the-high-level-rubicon-api }
 
-::: {.module}
+{.module}
 rubicon.objc.api
-:::
 
 This module contains Rubicon's main high-level APIs, which allow easy
 interaction with Objective-C classes and objects using Pythonic syntax.
@@ -28,13 +27,13 @@ attribute is also available as `_as_parameter_` to allow
 
 ::: objc_class <!-- TODO: attribute -->
 
-:::  str <!-- TODO: method -->
+::: str <!-- TODO: method -->
 
-:::  repr <!-- TODO: method -->
+::: repr <!-- TODO: method -->
 
-:::  getattr <!-- TODO: method -->
+::: getattr <!-- TODO: method -->
 
-:::  setattr <!-- TODO: method -->
+::: setattr <!-- TODO: method -->
 
 ::: objc_const <!-- TODO: function -->
 
@@ -42,11 +41,10 @@ attribute is also available as `_as_parameter_` to allow
 
 ::: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(),auto_rename=None]]) <!-- TODO: class -->
 
-::: {.attribute}
-name
-
+::: name <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The name of this class, as a `str`{.interpreted-text role="class"}.
-:::
+
 
 ::: superclass <!-- TODO: attribute -->
 
@@ -58,9 +56,9 @@ The name of this class, as a `str`{.interpreted-text role="class"}.
 
 ::: declare_class_property <!-- TODO: method -->
 
-:::  instancecheck <!-- TODO: method -->
+::: instancecheck <!-- TODO: method -->
 
-:::  subclasscheck <!-- TODO: method -->
+::: subclasscheck <!-- TODO: method -->
 
 ::: ObjCMetaClass(name_or_ptr) <!-- TODO: class -->
 
@@ -99,13 +97,12 @@ a list of operations that Rubicon supports on all objects.
 
 ///
 
-::: {.attribute}
-debugDescription description
-
+::: debugDescription description <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 These Objective-C properties have been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
 always be accessed using attribute syntax.
-:::
+
 ::::::
 
 ::::: {.Protocol}
@@ -178,20 +175,18 @@ role="class"} to `str`{.interpreted-text role="class"} first.
 
 ///
 
-::: {.method}
- str ()
-
+::: str () <!-- TODO: method -->
+<!-- TODO: Doc notes -->
 Return the value of this `NSString`{.interpreted-text role="class"} as a
 `str`{.interpreted-text role="class"}.
-:::
 
-::: {.attribute}
-UTF8String
 
+::: UTF8String <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 This Objective-C property has been declared using
 `ObjCClass.declare_property`{.interpreted-text role="meth"} and can
 always be accessed using attribute syntax.
-:::
+
 :::::::
 
 ::::: {.NSData}
@@ -231,13 +226,12 @@ is raised.
 
 ///
 
-::: {.method}
- getitem (index)  len ()  iter ()
+::: getitem (index)  len ()  iter ()
  contains (value)  eq (other)  ne (other) index(value)
-count(value) copy()
-
+count(value) copy() <!-- TODO: method -->
+<!-- TODO: Doc notes -->
 Python-style sequence interface.
-:::
+
 ::::::
 
 :::::: {.NSMutableArray}
@@ -252,13 +246,12 @@ superclass `NSArray`.
 
 ///
 
-::: {.method}
- setitem (index, value)  delitem (index) append(value)
+::: setitem (index, value)  delitem (index) append(value)
 clear() extend(values) insert(index, value) pop([index=-1])
-remove(value) reverse()
-
+remove(value) reverse() <!-- TODO: method -->
+<!-- TODO: Doc notes -->
 Python-style mutable sequence interface.
-:::
+
 ::::::
 
 :::::::: {.NSDictionary}
@@ -336,13 +329,12 @@ superclass `NSDictionary`.
 
 ///
 
-::: {.method}
- setitem (key, value)  delitem (key) clear() pop(item,
+::: setitem (key, value)  delitem (key) clear() pop(item,
 [default]) popitem() setdefault(key, [default=None])
-update([other], **kwargs)
-
+update([other], **kwargs) <!-- TODO: method -->
+<!-- TODO: Doc notes -->
 Python-style mutable mapping interface.
-:::
+
 ::::::
 
 ## Objective-C protocols
@@ -355,9 +347,9 @@ Python-style mutable mapping interface.
 
 ::: auto_rename <!-- TODO: attribute -->
 
-:::  instancecheck <!-- TODO: method -->
+::: instancecheck <!-- TODO: method -->
 
-:::  subclasscheck <!-- TODO: method -->
+::: subclasscheck <!-- TODO: method -->
 
 ### Standard Objective-C and Foundation protocols
 
@@ -370,16 +362,15 @@ role="class"}s for convenience. (Other protocols not listed here can be
 looked up by passing a protocol name to the
 `ObjCProtocol`{.interpreted-text role="class"} constructor.)
 
-::: {.data}
-NSObjectProtocol
-
+::: NSObjectProtocol <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 The
 [NSObject](https://developer.apple.com/documentation/objectivec/1418956-nsobject?language=objc)
 protocol from `<objc/NSObject.h>`. The protocol is exported as
 `NSObjectProtocol`{.interpreted-text role="class"} in Python because it
 would otherwise clash with the `NSObject`{.interpreted-text
 role="class"} class.
-:::
+
 
 ## Converting objects between Objective-C and Python
 
@@ -387,11 +378,10 @@ role="class"} class.
 
 ::: ns_from_py <!-- TODO: function -->
 
-::: {.function}
-at(pyobj)
-
+::: at(pyobj) <!-- TODO: function -->
+<!-- TODO: Doc notes -->
 Alias for `ns_from_py`{.interpreted-text role="func"}.
-:::
+
 
 ## Creating custom Objective-C classes and protocols { #custom-classes-and-protocols }
 
@@ -602,7 +592,7 @@ the block's type signature.
 
 ::: ObjCBlock(pointer, [return_type, *arg_types]) <!-- TODO: class -->
 
-:::  call <!-- TODO: method -->
+::: call <!-- TODO: method -->
 ::::
 
 ::: Block(func, [restype, *argtypes]) <!-- TODO: class -->

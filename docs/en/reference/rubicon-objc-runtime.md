@@ -1,8 +1,6 @@
 # `rubicon.objc.runtime`{.interpreted-text role="mod"} --- Low-level Objective-C runtime access { #rubicon.objc.runtime-----low-level-objective-c-runtime-access }
 
-::: {.module}
 rubicon.objc.runtime
-:::
 
 This module contains types, functions, and C libraries used for
 low-level access to the Objective-C runtime.
@@ -102,45 +100,40 @@ These are various types used by the Objective-C runtime functions.
 
 ::: objc_property_attribute_t([name, value]) <!-- TODO: class -->
 
-::: {.attribute}
-name value
-
+::: name value <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The attribute name and value as C strings (`bytes`{.interpreted-text
 role="class"}).
-:::
+
 ::::
 
 ::: objc_method_description([name, value]) <!-- TODO: class -->
 
-::: {.attribute}
-name
-
+::: name <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The method name as a `SEL`{.interpreted-text role="class"}.
-:::
 
-::: {.attribute}
-types
 
+::: types <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The method's signature encoding as a C string (`bytes`{.interpreted-text
 role="class"}).
-:::
+
 :::::
 
 ::: objc_super([receiver, super_class]) <!-- TODO: class -->
 
-::: {.attribute}
-receiver
-
+::: receiver <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The receiver of the call, as an `objc_id`{.interpreted-text
 role="class"}.
-:::
 
-::: {.attribute}
-super_class
 
+::: super_class <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The class in which to start searching for method implementations, as a
 `Class`{.interpreted-text role="class"}.
-:::
+
 :::::
 
 ## Objective-C runtime utility functions
@@ -148,9 +141,8 @@ The class in which to start searching for method implementations, as a
 These utility functions provide easier access from Python to certain
 parts of the Objective-C runtime.
 
-::: {.function}
-object_isClass(obj)
-
+::: object_isClass(obj) <!-- TODO: function -->
+<!-- TODO: Doc notes -->
 Return whether the given Objective-C object is a class (or a metaclass).
 
 This is equivalent to the `libobjc`{.interpreted-text role="data"}
@@ -160,7 +152,7 @@ from `<objc/runtime.h>`, which is only available since OS X 10.10 and
 iOS 8. This module-level function is provided to support older systems
 --- it uses the `libobjc`{.interpreted-text role="data"} function if
 available, and otherwise emulates it.
-:::
+
 
 ::: get_class <!-- TODO: function -->
 

@@ -1,8 +1,6 @@
 # `rubicon.objc.types`{.interpreted-text role="mod"} --- Non-Objective-C types and utilities { #rubicon.objc.types-----non-objective-c-types-and-utilities }
 
-::: {.module}
 rubicon.objc.types
-:::
 
 This module contains definitions for common C constants and types, and
 utilities for working with C types.
@@ -54,11 +52,10 @@ role="class"}.
 
 ///
 
-::: {.attribute}
-x y
-
+::: x y <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::::
 
 :::: {.CGPoint([x, .y])}
@@ -66,11 +63,10 @@ The
 [CGPoint](https://developer.apple.com/documentation/corefoundation/cgpoint?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: {.attribute}
-x y
-
+::: x y <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::
 
 :::::: {.NSSize([width, .height])}
@@ -85,11 +81,10 @@ role="class"}.
 
 ///
 
-::: {.attribute}
-width height
-
+::: width height <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::::
 
 :::: {.CGSize([width, .height])}
@@ -97,11 +92,10 @@ The
 [CGSize](https://developer.apple.com/documentation/corefoundation/cgsize?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: {.attribute}
-width height
-
+::: width height <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::
 
 ::::::: {.NSRect([origin, .size])}
@@ -116,17 +110,15 @@ role="class"}.
 
 ///
 
-::: {.attribute}
-origin
-
+::: origin <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The origin as a `NSPoint`{.interpreted-text role="class"}.
-:::
 
-::: {.attribute}
-size
 
+::: size <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The size as a `NSSize`{.interpreted-text role="class"}.
-:::
+
 :::::::
 
 ::::: {.CGRect([origin, .size])}
@@ -134,17 +126,15 @@ The
 [CGRect](https://developer.apple.com/documentation/corefoundation/cgrect?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-::: {.attribute}
-origin
-
+::: origin <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The origin as a `CGPoint`{.interpreted-text role="class"}.
-:::
 
-::: {.attribute}
-size
 
+::: size <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The size as a `CGSize`{.interpreted-text role="class"}.
-:::
+
 :::::
 
 :::: {.UIEdgeInsets([top, .left, .bottom, .right])}
@@ -152,11 +142,10 @@ The
 [UIEdgeInsets](https://developer.apple.com/documentation/uikit/uiedgeinsets?language=objc)
 structure from `<UIKit/UIGeometry.h>`.
 
-::: {.attribute}
-top left bottom right
-
+::: top left bottom right <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::
 
 :::: {.NSEdgeInsets([top, .left, .bottom, .right])}
@@ -164,11 +153,10 @@ The
 [NSEdgeInsets](https://developer.apple.com/documentation/foundation/nsedgeinsets?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-::: {.attribute}
-top left bottom right
-
+::: top left bottom right <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
-:::
+
 ::::
 
 ::: {.NSTimeInterval([value])}
@@ -210,11 +198,10 @@ The
 [CFRange](https://developer.apple.com/documentation/corefoundation/cfrange?language=objc)
 type from `<CoreFoundation/CFBase.h>`.
 
-::: {.attribute}
-location length
-
+::: location length <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The location and length as `CFIndex`{.interpreted-text role="class"}es.
-:::
+
 ::::
 
 :::: {.NSRange([location, .length])}
@@ -222,54 +209,49 @@ The
 [NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
 type from `<Foundation/NSRange.h>`.
 
-::: {.attribute}
-location length
-
+::: location length <!-- TODO: attribute -->
+<!-- TODO: Doc notes -->
 The location and length as `NSUInteger`{.interpreted-text
 role="class"}s.
-:::
+
 ::::
 
 ## Common C constants
 
 These are commonly used C constants from various frameworks.
 
-::: {.data}
-UIEdgeInsetsZero
-
+::: UIEdgeInsetsZero <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 The constant
 [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
 a `UIEdgeInsets`{.interpreted-text role="class"} instance with all
 insets set to zero.
-:::
 
-::: {.data}
-NSZeroPoint
 
+::: NSZeroPoint <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 The constant
 [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
 a `NSPoint`{.interpreted-text role="class"} instance with the X and Y
 coordinates set to zero.
-:::
 
-::: {.data}
-NSIntegerMax
 
+::: NSIntegerMax <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 The macro constant
 [NSIntegerMax](https://developer.apple.com/documentation/objectivec/nsintegermax?language=objc)
 from `<objc/NSObjCRuntime.h>`: the maximum value that a
 `NSInteger`{.interpreted-text role="class"} can hold.
-:::
 
-::: {.data}
-NSNotFound
 
+::: NSNotFound <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 The constant
 [NSNotFound](https://developer.apple.com/documentation/foundation/nsnotfound?language=objc)
 from `<Foundation/NSObjCRuntime.h>`: a `NSInteger`{.interpreted-text
 role="class"} sentinel value indicating that an item was not found
 (usually when searching in a collection).
-:::
+
 
 ### Architecture detection constants
 
@@ -277,21 +259,19 @@ The following constants provide information about the architecture of
 the current environment. All of them are equivalent to the C compiler
 macros of the same names.
 
-::: {.data}
- LP64
-
+::: LP64 <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 Indicates whether the current environment is 64-bit. If true, C `long`s
 and pointers are 64 bits in size, otherwise 32 bits.
-:::
 
-::: {.data}
- i386   x86_64   arm   arm64
 
+::: i386   x86_64   arm   arm64 <!-- TODO: data -->
+<!-- TODO: Doc notes -->
 Each of these constants is true if the current environment uses the
 named architecture. At most one of these constants is true at once in a
 single Python runtime. (If the current architecture cannot be
 determined, all of these constants are false.)
-:::
+
 
 ## Objective-C type encoding conversion
 

@@ -1,8 +1,7 @@
 # `rubicon.objc`{.interpreted-text role="mod"} --- The main Rubicon module { #rubicon.objc-----the-main-rubicon-module }
 
-::: {.module}
+{.module}
 rubicon.objc
-:::
 
 This is the main namespace of Rubicon-ObjC. Rubicon is structured into
 multiple submodules of `rubicon.objc`{.interpreted-text role="mod"}, and

@@ -1,8 +1,6 @@
 # `rubicon.objc.eventloop`{.interpreted-text role="mod"} --- Integrating native event loops with `asyncio`{.interpreted-text role="mod"} { #rubicon.objc.eventloop-----integrating-native-event-loops-with-asyncio }
 
-::: {.module}
 rubicon.objc.eventloop
-:::
 
 /// note | Note
 
