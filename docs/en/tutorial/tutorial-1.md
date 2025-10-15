@@ -14,7 +14,7 @@ Start Python, and get a reference to an Objective-C class. In this
 example, we're going to use the `NSURL` class, Objective-C's
 representation of URLs:
 
-``` pycon
+```pycon
 >>> from rubicon.objc import ObjCClass
 >>> NSURL = ObjCClass("NSURL")
 ```
@@ -29,7 +29,7 @@ Let's create an instance of an `NSURL` object. The `NSURL` documentation
 describes a static constructor `+URLWithString:`; we can invoke this
 constructor as:
 
-``` pycon
+```pycon
 >>> base = NSURL.URLWithString("https://beeware.org/")
 ```
 
@@ -41,7 +41,7 @@ an `NSString` instance as part of invoking the method.
 `NSURL` has another static constructor: `+URLWithString:relativeToURL:`.
 We can also invoke this constructor:
 
-``` pycon
+```pycon
 >>> full = NSURL.URLWithString("contributing/", relativeToURL=base)
 ```
 
@@ -58,7 +58,7 @@ in a method call. In this case, you can use a `__` suffix on the
 ambiguous keyword argument to make it unique. Any content after and
 including the `__` will be stripped when making the Objective-C call:
 
-``` pycon
+```pycon
 >>> constraint = NSLayoutConstraint.constraintWithItem(
 ...     first_item,
 ...     attribute__1=first_attribute,
@@ -77,7 +77,7 @@ However, `NSURL` also provides an initializer method `-initWithString:`.
 To use this method, you first have to instruct the Objective-C runtime
 to allocate memory for the instance, then invoke the initializer:
 
-``` pycon
+```pycon
 >>> base = NSURL.alloc().initWithString("https://beeware.org/")
 ```
 
@@ -85,13 +85,13 @@ Now that you have an instance of `NSURL`, you'll want to manipulate it.
 `NSURL` describes an `absoluteURL` property; this property can be
 accessed as a Python attribute:
 
-``` pycon
+```pycon
 >>> absolute = full.absoluteURL
 ```
 
 You can also invoke methods on the instance:
 
-``` pycon
+```pycon
 >>> longer = absolute.URLByAppendingPathComponent('how/first-time/')
 ```
 
@@ -99,7 +99,7 @@ If you want to output an object at the console, you can use the
 Objective-C property `description`, or for debugging output,
 `debugDescription`:
 
-``` pycon
+```pycon
 >>> longer.description
 'https://beeware.org/contributing/how/first-time/'
 
@@ -110,7 +110,7 @@ Objective-C property `description`, or for debugging output,
 Internally, `description` and `debugDescription` are hooked up to their
 Python equivalents, `__str__()` and `__repr__()`, respectively:
 
-``` pycon
+```pycon
 >>> str(absolute)
 'https://beeware.org/contributing/'
 

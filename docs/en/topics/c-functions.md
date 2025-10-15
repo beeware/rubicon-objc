@@ -29,7 +29,7 @@ library, `libc`. Because this library is commonly used, Rubicon already
 loads it by default and exposes it in Python as
 `rubicon.objc.runtime.libc`{.interpreted-text role="attr"}.
 
-``` pycon
+```pycon
 >>> from rubicon.objc.runtime import libc
 >>> libc
 <CDLL '/usr/lib/libc.dylib', handle 7fff60d0cb90 at 0x105850b38>
@@ -46,7 +46,7 @@ To access a library that is not predefined by Rubicon, you can use the
 `~rubicon.objc.runtime.load_library`{.interpreted-text role="func"}
 function:
 
-``` pycon
+```pycon
 >>> from rubicon.objc.runtime import load_library
 >>> libm = load_library("m")
 >>> libm
@@ -57,7 +57,7 @@ function:
 
 C functions are accessed as attributes on their library:
 
-``` pycon
+```pycon
 >>> libc.puts
 <_FuncPtr object at 0x110178f20>
 ```
@@ -75,7 +75,7 @@ version of macOS and the developer tools --- it is not a fixed path. To
 open the header directory in the Finder, run the following command in
 the terminal:
 
-``` console
+```console
 $ open "$(xcrun --show-sdk-path)/usr/include"
 ```
 
@@ -86,7 +86,7 @@ installed. If you do not have Xcode or the command-line developer tools
 installed yet, run this command in the terminal to install the
 command-line developer tools:
 
-``` console
+```console
 $ xcode-select --install
 ```
 
@@ -96,7 +96,7 @@ Once you have opened the relevant header file in a text editor, you need
 to search for the declaration of the function you're looking for. In the
 case of `puts`, it looks like this:
 
-``` c
+```c
 int puts(const char *);
 ```
 
@@ -104,7 +104,7 @@ This means that `puts` returns an `int` and takes a single argument of
 type `const char *` (a pointer to one or more characters, i.e. a C
 string). This translates to the following Python `ctypes` code:
 
-``` pycon
+```pycon
 >>> from ctypes import c_char_p, c_int
 >>> libc.puts.restype = c_int
 >>> libc.puts.argtypes = [c_char_p]
@@ -120,7 +120,7 @@ string specifically needs to be a byte string (`bytes`), because C's
 `char *` strings are byte-based, unlike normal Python strings (`str`),
 which are Unicode-based.
 
-``` pycon
+```pycon
 >>> res = libc.puts(b"Hello!")
 Hello!
 ```
@@ -179,7 +179,7 @@ Foundation framework. This function checks whether an index lies inside
 a `NSRange` value. The definition of this function, from the Foundation
 header `NSRange.h`, looks like this:
 
-``` objc
+```objc
 NS_INLINE BOOL NSLocationInRange(NSUInteger loc, NSRange range) {
     return (!(loc < range.location) && (loc - range.location) < range.length) ? YES : NO;
 }
@@ -201,7 +201,7 @@ following steps:
 
 The translated Python code looks like this:
 
-``` python
+```python
 def NSLocationInRange(loc, range):
     return True if (not (loc < range.location) and (loc - range.location) < range.length) else False
 ```
@@ -218,7 +218,7 @@ than necessary and can be simplified. In this case for example,
 parentheses can be removed. A cleaner version of the translated code
 might look like this:
 
-``` python
+```python
 def NSLocationInRange(loc, range):
     return loc >= range.location and loc - range.location < range.length
 ```
@@ -231,7 +231,7 @@ Some C libraries expose not just functions, but also global variables.
 An example of this is the Foundation framework, which defines the global
 variable `NSFoundationVersionNumber` in `<Foundation/NSObjCRuntime.h>`:
 
-``` objc
+```objc
 FOUNDATION_EXPORT double NSFoundationVersionNumber;
 ```
 
@@ -241,7 +241,7 @@ though -instead of reading them directly as attributes of the library
 object, you use the `in_dll` method of the variable's *type*. (Every
 `ctypes` type has an `in_dll` method.)
 
-``` pycon
+```pycon
 >>> from ctypes import c_double
 >>> from rubicon.objc.runtime import Foundation
 >>> NSFoundationVersionNumber = c_double.in_dll(Foundation, "NSFoundationVersionNumber")
@@ -254,7 +254,7 @@ instead it returns a `ctypes` data object that has the variable's type,
 in this case `c_double`. To access the variable's actual value, you can
 use the data object's `value` attribute:
 
-``` pycon
+```pycon
 >>> NSFoundationVersionNumber.value
 1575.23
 ```
@@ -267,14 +267,14 @@ variables with a `const` modifier, meaning that they cannot be modified.
 Constants of type `NSString *` are especially common and can be found in
 many places, such as Foundation's `<Foundation/NSMetadataAttribute.h>`:
 
-``` objc
+```objc
 FOUNDATION_EXPORT NSString * const NSMetadataItemFSNameKey;
 ```
 
 Because they are so common, Rubicon provides the convenience function
 `objc_const` specifically for accessing Objective-C object constants:
 
-``` pycon
+```pycon
 >>> from rubicon.objc import objc_const
 >>> from rubicon.objc.runtime import Foundation
 >>> NSMetadataItemFSNameKey = objc_const(Foundation, "NSMetadataItemFSNameKey")
@@ -290,7 +290,7 @@ with the "extensible string enum" pattern, where a set of related string
 constants are defined together. An example can be found in
 `<Foundation/NSCalendar.h>`:
 
-``` objc
+```objc
 typedef NSString * NSCalendarIdentifier NS_EXTENSIBLE_STRING_ENUM;
 
 FOUNDATION_EXPORT NSCalendarIdentifier const NSCalendarIdentifierGregorian;
@@ -319,7 +319,7 @@ experience with the C pre-processor, you may want to skip this section.
 First, we need to look at the function's definition, which is found in
 the header `<dispatch/queue.h>`:
 
-``` objc
+```objc
 DISPATCH_INLINE DISPATCH_ALWAYS_INLINE DISPATCH_CONST DISPATCH_NOTHROW
 dispatch_queue_main_t
 dispatch_get_main_queue(void)
@@ -342,7 +342,7 @@ The body is a little more complex: it uses `DISPATCH_GLOBAL_OBJECT`,
 which is actually a C macro. Its definition can be found in
 `<dispatch/object.h>`:
 
-``` objc
+```objc
 #define DISPATCH_GLOBAL_OBJECT(type, object) ((OS_OBJECT_BRIDGE type)&(object))
 ```
 
@@ -352,7 +352,7 @@ real values in our case (`dispatch_queue_main_t` and
 `((OS_OBJECT_BRIDGE dispatch_queue_main_t)&(_dispatch_main_q))`.
 `OS_OBJECT_BRIDGE` is also a macro, this time from `<os/object.h>`:
 
-``` objc
+```objc
 #define OS_OBJECT_BRIDGE __bridge
 ```
 
@@ -363,7 +363,7 @@ Objective-C objects), so we can ignore this attribute. This leaves us
 with the expression `((dispatch_queue_main_t)&(_dispatch_main_q))`,
 which we can substitute for the macro call in our original function:
 
-``` objc
+```objc
 dispatch_queue_main_t
 dispatch_get_main_queue(void)
 {
@@ -378,7 +378,7 @@ to the type `dispatch_queue_main_t`.
 First, let's look at the definition of the `_dispatch_main_q` variable,
 from `<dispatch/queue.h>`:
 
-``` objc
+```objc
 DISPATCH_EXPORT
 struct dispatch_queue_s _dispatch_main_q;
 ```
@@ -393,7 +393,7 @@ can work with *pointers* to the structure - which is exactly what
 Even though `struct dispatch_queue_s` is opaque, we still need to define
 it in Python so that we can look up the `_dispatch_main_q` variable:
 
-``` python
+```python
 from ctypes import Structure
 from rubicon.objc.runtime import load_library
 
@@ -411,35 +411,35 @@ Now we need to look at the definition of the `dispatch_queue_main_t`
 type. This definition is not very obvious to find - it's actually this
 line in `<dispatch/queue.h>`:
 
-``` objc
+```objc
 DISPATCH_DECL_SUBCLASS(dispatch_queue_main, dispatch_queue_serial);
 ```
 
 `DISPATCH_DECL_SUBCLASS` is a macro from `<dispatch/object.h>`, defined
 like this:
 
-``` objc
+```objc
 #define DISPATCH_DECL_SUBCLASS(name, base) OS_OBJECT_DECL_SUBCLASS(name, base)
 ```
 
 It directly calls another macro, `OS_OBJECT_DECL_SUBCLASS`, defined in
 `<os/object.h>`:
 
-``` objc
+```objc
 #define OS_OBJECT_DECL_SUBCLASS(name, super) \
         OS_OBJECT_DECL_IMPL(name, <OS_OBJECT_CLASS(super)>)
 ```
 
 Let's substitute this macro into our original code:
 
-``` objc
+```objc
 OS_OBJECT_DECL_IMPL(dispatch_queue_main, <OS_OBJECT_CLASS(dispatch_queue_serial)>);
 ```
 
 Next is the `OS_OBJECT_DECL_IMPL` macro, also defined in
 `<os/object.h>`:
 
-``` objc
+```objc
 #define OS_OBJECT_DECL_IMPL(name, ...) \
         OS_OBJECT_DECL_PROTOCOL(name, __VA_ARGS__) \
         typedef NSObject<OS_OBJECT_CLASS(name)> \
@@ -448,7 +448,7 @@ Next is the `OS_OBJECT_DECL_IMPL` macro, also defined in
 
 After we substitute this macro into our code, it looks like this:
 
-``` objc
+```objc
 OS_OBJECT_DECL_PROTOCOL(dispatch_queue_main, <OS_OBJECT_CLASS(dispatch_queue_serial)>) \
 typedef NSObject<OS_OBJECT_CLASS(dispatch_queue_main)> \
     * OS_OBJC_INDEPENDENT_CLASS dispatch_queue_main_t;
@@ -456,7 +456,7 @@ typedef NSObject<OS_OBJECT_CLASS(dispatch_queue_main)> \
 
 And another macro, `OS_OBJECT_DECL_PROTOCOL`, also from `<os/object.h>`:
 
-``` objc
+```objc
 #define OS_OBJECT_DECL_PROTOCOL(name, ...) \
         @protocol OS_OBJECT_CLASS(name) __VA_ARGS__ \
         @end
@@ -464,7 +464,7 @@ And another macro, `OS_OBJECT_DECL_PROTOCOL`, also from `<os/object.h>`:
 
 Which we can substitute into our code:
 
-``` objc
+```objc
 @protocol OS_OBJECT_CLASS(dispatch_queue_main) <OS_OBJECT_CLASS(dispatch_queue_serial)> \
 @end \
 typedef NSObject<OS_OBJECT_CLASS(dispatch_queue_main)> \
@@ -474,13 +474,13 @@ typedef NSObject<OS_OBJECT_CLASS(dispatch_queue_main)> \
 Now let's take care of the `OS_OBJECT_CLASS` macro, defined like this in
 `<os/object.h>`:
 
-``` objc
+```objc
 #define OS_OBJECT_CLASS(name) OS_##name
 ```
 
 And substituted into our code:
 
-``` objc
+```objc
 @protocol OS_dispatch_queue_main <OS_dispatch_queue_serial> \
 @end \
 typedef NSObject<OS_dispatch_queue_main> \
@@ -490,7 +490,7 @@ typedef NSObject<OS_dispatch_queue_main> \
 Finally we're left with the `OS_OBJECT_INDEPENDENT_CLASS` macro, which
 is a compiler attribute that we can ignore.
 
-``` objc
+```objc
 @protocol OS_dispatch_queue_main <OS_dispatch_queue_serial>
 @end
 typedef NSObject<OS_dispatch_queue_main> * dispatch_queue_main_t;
@@ -506,7 +506,7 @@ differentiate between object pointer types, we can replace
 `dispatch_queue_main_t` in our original function with the generic `id`
 type:
 
-``` objc
+```objc
 id
 dispatch_get_main_queue(void)
 {
@@ -516,7 +516,7 @@ dispatch_get_main_queue(void)
 
 This code can finally be translated to Python:
 
-``` python
+```python
 from ctypes import byref, cast
 from rubicon.objc import ObjCInstance
 from rubicon.objc.runtime import objc_id

@@ -49,7 +49,7 @@ commonly the case for delegates. For example, in the code below, the
 `NSOutlineView` only stores a weak reference to the object which is
 assigned to its delegate property:
 
-``` python
+```python
 from rubicon.objc import NSObject, ObjCClass
 from rubicon.objc.runtime import load_library
 
@@ -73,7 +73,7 @@ references can be useful in a number of cases, for instance to refer to
 a "parent" of an instance, and Python makes life easier by properly
 freeing such references. For example:
 
-``` python
+```python
 class TreeNode:
     def __init__(self, val):
         self.val = val
@@ -101,7 +101,7 @@ Objective-C side. If you are writing code which would lead to reference
 cycles, consider storing objects as weak references instead. The above
 code would be written as follows when using Objective-C classes:
 
-``` python
+```python
 from rubicon.objc import NSObject, NSMutableArray
 from rubicon.objc.api import objc_property, objc_method
 

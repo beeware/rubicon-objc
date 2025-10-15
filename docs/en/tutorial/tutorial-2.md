@@ -55,7 +55,7 @@ This code has several interesting implementation details:
 
 Having declared the class, you can then instantiate and use it:
 
-``` pycon
+```pycon
 >>> my_handler = Handler.alloc().initWithValue(42)
 >>> print(my_handler.value)
 42
@@ -98,7 +98,7 @@ class of any given name in a process - so, you won't be able to define a
 second `Handler` class in the same Python shell. If you try, you'll get
 an error:
 
-``` pycon
+```pycon
 >>> class Handler(NSObject):
 ...     pass
 Traceback (most recent call last)
@@ -114,14 +114,14 @@ To allow a class name to be reused, you can set the class variable
 to `True`. This option enables automatic renaming of the Objective C
 class if a naming collision is detected:
 
-``` pycon
+```pycon
 >>> ObjCClass.auto_rename = True
 ```
 
 This option can also be enabled on a per-class basis by using the
 `auto_rename` argument in the class declaration:
 
-``` pycon
+```pycon
 >>> class Handler(NSObject, auto_rename=True):
 ...     pass
 ```

@@ -399,7 +399,7 @@ Custom Objective-C classes are defined using Python `class` syntax, by
 subclassing an existing `ObjCClass`{.interpreted-text role="class"}
 object:
 
-``` python
+```python
 class MySubclass(NSObject):
     # method, property, etc. definitions go here
 ```
@@ -409,7 +409,7 @@ Objective-C does not support multiple inheritance. However, the class
 can conform to any number of protocols, which are specified by adding
 the `protocols` keyword argument to the base class list:
 
-``` python
+```python
 class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
     # method, property, etc. definitions go here
 ```
@@ -434,7 +434,7 @@ classes.
 Similar syntax is used to define custom Objective-C protocols. Unlike
 classes, protocols can extend multiple other protocols:
 
-``` python
+```python
 class MyProtocol(NSCopying, NSMutableCopying):
     # method, property, etc. definitions go here
 ```
@@ -445,7 +445,7 @@ this case, we need to explicitly tell Python to define an
 the metaclass automatically by examining the base classes, but in this
 case there are none, so we need to specify the metaclass manually.
 
-``` python
+```python
 class MyProtocol(metaclass=ObjCProtocol):
     # method, property, etc. definitions go here
 ```
@@ -540,7 +540,7 @@ encoding), Rubicon will convert the return value to a special
 `ObjCInstance`{.interpreted-text role="class"} that can be called in
 Python:
 
-``` python
+```python
 block = an_objc_instance.methodReturningABlock()
 res = block(arg, ...)
 ```
@@ -551,7 +551,7 @@ converted to an Objective-C block. In this case, the callable object
 needs to have parameter and return type annotations, so that Rubicon can
 expose this type information to the Objective-C runtime:
 
-``` python
+```python
 def result_handler(res: objc_id) -> None:
     print(ObjCInstance(res))
 
@@ -564,7 +564,7 @@ annotate parameter or return types using
 `~rubicon.objc.runtime.objc_block`{.interpreted-text role="class"} so
 that Rubicon converts them appropriately:
 
-``` python
+```python
 class AnObjCClass(NSObject):
     @objc_method
     def methodReturningABlock() -> objc_block:

@@ -9,7 +9,7 @@ properties for a class to implement. They have a similar purpose to ABCs
 Protocol objects can be looked up using the `ObjCProtocol` constructor,
 similar to how classes can be looked up using `ObjCClass`:
 
-``` pycon
+```pycon
 >>> NSCopying = ObjCProtocol('NSCopying')
 >>> NSCopying
 <ObjCProtocol: NSCopying>
@@ -18,7 +18,7 @@ similar to how classes can be looked up using `ObjCClass`:
 The `isinstance` function can be used to check whether an object
 conforms to a protocol:
 
-``` pycon
+```pycon
 >>> isinstance(NSObject.new(), NSCopying)
 False
 >>> isinstance(NSArray.array(), NSCopying)
@@ -33,7 +33,7 @@ the `protocols` keyword argument in the base class list. For example, if
 you have a class `UserAccount` and want it to conform to `NSCopyable`,
 you would write it like this:
 
-``` python
+```python
 class UserAccount(NSObject, protocols=[NSCopying]):
     username = objc_property()
     emailAddress = objc_property()
@@ -59,7 +59,7 @@ class UserAccount(NSObject, protocols=[NSCopying]):
 We can now use our class. The `copy` method (which uses our implemented
 `copyWithZone:` method) can also be used:
 
-``` pycon
+```pycon
 >>> ua = UserAccount.alloc().initWithUsername_emailAddress_(at('person'), at('person@example.com'))
 >>> ua
 <ObjCInstance: UserAccount at 0x106543210: <UserAccount: 0x106543220>>
@@ -69,7 +69,7 @@ We can now use our class. The `copy` method (which uses our implemented
 
 And we can check that the class conforms to the protocol:
 
-``` pycon
+```pycon
 >>> isinstance(ua, NSCopying)
 True
 ```
@@ -79,7 +79,7 @@ True
 You can also create custom protocols. This works similarly to creating
 custom Objective-C classes:
 
-``` python
+```python
 class Named(metaclass=ObjCProtocol):
     name = objc_property()
 

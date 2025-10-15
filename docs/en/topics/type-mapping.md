@@ -41,7 +41,7 @@ For example, a method that takes a C `double` and returns a
 `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"} would be
 defined and annotated like this:
 
-``` python
+```python
 @objc_method
 def roundToZero_(self, value: c_double) -> NSInteger:
     return int(value)
@@ -134,7 +134,7 @@ in the selector. Selectors without arguments (such as `+alloc` or
 `-init`) are defined as methods with no arguments, and no underscores in
 the name:
 
-``` python
+```python
 # Wrap the NSURL class
 NSURL = ObjCClass("NSURL")
 # Invoke the +alloc selector
@@ -150,7 +150,7 @@ all subsequent arguments are handled as keyword arguments, with the
 underscore suffixes being omitted. The last method in the previous
 example could also be invoked as:
 
-``` python
+```python
 # Invoke -initWithString:relativeToURL:
 my_url.initWithString("something/", relativeToURL="https://example.com/")
 ```
@@ -160,7 +160,7 @@ selector. For example, if you were invoking
 `-initFileURLWithPath:isDirectory:relativeToURL`, it *must* be invoked
 as:
 
-``` python
+```python
 # Invoke -initFileURLWithPath:isDirectory:relativeToURL
 my_url.initFileURLWithPath(
     "something/",
@@ -182,7 +182,7 @@ keyword argument to be duplicated, so to reach selectors of this type,
 Rubicon allows any keyword argument to be appended with a `__` suffix to
 generate a name that is unique in the Python code:
 
-``` python
+```python
 # Invoke +constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:
 NSLayoutConstraint.constraintWithItem(
     first_item,
@@ -218,7 +218,7 @@ behave almost exactly like Python `str`{.interpreted-text role="class"}
 objects - they can be sliced, concatenated, compared, etc. with other
 Objective-C and Python strings.
 
-``` pycon
+```pycon
 # Call an Objective-C method that returns a string.
 # We're using NSBundle to give us a string version of a path
 >>> NSBundle.mainBundle.bundlePath
@@ -248,7 +248,7 @@ type check for `str`{.interpreted-text role="class"}, you can use
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} to
 `str`{.interpreted-text role="class"}:
 
-``` pycon
+```pycon
 # Convert the Objective-C string to a Python string.
 >>> str(NSBundle.mainBundle.bundlePath)
 '/Users/rkm/projects/beeware/venv3.6/bin'
@@ -260,7 +260,7 @@ role="class"}, you can use the `~rubicon.objc.api.at`{.interpreted-text
 role="func"} function to convert the Python instance to an
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"}.
 
-``` pycon
+```pycon
 >>> from rubicon.objc import at
 # Create a Python string
 >>> py_str = 'hello world'
@@ -280,7 +280,7 @@ always use `str`{.interpreted-text role="class"} or
 `~rubicon.objc.api.at`{.interpreted-text role="func"} to ensure that you
 have the right kind of string for your needs.
 
-``` pycon
+```pycon
 # Is the path comprised of all lowercase letters? (Hint: it isn't)
 >>> NSBundle.mainBundle.bundlePath.islower()
 False
@@ -313,7 +313,7 @@ behave like any other Python sequence - they can be indexed, sliced,
 etc. and standard operations like `len`{.interpreted-text role="func"}
 and `in` are supported:
 
-``` pycon
+```pycon
 >>> from rubicon.objc import NSArray
 >>> array = NSArray.arrayWithArray(list(range(4)))
 >>> array[0]
@@ -350,7 +350,7 @@ your code.
 objects additionally support mutating operations, like item and slice
 assignment:
 
-``` pycon
+```pycon
 >>> from rubicon.objc import NSMutableArray
 >>> mutarray = NSMutableArray.arrayWithArray(list(range(4)))
 >>> mutarray[0] = 42
@@ -376,7 +376,7 @@ assignment:
 
 Sequence methods like `index` and `pop` are also supported:
 
-``` pycon
+```pycon
 >>> mutarray.index(7)
 3
 >>> mutarray.pop(3)
@@ -399,7 +399,7 @@ behave like any other Python mapping - their items can be accessed and
 standard operations like `len`{.interpreted-text role="func"} and `in`
 are supported:
 
-``` pycon
+```pycon
 >>> from rubicon.objc import NSDictionary
 >>> d = objc.NSDictionary.dictionaryWithDictionary({"one": 1, "two": 2})
 >>> d["one"]
@@ -429,7 +429,7 @@ your code.
 `~rubicon.objc.api.NSMutableDictionary`{.interpreted-text role="class"}
 objects additionally support mutating operations, like item assignment:
 
-``` pycon
+```pycon
 >>> md = objc.NSMutableDictionary.dictionaryWithDictionary({"one": 1, "two": 2})
 >>> md["three"] = 3
 >>> md
@@ -442,7 +442,7 @@ objects additionally support mutating operations, like item assignment:
 
 Mapping methods like `keys` and `values` are also supported:
 
-``` pycon
+```pycon
 >>> d.keys()
 <ObjCListInstance: __NSArrayI at 0x10b898a90: <__NSArrayI 0x7f86f8db6b70>(
 one,

@@ -24,20 +24,20 @@ path (i.e., `python3.12` must start a Python 3.12 interpreter).
 You'll also need to install the Enchant spell checking library. Enchant
 can be installed using [Homebrew](https://brew.sh):
 
-``` console
+```console
 (venv) $ brew install enchant
 ```
 
 If you're on an M1 machine, you'll also need to manually set the
 location of the Enchant library:
 
-``` console
+```console
 (venv) $ export PYENCHANT_LIBRARY_PATH=/opt/homebrew/lib/libenchant-2.2.dylib
 ```
 
 Once your development environment is set up, run:
 
-``` console
+```console
 (venv) $ tox -e docs
 ```
 
@@ -51,7 +51,7 @@ documentation:
 
 /// tab | macOS
 
-``` console
+```console
 (venv) $ tox -e docs-lint
 ```
 
@@ -59,7 +59,7 @@ documentation:
 
 /// tab | Linux
 
-``` console
+```console
 (venv) $ tox -e docs-lint
 ```
 
@@ -67,7 +67,7 @@ documentation:
 
 /// tab | Windows
 
-``` doscon
+```doscon
 C:\...>tox -e docs-lint
 ```
 
@@ -89,7 +89,7 @@ To force a rebuild for all of the documentation:
 
 /// tab | macOS
 
-``` console
+```console
 (venv) $ tox -e docs-all
 ```
 
@@ -97,7 +97,7 @@ To force a rebuild for all of the documentation:
 
 /// tab | Linux
 
-``` console
+```console
 (venv) $ tox -e docs-all
 ```
 
@@ -105,7 +105,7 @@ To force a rebuild for all of the documentation:
 
 /// tab | Windows
 
-``` doscon
+```doscon
 C:\...>tox -e docs-all
 ```
 
@@ -121,7 +121,7 @@ preview" mode:
 
 /// tab | macOS
 
-``` console
+```console
 (venv) $ tox -e docs-live
 ```
 
@@ -129,7 +129,7 @@ preview" mode:
 
 /// tab | Linux
 
-``` console
+```console
 (venv) $ tox -e docs-live
 ```
 
@@ -137,7 +137,7 @@ preview" mode:
 
 /// tab | Windows
 
-``` doscon
+```doscon
 (venv) C:\...>tox -e docs-live
 ```
 
@@ -155,7 +155,7 @@ code, you'll need to use the `docs-live-src` target to build docs:
 
 /// tab | macOS
 
-``` console
+```console
 (venv) $ tox -e docs-live-src
 ```
 
@@ -163,7 +163,7 @@ code, you'll need to use the `docs-live-src` target to build docs:
 
 /// tab | Linux
 
-``` console
+```console
 (venv) $ tox -e docs-live-src
 ```
 
@@ -171,7 +171,7 @@ code, you'll need to use the `docs-live-src` target to build docs:
 
 /// tab | Windows
 
-``` doscon
+```doscon
 (venv) C:\...>tox -e docs-live-src
 ```
 

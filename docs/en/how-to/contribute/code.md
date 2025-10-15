@@ -12,7 +12,7 @@ The recommended way of setting up your development environment for
 Rubicon is to clone the repository, create a virtual environment, and
 install the required dependencies:
 
-``` console
+```console
 $ git clone https://github.com/beeware/rubicon-objc.git
 $ cd rubicon-objc
 $ python3 -m venv venv
@@ -25,7 +25,7 @@ identify simple issues and standardize code formatting. It does this by
 installing a git hook that automatically runs a series of code linters
 prior to finalizing any git commit. To enable pre-commit, run:
 
-``` console
+```console
 (venv) $ pre-commit install
 pre-commit installed at .git/hooks/pre-commit
 ```
@@ -35,7 +35,7 @@ are any issues found with the commit, this will cause your commit to
 fail. Where possible, pre-commit will make the changes needed to correct
 the problems it has found:
 
-``` console
+```console
 (venv) $ git add some/interesting_file.py
 (venv) $ git commit -m "Minor change"
 black....................................................................Failed
@@ -62,7 +62,7 @@ docformatter.............................................................Passed
 You can then re-add any files that were modified as a result of the
 pre-commit checks, and re-commit the change.
 
-``` console
+```console
 (venv) $ git add some/interesting_file.py
 (venv) $ git commit -m "Minor change"
 black....................................................................Passed
@@ -84,7 +84,7 @@ Rubicon uses [tox](https://tox.wiki/en/latest/) to manage the testing
 process. To set up a testing environment and run the full test suite,
 run:
 
-``` console
+```console
 (venv) $ tox
 ```
 
@@ -94,13 +94,13 @@ checks of code style and validity. This can take a while, so if you want
 to speed up the process while developing, you can run the tests on one
 Python version only:
 
-``` console
+```console
 (venv) $ tox -e py
 ```
 
 Or, to run using a specific version of Python:
 
-``` console
+```console
 (venv) $ tox -e py310
 ```
 

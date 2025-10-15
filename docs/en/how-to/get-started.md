@@ -2,7 +2,7 @@
 
 To use Rubicon, create a new virtual environment, and install it:
 
-``` console
+```console
 $ python3 -m venv venv
 $ source venv/bin/activate
 (venv) $ pip install rubicon-objc
