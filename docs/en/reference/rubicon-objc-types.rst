@@ -55,7 +55,7 @@ These are commonly used C types from various frameworks.
         x
         y
 
-        The X and Y coordinates as :class:`CGFloat`\s.
+        The X and Y coordinates as :class:`CGFloat`s.
 
 .. class:: CGPoint([x, y])
 
@@ -67,7 +67,7 @@ These are commonly used C types from various frameworks.
         x
         y
 
-        The X and Y coordinates as :class:`CGFloat`\s.
+        The X and Y coordinates as :class:`CGFloat`s.
 
 .. class:: NSSize([width, height])
 
@@ -83,7 +83,7 @@ These are commonly used C types from various frameworks.
         width
         height
 
-        The width and height as :class:`CGFloat`\s.
+        The width and height as :class:`CGFloat`s.
 
 .. class:: CGSize([width, height])
 
@@ -95,7 +95,7 @@ These are commonly used C types from various frameworks.
         width
         height
 
-        The width and height as :class:`CGFloat`\s.
+        The width and height as :class:`CGFloat`s.
 
 .. class:: NSRect([origin, size])
 
@@ -141,7 +141,7 @@ These are commonly used C types from various frameworks.
         bottom
         right
 
-        The insets as :class:`CGFloat`\s.
+        The insets as :class:`CGFloat`s.
 
 .. class:: NSEdgeInsets([top, left, bottom, right])
 
@@ -155,7 +155,7 @@ These are commonly used C types from various frameworks.
         bottom
         right
 
-        The insets as :class:`CGFloat`\s.
+        The insets as :class:`CGFloat`s.
 
 .. class:: NSTimeInterval([value])
 
@@ -200,7 +200,7 @@ These are commonly used C types from various frameworks.
         location
         length
 
-        The location and length as :class:`CFIndex`\es.
+        The location and length as :class:`CFIndex`es.
 
 .. class:: NSRange([location, length])
 
@@ -212,7 +212,7 @@ These are commonly used C types from various frameworks.
         location
         length
 
-        The location and length as :class:`NSUInteger`\s.
+        The location and length as :class:`NSUInteger`s.
 
 Common C constants
 ------------------
@@ -255,7 +255,7 @@ same names.
 
 .. data:: __LP64__
 
-    Indicates whether the current environment is 64-bit. If true, C ``long``\s
+    Indicates whether the current environment is 64-bit. If true, C ``long``s
     and pointers are 64 bits in size, otherwise 32 bits.
 
 .. data::

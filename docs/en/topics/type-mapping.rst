@@ -276,7 +276,7 @@ for your needs.
 
     :class:`~rubicon.objc.api.NSString` objects behave slightly differently
     than Python :class:`str` objects in some cases. For technical reasons,
-    :class:`~rubicon.objc.api.NSString`\s are not hashable in Python, which
+    :class:`~rubicon.objc.api.NSString`s are not hashable in Python, which
     means they cannot be used as :class:`dict` keys (but they *can* be used as
     :class:`~rubicon.objc.api.NSDictionary` keys).
     :class:`~rubicon.objc.api.NSString` also handles Unicode code points above
@@ -468,8 +468,8 @@ real Python :class:`str`.
 When converting collections, such as ``NSArray`` or ``NSDictionary``,
 :func:`~rubicon.objc.api.py_from_ns` will convert them recursively to a pure
 Python object. For example, if ``nsarray`` is an ``NSArray`` containing
-``NSString``\s, ``py_from_ns(nsarray)`` will return a :class:`list` of
-:class:`str`\s. In most cases, that is the desired behavior, but you can also
+``NSString``s, ``py_from_ns(nsarray)`` will return a :class:`list` of
+:class:`str`s. In most cases, that is the desired behavior, but you can also
 avoid this recursive conversion by passing the Foundation collection into a
 Python collection constructor: for example ``list(nsarray)`` will return a
-:class:`list` of ``NSString``\s.
+:class:`list` of ``NSString``s.

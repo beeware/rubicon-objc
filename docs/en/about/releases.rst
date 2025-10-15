@@ -388,7 +388,7 @@ Features
   more safely. (`#174 <https://github.com/beeware/rubicon-objc/pull/174>`__)
 * Changed ``ObjCMethod`` to call methods using
   :func:`~rubicon.objc.runtime.send_message` instead of calling
-  :class:`~rubicon.objc.runtime.IMP`\s directly. This is mainly an internal
+  :class:`~rubicon.objc.runtime.IMP`s directly. This is mainly an internal
   change and should not affect most existing code, although it may improve
   compatibility with Objective-C code that makes heavy use of runtime
   reflection and method manipulation (such as swizzling).
@@ -530,12 +530,12 @@ Misc
   ``NSString`` objects now support operations similar to ``str``. If an actual
   ``str`` object is required, the ``NSString`` object can be wrapped in a
   ``str`` call to convert it.
-* Added support for ``objc_property``\s with non-object types.
+* Added support for ``objc_property``s with non-object types.
 * Added public ``get_ivar`` and ``set_ivar`` functions for manipulating ``ivars``.
 * Changed the implementation of ``objc_property`` to use ``ivars`` instead of
   Python attributes for storage. This fixes name conflicts in some situations.
 * Added the :func:`~rubicon.objc.runtime.load_library` function for loading
-  :class:`~ctypes.CDLL`\s by their name instead of their full path.
+  :class:`~ctypes.CDLL`s by their name instead of their full path.
 * Split the high-level Rubicon API (:class:`~rubicon.objc.api.ObjCInstance`,
   :class:`~rubicon.objc.api.ObjCClass`, etc.) out of :mod:`rubicon.objc.runtime`
   into a separate :mod:`rubicon.objc.api` module. The
@@ -675,7 +675,7 @@ Misc
   when calling an Objective-C method.
 * Added support for (``NS``/``UI``) ``EdgeInsets`` structs. (Longhanks)
 * Improved ``str`` of Objective-C classes and objects to return the
-  ``debugDescription``, or for ``NSString``\s, the string value.
+  ``debugDescription``, or for ``NSString``s, the string value.
 * Changed ``ObjCClass`` to extend ``ObjCInstance`` (in addition to ``type``),
   and added an ``ObjCMetaClass`` class to represent metaclasses.
 * Fixed some issues on non-x86_64 architectures (i386, ARM32, ARM64).

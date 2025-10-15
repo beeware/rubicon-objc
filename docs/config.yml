@@ -3,7 +3,6 @@ copyright: © Russell Keith-Magee
 
 not_in_nav: |
   /index.md
-  /reference/platforms/linux/docker_build_options.md
 
 validation:
   omitted_files: warn
@@ -85,9 +84,15 @@ plugins:
     resolve_closest: true
   literate-nav:
     nav_file: SUMMARY.md
-  macros: {}
-  mkdocstrings:
-    handlers:
-      python:
-        inventories:
-          - https://docs.python.org/3/objects.inv
+  macros:
+    j2_block_start_string: '[[%'
+    j2_block_end_string: '%]]'
+    j2_variable_start_string: '[['
+    j2_variable_end_string: ']]'
+    j2_comment_start_string: '[#'
+    j2_comment_end_string: '#]'
+#  mkdocstrings:
+#    handlers:
+#      python:
+#        inventories:
+#          - https://docs.python.org/3/objects.inv

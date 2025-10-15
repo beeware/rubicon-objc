@@ -16,7 +16,7 @@ high-level interface.
 C libraries
 -----------
 
-Some commonly used C libraries are provided as :class:`~ctypes.CDLL`\s. Other
+Some commonly used C libraries are provided as :class:`~ctypes.CDLL`s. Other
 libraries can be loaded using the :func:`load_library` function.
 
 .. data:: libc

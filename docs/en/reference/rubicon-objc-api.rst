@@ -22,7 +22,7 @@ Objective-C objects
 
         The wrapped object pointer as an :class:`~rubicon.objc.runtime.objc_id`.
         This attribute is also available as ``_as_parameter_`` to allow
-        :class:`ObjCInstance`\s to be passed into :mod:`ctypes` functions.
+        :class:`ObjCInstance`s to be passed into :mod:`ctypes` functions.
 
     .. autoattribute:: objc_class
     .. automethod:: __str__
@@ -57,7 +57,7 @@ Standard Objective-C and Foundation classes
 The following classes from the `Objective-C runtime
 <https://developer.apple.com/documentation/objectivec?language=objc>`__ and the
 `Foundation <https://developer.apple.com/documentation/foundation?language=objc>`__
-framework are provided as :class:`ObjCClass`\es for convenience. (Other classes
+framework are provided as :class:`ObjCClass`es for convenience. (Other classes
 not listed here can be looked up by passing a class name to the
 :class:`ObjCClass` constructor.)
 
@@ -335,7 +335,7 @@ Standard Objective-C and Foundation protocols
 The following protocols from the `Objective-C runtime
 <https://developer.apple.com/documentation/objectivec?language=objc>`__ and the
 `Foundation <https://developer.apple.com/documentation/foundation?language=objc>`__
-framework are provided as :class:`ObjCProtocol`\s for convenience. (Other
+framework are provided as :class:`ObjCProtocol`s for convenience. (Other
 protocols not listed here can be looked up by passing a protocol name to the
 :class:`ObjCProtocol` constructor.)
 
