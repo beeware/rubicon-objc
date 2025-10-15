@@ -75,52 +75,32 @@ The [Foundation](https://developer.apple.com/documentation/foundation)
 framework.
 :::
 
-::: {.autofunction}
-load_library
-:::
+::: load_library <!-- TODO: function -->
 
 ## Objective-C runtime types
 
 These are various types used by the Objective-C runtime functions.
 
-::: {.autoclass}
-objc_id([value])
-:::
+::: objc_id([value]) <!-- TODO: class -->
 
-::: {.autoclass}
-objc_block([value])
-:::
+::: objc_block([value]) <!-- TODO: class -->
 
-:::: {.autoclass}
-SEL([value])
+::: SEL([value]) <!-- TODO: class -->
 
-::: {.autoattribute}
-name
-:::
+::: name <!-- TODO: attribute -->
 ::::
 
-::: {.autoclass}
-Class([value])
-:::
+::: Class([value]) <!-- TODO: class -->
 
-::: {.autoclass}
-IMP([value])
-:::
+::: IMP([value]) <!-- TODO: class -->
 
-::: {.autoclass}
-Method([value])
-:::
+::: Method([value]) <!-- TODO: class -->
 
-::: {.autoclass}
-Ivar([value])
-:::
+::: Ivar([value]) <!-- TODO: class -->
 
-::: {.autoclass}
-objc_property_t([value])
-:::
+::: objc_property_t([value]) <!-- TODO: class -->
 
-:::: {.autoclass}
-objc_property_attribute_t([name, value])
+::: objc_property_attribute_t([name, value]) <!-- TODO: class -->
 
 ::: {.attribute}
 name value
@@ -130,8 +110,7 @@ role="class"}).
 :::
 ::::
 
-::::: {.autoclass}
-objc_method_description([name, value])
+::: objc_method_description([name, value]) <!-- TODO: class -->
 
 ::: {.attribute}
 name
@@ -147,8 +126,7 @@ role="class"}).
 :::
 :::::
 
-::::: {.autoclass}
-objc_super([receiver, super_class])
+::: objc_super([receiver, super_class]) <!-- TODO: class -->
 
 ::: {.attribute}
 receiver
@@ -184,38 +162,20 @@ iOS 8. This module-level function is provided to support older systems
 available, and otherwise emulates it.
 :::
 
-::: {.autofunction}
-get_class
-:::
+::: get_class <!-- TODO: function -->
 
-::: {.autofunction}
-should_use_stret
-:::
+::: should_use_stret <!-- TODO: function -->
 
-::: {.autofunction}
-should_use_fpret
-:::
+::: should_use_fpret <!-- TODO: function -->
 
-::: {.autofunction}
-send_message
-:::
+::: send_message <!-- TODO: function -->
 
-::: {.autofunction}
-send_super
-:::
+::: send_super <!-- TODO: function -->
 
-::: {.autofunction}
-add_method
-:::
+::: add_method <!-- TODO: function -->
 
-::: {.autofunction}
-add_ivar
-:::
+::: add_ivar <!-- TODO: function -->
 
-::: {.autofunction}
-get_ivar
-:::
+::: get_ivar <!-- TODO: function -->
 
-::: {.autofunction}
-set_ivar
-:::
+::: set_ivar <!-- TODO: function -->

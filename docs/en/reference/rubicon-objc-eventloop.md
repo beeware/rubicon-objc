@@ -12,46 +12,27 @@ role="doc"}.
 
 ///
 
-::::::: {.autoclass}
-EventLoopPolicy
+::: EventLoopPolicy <!-- TODO: class -->
 
-::: {.automethod}
-new_event_loop
-:::
+::: new_event_loop <!-- TODO: method -->
 
-::: {.automethod}
-get_default_loop
-:::
+::: get_default_loop <!-- TODO: method -->
 
-::: {.automethod}
-get_child_watcher
-:::
+::: get_child_watcher <!-- TODO: method -->
 
-::: {.automethod}
-set_child_watcher
-:::
+::: set_child_watcher <!-- TODO: method -->
 :::::::
 
-::::: {.autoclass}
-CocoaLifecycle
+::: CocoaLifecycle <!-- TODO: class -->
 
-::: {.automethod}
-start
-:::
+::: start <!-- TODO: method -->
 
-::: {.automethod}
-stop
-:::
+::: stop <!-- TODO: method -->
 :::::
 
-::::: {.autoclass}
-iOSLifecycle
+::: iOSLifecycle <!-- TODO: class -->
 
-::: {.automethod}
-start
-:::
+::: start <!-- TODO: method -->
 
-::: {.automethod}
-stop
-:::
+::: stop <!-- TODO: method -->
 :::::

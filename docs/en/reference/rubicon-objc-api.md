@@ -14,8 +14,7 @@ that module should be used instead of importing
 
 ## Objective-C objects
 
-::::::::: {.autoclass}
-ObjCInstance(ptr)
+::: ObjCInstance(ptr) <!-- TODO: class -->
 
 ::: {.attribute}
 ptr <span id="as_parameter">as_parameter</span>
@@ -27,36 +26,21 @@ attribute is also available as `_as_parameter_` to allow
 `ctypes`{.interpreted-text role="mod"} functions.
 :::
 
-::: {.autoattribute}
-objc_class
-:::
+::: objc_class <!-- TODO: attribute -->
 
-::: {.automethod}
- str
-:::
+:::  str <!-- TODO: method -->
 
-::: {.automethod}
- repr
-:::
+:::  repr <!-- TODO: method -->
 
-::: {.automethod}
- getattr
-:::
+:::  getattr <!-- TODO: method -->
 
-::: {.automethod}
- setattr
-:::
-:::::::::
+:::  setattr <!-- TODO: method -->
 
-::: {.autofunction}
-objc_const
-:::
+::: objc_const <!-- TODO: function -->
 
 ## Objective-C classes
 
-::::::::::: {.autoclass}
-ObjCClass(name_or_ptr, [bases, attrs, [protocols=(),
-auto_rename=None]])
+::: ObjCClass(name_or_ptr, [bases, attrs, [protocols=(),auto_rename=None]]) <!-- TODO: class -->
 
 ::: {.attribute}
 name
@@ -64,38 +48,21 @@ name
 The name of this class, as a `str`{.interpreted-text role="class"}.
 :::
 
-::: {.autoattribute}
-superclass
-:::
+::: superclass <!-- TODO: attribute -->
 
-::: {.autoattribute}
-protocols
-:::
+::: protocols <!-- TODO: attribute -->
 
-::: {.autoattribute}
-auto_rename
-:::
+::: auto_rename <!-- TODO: attribute -->
 
-::: {.automethod}
-declare_property
-:::
+::: declare_property <!-- TODO: method -->
 
-::: {.automethod}
-declare_class_property
-:::
+::: declare_class_property <!-- TODO: method -->
 
-::: {.automethod}
- instancecheck
-:::
+:::  instancecheck <!-- TODO: method -->
 
-::: {.automethod}
- subclasscheck
-:::
-:::::::::::
+:::  subclasscheck <!-- TODO: method -->
 
-::: {.autoclass}
-ObjCMetaClass(name_or_ptr)
-:::
+::: ObjCMetaClass(name_or_ptr) <!-- TODO: class -->
 
 ### Standard Objective-C and Foundation classes
 
@@ -322,8 +289,8 @@ error is raised.
 
 ///
 
-::::: {.method}
- getitem (key)  len ()  iter ()  contains (key)
+<!-- TODO: methods -->
+getitem (key)  len ()  iter ()  contains (key)
  eq (other)  ne (other) copy() get(key, [default=None])
 keys() items() values()
 
@@ -380,29 +347,17 @@ Python-style mutable mapping interface.
 
 ## Objective-C protocols
 
-:::::::: {.autoclass}
-ObjCProtocol(name_or_ptr, [bases, attrs, [auto_rename=None]])
+::: ObjCProtocol(name_or_ptr, [bases, attrs, [auto_rename=None]]) <!-- TODO: class -->
 
-::: {.autoattribute}
-name
-:::
+::: name <!-- TODO: attribute -->
 
-::: {.autoattribute}
-protocols
-:::
+::: protocols <!-- TODO: attribute -->
 
-::: {.autoattribute}
-auto_rename
-:::
+::: auto_rename <!-- TODO: attribute -->
 
-::: {.automethod}
- instancecheck
-:::
+:::  instancecheck <!-- TODO: method -->
 
-::: {.automethod}
- subclasscheck
-:::
-::::::::
+:::  subclasscheck <!-- TODO: method -->
 
 ### Standard Objective-C and Foundation protocols
 
@@ -428,13 +383,9 @@ role="class"} class.
 
 ## Converting objects between Objective-C and Python
 
-::: {.autofunction}
-py_from_ns(nsobj)
-:::
+::: py_from_ns(nsobj) <!-- TODO: function -->
 
-::: {.autofunction}
-ns_from_py
-:::
+::: ns_from_py <!-- TODO: function -->
 
 ::: {.function}
 at(pyobj)
@@ -501,13 +452,9 @@ class MyProtocol(metaclass=ObjCProtocol):
 
 ### Defining methods
 
-::: {.autofunction}
-objc_method
-:::
+::: objc_method <!-- TODO: function -->
 
-::: {.autofunction}
-objc_classmethod
-:::
+::: objc_classmethod <!-- TODO: function -->
 
 #### Method naming
 
@@ -568,27 +515,17 @@ is normally redundant and not needed. If needed, the `_cmd` parameter
 can be accessed by using `objc_rawmethod`{.interpreted-text role="func"}
 instead of `objc_method`{.interpreted-text role="func"}.
 
-::: {.autofunction}
-objc_rawmethod
-:::
+::: objc_rawmethod <!-- TODO: function -->
 
 ### Defining properties and `ivars`
 
-::: {.autofunction}
-objc_property
-:::
+::: objc_property <!-- TODO: function -->
 
-::: {.autofunction}
-objc_ivar
-:::
+::: objc_ivar <!-- TODO: function -->
 
-::: {.autofunction}
-get_ivar
-:::
+::: get_ivar <!-- TODO: function -->
 
-::: {.autofunction}
-set_ivar
-:::
+::: set_ivar <!-- TODO: function -->
 
 ## Objective-C blocks { #objc_blocks }
 
@@ -663,17 +600,12 @@ and vice versa. You may need to use them to perform these conversions
 outside of Objective-C method calls, or if you need more control over
 the block's type signature.
 
-:::: {.autoclass}
-ObjCBlock(pointer, [return_type, *arg_types])
+::: ObjCBlock(pointer, [return_type, *arg_types]) <!-- TODO: class -->
 
-::: {.automethod}
- call
-:::
+:::  call <!-- TODO: method -->
 ::::
 
-::: {.autoclass}
-Block(func, [restype, *argtypes])
-:::
+::: Block(func, [restype, *argtypes]) <!-- TODO: class -->
 
 ## Defining custom subclasses of `ObjCInstance`{.interpreted-text role="class"}
 
@@ -684,22 +616,12 @@ used by Rubicon to provide Python-style operators and methods on
 standard Foundation classes, such as `NSString`{.interpreted-text
 role="class"} and `NSDictionary`{.interpreted-text role="class"}.
 
-::: {.autofunction}
-register_type_for_objcclass
-:::
+::: register_type_for_objcclass <!-- TODO: function -->
 
-::: {.autofunction}
-for_objcclass
-:::
+::: for_objcclass <!-- TODO: function -->
 
-::: {.autofunction}
-type_for_objcclass
-:::
+::: type_for_objcclass <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_type_for_objcclass
-:::
+::: unregister_type_for_objcclass <!-- TODO: function -->
 
-::: {.autofunction}
-get_type_for_objcclass_map
-:::
+::: get_type_for_objcclass_map <!-- TODO: function -->

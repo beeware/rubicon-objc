@@ -303,61 +303,33 @@ All Objective-C encoding strings are represented as
 `bytes`{.interpreted-text role="class"} rather than
 `str`{.interpreted-text role="class"}.
 
-::: {.autofunction}
-ctype_for_encoding
-:::
+::: ctype_for_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-encoding_for_ctype
-:::
+::: encoding_for_ctype <!-- TODO: function -->
 
-::: {.autofunction}
-register_preferred_encoding
-:::
+::: register_preferred_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-with_preferred_encoding
-:::
+::: with_preferred_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-register_encoding
-:::
+::: register_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-with_encoding
-:::
+::: with_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_encoding
-:::
+::: unregister_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_encoding_all
-:::
+::: unregister_encoding_all <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_ctype
-:::
+::: unregister_ctype <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_ctype_all
-:::
+::: unregister_ctype_all <!-- TODO: function -->
 
-::: {.autofunction}
-get_ctype_for_encoding_map
-:::
+::: get_ctype_for_encoding_map <!-- TODO: function -->
 
-::: {.autofunction}
-get_encoding_for_ctype_map
-:::
+::: get_encoding_for_ctype_map <!-- TODO: function -->
 
-::: {.autofunction}
-split_method_encoding
-:::
+::: split_method_encoding <!-- TODO: function -->
 
-::: {.autofunction}
-ctypes_for_method_encoding
-:::
+::: ctypes_for_method_encoding <!-- TODO: function -->
 
 ### Default registered type encodings
 
@@ -401,9 +373,7 @@ than typing encodings out by hand.
 | `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"} | `:` |  |
 | `~rubicon.objc.runtime.Class`{.interpreted-text role="class"} | `#` |  |
 
-::: {.autoclass}
-UnknownPointer
-:::
+::: UnknownPointer <!-- TODO: class -->
 
 In addition, the following types defined by Rubicon are registered, but
 their encodings may vary depending on the system and architecture:
@@ -438,9 +408,7 @@ mainly used internally by Rubicon, to allow passing Python sequences as
 method parameters where a C structure or array would normally be
 required. Most users will not need to use this function directly.
 
-::: {.autofunction}
-compound_value_for_sequence
-:::
+::: compound_value_for_sequence <!-- TODO: function -->
 
 ## Python to `ctypes`{.interpreted-text role="mod"} type mapping
 
@@ -453,21 +421,13 @@ role="class"} to be used instead of
 method type annotations. Most users will not need to use these functions
 directly.
 
-::: {.autofunction}
-ctype_for_type
-:::
+::: ctype_for_type <!-- TODO: function -->
 
-::: {.autofunction}
-register_ctype_for_type
-:::
+::: register_ctype_for_type <!-- TODO: function -->
 
-::: {.autofunction}
-unregister_ctype_for_type
-:::
+::: unregister_ctype_for_type <!-- TODO: function -->
 
-::: {.autofunction}
-get_ctype_for_type_map
-:::
+::: get_ctype_for_type_map <!-- TODO: function -->
 
 ### Default registered mappings
 
