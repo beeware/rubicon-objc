@@ -1,0 +1,7 @@
+INHERIT: config.yml
+site_name: Rubicon ObjC
+site_url: https://rubicon-objc.beeware.org/
+docs_dir: en
+
+theme:
+  language: en
