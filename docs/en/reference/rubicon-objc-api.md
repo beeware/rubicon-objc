@@ -91,7 +91,7 @@ value `hello`.
 
 ///
 
-::: NSObject
+NSObject
     options:
         find_stubs_package: true
 
