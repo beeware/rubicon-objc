@@ -52,7 +52,7 @@ Source = "https://github.com/beeware/rubicon-objc"
 dev = [
     "pre-commit == 4.3.0",
     "pytest == 8.4.2",
-    "setuptools_scm == 9.2.0",
+    "setuptools_scm == 9.2.1",
     "tox == 4.30.3",
 ]
 # Docs are always built on a specific Python version; see RTD and tox config files,
