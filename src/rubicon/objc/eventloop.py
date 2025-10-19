@@ -238,9 +238,15 @@ class CFTimerHandle(events.TimerHandle):
     def cancel(self):
         """Cancel the Timer handle."""
         super().cancel()
-        libcf.CFRunLoopRemoveTimer(
-            self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes
-        )
+        # There's a very small opportunity for a race condition during startup
+        # where the CFTimerHandle exists, but the _timer hasn't been assigned.
+        # This has been seen in CI, (as a failure in
+        # AsyncSubprocessTests::test_subprocess) but it's not easily
+        # reproducible
+        if timer := getattr(self, "_timer", None):
+            libcf.CFRunLoopRemoveTimer(
+                self._loop._cfrunloop, timer, kCFRunLoopCommonModes
+            )
         self._loop._timers.discard(self)
 
 
