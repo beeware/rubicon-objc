@@ -1,0 +1,1 @@
+A rare race condition that led to an exception when cancelling timers has been resolved.
