@@ -1,21 +1,19 @@
-# `rubicon.objc`{.interpreted-text role="mod"} --- The main Rubicon module { #rubicon.objc-----the-main-rubicon-module }
+# `rubicon.objc` - The main Rubicon module { #rubicon-objc-module }
 
-{.module}
-rubicon.objc
 
 This is the main namespace of Rubicon-ObjC. Rubicon is structured into
-multiple submodules of `rubicon.objc`{.interpreted-text role="mod"}, and
+multiple submodules of [`rubicon.objc`][rubicon-objc-module], and
 the most commonly used attributes from these submodules are exported via
-the `rubicon.objc`{.interpreted-text role="mod"} module. This means that
+the [`rubicon.objc`][rubicon-objc-module] module. This means that
 most users only need to import and use the main
-`rubicon.objc`{.interpreted-text role="mod"} module; the individual
+[`rubicon.objc`][rubicon-objc-module] module; the individual
 submodules only need to be used for attributes that are not also
-available on `rubicon.objc`{.interpreted-text role="mod"}.
+available on [`rubicon.objc`][rubicon-objc-module].
 
 ## Exported Attributes
 
 This is a full list of all attributes exported on the
-`rubicon.objc`{.interpreted-text role="mod"} module. For detailed
+[`rubicon.objc`][rubicon-objc-module] module. For detailed
 documentation on these attributes, click the links below to visit the
 relevant sections of the submodules' documentation.
 

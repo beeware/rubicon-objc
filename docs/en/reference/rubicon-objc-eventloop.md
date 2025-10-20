@@ -1,7 +1,5 @@
 # `rubicon.objc.eventloop` - Integrating native event loops with `asyncio`
 
-rubicon.objc.eventloop
-
 /// note | Note
 
 The documentation for this module is incomplete. You can help by
@@ -10,7 +8,8 @@ role="doc"}.
 
 ///
 
-<:> EventLoopPolicy <!-- TODO: class -->
+<:> EventLoopPolicy
+<!-- TODO: class -->
 
 <:> new_event_loop <!-- TODO: method -->
 
@@ -21,14 +20,16 @@ role="doc"}.
 <:> set_child_watcher <!-- TODO: method -->
 
 
-<:> CocoaLifecycle <!-- TODO: class -->
+<:> CocoaLifecycle
+<!-- TODO: class -->
 
 <:> start <!-- TODO: method -->
 
 <:> stop <!-- TODO: method -->
 
 
-<:> iOSLifecycle <!-- TODO: class -->
+<:> iOSLifecycle
+<!-- TODO: class -->
 
 <:> start <!-- TODO: method -->
 

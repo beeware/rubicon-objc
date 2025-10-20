@@ -33,7 +33,7 @@ need to be annotated to tell Rubicon and Objective-C which type to
 expect. These annotations can use any of the types defined by Rubicon,
 such as `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"}
 or `~rubicon.objc.types.NSRange`{.interpreted-text role="class"}, as
-well as standard C types from the `ctypes`{.interpreted-text role="mod"}
+well as standard C types from the [`ctypes`][]
 module, such as `~ctypes.c_byte`{.interpreted-text role="class"} or
 `~ctypes.c_double`{.interpreted-text role="class"}.
 
@@ -49,7 +49,7 @@ def roundToZero_(self, value: c_double) -> NSInteger:
 
 Rubicon also allows certain Python types to be used in method
 signatures, and converts them to matching primitive
-`ctypes`{.interpreted-text role="mod"} types. For example, Python
+[`ctypes`][] types. For example, Python
 `int`{.interpreted-text role="class"} is treated as
 `~ctypes.c_int`{.interpreted-text role="class"}, and
 `float`{.interpreted-text role="class"} is treated as
@@ -91,10 +91,8 @@ required structure type.
 
 If a parameter expects an Objective-C object, you can also pass certain
 Python objects, which are automatically converted to their Objective-C
-counterparts. For example, a Python `str`{.interpreted-text
-role="class"} is converted to an `NSString`, `bytes`{.interpreted-text
-role="class"} to `NSData`, etc. Collections are also supported:
-`list`{.interpreted-text role="class"} and `dict`{.interpreted-text
+counterparts. For example, a Python [`str`][] is converted to an `NSString`, [`bytes`][] to `NSData`, etc. Collections are also supported:
+`[`list`][] and `dict`{.interpreted-text
 role="class"} are converted to `NSArray` and `NSDictionary`, and their
 elements are converted recursively.
 
@@ -108,7 +106,7 @@ All of these conversions can also be performed manually - see
 ### Return value conversion and wrapping
 
 Primitive values returned from methods are converted using the usual
-`ctypes`{.interpreted-text role="mod"} conversions, e. g. C integers are
+[`ctypes`][] conversions, e. g. C integers are
 converted to Python `int`{.interpreted-text role="class"} and
 floating-point values to Python `float`{.interpreted-text role="class"}.
 
@@ -214,7 +212,7 @@ manually.
 ### Strings
 
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects
-behave almost exactly like Python `str`{.interpreted-text role="class"}
+behave almost exactly like Python [`str`][]
 objects - they can be sliced, concatenated, compared, etc. with other
 Objective-C and Python strings.
 
@@ -243,10 +241,10 @@ This is an implementation detail - you should not refer to the
 
 If you have an `~rubicon.objc.api.NSString`{.interpreted-text
 role="class"}, and you need to pass it to a method that does a specific
-type check for `str`{.interpreted-text role="class"}, you can use
+type check for [`str`][], you can use
 `str(nsstring)` to convert the
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} to
-`str`{.interpreted-text role="class"}:
+[`str`][]:
 
 ```pycon
 # Convert the Objective-C string to a Python string.
@@ -254,7 +252,7 @@ type check for `str`{.interpreted-text role="class"}, you can use
 '/Users/rkm/projects/beeware/venv3.6/bin'
 ```
 
-Conversely, if you have a `str`{.interpreted-text role="class"}, and you
+Conversely, if you have a [`str`][], and you
 specifically require a `~rubicon.objc.api.NSString`{.interpreted-text
 role="class"}, you can use the `~rubicon.objc.api.at`{.interpreted-text
 role="func"} function to convert the Python instance to an
@@ -271,12 +269,12 @@ role="func"} function to convert the Python instance to an
 
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} also
 supports all the utility methods that are available on
-`str`{.interpreted-text role="class"}, such as `replace` and `split`.
+[`str`][], such as `replace` and `split`.
 When these methods return a string, the implementation may return Python
-`str`{.interpreted-text role="class"} or Objective-C
+[`str`][] or Objective-C
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} instances.
 If you need to use the return value from these methods, you should
-always use `str`{.interpreted-text role="class"} or
+always use [`str`][] or
 `~rubicon.objc.api.at`{.interpreted-text role="func"} to ensure that you
 have the right kind of string for your needs.
 
@@ -293,15 +291,14 @@ False
 /// note | Note
 
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects
-behave slightly differently than Python `str`{.interpreted-text
-role="class"} objects in some cases. For technical reasons,
+behave slightly differently than Python [`str`][] objects in some cases. For technical reasons,
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"}s are not
 hashable in Python, which means they cannot be used as
 `dict`{.interpreted-text role="class"} keys (but they *can* be used as
 `~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} keys).
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} also
 handles Unicode code points above `U+FFFF` differently than Python
-`str`{.interpreted-text role="class"}, because the former is based on
+[`str`][], because the former is based on
 UTF-16.
 
 ///
@@ -501,16 +498,14 @@ return it as an `~rubicon.objc.api.ObjCInstance`{.interpreted-text
 role="class"} (with some additional Python methods -see
 `python_style_apis_for_objc`{.interpreted-text role="ref"}). Using
 `~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"}, you can
-convert the `NSString` to a real Python `str`{.interpreted-text
-role="class"}.
+convert the `NSString` to a real Python [`str`][].
 
 When converting collections, such as `NSArray` or `NSDictionary`,
 `~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"} will
 convert them recursively to a pure Python object. For example, if
 `nsarray` is an `NSArray` containing `NSString`s, `py_from_ns(nsarray)`
-will return a `list`{.interpreted-text role="class"} of
-`str`{.interpreted-text role="class"}s. In most cases, that is the
+will return a `[`list`][] of
+[`str`][]s. In most cases, that is the
 desired behavior, but you can also avoid this recursive conversion by
 passing the Foundation collection into a Python collection constructor:
-for example `list(nsarray)` will return a `list`{.interpreted-text
-role="class"} of `NSString`s.
+for example `list(nsarray)` will return a [`list`][] of `NSString`s.

@@ -85,7 +85,7 @@ the spellchecker's
 
 ## Rebuilding all documentation
 
-To force a rebuild for all of the documentation:
+To force a rebuild for all the documentation:
 
 /// tab | macOS
 

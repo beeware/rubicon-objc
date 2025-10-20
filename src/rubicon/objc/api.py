@@ -823,6 +823,19 @@ def for_objcclass(objcclass):
 class ObjCInstance:
     """Python wrapper for an Objective-C instance."""
 
+    ptr: objc_id
+    """The wrapped object pointer as an [`objc_id`][rubicon.objc.objc_id].
+
+    This
+    attribute is also available as `_as_parameter_` to allow
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s to be passed into
+    [`ctypes`][] functions.
+    """
+    _as_parameter_: objc_id
+    """[`ptr`][rubicon.objc.api.ObjCInstance.ptr] available as `_as_parameter_` to allow
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s to be passed into [`ctypes`][]
+    functions."""
+
     # Cache dictionary containing every currently existing ObjCInstance object,
     # with the key being the memory address (as an integer) of the Objective-C
     # object that it wraps. Because this is a weak value dictionary, entries are
@@ -1147,6 +1160,7 @@ class ObjCInstance:
                 # Set the Python value as an associated object. This will release
                 # any previous wrapper object with the same key.
                 key = self._associated_attr_key_for_name(name)
+                key = self._associated_attr_key_for_name(name)
                 libobjc.objc_setAssociatedObject(self, key, wrapper, 0x301)
 
                 # Release the wrapper object, it will be retained by the association.
@@ -1181,7 +1195,12 @@ class ObjCClass(ObjCInstance, type):
 
     :class:`ObjCClass` is a subclass of :class:`ObjCInstance` and supports the
     same syntaxes for calling methods and accessing properties.
+
+    TODO: Add name.
     """
+
+    name: str
+    """The name of this class as a str."""
 
     @property
     def superclass(self):
@@ -1717,20 +1736,184 @@ class ObjCMetaClass(ObjCClass):
 register_ctype_for_type(ObjCInstance, objc_id)
 register_ctype_for_type(ObjCClass, Class)
 
+# check-docstring-is-first made us do this
+if True:
+    NSObject = ObjCClass("NSObject")
+    """
+    The
+    [NSObject](https://developer.apple.com/documentation/objectivec/nsobject?language
+    =objc)
+    class from `<objc/NSObject.h>`.
 
-NSObject = ObjCClass("NSObject")
-NSObject.declare_property("debugDescription")
-NSObject.declare_property("description")
-NSNumber = ObjCClass("NSNumber")
-NSDecimalNumber = ObjCClass("NSDecimalNumber")
-NSString = ObjCClass("NSString")
-NSString.declare_property("UTF8String")
-NSData = ObjCClass("NSData")
-NSArray = ObjCClass("NSArray")
-NSMutableArray = ObjCClass("NSMutableArray")
-NSDictionary = ObjCClass("NSDictionary")
-NSMutableDictionary = ObjCClass("NSMutableDictionary")
-Protocol = ObjCClass("Protocol")
+    See the [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
+    documentation for a list of operations that Rubicon supports on all objects.
+
+    # `debugDescription`
+    This Objective-C property has been declared using
+    [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property] and
+    can always be accessed using attribute syntax.
+
+    # `description`
+    This Objective-C property has been declared using
+    [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property] and
+    can always be accessed using attribute syntax.
+    """
+    NSObject.declare_property("debugDescription")
+    NSObject.declare_property("description")
+    NSNumber = ObjCClass("NSNumber")
+    """
+    The
+    [NSNumber](https://developer.apple.com/documentation/foundation/nsnumber?language=objc)
+    class from `<Foundation/NSValue.h>`.
+
+    /// note | Note
+
+    This class can be converted to and from standard Python primitives
+    (`bool`, `int`, `float`) using [`py_from_ns`][rubicon.objc.py_from_ns] and
+    [`ns_from_py`][rubicon.objc.ns_from_py].
+
+    ///
+    """
+    NSDecimalNumber = ObjCClass("NSDecimalNumber")
+    """
+    The
+    [NSDecimalNumber](https://developer.apple.com/documentation/foundation/nsdecimalnumber?language=objc)
+    class from `<Foundation/NSDecimalNumber.h>`.
+
+    /// note | Note
+
+    This class can be converted to and from Python `decimal.Decimal` using
+    [`py_from_ns`][rubicon.objc.py_from_ns] and
+    [`ns_from_py`][rubicon.objc.ns_from_py].
+
+    ///
+    """
+    NSString = ObjCClass("NSString")
+    """
+    The
+    [NSString](https://developer.apple.com/documentation/foundation/nsstring?language=objc)
+    class from `<Foundation/NSString.h>`.
+
+    This class also supports all methods that [`str`][] does.
+
+    /// note | Note
+
+    This class can be converted to and from Python [`str`][] using
+    [`py_from_ns`][rubicon.objc.py_from_ns] and
+    [`ns_from_py`][rubicon.objc.ns_from_py]. You can also call
+    `str(nsstring)` to convert a `NSString` to [`str`][].
+
+    [`NSString`][rubicon.objc.api.NSString] objects consist of UTF-16
+    code units, unlike [`str`][], which consists
+    of Unicode code points. All [`NSString`][rubicon.objc.api.NSString]
+    indices and iteration are based on UTF-16, even when using the
+    Python-style operations/methods. If indexing or iteration based on code
+    points is required, convert the [`NSString`][rubicon.objc.api.NSString] to
+    [`str`][] first.
+
+    ///
+
+    # `str`
+    Return the value of this [`NSString`][rubicon.objc.api.NSString] as a
+    [`str`][].
+
+    # `UTF8String`
+    This Objective-C property has been declared using
+    [`ObjCClass.declare_property`][rubicon.objc.api.ObjCClass.declare_property]
+    and can always be accessed using attribute syntax.
+    """
+    NSString.declare_property("UTF8String")
+    NSData = ObjCClass("NSData")
+    """
+    The
+    [NSData](https://developer.apple.com/documentation/foundation/nsdata?language=objc)
+    class from `<Foundation/NSData.h>`.
+
+    /// note | Note
+
+    This class can be converted to and from Python [`bytes`][] using
+    [`py_from_ns`][rubicon.objc.py_from_ns] and
+    [`ns_from_py`][rubicon.objc.ns_from_py].
+
+    ///
+    """
+    NSArray = ObjCClass("NSArray")
+    """
+    The
+    [NSArray](https://developer.apple.com/documentation/foundation/nsarray?language=objc)
+    class from `<Foundation/NSArray.h>`.
+
+    /// note | Note
+
+    This class can be converted to and from Python [`list`][] using
+    [`py_from_ns`][rubicon.objc.py_from_ns] and
+    [`ns_from_py`][rubicon.objc.ns_from_py].
+
+    `py_from_ns(nsarray)` will recursively convert `nsarray`'s elements to
+    Python objects, where possible. To avoid this recursive conversion, use
+    `list(nsarray)` instead.
+
+    `ns_from_py(pylist)` will recursively convert `pylist`'s elements to
+    Objective-C. As there is no way to store Python object references as
+    Objective-C objects yet, this recursive conversion cannot be avoided. If
+    any of `pylist`'s elements cannot be converted to Objective-C, an error
+    is raised.
+
+    ///
+
+    # `__getitem__(index)`
+    # `__len__()`
+    # `__iter__()`
+    # `__contains__(value)`
+    # `__eq__(other)`
+    # `__ne__(other)`
+    # `index(value)`
+    # `count(value)`
+    # `copy()`
+    Python-style sequence interface.
+    """
+    NSMutableArray = ObjCClass("NSMutableArray")
+    """
+    The
+    [NSMutableArray](https://developer.apple.com/documentation/foundation/nsmutablearray?language=objc)
+    class from `<Foundation/NSArray.h>`.
+
+    /// note | Note
+
+    This class can be converted to and from Python exactly like its
+    superclass `NSArray`.
+
+    ///
+
+    # `__setitem__(index, value)`
+    # `__delitem__(index)`
+    # `append(value)`
+    # `clear()`
+    # `extend(values)`
+    # `insert(index, value)`
+    # `pop([index=-1])`
+    # `remove(value)`
+    # `reverse()`
+    Python-style mutable sequence interface.
+    """
+    NSDictionary = ObjCClass("NSDictionary")
+    NSMutableDictionary = ObjCClass("NSMutableDictionary")
+    Protocol = ObjCClass("Protocol")
+    """
+    The
+    [Protocol](https://developer.apple.com/documentation/objectivec/protocol?language=objc)
+    class from `<objc/Protocol.h>`.
+
+    /// note | Note
+
+    This class has no (non-deprecated) Objective-C methods; protocol objects
+    can only be manipulated using Objective-C runtime functions. Rubicon
+    automatically wraps all [`Protocol`][rubicon.objc.api.Protocol]
+    objects using [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol], which
+    provides an easier interface for working with protocols.
+
+    ///
+    """
 
 
 def py_from_ns(nsobj):
@@ -1865,7 +2048,10 @@ def ns_from_py(pyobj):
         )
 
 
-at = ns_from_py
+# check-docstring-is-first made us do this
+if True:
+    at = ns_from_py
+    """Alias for [`ns_from_py`][rubicon.objc.ns_from_py]."""
 
 
 @for_objcclass(Protocol)

@@ -35,7 +35,7 @@ constructor as:
 
 That is, the name of the method in Python is identical to the method in
 Objective-C. The first argument is declared as being an `NSString *`;
-Rubicon converts the Python `str`{.interpreted-text role="class"} into
+Rubicon converts the Python [`str`][] into
 an `NSString` instance as part of invoking the method.
 
 `NSURL` has another static constructor: `+URLWithString:relativeToURL:`.

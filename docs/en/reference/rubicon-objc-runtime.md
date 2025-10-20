@@ -1,12 +1,10 @@
 # `rubicon.objc.runtime` - Low-level Objective-C runtime access
 
-rubicon.objc.runtime
-
 This module contains types, functions, and C libraries used for
 low-level access to the Objective-C runtime.
 
 In most cases there is no need to use this module directly --- the
-`rubicon.objc.api`{.interpreted-text role="mod"} module provides the
+[`rubicon.objc.api`][rubicon-objc-api] module provides the
 same functionality through a high-level interface.
 
 ## C libraries { #predefined-c-libraries }
@@ -15,7 +13,8 @@ Some commonly used C libraries are provided as
 `~ctypes.CDLL`{.interpreted-text role="class"}s. Other libraries can be
 loaded using the `load_library`{.interpreted-text role="func"} function.
 
-<:> data annotation="= load_library('c')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('c')"
+<!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 libc
 
@@ -27,7 +26,8 @@ The following functions are accessible by default:
 
 * `free`
 
-<:> data annotation="= load_library('objc')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('objc')"
+<!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 libobjc
 
@@ -67,7 +67,8 @@ The following functions are accessible by default:
 `sel_isEqual` * `sel_registerName`
 
 
-<:> data annotation="= load_library('Foundation')"  <!-- TODO: stub candidate -->
+<:> data annotation="= load_library('Foundation')"
+<!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 Foundation
 
@@ -80,35 +81,43 @@ framework.
 
 These are various types used by the Objective-C runtime functions.
 
-<:> objc_id([value]) <!-- TODO: class -->
+::: rubicon.objc.objc_id
 
-<:> objc_block([value]) <!-- TODO: class -->
+<:> objc_block([value])
+<!-- TODO: class -->
 
-<:> SEL([value]) <!-- TODO: class -->
+<:> SEL([value])
+<!-- TODO: class -->
 
 <:> name <!-- TODO: attribute -->
 
 
-<:> Class([value]) <!-- TODO: class -->
+<:> Class([value])
+<!-- TODO: class -->
 
-<:> IMP([value]) <!-- TODO: class -->
+<:> IMP([value])
+<!-- TODO: class -->
 
-<:> Method([value]) <!-- TODO: class -->
+<:> Method([value])
+<!-- TODO: class -->
 
-<:> Ivar([value]) <!-- TODO: class -->
+<:> Ivar([value])
+<!-- TODO: class -->
 
-<:> objc_property_t([value]) <!-- TODO: class -->
+<:> objc_property_t([value])
+<!-- TODO: class -->
 
-<:> objc_property_attribute_t([name, value]) <!-- TODO: class -->
+<:> objc_property_attribute_t([name, value])
+<!-- TODO: class -->
 
 <:> name value <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
-The attribute name and value as C strings (`bytes`{.interpreted-text
-role="class"}).
+The attribute name and value as C strings ([`bytes`][]).
 
 
 
-<:> objc_method_description([name, value]) <!-- TODO: class -->
+<:> objc_method_description([name, value])
+<!-- TODO: class -->
 
 <:> name <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
@@ -117,12 +126,12 @@ The method name as a `SEL`{.interpreted-text role="class"}.
 
 <:> types <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
-The method's signature encoding as a C string (`bytes`{.interpreted-text
-role="class"}).
+The method's signature encoding as a C string ([`bytes`][]).
 
 
 
-<:> objc_super([receiver, super_class]) <!-- TODO: class -->
+<:> objc_super([receiver, super_class])
+<!-- TODO: class -->
 
 <:> receiver <!-- TODO: attribute -->
 <!-- TODO: Doc notes -->

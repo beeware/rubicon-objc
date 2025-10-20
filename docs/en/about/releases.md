@@ -442,7 +442,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   ([#156](https://github.com/beeware/rubicon-objc/pull/156))
 - Removed unit test that attempted to pass a struct with bit fields into
   a C function by value. Although this has worked in the past on x86 and
-  x86_64, `ctypes`{.interpreted-text role="mod"} never officially
+  x86_64, [`ctypes`][] never officially
   supported this, and started generating an error in Python 3.7.6 and
   3.8.1 (see [bpo-39295](https://bugs.python.org/issue39295)).
   ([#157](https://github.com/beeware/rubicon-objc/pull/157))
@@ -461,13 +461,12 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 - Added detailed
   `reference documentation </reference/index>`{.interpreted-text
-  role="doc"} for all public APIs of `rubicon.objc`{.interpreted-text
-  role="mod"}.
+  role="doc"} for all public APIs of [`rubicon.objc`][rubicon-objc-module].
   ([#118](https://github.com/beeware/rubicon-objc/pull/118))
 - Added a `topic guide for calling regular C functions
   </topics/c-functions>`{.interpreted-text role="doc"} using
-  `ctypes`{.interpreted-text role="mod"} and
-  `rubicon.objc`{.interpreted-text role="mod"}.
+  [`ctypes`][] and
+  [`rubicon.objc`][rubicon-objc-module].
   ([#147](https://github.com/beeware/rubicon-objc/pull/147))
 
 #### Deprecations and Removals
@@ -496,7 +495,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   ///
 
 - Disallowed passing class names as `str`{.interpreted-text
-  role="class"}/`bytes`{.interpreted-text role="class"} as the
+  role="class"}/[`bytes`][] as the
   `receiver` argument of
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
   If you need to send a message to a class object (i. e. call a class
@@ -609,7 +608,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   (`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"},
   `~rubicon.objc.api.ObjCClass`{.interpreted-text role="class"}, etc.)
   out of `rubicon.objc.runtime`{.interpreted-text role="mod"} into a
-  separate `rubicon.objc.api`{.interpreted-text role="mod"} module. The
+  separate [`rubicon.objc.api`][rubicon-objc-api] module. The
   `~rubicon.objc.runtime`{.interpreted-text role="mod"} module now only
   contains low-level runtime interfaces like
   `~rubicon.objc.runtime.libobjc`{.interpreted-text role="data"}.
@@ -631,8 +630,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"},
   `~rubicon.objc.runtime.objc_property_t`{.interpreted-text
   role="class"}, `~rubicon.objc.runtime.set_ivar`{.interpreted-text
-  role="func"}) from the main `rubicon.objc`{.interpreted-text
-  role="mod"} namespace.
+  role="func"}) from the main [`rubicon.objc`][rubicon-objc-module] namespace.
 
   If needed, these names can be imported explicitly from the
   `rubicon.objc.runtime`{.interpreted-text role="mod"} module.
