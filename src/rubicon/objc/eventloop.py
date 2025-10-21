@@ -685,8 +685,8 @@ if sys.version_info < (3, 16):
         threads by default have no event loop.
 
         **DEPRECATED** - Python 3.14 deprecated the concept of manually creating
-        EventLoopPolicies. Create and use a ``RubiconEventLoop`` instance instead of
-        installing an event loop policy and calling ``asyncio.new_event_loop()``.
+        EventLoopPolicies. Create and use a `RubiconEventLoop` instance instead of
+        installing an event loop policy and calling `asyncio.new_event_loop()`.
         """
 
         def __init__(self):
@@ -804,7 +804,7 @@ class CFLifecycle:
 
 
 class CocoaLifecycle:
-    """A life cycle manager for Cocoa (``NSApplication``) apps."""
+    """A life cycle manager for Cocoa (`NSApplication`) apps."""
 
     def __init__(self, application):
         self._application = application
@@ -817,7 +817,7 @@ class CocoaLifecycle:
 
 
 class iOSLifecycle:
-    """A life cycle manager for iOS (``UIApplication``) apps."""
+    """A life cycle manager for iOS (`UIApplication`) apps."""
 
     def start(self):
         NSRunLoop.currentRunLoop.run()

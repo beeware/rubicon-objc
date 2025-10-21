@@ -359,11 +359,11 @@ def ctype_for_encoding(encoding):
     the encoding (so that future conversions of the same encoding return the
     same C type).
 
-    For example, the type encoding ``{spam=ic}`` is not registered by default.
-    However, the contained types ``i`` and ``c`` are registered, so they are
+    For example, the type encoding `{spam=ic}` is not registered by default.
+    However, the contained types `i` and `c` are registered, so they are
     converted individually and used to create a new :class:`~ctypes.Structure`
     with two fields of the correct types. The new structure type is then
-    registered for the original encoding ``{spam=ic}`` and returned.
+    registered for the original encoding `{spam=ic}` and returned.
 
     :raises ValueError: if the conversion fails at any point
     """
@@ -613,19 +613,18 @@ def _array_for_sequence(seq, array_type):
 
 
 def compound_value_for_sequence(seq, tp):
-    """Create a C structure or array of type ``tp``, initialized with values from
-    ``seq``.
+    """Create a C structure or array of type `tp`, initialized with values from `seq`.
 
-    If ``tp`` is a :class:`~ctypes.Structure` type, the newly created
+    If `tp` is a :class:`~ctypes.Structure` type, the newly created
     structure's fields are initialized in declaration order with the values from
-    ``seq``. ``seq`` must have as many elements as the structure has fields.
+    `seq`. `seq` must have as many elements as the structure has fields.
 
-    If ``tp`` is a :class:`~ctypes.Array` type, the newly created array is
-    initialized with the values from ``seq``. ``seq`` must have as many elements
+    If `tp` is a :class:`~ctypes.Array` type, the newly created array is
+    initialized with the values from `seq`. `seq` must have as many elements
     as the array type.
 
     In both cases, if a structure field type or the array element type is itself
-    a structure or array type, the corresponding value from ``seq`` is
+    a structure or array type, the corresponding value from `seq` is
     recursively converted as well.
     """
 
@@ -741,17 +740,17 @@ register_preferred_encoding(_PyObjectEncoding, py_object)
 @with_encoding(b"^{?}")
 @with_encoding(b"^(?)")
 class UnknownPointer(c_void_p):
-    """Placeholder for the "unknown pointer" types ``^?``, ``^{?}`` and ``^(?)``.
+    """Placeholder for the "unknown pointer" types `^?`, `^{?}` and `^(?)`.
 
-    Not to be confused with a ``^v`` void pointer.
+    Not to be confused with a `^v` void pointer.
 
-    Usually a ``^?`` is a function pointer, but because the encoding doesn't
-    contain the function signature, you need to manually create a CFUNCTYPE with
-    the proper types, and cast this pointer to it.
+    Usually a `^?` is a function pointer, but because the encoding doesn't contain the
+    function signature, you need to manually create a CFUNCTYPE with the proper types,
+    and cast this pointer to it.
 
-    ``^{?}`` and ``^(?)`` are pointers to a structure or union (respectively)
-    with unknown name and fields. Such a type also cannot be used meaningfully
-    without casting it to the correct pointer type first.
+    `^{?}` and `^(?)` are pointers to a structure or union (respectively) with unknown
+    name and fields. Such a type also cannot be used meaningfully without casting it to
+    the correct pointer type first.
     """
 
 

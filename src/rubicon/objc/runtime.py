@@ -82,7 +82,7 @@ def load_library(name):
     Internally, this function uses :func:`ctypes.util.find_library` to search
     for the library in the system-standard locations. If the library cannot be
     found this way, it is attempted to load the library from certain hard-coded
-    locations, as a fallback for systems where ``find_library`` does not work
+    locations, as a fallback for systems where `find_library` does not work
     (such as iOS).
     """
 
@@ -119,7 +119,7 @@ Foundation = load_library("Foundation")
 @with_encoding(b"@")
 class objc_id(c_void_p):
     """The `id <https://developer.apple.com/documentation/objectivec/id?language=objc>`__
-    type from ``<objc/objc.h>``.
+    type from `<objc/objc.h>`.
     """
 
 
@@ -147,7 +147,7 @@ class objc_block(objc_id):
 @with_preferred_encoding(b":")
 class SEL(c_void_p):
     """The `SEL <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__
-    type from ``<objc/objc.h>``.
+    type from `<objc/objc.h>`.
     """
 
     @property
@@ -189,13 +189,13 @@ class SEL(c_void_p):
 @with_preferred_encoding(b"#")
 class Class(objc_id):
     """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__
-    type from ``<objc/objc.h>``.
+    type from `<objc/objc.h>`.
     """
 
 
 class IMP(c_void_p):
     """The `IMP <https://developer.apple.com/documentation/objectivec/imp?language=objc>`__
-    type from ``<objc/objc.h>``.
+    type from `<objc/objc.h>`.
 
     An :class:`IMP` cannot be called directly --- it must be cast to the
     correct :func:`~ctypes.CFUNCTYPE` first, to provide the necessary
@@ -205,26 +205,26 @@ class IMP(c_void_p):
 
 class Method(c_void_p):
     """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__
-    type from ``<objc/runtime.h>``.
+    type from `<objc/runtime.h>`.
     """
 
 
 class Ivar(c_void_p):
     """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?language=objc>`__
-    type from ``<objc/runtime.h>``.
+    type from `<objc/runtime.h>`.
     """
 
 
 class objc_property_t(c_void_p):
     """The `objc_property_t <https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc>`__
-    type from ``<objc/runtime.h>``.
+    type from `<objc/runtime.h>`.
     """
 
 
 class objc_property_attribute_t(Structure):
     """
     The `objc_property_attribute_t <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__
-    structure from ``<objc/runtime.h>``.
+    structure from `<objc/runtime.h>`.
     """
 
     _fields_ = [
@@ -547,7 +547,7 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 class objc_method_description(Structure):
     """The `objc_method_description <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__
-    structure from ``<objc/runtime.h>``.
+    structure from `<objc/runtime.h>`.
     """
 
     _fields_ = [
@@ -663,7 +663,7 @@ def ensure_bytes(x):
 def get_class(name):
     """Get the Objective-C class with the given name as a :class:`Class` object.
 
-    If no class with the given name is loaded, ``None`` is returned, and
+    If no class with the given name is loaded, `None` is returned, and
     the Objective-C runtime will log a warning message.
     """
 
@@ -676,7 +676,7 @@ def get_class(name):
 # executive summary: on x86-64, who knows?
 def should_use_stret(restype):
     """Return whether a method returning the given type must be called using
-    ``objc_msgSend_stret`` on the current system."""
+    `objc_msgSend_stret` on the current system."""
 
     if type(restype) is not type(Structure):
         # Not needed when restype is not a structure.
@@ -703,7 +703,7 @@ def should_use_stret(restype):
 # https://www.sealiesoftware.com/blog/archive/2008/11/16/objc_explain_objc_msgSend_fpret.html
 def should_use_fpret(restype):
     """Return whether a method returning the given type must be called using
-    ``objc_msgSend_fpret`` on the current system."""
+    `objc_msgSend_fpret` on the current system."""
 
     if __x86_64__:
         # On x86_64: Use only for long double.
@@ -720,15 +720,15 @@ _msg_send_cache = {}
 
 
 def _msg_send_for_types(restype, argtypes):
-    """Get the appropriate variant of ``objc_msgSend`` for calling a method with the
-    given return and argument types.
+    """Get the appropriate variant of `objc_msgSend` for calling a method with the given
+    return and argument types.
 
     :param restype: The return type of the method to be called.
     :param argtypes: The argument types of the method to be called, excluding
         the self and _cmd arguments.
-    :return: A C function for ``objc_msgSend`` or one of its variants, with its
-        return and argument types configured correctly based on the ``restype``
-        and ``argtypes`` arguments. The ``restype`` and ``argtypes`` attributes
+    :return: A C function for `objc_msgSend` or one of its variants, with its
+        return and argument types configured correctly based on the `restype`
+        and `argtypes` arguments. The `restype` and `argtypes` attributes
         of the returned function *must not* be modified.
     """
 
@@ -766,29 +766,29 @@ def _msg_send_for_types(restype, argtypes):
 def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None):
     """Call a method on the receiver with the given selector and arguments.
 
-    This is the equivalent of an Objective-C method call like ``[receiver sel:args]``.
+    This is the equivalent of an Objective-C method call like `[receiver sel:args]`.
 
     .. note::
 
-        Some Objective-C methods take variadic arguments (``varargs``), for example
+        Some Objective-C methods take variadic arguments (`varargs`), for example
         `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/stringwithformat:?language=objc>`_.
         When using :func:`send_message`, variadic arguments are treated
         differently from regular arguments: they are not passed as normal
-        function arguments in ``*args``, but as a list in a separate ``varargs``
+        function arguments in `*args`, but as a list in a separate `varargs`
         keyword argument.
 
         This explicit separation of regular and variadic arguments protects
         against accidentally passing too many arguments into a method. By
-        default these extra arguments would be considered ``varargs`` and passed on
-        to the method, even if the method in question doesn't take ``varargs``.
+        default these extra arguments would be considered `varargs` and passed on
+        to the method, even if the method in question doesn't take `varargs`.
         Because of how the Objective-C runtime and most C calling conventions
         work, this error would otherwise be silently ignored.
 
-        The types of ``varargs`` are not included in the ``argtypes`` list. Instead,
+        The types of `varargs` are not included in the `argtypes` list. Instead,
         the values are automatically converted to C types using the default
-        [`ctypes`][] argument conversion rules. To ensure that all ``varargs`` are
+        [`ctypes`][] argument conversion rules. To ensure that all `varargs` are
         converted to the expected C types, it is recommended to manually convert
-        all ``varargs`` to [`ctypes`][] types instead of relying on automatic
+        all `varargs` to [`ctypes`][] types instead of relying on automatic
         conversions. For example:
 
         .. code-block:: python
@@ -809,9 +809,9 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
     :param args: The method arguments.
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a [`list`][].
-        Defaults to ``[]``.
+        Defaults to `[]`.
     :param varargs: Variadic arguments for the method, as a [`list`][].
-        Defaults to ``[]``. These arguments are converted according to the
+        Defaults to `[]`. These arguments are converted according to the
         default [`ctypes`][] conversion rules.
     """
 
@@ -860,7 +860,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
 class objc_super(Structure):
     """The `objc_super <https://developer.apple.com/documentation/objectivec/objc_super?language=objc>`__
-    structure from ``<objc/message.h>``.
+    structure from `<objc/message.h>`.
     """
 
     _fields_ = [
@@ -884,27 +884,27 @@ def send_super(
     the given selector and arguments.
 
     This is the equivalent of an Objective-C method call like
-    ``[super sel:args]`` in the class ``cls``.
+    `[super sel:args]` in the class `cls`.
 
     In practice, the first parameter should always be the special variable
-    ``__class__``, and the second parameter should be ``self``. A typical
-    :func:`send_super` call would be ``send_super(__class__, self, 'init')``
+    `__class__`, and the second parameter should be `self`. A typical
+    :func:`send_super` call would be `send_super(__class__, self, 'init')`
     for example.
 
-    The special variable ``__class__`` is defined by Python and stands for the
-    class object that is being created by the current ``class`` block. The
-    exact reasons why ``__class__`` must be passed manually are somewhat
+    The special variable `__class__` is defined by Python and stands for the
+    class object that is being created by the current `class` block. The
+    exact reasons why `__class__` must be passed manually are somewhat
     technical, and are not directly relevant to users of :func:`send_super`.
     For a full explanation, see issue `beeware/rubicon-objc#107
     <https://github.com/beeware/rubicon-objc/issues/107>`__ and PR
     `beeware/rubicon-objc#108 <https://github.com/beeware/rubicon-objc/pull/108>`__.
 
-    Although it is possible to pass other values than ``__class__`` and
-    ``self`` for the first two parameters, this is strongly discouraged. Doing
+    Although it is possible to pass other values than `__class__` and
+    `self` for the first two parameters, this is strongly discouraged. Doing
     so is not supported by the Objective-C language, and relies on
     implementation details of the superclasses.
 
-    :param cls: The class in whose context the ``super`` call is happening, as
+    :param cls: The class in whose context the `super` call is happening, as
         an :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
     :param receiver: The object on which to call the method, as an
         :class:`~rubicon.objc.api.ObjCInstance`, :class:`.objc_id`, or
@@ -914,9 +914,9 @@ def send_super(
     :param args: The method arguments.
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a [`list`][].
-        Defaults to ``[]``.
+        Defaults to `[]`.
     :param varargs: Variadic arguments for the method, as a [`list`][].
-        Defaults to ``[]``. These arguments are converted according to the
+        Defaults to `[]`. These arguments are converted according to the
         default [`ctypes`][] conversion rules.
     """
 
@@ -1024,10 +1024,10 @@ def add_method(cls, selector, method, encoding, replace=False):
     :param method: The method implementation, as a Python callable or a C
         function address.
     :param encoding: The method's signature (return type and argument types) as
-        a [`list`][]. The types of the implicit ``self`` and ``_cmd``
+        a [`list`][]. The types of the implicit `self` and `_cmd`
         parameters must be included in the signature.
     :param replace: If the class already implements a method with the given
-        name, replaces the current implementation if ``True``. Raises a
+        name, replaces the current implementation if `True`. Raises a
         :class:`ValueError` error otherwise.
     :return: The ctypes C function pointer object that was created for the
         method's implementation. This return value can be ignored. (In version
@@ -1061,7 +1061,7 @@ def add_method(cls, selector, method, encoding, replace=False):
 
 
 def add_ivar(cls, name, vartype):
-    """Add a new instance variable of type ``vartype`` to ``cls``."""
+    """Add a new instance variable of type `vartype` to `cls`."""
 
     return libobjc.class_addIvar(
         cls,
@@ -1073,17 +1073,17 @@ def add_ivar(cls, name, vartype):
 
 
 def get_ivar(obj, varname, weak=False):
-    """Get the value of obj's ``ivar`` named ``varname``.
+    """Get the value of obj's `ivar` named `varname`.
 
     The returned object is a [`ctypes`][] data object.
 
     For non-object types (everything except :class:`.objc_id` and subclasses),
-    the returned data object is backed by the ``ivar``'s actual memory. This means
+    the returned data object is backed by the `ivar`'s actual memory. This means
     that the data object is only usable as long as the "owner" object is alive,
-    and writes to it will directly change the ``ivar``'s value.
+    and writes to it will directly change the `ivar`'s value.
 
-    For object types, the returned data object is independent of the ``ivar``'s
-    memory. This is because object ``ivars`` may be weak, and thus cannot always
+    For object types, the returned data object is independent of the `ivar`'s
+    memory. This is because object `ivars` may be weak, and thus cannot always
     be accessed directly by their address.
     """
 
@@ -1107,11 +1107,11 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's ``ivar`` ``varname`` to value. If ``weak`` is ``True``, only a weak
-    reference to the value is stored.
+    """Set obj's `ivar` `varname` to value. If `weak` is `True`, only a weak reference
+    to the value is stored.
 
     value must be a [`ctypes`][] data object whose type matches that of
-    the ``ivar``.
+    the `ivar`.
     """
 
     try:
