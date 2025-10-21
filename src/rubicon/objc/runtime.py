@@ -163,7 +163,7 @@ class SEL(c_void_p):
         """The constructor can be called with a [`bytes`][] or [`str`][] object to
         obtain a selector with that value.
 
-        (The normal arguments supported by :class:`~ctypes.c_void_p` are
+        (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
         still accepted.)
         """
 
@@ -786,9 +786,9 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
         The types of ``varargs`` are not included in the ``argtypes`` list. Instead,
         the values are automatically converted to C types using the default
-        :mod:`ctypes` argument conversion rules. To ensure that all ``varargs`` are
+        [`ctypes`][] argument conversion rules. To ensure that all ``varargs`` are
         converted to the expected C types, it is recommended to manually convert
-        all ``varargs`` to :mod:`ctypes` types instead of relying on automatic
+        all ``varargs`` to [`ctypes`][] types instead of relying on automatic
         conversions. For example:
 
         .. code-block:: python
@@ -808,11 +808,11 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
-    :param argtypes: The argument types of the method, as a :class:`list`.
+    :param argtypes: The argument types of the method, as a [`list`][].
         Defaults to ``[]``.
-    :param varargs: Variadic arguments for the method, as a :class:`list`.
+    :param varargs: Variadic arguments for the method, as a [`list`][].
         Defaults to ``[]``. These arguments are converted according to the
-        default :mod:`ctypes` conversion rules.
+        default [`ctypes`][] conversion rules.
     """
 
     try:
@@ -908,16 +908,16 @@ def send_super(
         an :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
     :param receiver: The object on which to call the method, as an
         :class:`~rubicon.objc.api.ObjCInstance`, :class:`.objc_id`, or
-        :class:`~ctypes.c_void_p`.
+        [`c_void_p`][ctypes.c_void_p].
     :param selector: The name of the method as a [`str`][], [`bytes`][],
         or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
-    :param argtypes: The argument types of the method, as a :class:`list`.
+    :param argtypes: The argument types of the method, as a [`list`][].
         Defaults to ``[]``.
-    :param varargs: Variadic arguments for the method, as a :class:`list`.
+    :param varargs: Variadic arguments for the method, as a [`list`][].
         Defaults to ``[]``. These arguments are converted according to the
-        default :mod:`ctypes` conversion rules.
+        default [`ctypes`][] conversion rules.
     """
 
     # Unwrap ObjCClass to Class if necessary
@@ -1024,7 +1024,7 @@ def add_method(cls, selector, method, encoding, replace=False):
     :param method: The method implementation, as a Python callable or a C
         function address.
     :param encoding: The method's signature (return type and argument types) as
-        a :class:`list`. The types of the implicit ``self`` and ``_cmd``
+        a [`list`][]. The types of the implicit ``self`` and ``_cmd``
         parameters must be included in the signature.
     :param replace: If the class already implements a method with the given
         name, replaces the current implementation if ``True``. Raises a
@@ -1075,7 +1075,7 @@ def add_ivar(cls, name, vartype):
 def get_ivar(obj, varname, weak=False):
     """Get the value of obj's ``ivar`` named ``varname``.
 
-    The returned object is a :mod:`ctypes` data object.
+    The returned object is a [`ctypes`][] data object.
 
     For non-object types (everything except :class:`.objc_id` and subclasses),
     the returned data object is backed by the ``ivar``'s actual memory. This means
@@ -1110,7 +1110,7 @@ def set_ivar(obj, varname, value, weak=False):
     """Set obj's ``ivar`` ``varname`` to value. If ``weak`` is ``True``, only a weak
     reference to the value is stored.
 
-    value must be a :mod:`ctypes` data object whose type matches that of
+    value must be a [`ctypes`][] data object whose type matches that of
     the ``ivar``.
     """
 

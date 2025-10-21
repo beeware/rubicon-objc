@@ -51,7 +51,7 @@ From :mod:`rubicon.objc.runtime`
 .. hlist::
 
     * :class:`~rubicon.objc.runtime.SEL`
-    * :func:`~rubicon.objc.runtime.send_message`
+    * [`send_message`][rubicon.objc.runtime.send_message]
     * :func:`~rubicon.objc.runtime.send_super`
 
 From :mod:`rubicon.objc.types`

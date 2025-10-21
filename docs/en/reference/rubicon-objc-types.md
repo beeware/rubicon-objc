@@ -386,8 +386,8 @@ than typing encodings out by hand.
 | `~ctypes.c_void_p`{.interpreted-text role="class"} | `^v` |  |
 | `UnknownPointer`{.interpreted-text role="class"} | `^?` | This encoding stands for a pointer to a type that cannot be encoded, which in practice means a function pointer. |
 | `UnknownPointer`{.interpreted-text role="class"} | `^{?}`, `^(?)` | Only when decoding. These encodings stand for pointers to a structure or union with unknown name and fields. |
-| `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"} | `@` | Class name suffixes in the encoding (e. g. `@"NSString"`) are ignored. |
-| `~rubicon.objc.runtime.objc_block`{.interpreted-text role="class"} | `@?` | Block signature suffixes in the encoding (e. g. `@?<v@?>`) are ignored. |
+| [`objc_id`][rubicon.objc.runtime.objc_id] | `@` | Class name suffixes in the encoding (e. g. `@"NSString"`) are ignored. |
+| [`objc_block`][rubicon.objc.runtime.objc_block] | `@?` | Block signature suffixes in the encoding (e. g. `@?<v@?>`) are ignored. |
 | `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"} | `:` |  |
 | `~rubicon.objc.runtime.Class`{.interpreted-text role="class"} | `#` |  |
 
@@ -436,11 +436,11 @@ These functions are used to map Python types to equivalent
 mappings. This mechanism is mainly used internally by Rubicon, to for
 example allow `~rubicon.objc.api.ObjCInstance`{.interpreted-text
 role="class"} to be used instead of
-`~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"} in
+[`objc_id`][rubicon.objc.runtime.objc_id] in
 method type annotations. Most users will not need to use these functions
 directly.
 
-<:> ctype_for_type
+::: rubicon.objc.types.ctype_for_type
 <!-- TODO: function -->
 
 <:> register_ctype_for_type
@@ -462,5 +462,5 @@ The following mappings are registered by default by Rubicon.
 | `float`{.interpreted-text role="class"} | `~ctypes.c_float`{.interpreted-text role="class"} |
 | `bool`{.interpreted-text role="class"} | `~ctypes.c_bool`{.interpreted-text role="class"} |
 | [`bytes`][] | `~ctypes.c_char_p`{.interpreted-text role="class"} |
-| `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} | `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"} |
+| `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} | [`objc_id`][rubicon.objc.runtime.objc_id] |
 | `~rubicon.objc.api.ObjCClass`{.interpreted-text role="class"} | `~rubicon.objc.runtime.Class`{.interpreted-text role="class"} |

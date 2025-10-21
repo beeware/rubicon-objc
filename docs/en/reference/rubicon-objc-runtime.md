@@ -82,9 +82,9 @@ framework.
 
 These are various types used by the Objective-C runtime functions.
 
-::: rubicon.objc.objc_id
+::: rubicon.objc.runtime.objc_id
 
-<:> objc_block([value])
+::: rubicon.objc.runtime.objc_block
 <!-- TODO: class -->
 
 <:> SEL([value])

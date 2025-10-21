@@ -384,10 +384,10 @@ Features
 * Added official support for Python 3.8.
   (`#162 <https://github.com/beeware/rubicon-objc/pull/162>`__)
 * Added a ``varargs`` keyword argument to
-  :func:`~rubicon.objc.runtime.send_message` to allow calling variadic methods
+  [`send_message`][rubicon.objc.runtime.send_message] to allow calling variadic methods
   more safely. (`#174 <https://github.com/beeware/rubicon-objc/pull/174>`__)
 * Changed ``ObjCMethod`` to call methods using
-  :func:`~rubicon.objc.runtime.send_message` instead of calling
+  [`send_message`][rubicon.objc.runtime.send_message] instead of calling
   :class:`~rubicon.objc.runtime.IMP`s directly. This is mainly an internal
   change and should not affect most existing code, although it may improve
   compatibility with Objective-C code that makes heavy use of runtime
@@ -417,7 +417,7 @@ Bugfixes
 * Corrected the invocation of ``NSApplication.terminate()`` when the
   :class:`~rubicon.objc.eventloop.CocoaLifecycle` is ended.
   (`#170 <https://github.com/beeware/rubicon-objc/issues/170>`__)
-* Fixed :func:`~rubicon.objc.runtime.send_message` not accepting
+* Fixed [`send_message`][rubicon.objc.runtime.send_message] not accepting
   :class:`~rubicon.objc.runtime.SEL` objects for the ``selector`` parameter.
   The documentation stated that this is allowed, but actually doing so caused
   a type error. (`#177 <https://github.com/beeware/rubicon-objc/pull/177>`__)
@@ -438,7 +438,7 @@ Deprecations and Removals
 * Removed the i386 architecture from the test matrix. It is still supported on
   a best-effort basis, but compatibility is not tested automatically.
   (`#139 <https://github.com/beeware/rubicon-objc/pull/139>`__)
-* Tightened the API of :func:`~rubicon.objc.runtime.send_message`, removing
+* Tightened the API of [`send_message`][rubicon.objc.runtime.send_message], removing
   some previously allowed shortcuts and features that were rarely used, or
   likely to be used by accident in an unsafe way.
 
@@ -446,20 +446,20 @@ Deprecations and Removals
 
       In most cases, Rubicon's high-level method call syntax provided by
       :class:`~rubicon.objc.api.ObjCInstance` can be used instead of
-      :func:`~rubicon.objc.runtime.send_message`. This syntax is almost always
+      [`send_message`][rubicon.objc.runtime.send_message]. This syntax is almost always
       more convenient to use, more readable and less error-prone.
-      :func:`~rubicon.objc.runtime.send_message` should only be used in cases
+      [`send_message`][rubicon.objc.runtime.send_message] should only be used in cases
       not supported by the high-level syntax.
 
 * Disallowed passing class names as :class:`str`/:class:`bytes` as the
-  ``receiver`` argument of :func:`~rubicon.objc.runtime.send_message`. If you
+  ``receiver`` argument of [`send_message`][rubicon.objc.runtime.send_message]. If you
   need to send a message to a class object (i. e. call a class method), use
   :class:`~rubicon.objc.api.ObjCClass` or
   :func:`~rubicon.objc.runtime.get_class` to look up the class, and pass the
   resulting :class:`~rubicon.objc.api.ObjCClass` or
   :class:`~rubicon.objc.runtime.Class` object as the receiver.
 * Disallowed passing :class:`~ctypes.c_void_p` objects as the ``receiver``
-  argument of :func:`~rubicon.objc.runtime.send_message`. The ``receiver``
+  argument of [`send_message`][rubicon.objc.runtime.send_message]. The ``receiver``
   argument now has to be of type :class:`~rubicon.objc.runtime.objc_id`, or
   one of its subclasses (such as :class:`~rubicon.objc.runtime.Class`), or one
   of its high-level equivalents
@@ -468,9 +468,9 @@ Deprecations and Removals
   If you need to send a message to an object pointer stored as
   :class:`~ctypes.c_void_p`, :func:`~ctypes.cast` it to
   :class:`~rubicon.objc.runtime.objc_id` first.
-* Removed default values for :func:`~rubicon.objc.runtime.send_message`'s
+* Removed default values for [`send_message`][rubicon.objc.runtime.send_message]'s
   ``restype`` and ``argtypes`` keyword arguments. Every
-  :func:`~rubicon.objc.runtime.send_message` call now needs to have its return
+  [`send_message`][rubicon.objc.runtime.send_message] call now needs to have its return
   and argument types set explicitly. This ensures that all arguments and the
   return value are converted correctly between (Objective-)C and Python.
 * Disallowed passing more argument values than there are argument types in
@@ -548,7 +548,7 @@ Misc
   :mod:`rubicon.objc.runtime` to :mod:`rubicon.objc.types`.
 * Removed some rarely used names (:class:`~rubicon.objc.runtime.IMP`,
   :class:`~rubicon.objc.runtime.Class`, :class:`~rubicon.objc.runtime.Ivar`,
-  :class:`~rubicon.objc.runtime.Method`, :func:`~rubicon.objc.runtime.get_ivar`,
+  [`Method`][rubicon.objc.runtime.Method], :func:`~rubicon.objc.runtime.get_ivar`,
   :class:`~rubicon.objc.runtime.objc_id`,
   :class:`~rubicon.objc.runtime.objc_property_t`,
   :func:`~rubicon.objc.runtime.set_ivar`) from the main

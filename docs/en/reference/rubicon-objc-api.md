@@ -248,25 +248,24 @@ The argument and return types of a Python-created Objective-C method are
 determined based on the Python method's type annotations. The
 annotations may contain any [`ctypes`][] type,
 as well as any of the Python types accepted by
-`~rubicon.objc.types.ctype_for_type`{.interpreted-text role="func"}. If
+[`ctype_for_type`][rubicon.objc.types.ctype_for_type]. If
 a parameter or the return type is not specified, it defaults to
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. The `self` parameter is
 special-cased --- its type is always [`ObjCInstance`][rubicon.objc.api.ObjCInstance], even if annotated otherwise. To annotate a method as
-returning `void`, set its return type to `None`{.interpreted-text
-role="class"}.
+returning `void`, set its return type to [`None`][].
 
 Before being passed to the Python method, any object parameters
-(`~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"}) are
+([`objc_id`][rubicon.objc.runtime.objc_id]) are
 automatically converted to [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. If the method returns an Objective-C object, it is
 converted using [`ns_from_py`][rubicon.objc.api.ns_from_py] before being
 returned to Objective-C. These automatic conversions can be disabled by
-using `objc_rawmethod`{.interpreted-text role="func"} instead of
-`objc_method`{.interpreted-text role="func"}.
+using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod] instead of
+[`objc_method`][rubicon.objc.api.objc_method].
 
 The implicit `_cmd` parameter is not passed to the Python method, as it
 is normally redundant and not needed. If needed, the `_cmd` parameter
-can be accessed by using `objc_rawmethod`{.interpreted-text role="func"}
-instead of `objc_method`{.interpreted-text role="func"}.
+can be accessed by using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod]
+instead of [`objc_method`][rubicon.objc.api.objc_method].
 
 ::: rubicon.objc.api.objc_rawmethod
     options:
@@ -322,9 +321,8 @@ an_objc_instance.doSomethingWithResultHandler(result_handler)
 ```
 
 If you are writing a custom Objective-C method (see
-`custom-classes-and-protocols`{.interpreted-text role="ref"}), you can
-annotate parameter or return types using
-`~rubicon.objc.runtime.objc_block`{.interpreted-text role="class"} so
+[Creating custom Objective-C classes and protocols][custom-classes-and-protocols]), you can annotate parameter or return types using
+[`objc_block`][rubicon.objc.runtime.objc_block] so
 that Rubicon converts them appropriately:
 
 ```python
@@ -349,7 +347,7 @@ differences between automatic and manual conversions, but they are not
 noticeable to most users.
 
 The internals of automatic conversion and
-`~rubicon.objc.runtime.objc_block`{.interpreted-text role="class"}
+[`objc_block`][rubicon.objc.runtime.objc_block]
 handling may change in the future, so if you need more control over the
 block conversion process, you should use the manual conversions
 described in the next section.
@@ -379,7 +377,7 @@ The following functions can be used to register custom subclasses of
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used when wrapping
 instances of a certain Objective-C class. This mechanism is for example
 used by Rubicon to provide Python-style operators and methods on
-standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and `NSDictionary`{.interpreted-text role="class"}.
+standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and [`NSDictionary`][rubicon.objc.api.NSDictionary].
 
 ::: rubicon.objc.api.register_type_for_objcclass
     options:

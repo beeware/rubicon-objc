@@ -510,7 +510,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   objects as the `receiver` argument of
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
   The `receiver` argument now has to be of type
-  `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"}, or
+  [`objc_id`][rubicon.objc.runtime.objc_id], or
   one of its subclasses (such as
   `~rubicon.objc.runtime.Class`{.interpreted-text role="class"}), or one
   of its high-level equivalents (such as
@@ -519,7 +519,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   APIs have one of these types. If you need to send a message to an
   object pointer stored as `~ctypes.c_void_p`{.interpreted-text
   role="class"}, `~ctypes.cast`{.interpreted-text role="func"} it to
-  `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"} first.
+  [`objc_id`][rubicon.objc.runtime.objc_id] first.
 
 - Removed default values for
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}'s
@@ -627,7 +627,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   `~rubicon.objc.runtime.Ivar`{.interpreted-text role="class"},
   `~rubicon.objc.runtime.Method`{.interpreted-text role="class"},
   `~rubicon.objc.runtime.get_ivar`{.interpreted-text role="func"},
-  `~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"},
+  [`objc_id`][rubicon.objc.runtime.objc_id],
   `~rubicon.objc.runtime.objc_property_t`{.interpreted-text
   role="class"}, `~rubicon.objc.runtime.set_ivar`{.interpreted-text
   role="func"}) from the main [`rubicon.objc`][rubicon-objc-module] namespace.

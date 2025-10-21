@@ -131,7 +131,7 @@ def ctype_for_type(tp):
     :class:`~rubicon.objc.api.objc_method` signatures,
     :class:`~rubicon.objc.api.objc_ivar` types, etc. This function translates
     Python built-in types and :mod:`rubicon.objc` classes to their
-    :mod:`ctypes` equivalents. Unregistered types (including types that are
+    [`ctypes`][] equivalents. Unregistered types (including types that are
     already ctypes) are returned unchanged.
     """
 
