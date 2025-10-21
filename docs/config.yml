@@ -107,5 +107,4 @@ plugins:
           docstring_section_style: spacy  # Better info layout than the other options
           line_length: 80  # Requires ruff, forces longer signatures to be stacked, if signatures aren't used, can be removed
           show_symbol_type_toc: true  # This is what they added on place of function() (parens) being displayed in the sidebar ToC
-          show_attribute_values: false  # Suppresses the values of attributes in the signature
           find_stubs_package: true  # Allows for rendering documentation out of the stubs package

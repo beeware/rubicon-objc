@@ -21,8 +21,12 @@ that module should be used instead of importing
 ## Objective-C classes
 
 ::: rubicon.objc.api.ObjCClass
+    options:
+        heading_level: 3
 
 ::: rubicon.objc.api.ObjCMetaClass
+    options:
+        heading_level: 3
 
 ## Standard Objective-C and Foundation classes
 
@@ -33,8 +37,8 @@ The following classes from the [Objective-C runtime](https://developer.apple.com
 None of the following classes have a usable Python-style constructor -
 for example, you *cannot* call `NSString("hello")` to create an
 Objective-C string from a Python string. To create instances of these
-classes, you should use [`ns_from_py`][rubicon.objc.ns_from_py]
-(also called [`at`][rubicon.objc.at]): `ns_from_py("hello")`
+classes, you should use [`ns_from_py`][rubicon.objc.api.ns_from_py]
+(also called [`at`][rubicon.objc.api.at]): `ns_from_py("hello")`
 returns a [`NSString`][rubicon.objc.api.NSString] instance with the
 value `hello`.
 
@@ -45,85 +49,98 @@ value `hello`.
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.Protocol
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSNumber
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSDecimalNumber
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSString
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSData
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSArray
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSMutableArray
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSDictionary
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ::: rubicon.objc.api.NSMutableDictionary
     options:
         heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
+        show_attribute_values: false
 
 ## Objective-C protocols
 
 ::: rubicon.objc.api.ObjCProtocol
+    options:
+        heading_level: 3
 
 ## Standard Objective-C and Foundation protocols
 
 The following protocols from the [Objective-C runtime](https://developer.apple.com/documentation/objectivec?language=objc) and the [Foundation](https://developer.apple.com/documentation/foundation?language=objc) framework are provided as [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]s for convenience. (Other protocols not listed here can be looked up by passing a protocol name to the [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] constructor.)
 
-::: rubicon.objc.NSObjectProtocol
+::: rubicon.objc.api.NSObjectProtocol
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_attribute_values: false
 
 ## Converting objects between Objective-C and Python
 
-::: rubicon.objc.py_from_ns
+::: rubicon.objc.api.py_from_ns
     options:
         heading_level: 3
 
-::: rubicon.objc.ns_from_py
+::: rubicon.objc.api.ns_from_py
     options:
         heading_level: 3
 
-::: rubicon.objc.at
+::: rubicon.objc.api.at
     options:
         heading_level: 3
 
@@ -152,14 +169,14 @@ class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
 
 Rubicon requires specifying a superclass when defining a custom
 Objective-C class. If you don't need to extend any specific class, use
-[`NSObject`][rubicon.objc.NSObject] as the superclass.
+[`NSObject`][rubicon.objc.api.NSObject] as the superclass.
 
 Although Objective-C technically allows defining classes without a base
 class (so-called *root classes*), this is almost never the desired
 behavior (attempting to do so [causes a compiler error by
 default](https://developer.apple.com/documentation/objectivec/objc_root_class)).
 In practice, this feature is only used in the definitions of core
-Objective-C classes like [`NSObject`][rubicon.objc.NSObject].
+Objective-C classes like [`NSObject`][rubicon.objc.api.NSObject].
 Because of this, Rubicon does not support defining Objective-C root
 classes.
 
@@ -234,16 +251,14 @@ as well as any of the Python types accepted by
 `~rubicon.objc.types.ctype_for_type`{.interpreted-text role="func"}. If
 a parameter or the return type is not specified, it defaults to
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. The `self` parameter is
-special-cased --- its type is always `ObjCInstance`{.interpreted-text
-role="class"}, even if annotated otherwise. To annotate a method as
+special-cased --- its type is always [`ObjCInstance`][rubicon.objc.api.ObjCInstance], even if annotated otherwise. To annotate a method as
 returning `void`, set its return type to `None`{.interpreted-text
 role="class"}.
 
 Before being passed to the Python method, any object parameters
 (`~rubicon.objc.runtime.objc_id`{.interpreted-text role="class"}) are
-automatically converted to `ObjCInstance`{.interpreted-text
-role="class"}. If the method returns an Objective-C object, it is
-converted using [`ns_from_py`][rubicon.objc.ns_from_py] before being
+automatically converted to [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. If the method returns an Objective-C object, it is
+converted using [`ns_from_py`][rubicon.objc.api.ns_from_py] before being
 returned to Objective-C. These automatic conversions can be disabled by
 using `objc_rawmethod`{.interpreted-text role="func"} instead of
 `objc_method`{.interpreted-text role="func"}.
