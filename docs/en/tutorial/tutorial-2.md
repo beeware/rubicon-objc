@@ -111,7 +111,7 @@ choosing class names.
 
 To allow a class name to be reused, you can set the class variable
 `~rubicon.objc.api.ObjCClass.auto_rename`{.interpreted-text role="attr"}
-to `True`. This option enables automatic renaming of the Objective C
+to `True`. This option enables automatic renaming of the Objective-C
 class if a naming collision is detected:
 
 ```pycon
@@ -126,7 +126,7 @@ This option can also be enabled on a per-class basis by using the
 ...     pass
 ```
 
-If this option is used, the Objective C class name will have a numeric
+If this option is used, the Objective-C class name will have a numeric
 suffix (e.g., <span class="title-ref">Handler_2</span>). The Python
 class name will be unchanged.
 

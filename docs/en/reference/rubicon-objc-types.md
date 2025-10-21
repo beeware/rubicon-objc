@@ -307,33 +307,47 @@ All Objective-C encoding strings are represented as
 [`bytes`][] rather than
 [`str`][].
 
-<:> ctype_for_encoding <!-- TODO: function -->
+<:> ctype_for_encoding
+<!-- TODO: function -->
 
-<:> encoding_for_ctype <!-- TODO: function -->
+<:> encoding_for_ctype
+<!-- TODO: function -->
 
-<:> register_preferred_encoding <!-- TODO: function -->
+<:> register_preferred_encoding
+<!-- TODO: function -->
 
-<:> with_preferred_encoding <!-- TODO: function -->
+<:> with_preferred_encoding
+<!-- TODO: function -->
 
-<:> register_encoding <!-- TODO: function -->
+<:> register_encoding
+<!-- TODO: function -->
 
-<:> with_encoding <!-- TODO: function -->
+<:> with_encoding
+<!-- TODO: function -->
 
-<:> unregister_encoding <!-- TODO: function -->
+<:> unregister_encoding
+<!-- TODO: function -->
 
-<:> unregister_encoding_all <!-- TODO: function -->
+<:> unregister_encoding_all
+<!-- TODO: function -->
 
-<:> unregister_ctype <!-- TODO: function -->
+<:> unregister_ctype
+<!-- TODO: function -->
 
-<:> unregister_ctype_all <!-- TODO: function -->
+<:> unregister_ctype_all
+<!-- TODO: function -->
 
-<:> get_ctype_for_encoding_map <!-- TODO: function -->
+<:> get_ctype_for_encoding_map
+<!-- TODO: function -->
 
-<:> get_encoding_for_ctype_map <!-- TODO: function -->
+<:> get_encoding_for_ctype_map
+<!-- TODO: function -->
 
-<:> split_method_encoding <!-- TODO: function -->
+<:> split_method_encoding
+<!-- TODO: function -->
 
-<:> ctypes_for_method_encoding <!-- TODO: function -->
+<:> ctypes_for_method_encoding
+<!-- TODO: function -->
 
 ### Default registered type encodings
 
@@ -412,7 +426,8 @@ mainly used internally by Rubicon, to allow passing Python sequences as
 method parameters where a C structure or array would normally be
 required. Most users will not need to use this function directly.
 
-<:> compound_value_for_sequence <!-- TODO: function -->
+<:> compound_value_for_sequence
+<!-- TODO: function -->
 
 ## Python to [`ctypes`][] type mapping
 
@@ -425,13 +440,17 @@ role="class"} to be used instead of
 method type annotations. Most users will not need to use these functions
 directly.
 
-<:> ctype_for_type <!-- TODO: function -->
+<:> ctype_for_type
+<!-- TODO: function -->
 
-<:> register_ctype_for_type <!-- TODO: function -->
+<:> register_ctype_for_type
+<!-- TODO: function -->
 
-<:> unregister_ctype_for_type <!-- TODO: function -->
+<:> unregister_ctype_for_type
+<!-- TODO: function -->
 
-<:> get_ctype_for_type_map <!-- TODO: function -->
+<:> get_ctype_for_type_map
+<!-- TODO: function -->
 
 ### Default registered mappings
 

@@ -75,7 +75,8 @@ Foundation
 The [Foundation](https://developer.apple.com/documentation/foundation)
 framework.
 
-<:> load_library <!-- TODO: function -->
+<:> load_library
+<!-- TODO: function -->
 
 ## Objective-C runtime types
 
@@ -151,7 +152,8 @@ The class in which to start searching for method implementations, as a
 These utility functions provide easier access from Python to certain
 parts of the Objective-C runtime.
 
-<:> object_isClass(obj) <!-- TODO: function -->
+<:> object_isClass(obj)
+<!-- TODO: function -->
 <!-- TODO: Doc notes -->
 Return whether the given Objective-C object is a class (or a metaclass).
 
@@ -164,20 +166,29 @@ iOS 8. This module-level function is provided to support older systems
 available, and otherwise emulates it.
 
 
-<:> get_class <!-- TODO: function -->
+<:> get_class
+<!-- TODO: function -->
 
-<:> should_use_stret <!-- TODO: function -->
+<:> should_use_stret
+<!-- TODO: function -->
 
-<:> should_use_fpret <!-- TODO: function -->
+<:> should_use_fpret
+<!-- TODO: function -->
 
-<:> send_message <!-- TODO: function -->
+<:> send_message
+<!-- TODO: function -->
 
-<:> send_super <!-- TODO: function -->
+<:> send_super
+<!-- TODO: function -->
 
-<:> add_method <!-- TODO: function -->
+<:> add_method
+<!-- TODO: function -->
 
-<:> add_ivar <!-- TODO: function -->
+<:> add_ivar
+<!-- TODO: function -->
 
-<:> get_ivar <!-- TODO: function -->
+<:> get_ivar
+<!-- TODO: function -->
 
-<:> set_ivar <!-- TODO: function -->
+<:> set_ivar
+<!-- TODO: function -->

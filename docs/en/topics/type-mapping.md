@@ -92,8 +92,7 @@ required structure type.
 If a parameter expects an Objective-C object, you can also pass certain
 Python objects, which are automatically converted to their Objective-C
 counterparts. For example, a Python [`str`][] is converted to an `NSString`, [`bytes`][] to `NSData`, etc. Collections are also supported:
-`[`list`][] and `dict`{.interpreted-text
-role="class"} are converted to `NSArray` and `NSDictionary`, and their
+`[`list`][] and [`dict`][] are converted to `NSArray` and `NSDictionary`, and their
 elements are converted recursively.
 
 /// note | Note
@@ -294,7 +293,7 @@ False
 behave slightly differently than Python [`str`][] objects in some cases. For technical reasons,
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"}s are not
 hashable in Python, which means they cannot be used as
-`dict`{.interpreted-text role="class"} keys (but they *can* be used as
+[`dict`][] keys (but they *can* be used as
 `~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} keys).
 `~rubicon.objc.api.NSString`{.interpreted-text role="class"} also
 handles Unicode code points above `U+FFFF` differently than Python

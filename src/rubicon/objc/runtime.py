@@ -152,7 +152,7 @@ class SEL(c_void_p):
 
     @property
     def name(self):
-        """The selector's name as :class:`bytes`."""
+        """The selector's name as [`bytes`][]."""
 
         if self.value is None:
             raise ValueError("Cannot get name of null selector")
@@ -160,7 +160,7 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        """The constructor can be called with a :class:`bytes` or :class:`str` object to
+        """The constructor can be called with a [`bytes`][] or [`str`][] object to
         obtain a selector with that value.
 
         (The normal arguments supported by :class:`~ctypes.c_void_p` are
@@ -644,10 +644,10 @@ libobjc.sel_registerName.argtypes = [c_char_p]
 
 
 def ensure_bytes(x):
-    """Convert the given string to :class:`bytes` if necessary.
+    """Convert the given string to [`bytes`][] if necessary.
 
-    If the argument is already :class:`bytes`, it is returned unchanged;
-    if it is :class:`str`, it is encoded as UTF-8.
+    If the argument is already [`bytes`][], it is returned unchanged;
+    if it is [`str`][], it is encoded as UTF-8.
     """
 
     if isinstance(x, bytes):
@@ -804,7 +804,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     :param receiver: The object on which to call the method, as an
         :class:`~rubicon.objc.api.ObjCInstance` or :class:`.objc_id`.
-    :param selector: The name of the method as a :class:`str`, :class:`bytes`,
+    :param selector: The name of the method as a [`str`][], [`bytes`][],
         or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
@@ -909,7 +909,7 @@ def send_super(
     :param receiver: The object on which to call the method, as an
         :class:`~rubicon.objc.api.ObjCInstance`, :class:`.objc_id`, or
         :class:`~ctypes.c_void_p`.
-    :param selector: The name of the method as a :class:`str`, :class:`bytes`,
+    :param selector: The name of the method as a [`str`][], [`bytes`][],
         or :class:`SEL`.
     :param args: The method arguments.
     :param restype: The return type of the method.
@@ -1019,8 +1019,8 @@ def add_method(cls, selector, method, encoding, replace=False):
 
     :param cls: The Objective-C class to which to add the method, as an
         :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
-    :param selector: The name for the new method, as a :class:`str`,
-        :class:`bytes`, or :class:`SEL`.
+    :param selector: The name for the new method, as a [`str`][],
+        [`bytes`][], or :class:`SEL`.
     :param method: The method implementation, as a Python callable or a C
         function address.
     :param encoding: The method's signature (return type and argument types) as

@@ -130,7 +130,7 @@
 
 ### Features
 
-- Name clashes caused by re-registering Objective C classes and
+- Name clashes caused by re-registering Objective-C classes and
   protocols can now be automatically avoided by marking the class with
   `auto_rename`. (#181)
 - Apple Silicon is now formally tested by Rubicon's continuous
@@ -173,7 +173,7 @@
 
 ### Bugfixes
 
-- References to blocks obtained from an Objective C API can now be
+- References to blocks obtained from an Objective-C API can now be
   invoked on M1 hardware.
   ([#225](https://github.com/beeware/rubicon-objc/issues/225))
 - Rubicon is now compatible with PEP563 deferred annotations
@@ -255,7 +255,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   loop is in use.
   ([#228](https://github.com/beeware/rubicon-objc/issues/228))
 - The `ObjCInstance` cache no longer returns a stale wrapper objects if
-  a memory address is reused by the Objective C runtime.
+  a memory address is reused by the Objective-C runtime.
   ([#249](https://github.com/beeware/rubicon-objc/issues/249))
 - It is now safe to open an asyncio event loop on a secondary thread.
   Previously this would work, but would intermittently fail with a

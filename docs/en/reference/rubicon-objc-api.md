@@ -1,10 +1,5 @@
 # `rubicon.objc.api` - The high-level Rubicon API { #rubicon-objc-api }
 
-
-rubicon.objc
-    options:
-        show_if_no_docstring: true
-
 This module contains Rubicon's main high-level APIs, which allow easy
 interaction with Objective-C classes and objects using Pythonic syntax.
 
@@ -16,58 +11,22 @@ that module should be used instead of importing
 ## Objective-C objects
 
 ::: rubicon.objc.api.ObjCInstance
+    options:
+        heading_level: 3
 
 ::: rubicon.objc.api.objc_const
-<!-- TODO: function -->
-
-<:> objc_class <!-- TODO: attribute -->
-
-<:> str <!-- TODO: method -->
-
-<:> repr <!-- TODO: method -->
-
-<:> getattr <!-- TODO: method -->
-
-<:> setattr <!-- TODO: method -->
-
+    options:
+        heading_level: 3
 
 ## Objective-C classes
 
 ::: rubicon.objc.api.ObjCClass
 
-(name_or_ptr, [bases, attrs, [protocols=(),auto_rename=None]]) <!-- TODO: add to args? -->
-
 ::: rubicon.objc.api.ObjCMetaClass
-(name_or_ptr) <!-- TODO: add to args? -->
-
-<:> name <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The name of this class, as a [`str`][].
-
-<:> superclass <!-- TODO: attribute -->
-
-<:> protocols <!-- TODO: attribute -->
-
-<:> auto_rename <!-- TODO: attribute -->
-
-<:> declare_property <!-- TODO: method -->
-
-<:> declare_class_property <!-- TODO: method -->
-
-<:> instancecheck <!-- TODO: method -->
-
-<:> subclasscheck <!-- TODO: method -->
 
 ## Standard Objective-C and Foundation classes
 
-The following classes from the [Objective-C
-runtime](https://developer.apple.com/documentation/objectivec?language=objc)
-and the
-[Foundation](https://developer.apple.com/documentation/foundation?language=objc)
-framework are provided as [`ObjCClass`][rubicon.objc.api.ObjCClass]es
-for convenience. (Other classes not listed here can be looked up by
-passing a class name to the [`ObjCClass`][rubicon.objc.api.ObjCClass]
-constructor.)
+The following classes from the [Objective-C runtime](https://developer.apple.com/documentation/objectivec?language=objc) and the [Foundation](https://developer.apple.com/documentation/foundation?language=objc) framework are provided as [`ObjCClass`][rubicon.objc.api.ObjCClass]es for convenience. (Other classes not listed here can be looked up by passing a class name to the [`ObjCClass`][rubicon.objc.api.ObjCClass] constructor.)
 
 /// note | Note
 
@@ -85,161 +44,74 @@ value `hello`.
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.Protocol
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSNumber
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSDecimalNumber
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSString
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSData
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSArray
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSMutableArray
     options:
         heading_level: 3
         show_symbol_type_toc: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSDictionary
     options:
         heading_level: 3
         show_symbol_type_toc: false
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSDictionary](https://developer.apple.com/documentation/foundation/nsdictionary?language=objc)
-class from `<Foundation/NSDictionary.h>`.
-
-/// note | Note
-
-This class can be converted to and from Python `dict`{.interpreted-text
-role="class"} using [`py_from_ns`][rubicon.objc.py_from_ns] and
-[`ns_from_py`][rubicon.objc.ns_from_py].
-
-`py_from_ns(nsdict)` will recursively convert `nsdict`'s keys and values
-to Python objects, where possible. To avoid the recursive conversion of
-the values, use `{py_from_ns(k): v for k, v in nsdict.items()}`. The
-conversion of the keys cannot be avoided, because Python
-`dict`{.interpreted-text role="class"} keys need to be hashable, which
-[`ObjCInstance`][rubicon.objc.api.ObjCInstance] is not. If any of the
-keys convert to a Python object that is not hashable, an error is raised
-(regardless of which conversion method you use).
-
-`ns_from_py(pydict)` will recursively convert `pydict`'s keys and values
-to Objective-C. As there is no way to store Python object references as
-Objective-C objects yet, this recursive conversion cannot be avoided. If
-any of `pydict`'s keys or values cannot be converted to Objective-C, an
-error is raised.
-
-///
-
-<!-- TODO: methods -->
-getitem (key)  len ()  iter ()  contains (key)
- eq (other)  ne (other) copy() get(key, [default=None])
-keys() items() values()
-
-Python-style mapping interface.
-
-/// note | Note
-
-Unlike most Python mappings, `NSDictionary`{.interpreted-text
-role="class"}'s `keys`{.interpreted-text role="attr"},
-`values`{.interpreted-text role="attr"}, and `items`{.interpreted-text
-role="attr"} methods don't return dynamic views of the dictionary's
-keys, values, and items.
-
-`keys`{.interpreted-text role="attr"} and `values`{.interpreted-text
-role="attr"} return lists that are created each time the methods are
-called, which can have an effect on performance and memory usage for
-large dictionaries. To avoid this, you can cache the return values of
-`keys`{.interpreted-text role="attr"} and `values`{.interpreted-text
-role="attr"}, or convert the `NSDictionary`{.interpreted-text
-role="class"} to a Python `dict`{.interpreted-text role="class"}
-beforehand.
-
-`items`{.interpreted-text role="attr"} is currently implemented as a
-generator, meaning that it returns a single-use iterator. If you need to
-iterate over `items`{.interpreted-text role="attr"} more than once or
-perform other operations on it, you should convert it to a Python
-`set`{.interpreted-text role="class"} or [`list`][] first.
-
-///
-
-
+        show_labels: false
 
 ::: rubicon.objc.api.NSMutableDictionary
     options:
         heading_level: 3
         show_symbol_type_toc: false
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSMutableDictionary](https://developer.apple.com/documentation/foundation/nsmutabledictionary?language=objc)
-class from `<Foundation/NSDictionary.h>`.
-
-/// note | Note
-
-This class can be converted to and from Python exactly like its
-superclass `NSDictionary`.
-
-///
-
-<:> setitem (key, value)  delitem (key) clear() pop(item,
-[default]) popitem() setdefault(key, [default=None])
-update([other], **kwargs) <!-- TODO: method -->
-<!-- TODO: Doc notes -->
-Python-style mutable mapping interface.
-
-
+        show_labels: false
 
 ## Objective-C protocols
 
 ::: rubicon.objc.api.ObjCProtocol
 
-### Standard Objective-C and Foundation protocols
+## Standard Objective-C and Foundation protocols
 
-The following protocols from the [Objective-C
-runtime](https://developer.apple.com/documentation/objectivec?language=objc)
-and the
-[Foundation](https://developer.apple.com/documentation/foundation?language=objc)
-framework are provided as [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]s for convenience. (Other protocols not listed here can be
-looked up by passing a protocol name to the
-[`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] constructor.)
+The following protocols from the [Objective-C runtime](https://developer.apple.com/documentation/objectivec?language=objc) and the [Foundation](https://developer.apple.com/documentation/foundation?language=objc) framework are provided as [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]s for convenience. (Other protocols not listed here can be looked up by passing a protocol name to the [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] constructor.)
 
 ::: rubicon.objc.NSObjectProtocol
     options:
-        heading_level: 4
+        heading_level: 3
         show_symbol_type_toc: false
-<!-- TODO: data -->
-<!-- TODO: Doc notes -->
-The
-[NSObject](https://developer.apple.com/documentation/objectivec/1418956-nsobject?language=objc)
-protocol from `<objc/NSObject.h>`. The protocol is exported as
-`NSObjectProtocol`{.interpreted-text role="class"} in Python because it
-would otherwise clash with the `NSObject`{.interpreted-text
-role="class"} class.
-
 
 ## Converting objects between Objective-C and Python
 
@@ -254,7 +126,6 @@ role="class"} class.
 ::: rubicon.objc.at
     options:
         heading_level: 3
-        separate_signature: false
 
 ## Creating custom Objective-C classes and protocols { #custom-classes-and-protocols }
 
@@ -281,14 +152,14 @@ class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
 
 Rubicon requires specifying a superclass when defining a custom
 Objective-C class. If you don't need to extend any specific class, use
-`NSObject`{.interpreted-text role="class"} as the superclass.
+[`NSObject`][rubicon.objc.NSObject] as the superclass.
 
 Although Objective-C technically allows defining classes without a base
 class (so-called *root classes*), this is almost never the desired
 behavior (attempting to do so [causes a compiler error by
 default](https://developer.apple.com/documentation/objectivec/objc_root_class)).
 In practice, this feature is only used in the definitions of core
-Objective-C classes like `NSObject`{.interpreted-text role="class"}.
+Objective-C classes like [`NSObject`][rubicon.objc.NSObject].
 Because of this, Rubicon does not support defining Objective-C root
 classes.
 
@@ -315,11 +186,15 @@ class MyProtocol(metaclass=ObjCProtocol):
 
 ### Defining methods
 
-<:> objc_method <!-- TODO: function -->
+::: rubicon.objc.api.objc_method
+    options:
+        heading_level: 4
 
-<:> objc_classmethod <!-- TODO: function -->
+::: rubicon.objc.api.objc_classmethod
+    options:
+        heading_level: 4
 
-#### Method naming
+### Method naming
 
 The name of a Python-defined Objective-C method is same as the Python
 method's name, but with all underscores (`_`) replaced with colons (`:`)
@@ -350,7 +225,7 @@ method names.
 
 ///
 
-#### Parameter and return types
+### Parameter and return types
 
 The argument and return types of a Python-created Objective-C method are
 determined based on the Python method's type annotations. The
@@ -378,17 +253,27 @@ is normally redundant and not needed. If needed, the `_cmd` parameter
 can be accessed by using `objc_rawmethod`{.interpreted-text role="func"}
 instead of `objc_method`{.interpreted-text role="func"}.
 
-<:> objc_rawmethod <!-- TODO: function -->
+::: rubicon.objc.api.objc_rawmethod
+    options:
+        heading_level: 4
 
 ### Defining properties and `ivars`
 
-<:> objc_property <!-- TODO: function -->
+::: rubicon.objc.api.objc_property
+    options:
+        heading_level: 4
 
-<:> objc_ivar <!-- TODO: function -->
+::: rubicon.objc.api.objc_ivar
+    options:
+        heading_level: 4
 
-<:> get_ivar <!-- TODO: function -->
+::: rubicon.objc.api.get_ivar
+    options:
+        heading_level: 4
 
-<:> set_ivar <!-- TODO: function -->
+::: rubicon.objc.api.set_ivar
+    options:
+        heading_level: 4
 
 ## Objective-C blocks { #objc_blocks }
 
@@ -463,14 +348,15 @@ and vice versa. You may need to use them to perform these conversions
 outside of Objective-C method calls, or if you need more control over
 the block's type signature.
 
-<:> ObjCBlock(pointer, [return_type, *arg_types])
-<!-- TODO: class -->
+::: rubicon.objc.api.ObjCBlock
+    options:
+        heading_level: 4
+        members:
+            - __call__
 
-<:> call <!-- TODO: method -->
-
-
-<:> Block(func, [restype, *argtypes])
-<!-- TODO: class -->
+::: rubicon.objc.api.Block
+    options:
+        heading_level: 4
 
 ## Defining custom subclasses of [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
 
@@ -480,12 +366,22 @@ instances of a certain Objective-C class. This mechanism is for example
 used by Rubicon to provide Python-style operators and methods on
 standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and `NSDictionary`{.interpreted-text role="class"}.
 
-<:> register_type_for_objcclass <!-- TODO: function -->
+::: rubicon.objc.api.register_type_for_objcclass
+    options:
+        heading_level: 3
 
-<:> for_objcclass <!-- TODO: function -->
+::: rubicon.objc.api.for_objcclass
+    options:
+        heading_level: 3
 
-<:> type_for_objcclass <!-- TODO: function -->
+::: rubicon.objc.api.type_for_objcclass
+    options:
+        heading_level: 3
 
-<:> unregister_type_for_objcclass <!-- TODO: function -->
+::: rubicon.objc.api.unregister_type_for_objcclass
+    options:
+        heading_level: 3
 
-<:> get_type_for_objcclass_map <!-- TODO: function -->
+::: rubicon.objc.api.get_type_for_objcclass_map
+    options:
+        heading_level: 3

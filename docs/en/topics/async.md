@@ -12,7 +12,7 @@ module](https://docs.python.org/3/library/asyncio.html).
 
 The `asyncio`{.interpreted-text role="mod"} module provides an event
 loop to coordinate asynchronous features. However, if you're running an
-Objective C GUI application, you probably already have an event loop -
+Objective-C GUI application, you probably already have an event loop -
 the one provided by CoreFoundation. This CoreFoundation event loop is
 then wrapped by `NSApplication` or `UIApplication` in end-user code.
 
