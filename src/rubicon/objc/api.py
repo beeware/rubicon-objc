@@ -2157,8 +2157,8 @@ def ns_from_py(pyobj):
     """Convert a Python object into an equivalent Foundation object. The returned object
     is autoreleased.
 
-    This function is also available under the name :func:`at`, because its
-    functionality is very similar to that of the Objective-C ``@`` operator and
+    This function is also available under the name [`at`][rubicon.objc.api.at], because
+    its functionality is very similar to that of the Objective-C ``@`` operator and
     literals.
 
     Currently supported types:

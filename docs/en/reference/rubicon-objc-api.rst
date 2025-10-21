@@ -66,7 +66,7 @@ not listed here can be looked up by passing a class name to the
     None of the following classes have a usable Python-style constructor - for
     example, you *cannot* call ``NSString("hello")`` to create an Objective-C
     string from a Python string. To create instances of these classes, you
-    should use :func:`ns_from_py` (also called :func:`at`):
+    should use :func:`ns_from_py` (also called [`at`][rubicon.objc.api.at]):
     ``ns_from_py("hello")`` returns a :class:`NSString` instance with the value
     ``hello``.
 
