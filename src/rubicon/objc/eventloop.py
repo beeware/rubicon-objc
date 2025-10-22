@@ -217,9 +217,6 @@ class CFTimerHandle(events.TimerHandle):
 
         self._timeout = timeout
 
-        # Retain a reference to the Handle
-        self._loop._timers.add(self)
-
         # Create the timer event, and add it to the run loop.
         self._timer = libcf.CFRunLoopTimerCreate(
             kCFAllocatorDefault,
@@ -235,18 +232,17 @@ class CFTimerHandle(events.TimerHandle):
             self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes
         )
 
+        # Retain a reference to the Handle. This is done last to ensure that the
+        # CFTimerHandle isn't put on the loop's cancellation list unless the
+        # timer is fully created and added.
+        self._loop._timers.add(self)
+
     def cancel(self):
         """Cancel the Timer handle."""
         super().cancel()
-        # There's a very small opportunity for a race condition during startup
-        # where the CFTimerHandle exists, but the _timer hasn't been assigned.
-        # This has been seen in CI, (as a failure in
-        # AsyncSubprocessTests::test_subprocess) but it's not easily
-        # reproducible
-        if timer := getattr(self, "_timer", None):
-            libcf.CFRunLoopRemoveTimer(
-                self._loop._cfrunloop, timer, kCFRunLoopCommonModes
-            )
+        libcf.CFRunLoopRemoveTimer(
+            self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes
+        )
         self._loop._timers.discard(self)
 
 
