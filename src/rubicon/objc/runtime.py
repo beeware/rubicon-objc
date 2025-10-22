@@ -118,7 +118,7 @@ Foundation = load_library("Foundation")
 
 @with_encoding(b"@")
 class objc_id(c_void_p):
-    """The `id <https://developer.apple.com/documentation/objectivec/id?language=objc>`__
+    """The [id](https://developer.apple.com/documentation/objectivec/id?language=objc)
     type from `<objc/objc.h>`.
     """
 
@@ -146,7 +146,7 @@ class objc_block(objc_id):
 
 @with_preferred_encoding(b":")
 class SEL(c_void_p):
-    """The `SEL <https://developer.apple.com/documentation/objectivec/sel?language=objc>`__
+    """The [SEL](https://developer.apple.com/documentation/objectivec/sel?language=objc)
     type from `<objc/objc.h>`.
     """
 
@@ -188,13 +188,13 @@ class SEL(c_void_p):
 
 @with_preferred_encoding(b"#")
 class Class(objc_id):
-    """The `Class <https://developer.apple.com/documentation/objectivec/class?language=objc>`__
+    """The [Class](https://developer.apple.com/documentation/objectivec/class?language=objc)
     type from `<objc/objc.h>`.
     """
 
 
 class IMP(c_void_p):
-    """The `IMP <https://developer.apple.com/documentation/objectivec/imp?language=objc>`__
+    """The [IMP](https://developer.apple.com/documentation/objectivec/imp?language=objc)
     type from `<objc/objc.h>`.
 
     An :class:`IMP` cannot be called directly --- it must be cast to the
@@ -204,26 +204,26 @@ class IMP(c_void_p):
 
 
 class Method(c_void_p):
-    """The `Method <https://developer.apple.com/documentation/objectivec/method?language=objc>`__
+    """The [Method](https://developer.apple.com/documentation/objectivec/method?language=objc)
     type from `<objc/runtime.h>`.
     """
 
 
 class Ivar(c_void_p):
-    """The `Ivar <https://developer.apple.com/documentation/objectivec/ivar?language=objc>`__
+    """The [Ivar](https://developer.apple.com/documentation/objectivec/ivar?language=objc)
     type from `<objc/runtime.h>`.
     """
 
 
 class objc_property_t(c_void_p):
-    """The `objc_property_t <https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc>`__
+    """The [objc_property_t](https://developer.apple.com/documentation/objectivec/objc_property_t?language=objc)
     type from `<objc/runtime.h>`.
     """
 
 
 class objc_property_attribute_t(Structure):
     """
-    The `objc_property_attribute_t <https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc>`__
+    The [objc_property_attribute_t](https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc)
     structure from `<objc/runtime.h>`.
     """
 
@@ -546,7 +546,7 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """The `objc_method_description <https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc>`__
+    """The [objc_method_description](https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc)
     structure from `<objc/runtime.h>`.
     """
 
@@ -859,7 +859,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
 
 class objc_super(Structure):
-    """The `objc_super <https://developer.apple.com/documentation/objectivec/objc_super?language=objc>`__
+    """The [objc_super](https://developer.apple.com/documentation/objectivec/objc_super?language=objc)
     structure from `<objc/message.h>`.
     """
 
