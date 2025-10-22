@@ -1103,7 +1103,7 @@ class ObjCInstance:
           `@property` in the source code)
         * There is both a getter and setter method for the name
         * The name has been declared as a property using
-          [`ObjCClass.declare_property`][rubicon.objc.api.ObjCClass.declare_property]
+          [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property]
 
         Otherwise, a method matching the given name is looked up.
         [`ObjCInstance`][rubicon.objc.api.ObjCInstance] understands two syntaxes for
@@ -2020,7 +2020,7 @@ if True:
     to Python objects, where possible. To avoid the recursive conversion of
     the values, use `{py_from_ns(k): v for k, v in nsdict.items()}`. The
     conversion of the keys cannot be avoided, because Python
-    [`dict][] keys need to be hashable, which
+    [`dict`][] keys need to be hashable, which
     [`ObjCInstance`][rubicon.objc.api.ObjCInstance] is not. If any of the
     keys convert to a Python object that is not hashable, an error is raised
     (regardless of which conversion method you use).
