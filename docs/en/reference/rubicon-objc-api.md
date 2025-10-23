@@ -37,64 +37,24 @@ value `hello`.
 ///
 
 ::: rubicon.objc.api.NSObject
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.Protocol
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSNumber
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSDecimalNumber
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSString
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSData
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSArray
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSMutableArray
-    options:
-        show_symbol_type_toc: false
-        show_labels: false
-        show_attribute_values: false
 
 ::: rubicon.objc.api.NSDictionary
-    options:
-        show_symbol_type_toc: false
-        show_attribute_values: false
-        show_labels: false
 
 ::: rubicon.objc.api.NSMutableDictionary
-    options:
-        show_symbol_type_toc: false
-        show_attribute_values: false
-        show_labels: false
 
 ## Objective-C protocols
 

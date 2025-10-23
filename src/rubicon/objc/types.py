@@ -88,7 +88,14 @@ __all__ = [
     "with_preferred_encoding",
 ]
 
-__LP64__ = 8 * struct.calcsize("P") == 64
+# check-docstring-is-first made us do this
+if True:
+    __LP64__ = 8 * struct.calcsize("P") == 64
+    """Indicates whether the current environment is 64-bit.
+
+    If true, C `long`s
+    and pointers are 64 bits in size, otherwise 32 bits.
+    """
 
 # platform.processor() describes the CPU on which the code is running.
 #   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit
@@ -98,8 +105,10 @@ __LP64__ = 8 * struct.calcsize("P") == 64
 # platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
 _processor = platform.processor()
 _any_x86 = _processor in ("i386", "x86_64")
-__i386__ = _any_x86 and not __LP64__
-__x86_64__ = _any_x86 and __LP64__
+# check-docstring-is-first made us do this
+if True:
+    __i386__ = _any_x86 and not __LP64__
+    __x86_64__ = _any_x86 and __LP64__
 
 if _processor:
     _any_arm = _processor.startswith("arm")
@@ -110,8 +119,10 @@ else:
     # architecture. In that case, look for the architecture in the kernel
     # version string.
     _any_arm = "ARM" in platform.version()
-__arm64__ = _any_arm and __LP64__
-__arm__ = _any_arm and not __LP64__
+# check-docstring-is-first made us do this
+if True:
+    __arm64__ = _any_arm and __LP64__
+    __arm__ = _any_arm and not __LP64__
 
 
 _ctype_for_type_map = {
@@ -622,7 +633,7 @@ def compound_value_for_sequence(seq, tp):
     structure's fields are initialized in declaration order with the values from
     `seq`. `seq` must have as many elements as the structure has fields.
 
-    If `tp` is a :class:`~ctypes.Array` type, the newly created array is
+    If `tp` is a [`Array`][ctypes.Array] type, the newly created array is
     initialized with the values from `seq`. `seq` must have as many elements
     as the array type.
 
@@ -863,26 +874,32 @@ else:
 
 
 def NSMakeSize(w, h):
+    """Constructs a new [`NSSize`][rubicon.objc.types.NSSize] object."""
     return NSSize(w, h)
 
 
 def CGSizeMake(w, h):
+    """Constructs a new [`CGSize`][rubicon.objc.types.CGSize] object."""
     return CGSize(w, h)
 
 
 def NSMakeRect(x, y, w, h):
+    """Constructs a new [`NSRect`][rubicon.objc.types.NSRect] object."""
     return NSRect(NSPoint(x, y), NSSize(w, h))
 
 
 def CGRectMake(x, y, w, h):
+    """Constructs a new [`CGRect`][rubicon.objc.types.CGRect] object."""
     return CGRect(CGPoint(x, y), CGSize(w, h))
 
 
 def NSMakePoint(x, y):
+    """Constructs a new [`NSPoint`][rubicon.objc.types.NSPoint] object."""
     return NSPoint(x, y)
 
 
 def CGPointMake(x, y):
+    """Constructs a new [`CGPoint`][rubicon.objc.types.CGPoint] object."""
     return CGPoint(x, y)
 
 
@@ -907,10 +924,19 @@ class UIEdgeInsets(Structure):
 
 
 def UIEdgeInsetsMake(top, left, bottom, right):
+    """Constructs a new [`UIEdgeInsets`][rubicon.objc.types.UIEdgeInsets] object."""
     return UIEdgeInsets(top, left, bottom, right)
 
 
-UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+# check-docstring-is-first made us do this
+if True:
+    UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+    """
+    The constant
+    [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
+    a [`UIEdgeInsets`][rubicon.objc.types.UIEdgeInsets] instance with all
+    insets set to zero.
+    """
 
 
 # macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
@@ -979,11 +1005,34 @@ class NSRange(Structure):
         return f"location={self.location}, length={self.length}"
 
 
-NSZeroPoint = NSPoint(0, 0)
+# check-docstring-is-first made us do this
+if True:
+    NSZeroPoint = NSPoint(0, 0)
+    """
+    The constant
+    [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
+    a [`NSPoint`][rubicon.objc.types.NSPoint] instance with the X and Y
+    coordinates set to zero.
+    """
 
 
 if sizeof(c_void_p) == 4:
     NSIntegerMax = 0x7FFFFFFF
+    """
+    The macro constant
+    [NSIntegerMax](https://developer.apple.com/documentation/objectivec/nsintegermax?language=objc)
+    from `<objc/NSObjCRuntime.h>`: the maximum value that a
+    [`NSInteger`][rubicon.objc.types.NSInteger] can hold.
+    """
 elif sizeof(c_void_p) == 8:
     NSIntegerMax = 0x7FFFFFFFFFFFFFFF
-NSNotFound = NSIntegerMax
+# check-docstring-is-first made us do this
+if True:
+    NSNotFound = NSIntegerMax
+    """
+    The constant
+    [NSNotFound](https://developer.apple.com/documentation/foundation/nsnotfound?language=objc)
+    from `<Foundation/NSObjCRuntime.h>`: a
+    [`NSInteger`][rubicon.objc.types.NSInteger] sentinel value indicating that
+    an item was not found (usually when searching in a collection).
+    """

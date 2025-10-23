@@ -79,6 +79,7 @@ dev = [
 # and the docs contribution guide.
 docs = [
     "beeware-docs-tools @ git+https://github.com/beeware/beeware-docs-tools",
+    "griffe @ git+https://github.com/kattni/griffe@stub-override",
     {include-group = "setuptools-scm"}
 ]
 

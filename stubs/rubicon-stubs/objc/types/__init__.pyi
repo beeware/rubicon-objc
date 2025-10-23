@@ -193,7 +193,7 @@ class UIEdgeInsets:
         """
         ...
     @property
-    def bottom(self):
+    def bottom(self) -> CGFloat:
         """
         The bottom inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """

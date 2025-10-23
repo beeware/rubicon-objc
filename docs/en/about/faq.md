@@ -1,6 +1,6 @@
 # Why "Rubicon"?
 
-## So... why the name Rubicon? { #so...-why-the-name-rubicon }
+## So... why the name Rubicon?
 
 The Rubicon is a river in Italy. It was of importance in ancient times
 as the border of Rome. The Roman Army was prohibited from crossing this

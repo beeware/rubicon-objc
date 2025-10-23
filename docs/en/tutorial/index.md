@@ -1,4 +1,4 @@
-# Tutorials { #tutorial }
+# Tutorials { #tutorial-index }
 
 These tutorials are step-by step guides for using Rubicon.
 

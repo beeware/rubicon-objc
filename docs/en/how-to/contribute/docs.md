@@ -1,4 +1,4 @@
-# Contributing to the documentation
+# Contributing to the documentation { #contribute-docs }
 
 Here are some tips for working on this documentation. You're welcome to
 add more and help us out!

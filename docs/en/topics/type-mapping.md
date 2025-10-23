@@ -50,9 +50,9 @@ def roundToZero_(self, value: c_double) -> NSInteger:
 Rubicon also allows certain Python types to be used in method
 signatures, and converts them to matching primitive
 [`ctypes`][] types. For example, Python
-`int`{.interpreted-text role="class"} is treated as
+[`int`][] is treated as
 [`c_int`][ctypes.c_int], and
-`float`{.interpreted-text role="class"} is treated as
+[`float`][] is treated as
 [`c_double`][ctypes.c_double].
 
 /// note | See also
@@ -76,9 +76,9 @@ Objective-C types unnecessary in many cases.
 
 If an Objective-C method expects a C primitive argument, you can pass an
 equivalent Python value instead. For example, a Python
-`int`{.interpreted-text role="class"} value can be passed into any
+[`int`][] value can be passed into any
 integer argument (`int`, `NSInteger`, `uint8_t`, ...), and a Python
-`float`{.interpreted-text role="class"} value can be passed into any
+[`float`][] value can be passed into any
 floating-point argument (`double`, `CGFloat`, ...).
 
 To pass a C structure as an argument, you would normally need to
@@ -106,11 +106,11 @@ All of these conversions can also be performed manually - see
 
 Primitive values returned from methods are converted using the usual
 [`ctypes`][] conversions, e. g. C integers are
-converted to Python `int`{.interpreted-text role="class"} and
-floating-point values to Python `float`{.interpreted-text role="class"}.
+converted to Python [`int`][] and
+floating-point values to Python [`float`][].
 
 Objective-C objects are automatically returned as
-`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"}
+[`ObjCInstance`][rubicon.objc.api.ObjCInstance]
 objects, so you can call methods on them and access their properties. In
 some cases, Rubicon also provides additional Python methods on
 Objective-C objects -see `python_style_apis_for_objc`{.interpreted-text
@@ -228,7 +228,7 @@ Objective-C and Python strings.
 
 /// note | Note
 
-`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
+[`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
 wrapping a `~rubicon.objc.api.NSString`{.interpreted-text role="class"}
 internally have the class `ObjCStrInstance`, and you will see this name
 in the `repr`{.interpreted-text role="func"} of
@@ -330,7 +330,7 @@ False
 
 /// note | Note
 
-`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
+[`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
 wrapping a `~rubicon.objc.api.NSArray`{.interpreted-text role="class"}
 internally have the class `ObjCListInstance` or
 `ObjCMutableListInstance`, and you will see these names in the
@@ -410,7 +410,7 @@ False
 
 /// note | Note
 
-`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} objects
+[`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
 wrapping a `~rubicon.objc.api.NSDictionary`{.interpreted-text
 role="class"} internally have the class `ObjCDictInstance` or
 `ObjCMutableDictInstance`, and you will see these names in the

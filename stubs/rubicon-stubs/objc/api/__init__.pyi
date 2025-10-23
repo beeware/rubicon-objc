@@ -78,7 +78,7 @@ class NSString:
     def UTF8String(self):
         """
         This Objective-C property has been declared using
-        [`ObjCClass.declare_property`][rubicon.objc.api.ObjCClass.declare_property]
+        [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property]
         and can always be accessed using attribute syntax.
         """
         ...

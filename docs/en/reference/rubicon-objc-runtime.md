@@ -13,13 +13,13 @@ Some commonly used C libraries are provided as
 [`CDLL`][ctypes.CDLL]s. Other libraries can be
 loaded using the [`load_library`][rubicon.objc.runtime.load_library] function.
 
+::: rubicon.objc.runtime.load_library
+
 ::: rubicon.objc.runtime.libc
 
 ::: rubicon.objc.runtime.libobjc
 
 ::: rubicon.objc.runtime.Foundation
-
-::: rubicon.objc.runtime.load_library
 
 ## Objective-C runtime types
 

@@ -1,4 +1,4 @@
-# How to contribute code to Rubicon
+# How to contribute code to Rubicon { #contribute }
 
 If you experience problems with Rubicon, [log them on
 GitHub](https://github.com/beeware/rubicon-objc/issues). If you want to

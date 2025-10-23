@@ -1,4 +1,4 @@
-# Reference
+# Reference { #reference-index }
 
 This is the technical reference for public APIs provided by Rubicon.
 

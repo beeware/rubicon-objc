@@ -1953,7 +1953,7 @@ if True:
     ```
 
     This Objective-C property has been declared using
-    [`ObjCClass.declare_property`][rubicon.objc.api.ObjCClass.declare_property]
+    [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property]
     and can always be accessed using attribute syntax.
     """
     NSString.declare_property("UTF8String")

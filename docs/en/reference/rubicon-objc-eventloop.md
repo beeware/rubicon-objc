@@ -3,7 +3,7 @@
 /// note | Note
 
 The documentation for this module is incomplete. You can help by
-[contributing to the documentation][contributing-to-the-documentation].
+[contributing to the documentation][contribute-docs].
 
 ///
 

@@ -350,7 +350,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   corrects a problem seen when using Python 3.8 on iOS.
   ([#182](https://github.com/beeware/rubicon-objc/pull/182))
 - Improved performance of Objective-C method calls and
-  `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"}
+  [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
   creation in many cases.
   ([#183](https://github.com/beeware/rubicon-objc/issues/183))
 - Fix calling of signal handlers added to the asyncio loop with
@@ -452,7 +452,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   ([#170](https://github.com/beeware/rubicon-objc/issues/170))
 - Fixed `~rubicon.objc.runtime.send_message`{.interpreted-text
   role="func"} not accepting
-  `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"} objects
+  [`SEL`][rubicon.objc.runtime.SEL] objects
   for the `selector` parameter. The documentation stated that this is
   allowed, but actually doing so caused a type error.
   ([#177](https://github.com/beeware/rubicon-objc/pull/177))
@@ -484,7 +484,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   /// note | Note
 
   In most cases, Rubicon's high-level method call syntax provided by
-  `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} can
+  [`ObjCInstance`][rubicon.objc.api.ObjCInstance] can
   be used instead of
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
   This syntax is almost always more convenient to use, more readable and
@@ -502,19 +502,19 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   method), use `~rubicon.objc.api.ObjCClass`{.interpreted-text
   role="class"} or `~rubicon.objc.runtime.get_class`{.interpreted-text
   role="func"} to look up the class, and pass the resulting
-  `~rubicon.objc.api.ObjCClass`{.interpreted-text role="class"} or
-  `~rubicon.objc.runtime.Class`{.interpreted-text role="class"} object
+  [`ObjCClass`][rubicon.objc.api.ObjCClass] or
+  [`Class`][rubicon.objc.runtime.Class] object
   as the receiver.
 
-- Disallowed passing `~ctypes.c_void_p`{.interpreted-text role="class"}
+- Disallowed passing [`c_void_p`][ctypes.c_void_p]
   objects as the `receiver` argument of
   `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
   The `receiver` argument now has to be of type
   [`objc_id`][rubicon.objc.runtime.objc_id], or
   one of its subclasses (such as
-  `~rubicon.objc.runtime.Class`{.interpreted-text role="class"}), or one
+  [`Class`][rubicon.objc.runtime.Class]), or one
   of its high-level equivalents (such as
-  `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"}). All
+  [`ObjCInstance`][rubicon.objc.api.ObjCInstance]). All
   Objective-C objects returned by Rubicon's high-level and low-level
   APIs have one of these types. If you need to send a message to an
   object pointer stored as `~ctypes.c_void_p`{.interpreted-text
@@ -605,8 +605,8 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   role="class"}s by their name instead of their full path.
 
 - Split the high-level Rubicon API
-  (`~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"},
-  `~rubicon.objc.api.ObjCClass`{.interpreted-text role="class"}, etc.)
+  ([`ObjCInstance`][rubicon.objc.api.ObjCInstance],
+  [`ObjCClass`][rubicon.objc.api.ObjCClass], etc.)
   out of `rubicon.objc.runtime`{.interpreted-text role="mod"} into a
   separate [`rubicon.objc.api`][rubicon-objc-api] module. The
   `~rubicon.objc.runtime`{.interpreted-text role="mod"} module now only
@@ -623,7 +623,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 - Removed some rarely used names
   (`~rubicon.objc.runtime.IMP`{.interpreted-text role="class"},
-  `~rubicon.objc.runtime.Class`{.interpreted-text role="class"},
+  [`Class`][rubicon.objc.runtime.Class],
   `~rubicon.objc.runtime.Ivar`{.interpreted-text role="class"},
   `~rubicon.objc.runtime.Method`{.interpreted-text role="class"},
   `~rubicon.objc.runtime.get_ivar`{.interpreted-text role="func"},
