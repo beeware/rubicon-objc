@@ -128,9 +128,9 @@ def ctype_for_type(tp):
     """Look up the C type corresponding to the given Python type.
 
     This conversion is applied to types used in
-    :class:`~rubicon.objc.api.objc_method` signatures,
-    :class:`~rubicon.objc.api.objc_ivar` types, etc. This function translates
-    Python built-in types and :mod:`rubicon.objc` classes to their
+    [`objc_method`][rubicon.objc.api.objc_method] signatures,
+    [`objc_ivar`][rubicon.objc.api.objc_ivar] types, etc. This function translates
+    Python built-in types and [`rubicon.objc`][rubicon-objc-module] classes to their
     [`ctypes`][] equivalents. Unregistered types (including types that are
     already ctypes) are returned unchanged.
     """
@@ -361,7 +361,7 @@ def ctype_for_encoding(encoding):
 
     For example, the type encoding `{spam=ic}` is not registered by default.
     However, the contained types `i` and `c` are registered, so they are
-    converted individually and used to create a new :class:`~ctypes.Structure`
+    converted individually and used to create a new [`ctypes.Structure`][]
     with two fields of the correct types. The new structure type is then
     registered for the original encoding `{spam=ic}` and returned.
 
@@ -388,7 +388,8 @@ def encoding_for_ctype(ctype):
 
     Automatic encoding of other compound types (arrays, structures, and unions)
     is currently not supported. To encode such types, a type encoding must be
-    manually provided for them using :func:`register_preferred_encoding` or
+    manually provided for them using
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding] or
     :func:`register_encoding`.
 
     :raises ValueError: if the conversion fails at any point
@@ -420,8 +421,9 @@ def with_preferred_encoding(encoding):
     """Register a preferred conversion between an Objective-C type encoding and the
     decorated C type.
 
-    This is equivalent to calling :func:`register_preferred_encoding` on the
-    decorated C type.
+    This is equivalent to calling
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding] on
+    the decorated C type.
     """
 
     def _with_preferred_encoding_decorator(ctype):
@@ -437,7 +439,8 @@ def register_encoding(encoding, ctype):
 
     "Additional" means that any existing conversions in either direction are
     *not* overwritten with the new conversion. To register an encoding and
-    overwrite existing conversions, use :func:`register_preferred_encoding`.
+    overwrite existing conversions, use
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding].
     """
 
     _ctype_for_encoding_map.setdefault(encoding, ctype)
@@ -615,7 +618,7 @@ def _array_for_sequence(seq, array_type):
 def compound_value_for_sequence(seq, tp):
     """Create a C structure or array of type `tp`, initialized with values from `seq`.
 
-    If `tp` is a :class:`~ctypes.Structure` type, the newly created
+    If `tp` is a [`ctypes.Structure`][] type, the newly created
     structure's fields are initialized in declaration order with the values from
     `seq`. `seq` must have as many elements as the structure has fields.
 

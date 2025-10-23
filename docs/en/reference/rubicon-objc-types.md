@@ -11,8 +11,7 @@ These are commonly used C types from various frameworks.
 ([value])<!-- TODO: stub candidate -->
 <!-- TODO: stub notes -->
 The [ptrdiff_t](https://en.cppreference.com/w/c/types/ptrdiff_t) type
-from `<stddef.h>`. Equivalent to `~ctypes.c_long`{.interpreted-text
-role="class"} on 64-bit systems and `~ctypes.c_int`{.interpreted-text
+from `<stddef.h>`. Equivalent to [`c_long`][ctypes.c_long] on 64-bit systems and `~ctypes.c_int`{.interpreted-text
 role="class"} on 32-bit systems.
 
 <:> NSInteger([value])
@@ -21,7 +20,7 @@ role="class"} on 32-bit systems.
 The
 [NSInteger](https://developer.apple.com/documentation/objectivec/nsinteger?language=objc)
 type from `<objc/NSObjCRuntime.h>`. Equivalent to
-`~ctypes.c_long`{.interpreted-text role="class"} on 64-bit systems and
+[`c_long`][ctypes.c_long] on 64-bit systems and
 `~ctypes.c_int`{.interpreted-text role="class"} on 32-bit systems.
 
 <:> NSUInteger([value])
@@ -202,7 +201,7 @@ The
 [CFIndex](https://developer.apple.com/documentation/corefoundation/cfindex?language=objc)
 type from `<CoreFoundation/CFBase.h>`. Equivalent to
 `~ctypes.c_longlong`{.interpreted-text role="class"} on 64-bit systems
-and `~ctypes.c_long`{.interpreted-text role="class"} on 32-bit systems.
+and [`c_long`][ctypes.c_long] on 32-bit systems.
 
 <:> UniChar([value])
 <!-- TODO: stub candidate -->
@@ -257,14 +256,16 @@ role="class"}s.
 
 These are commonly used C constants from various frameworks.
 
-<:> UIEdgeInsetsZero <!-- TODO: data -->
+<:> UIEdgeInsetsZero
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
 a `UIEdgeInsets`{.interpreted-text role="class"} instance with all
 insets set to zero.
 
-<:> NSZeroPoint <!-- TODO: data -->
+<:> NSZeroPoint
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
@@ -272,7 +273,8 @@ a `NSPoint`{.interpreted-text role="class"} instance with the X and Y
 coordinates set to zero.
 
 
-<:> NSIntegerMax <!-- TODO: data -->
+<:> NSIntegerMax
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The macro constant
 [NSIntegerMax](https://developer.apple.com/documentation/objectivec/nsintegermax?language=objc)
@@ -280,7 +282,8 @@ from `<objc/NSObjCRuntime.h>`: the maximum value that a
 `NSInteger`{.interpreted-text role="class"} can hold.
 
 
-<:> NSNotFound <!-- TODO: data -->
+<:> NSNotFound
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 The constant
 [NSNotFound](https://developer.apple.com/documentation/foundation/nsnotfound?language=objc)
@@ -295,13 +298,15 @@ The following constants provide information about the architecture of
 the current environment. All of them are equivalent to the C compiler
 macros of the same names.
 
-<:> LP64 <!-- TODO: data -->
+<:> LP64
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 Indicates whether the current environment is 64-bit. If true, C `long`s
 and pointers are 64 bits in size, otherwise 32 bits.
 
 
-<:> i386   x86_64   arm   arm64 <!-- TODO: data -->
+<:> i386   x86_64   arm   arm64
+<!-- TODO: data -->
 <!-- TODO: Doc notes -->
 Each of these constants is true if the current environment uses the
 named architecture. At most one of these constants is true at once in a
@@ -379,11 +384,11 @@ than typing encodings out by hand.
 | `~ctypes.c_ubyte`{.interpreted-text role="class"} | `C` |  |
 | `~ctypes.c_short`{.interpreted-text role="class"} | `s` |  |
 | `~ctypes.c_ushort`{.interpreted-text role="class"} | `S` |  |
-| `~ctypes.c_long`{.interpreted-text role="class"} | `l` |  |
+| [`c_long`][ctypes.c_long] | `l` |  |
 | `~ctypes.c_ulong`{.interpreted-text role="class"} | `L` |  |
-| `~ctypes.c_int`{.interpreted-text role="class"} | `i` | On 32-bit systems, `~ctypes.c_int`{.interpreted-text role="class"} is an alias for `~ctypes.c_long`{.interpreted-text role="class"}, and will be encoded as such. |
+| `~ctypes.c_int`{.interpreted-text role="class"} | `i` | On 32-bit systems, `~ctypes.c_int`{.interpreted-text role="class"} is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
 | `~ctypes.c_uint`{.interpreted-text role="class"} | `I` | On 32-bit systems, `~ctypes.c_uint`{.interpreted-text role="class"} is an alias for `~ctypes.c_ulong`{.interpreted-text role="class"}, and will be encoded as such. |
-| `~ctypes.c_longlong`{.interpreted-text role="class"} | `q` | On 64-bit systems, `~ctypes.c_longlong`{.interpreted-text role="class"} is an alias for `~ctypes.c_long`{.interpreted-text role="class"}, and will be encoded as such. |
+| `~ctypes.c_longlong`{.interpreted-text role="class"} | `q` | On 64-bit systems, `~ctypes.c_longlong`{.interpreted-text role="class"} is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
 | `~ctypes.c_ulonglong`{.interpreted-text role="class"} | `Q` | On 64-bit systems, `~ctypes.c_ulonglong`{.interpreted-text role="class"} is an alias for `~ctypes.c_ulong`{.interpreted-text role="class"}, and will be encoded as such. |
 | `~ctypes.c_float`{.interpreted-text role="class"} | `f` |  |
 | `~ctypes.c_double`{.interpreted-text role="class"} | `d` |  |

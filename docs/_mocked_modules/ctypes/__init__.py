@@ -1,8 +1,8 @@
 """Bare minimum mock version of ctypes.
 
 This shadows the real ctypes module when building the documentation,
-so that :mod:`rubicon.objc` can be imported by Sphinx autodoc even when no Objective-C
-runtime is available.
+so that [`rubicon.objc`][rubicon-objc-module] can be imported by Sphinx autodoc even
+when no Objective-C runtime is available.
 
 This module only emulates enough of ctypes to make the docs build.
 Most parts are in no way accurately implemented, and some ctypes features are missing

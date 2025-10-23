@@ -750,8 +750,9 @@ if sys.version_info < (3, 16):
             def get_child_watcher(self):
                 """Get the watcher for child processes.
 
-                If not yet set, a [`SafeChildWatcher`][asyncio.SafeChildWatcher] object
-                is automatically created.
+                If not yet set, a
+                [`SafeChildWatcher`](https://docs.python.org/3.13/library/asyncio-policy.html#asyncio.set_child_watcher)
+                object is automatically created.
 
                 /// note | Note
 

@@ -17,71 +17,65 @@ This is a full list of all attributes exported on the
 documentation on these attributes, click the links below to visit the
 relevant sections of the submodules' documentation.
 
-### From `rubicon.objc.api`{.interpreted-text role="mod"} { #from-rubicon.objc.api }
+### From `rubicon.objc.api`
 
-<!-- TODO: style into list -->
-
-- `~rubicon.objc.api.Block`{.interpreted-text role="class"}
-- `~rubicon.objc.api.NSArray`{.interpreted-text role="data"}
-- `~rubicon.objc.api.NSDictionary`{.interpreted-text role="data"}
-- `~rubicon.objc.api.NSMutableArray`{.interpreted-text role="data"}
-- `~rubicon.objc.api.NSMutableDictionary`{.interpreted-text role="data"}
-- `~rubicon.objc.api.NSObject`{.interpreted-text role="data"}
-- `~rubicon.objc.api.NSObjectProtocol`{.interpreted-text role="data"}
-- `~rubicon.objc.api.ObjCBlock`{.interpreted-text role="class"}
-- `~rubicon.objc.api.ObjCClass`{.interpreted-text role="class"}
-- `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"}
-- `~rubicon.objc.api.ObjCMetaClass`{.interpreted-text role="class"}
-- `~rubicon.objc.api.ObjCProtocol`{.interpreted-text role="class"}
-- `~rubicon.objc.api.at`{.interpreted-text role="func"}
-- `~rubicon.objc.api.ns_from_py`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_classmethod`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_const`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_ivar`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_method`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_property`{.interpreted-text role="func"}
-- `~rubicon.objc.api.objc_rawmethod`{.interpreted-text role="func"}
-- `~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"}
+* [`Block`][rubicon.objc.api.Block]
+* [`NSArray`][rubicon.objc.api.NSArray]
+* [`NSDictionary`][rubicon.objc.api.NSDictionary]
+* [`NSMutableArray`][rubicon.objc.api.NSMutableArray]
+* [`NSMutableDictionary`][rubicon.objc.api.NSMutableDictionary]
+* [`NSObject`][rubicon.objc.api.NSObject]
+* [`NSObjectProtocol`][rubicon.objc.api.NSObjectProtocol]
+* [`ObjCBlock`][rubicon.objc.api.ObjCBlock]
+* [`ObjCClass`][rubicon.objc.api.ObjCClass]
+* [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
+* [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass]
+* [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]
+* [`at`][rubicon.objc.api.at]
+* [`ns_from_py`][rubicon.objc.api.ns_from_py]
+* [`objc_classmethod`][rubicon.objc.api.objc_classmethod]
+* [`objc_const`][rubicon.objc.api.objc_const]
+* [`objc_ivar`][rubicon.objc.api.objc_ivar]
+* [`objc_method`][rubicon.objc.api.objc_method]
+* [`objc_property`][rubicon.objc.api.objc_property]
+* [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod]
+* [`py_from_ns`][rubicon.objc.api.py_from_ns]
 
 
-### From `rubicon.objc.runtime`{.interpreted-text role="mod"} { #from-rubicon.objc.runtime }
+### From `rubicon.objc.runtime`
 
-<!-- TODO: style into list -->
-
-- `~rubicon.objc.runtime.SEL`{.interpreted-text role="class"}
-- `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
-- `~rubicon.objc.runtime.send_super`{.interpreted-text role="func"}
+* [`SEL`][rubicon.objc.runtime.SEL]
+* [`send_message`][rubicon.objc.runtime.send_message]
+* [`send_super`][rubicon.objc.runtime.send_super]
 
 
-### From `rubicon.objc.types`{.interpreted-text role="mod"} { #from-rubicon.objc.types }
+### From `rubicon.objc.types`
 
-<!-- TODO: style into list -->
-
-- `~rubicon.objc.types.CFIndex`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CFRange`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGFloat`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGGlyph`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGPoint`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGPointMake`{.interpreted-text role="func"}
-- `~rubicon.objc.types.CGRect`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGRectMake`{.interpreted-text role="func"}
-- `~rubicon.objc.types.CGSize`{.interpreted-text role="class"}
-- `~rubicon.objc.types.CGSizeMake`{.interpreted-text role="func"}
-- `~rubicon.objc.types.NSEdgeInsets`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSEdgeInsetsMake`{.interpreted-text role="func"}
-- `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSMakePoint`{.interpreted-text role="func"}
-- `~rubicon.objc.types.NSMakeRect`{.interpreted-text role="func"}
-- `~rubicon.objc.types.NSMakeSize`{.interpreted-text role="func"}
-- `~rubicon.objc.types.NSPoint`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSRange`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSRect`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSSize`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSTimeInterval`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSUInteger`{.interpreted-text role="class"}
-- `~rubicon.objc.types.NSZeroPoint`{.interpreted-text role="data"}
-- `~rubicon.objc.types.UIEdgeInsets`{.interpreted-text role="class"}
-- `~rubicon.objc.types.UIEdgeInsetsMake`{.interpreted-text role="func"}
-- `~rubicon.objc.types.UIEdgeInsetsZero`{.interpreted-text role="data"}
-- `~rubicon.objc.types.UniChar`{.interpreted-text role="class"}
-- `~rubicon.objc.types.unichar`{.interpreted-text role="class"}
+* [`CFIndex`][rubicon.objc.types.CFIndex]
+* [`CFRange`][rubicon.objc.types.CFRange]
+* [`CGFloat`][rubicon.objc.types.CGFloat]
+* [`CGGlyph`][rubicon.objc.types.CGGlyph]
+* [`CGPoint`][rubicon.objc.types.CGPoint]
+* [`CGPointMake`][rubicon.objc.types.CGPointMake]
+* [`CGRect`][rubicon.objc.types.CGRect]
+* [`CGRectMake`][rubicon.objc.types.CGRectMake]
+* [`CGSize`][rubicon.objc.types.CGSize]
+* [`CGSizeMake`][rubicon.objc.types.CGSizeMake]
+* [`NSEdgeInsets`][rubicon.objc.types.NSEdgeInsets]
+* [`NSEdgeInsetsMake`][rubicon.objc.types.NSEdgeInsetsMake]
+* [`NSInteger`][rubicon.objc.types.NSInteger]
+* [`NSMakePoint`][rubicon.objc.types.NSMakePoint]
+* [`NSMakeRect`][rubicon.objc.types.NSMakeRect]
+* [`NSMakeSize`][rubicon.objc.types.NSMakeSize]
+* [`NSPoint`][rubicon.objc.types.NSPoint]
+* [`NSRange`][rubicon.objc.types.NSRange]
+* [`NSRect`][rubicon.objc.types.NSRect]
+* [`NSSize`][rubicon.objc.types.NSSize]
+* [`NSTimeInterval`][rubicon.objc.types.NSTimeInterval]
+* [`NSUInteger`][rubicon.objc.types.NSUInteger]
+* [`NSZeroPoint`][rubicon.objc.types.NSZeroPoint]
+* [`UIEdgeInsets`][rubicon.objc.types.UIEdgeInsets]
+* [`UIEdgeInsetsMake`][rubicon.objc.types.UIEdgeInsetsMake]
+* [`UIEdgeInsetsZero`][rubicon.objc.types.UIEdgeInsetsZero]
+* [`UniChar`][rubicon.objc.types.UniChar]
+* [`unichar`][rubicon.objc.types.unichar]
