@@ -108,3 +108,4 @@ plugins:
           line_length: 80  # Requires ruff, forces longer signatures to be stacked, if signatures aren't used, can be removed
           show_symbol_type_toc: true  # This is what they added on place of function() (parens) being displayed in the sidebar ToC
           find_stubs_package: true  # Allows for rendering documentation out of the stubs package
+          heading_level: 3  # Default heading level of H3 for class docs.

@@ -3,34 +3,16 @@
 /// note | Note
 
 The documentation for this module is incomplete. You can help by
-`contributing to the documentation <../how-to/contribute/docs>`{.interpreted-text
-role="doc"}.
+[contributing to the documentation][contributing-to-the-documentation].
 
 ///
 
-<:> EventLoopPolicy
-<!-- TODO: class -->
+::: rubicon.objc.eventloop.EventLoopPolicy
 
-<:> new_event_loop <!-- TODO: method -->
+::: rubicon.objc.eventloop.CocoaLifecycle
+    options:
+        show_if_no_docstring: true
 
-<:> get_default_loop <!-- TODO: method -->
-
-<:> get_child_watcher <!-- TODO: method -->
-
-<:> set_child_watcher <!-- TODO: method -->
-
-
-<:> CocoaLifecycle
-<!-- TODO: class -->
-
-<:> start <!-- TODO: method -->
-
-<:> stop <!-- TODO: method -->
-
-
-<:> iOSLifecycle
-<!-- TODO: class -->
-
-<:> start <!-- TODO: method -->
-
-<:> stop <!-- TODO: method -->
+::: rubicon.objc.eventloop.iOSLifecycle
+    options:
+        show_if_no_docstring: true

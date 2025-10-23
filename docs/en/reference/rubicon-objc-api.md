@@ -11,22 +11,14 @@ that module should be used instead of importing
 ## Objective-C objects
 
 ::: rubicon.objc.api.ObjCInstance
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.objc_const
-    options:
-        heading_level: 3
 
 ## Objective-C classes
 
 ::: rubicon.objc.api.ObjCClass
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.ObjCMetaClass
-    options:
-        heading_level: 3
 
 ## Standard Objective-C and Foundation classes
 
@@ -46,79 +38,67 @@ value `hello`.
 
 ::: rubicon.objc.api.NSObject
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.Protocol
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSNumber
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSDecimalNumber
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSString
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSData
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSArray
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSMutableArray
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_labels: false
         show_attribute_values: false
 
 ::: rubicon.objc.api.NSDictionary
     options:
-        heading_level: 3
         show_symbol_type_toc: false
-        show_labels: false
         show_attribute_values: false
+        show_labels: false
 
 ::: rubicon.objc.api.NSMutableDictionary
     options:
-        heading_level: 3
         show_symbol_type_toc: false
-        show_labels: false
         show_attribute_values: false
+        show_labels: false
 
 ## Objective-C protocols
 
 ::: rubicon.objc.api.ObjCProtocol
-    options:
-        heading_level: 3
 
 ## Standard Objective-C and Foundation protocols
 
@@ -126,23 +106,16 @@ The following protocols from the [Objective-C runtime](https://developer.apple.c
 
 ::: rubicon.objc.api.NSObjectProtocol
     options:
-        heading_level: 3
         show_symbol_type_toc: false
         show_attribute_values: false
 
 ## Converting objects between Objective-C and Python
 
 ::: rubicon.objc.api.py_from_ns
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.ns_from_py
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.at
-    options:
-        heading_level: 3
 
 ## Creating custom Objective-C classes and protocols { #custom-classes-and-protocols }
 
@@ -380,21 +353,11 @@ used by Rubicon to provide Python-style operators and methods on
 standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and [`NSDictionary`][rubicon.objc.api.NSDictionary].
 
 ::: rubicon.objc.api.register_type_for_objcclass
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.for_objcclass
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.type_for_objcclass
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.unregister_type_for_objcclass
-    options:
-        heading_level: 3
 
 ::: rubicon.objc.api.get_type_for_objcclass_map
-    options:
-        heading_level: 3

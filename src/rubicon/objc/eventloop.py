@@ -479,9 +479,12 @@ class CFEventLoop(unix_events.SelectorEventLoop):
 
         If the argument is a coroutine, it is wrapped in a Task.
 
-        WARNING: It would be disastrous to call run_until_complete()
-        with the same coroutine twice -- it would wrap it in two
-        different Tasks and that can't be good.
+        /// warning | Warning
+
+        It would be disastrous to call run_until_complete() with the same coroutine
+        twice -- it would wrap it in two different Tasks and that can't be good.
+
+        ///
 
         Return the Future's result, or raise its exception.
         """
@@ -520,7 +523,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             self.stop()
 
     def run_forever_cooperatively(self, lifecycle=None):
-        """A non-blocking version of :meth:`run_forever`.
+        """A non-blocking version of
+        [`run_forever()`][rubicon.objc.eventloop.run_forever].
 
         This may seem like nonsense; however, an iOS app is not expected to invoke a
         blocking "main event loop" method. As a result, we need to be able to *start*
@@ -528,7 +532,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         actual event loop.
 
         The implementation is effectively all the parts of a call to
-        :meth:`run_forever()`, but without any of the shutdown/cleanup logic.
+        [`run_forever()`][rubicon.objc.eventloop.run_forever], but without any of the
+        shutdown/cleanup logic.
         """
         if not self._lifecycle:
             self._set_lifecycle(
@@ -745,11 +750,14 @@ if sys.version_info < (3, 16):
             def get_child_watcher(self):
                 """Get the watcher for child processes.
 
-                If not yet set, a :class:`~asyncio.SafeChildWatcher` object is
-                automatically created.
+                If not yet set, a [`SafeChildWatcher`][asyncio.SafeChildWatcher] object
+                is automatically created.
 
-                .. note::
-                    Child watcher support was removed in Python 3.14
+                /// note | Note
+
+                Child watcher support was removed in Python 3.14
+
+                ///
                 """
                 if self._watcher is None:
                     self._init_watcher()
@@ -759,8 +767,11 @@ if sys.version_info < (3, 16):
             def set_child_watcher(self, watcher):
                 """Set the watcher for child processes.
 
-                .. note::
-                    Child watcher support was removed in Python 3.14
+                /// note | Note
+
+                Child watcher support was removed in Python 3.14
+
+                ///
                 """
                 if self._watcher is not None:
                     self._watcher.close()

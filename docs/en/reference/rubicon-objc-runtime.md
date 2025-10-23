@@ -10,73 +10,16 @@ same functionality through a high-level interface.
 ## C libraries { #predefined-c-libraries }
 
 Some commonly used C libraries are provided as
-`~ctypes.CDLL`{.interpreted-text role="class"}s. Other libraries can be
-loaded using the `load_library`{.interpreted-text role="func"} function.
+[`CDLL`][ctypes.CDLL]s. Other libraries can be
+loaded using the [`load_library`][rubicon.objc.runtime.load_library] function.
 
-<:> data annotation="= load_library('c')"
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-libc
+::: rubicon.objc.runtime.libc
 
-The [C standard library](https://en.cppreference.com/w/c).
+::: rubicon.objc.runtime.libobjc
 
-The following functions are accessible by default:
+::: rubicon.objc.runtime.Foundation
 
-<!-- TODO: style into list -->
-
-* `free`
-
-<:> data annotation="= load_library('objc')"
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-libobjc
-
-The [Objective-C runtime
-library](https://developer.apple.com/documentation/objectivec).
-
-The following functions are accessible by default:
-
-<!-- TODO: style into list -->
-
-* `class_addIvar` * `class_addMethod` * `class_addProperty` *
-`class_addProtocol` * `class_copyIvarList` * `class_copyMethodList` *
-`class_copyPropertyList` * `class_copyProtocolList` *
-`class_getClassMethod` * `class_getClassVariable` *
-`class_getInstanceMethod` * `class_getInstanceSize` *
-`class_getInstanceVariable` * `class_getIvarLayout` *
-`class_getMethodImplementation` * `class_getName` *
-`class_getProperty` * `class_getSuperclass` * `class_getVersion` *
-`class_getWeakIvarLayout` * `class_isMetaClass` *
-`class_replaceMethod` * `class_respondsToSelector` *
-`class_setIvarLayout` * `class_setVersion` * `class_setWeakIvarLayout`
-* `ivar_getName` * `ivar_getOffset` * `ivar_getTypeEncoding` *
-`method_exchangeImplementations` * `method_getImplementation` *
-`method_getName` * `method_getTypeEncoding` *
-`method_setImplementation` * `objc_allocateClassPair` *
-`objc_copyProtocolList` * `objc_getAssociatedObject` * `objc_getClass`
-* `objc_getMetaClass` * `objc_getProtocol` * `objc_registerClassPair`
-* `objc_removeAssociatedObjects` * `objc_setAssociatedObject` *
-`object_getClass` * `object_getClassName` * `object_getIvar` *
-`object_setIvar` * `property_getAttributes` * `property_getName` *
-`property_copyAttributeList` * `protocol_addMethodDescription` *
-`protocol_addProtocol` * `protocol_addProperty` *
-`objc_allocateProtocol` * `protocol_conformsToProtocol` *
-`protocol_copyMethodDescriptionList` * `protocol_copyPropertyList` *
-`protocol_copyProtocolList` * `protocol_getMethodDescription` *
-`protocol_getName` * `objc_registerProtocol` * `sel_getName` *
-`sel_isEqual` * `sel_registerName`
-
-
-<:> data annotation="= load_library('Foundation')"
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-Foundation
-
-The [Foundation](https://developer.apple.com/documentation/foundation)
-framework.
-
-<:> load_library
-<!-- TODO: function -->
+::: rubicon.objc.runtime.load_library
 
 ## Objective-C runtime types
 
@@ -85,110 +28,46 @@ These are various types used by the Objective-C runtime functions.
 ::: rubicon.objc.runtime.objc_id
 
 ::: rubicon.objc.runtime.objc_block
-<!-- TODO: class -->
 
-<:> SEL([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.SEL
 
-<:> name <!-- TODO: attribute -->
+::: rubicon.objc.runtime.Class
 
+::: rubicon.objc.runtime.IMP
 
-<:> Class([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.Method
 
-<:> IMP([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.Ivar
 
-<:> Method([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.objc_property_t
 
-<:> Ivar([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.objc_property_attribute_t
 
-<:> objc_property_t([value])
-<!-- TODO: class -->
+::: rubicon.objc.runtime.objc_method_description
 
-<:> objc_property_attribute_t([name, value])
-<!-- TODO: class -->
-
-<:> name value <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The attribute name and value as C strings ([`bytes`][]).
-
-
-
-<:> objc_method_description([name, value])
-<!-- TODO: class -->
-
-<:> name <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The method name as a `SEL`{.interpreted-text role="class"}.
-
-
-<:> types <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The method's signature encoding as a C string ([`bytes`][]).
-
-
-
-<:> objc_super([receiver, super_class])
-<!-- TODO: class -->
-
-<:> receiver <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The receiver of the call, as an `objc_id`{.interpreted-text
-role="class"}.
-
-
-<:> super_class <!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The class in which to start searching for method implementations, as a
-`Class`{.interpreted-text role="class"}.
-
-
+::: rubicon.objc.runtime.objc_super
 
 ## Objective-C runtime utility functions
 
 These utility functions provide easier access from Python to certain
 parts of the Objective-C runtime.
 
-<:> object_isClass(obj)
-<!-- TODO: function -->
-<!-- TODO: Doc notes -->
-Return whether the given Objective-C object is a class (or a metaclass).
+::: rubicon.objc.runtime.object_isClass
 
-This is equivalent to the `libobjc`{.interpreted-text role="data"}
-function
-[object_isClass](https://developer.apple.com/documentation/objectivec/1418659-object_isclass?language=objc)
-from `<objc/runtime.h>`, which is only available since OS X 10.10 and
-iOS 8. This module-level function is provided to support older systems
---- it uses the `libobjc`{.interpreted-text role="data"} function if
-available, and otherwise emulates it.
+::: rubicon.objc.runtime.get_class
 
+::: rubicon.objc.runtime.should_use_stret
 
-<:> get_class
-<!-- TODO: function -->
+::: rubicon.objc.runtime.should_use_fpret
 
-<:> should_use_stret
-<!-- TODO: function -->
+::: rubicon.objc.runtime.send_message
 
-<:> should_use_fpret
-<!-- TODO: function -->
+::: rubicon.objc.runtime.send_super
 
-<:> send_message
-<!-- TODO: function -->
+::: rubicon.objc.runtime.add_method
 
-<:> send_super
-<!-- TODO: function -->
+::: rubicon.objc.runtime.add_ivar
 
-<:> add_method
-<!-- TODO: function -->
+::: rubicon.objc.runtime.get_ivar
 
-<:> add_ivar
-<!-- TODO: function -->
-
-<:> get_ivar
-<!-- TODO: function -->
-
-<:> set_ivar
-<!-- TODO: function -->
+::: rubicon.objc.runtime.set_ivar

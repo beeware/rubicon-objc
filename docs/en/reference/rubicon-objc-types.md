@@ -56,7 +56,8 @@ role="class"}.
 
 ///
 
-<:> x y <!-- TODO: attribute -->
+<:> x y
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -69,7 +70,8 @@ The
 [CGPoint](https://developer.apple.com/documentation/corefoundation/cgpoint?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-<:> x y <!-- TODO: attribute -->
+<:> x y
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -89,7 +91,8 @@ role="class"}.
 
 ///
 
-<:> width height <!-- TODO: attribute -->
+<:> width height
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -102,7 +105,8 @@ The
 [CGSize](https://developer.apple.com/documentation/corefoundation/cgsize?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-<:> width height <!-- TODO: attribute -->
+<:> width height
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The width and height as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -122,12 +126,14 @@ role="class"}.
 
 ///
 
-<:> origin <!-- TODO: attribute -->
+<:> origin
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The origin as a `NSPoint`{.interpreted-text role="class"}.
 
 
-<:> size <!-- TODO: attribute -->
+<:> size
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The size as a `NSSize`{.interpreted-text role="class"}.
 
@@ -140,12 +146,14 @@ The
 [CGRect](https://developer.apple.com/documentation/corefoundation/cgrect?language=objc)
 structure from `<CoreGraphics/CGGeometry.h>`.
 
-<:> origin <!-- TODO: attribute -->
+<:> origin
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The origin as a `CGPoint`{.interpreted-text role="class"}.
 
 
-<:> size <!-- TODO: attribute -->
+<:> size
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The size as a `CGSize`{.interpreted-text role="class"}.
 
@@ -158,7 +166,8 @@ The
 [UIEdgeInsets](https://developer.apple.com/documentation/uikit/uiedgeinsets?language=objc)
 structure from `<UIKit/UIGeometry.h>`.
 
-<:> top left bottom right <!-- TODO: attribute -->
+<:> top left bottom right
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -171,7 +180,8 @@ The
 [NSEdgeInsets](https://developer.apple.com/documentation/foundation/nsedgeinsets?language=objc)
 structure from `<Foundation/NSGeometry.h>`.
 
-<:> top left bottom right <!-- TODO: attribute -->
+<:> top left bottom right
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The insets as `CGFloat`{.interpreted-text role="class"}s.
 
@@ -223,7 +233,8 @@ The
 [CFRange](https://developer.apple.com/documentation/corefoundation/cfrange?language=objc)
 type from `<CoreFoundation/CFBase.h>`.
 
-<:> location length <!-- TODO: attribute -->
+<:> location length
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The location and length as `CFIndex`{.interpreted-text role="class"}es.
 
@@ -236,7 +247,8 @@ The
 [NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
 type from `<Foundation/NSRange.h>`.
 
-<:> location length <!-- TODO: attribute -->
+<:> location length
+<!-- TODO: attribute -->
 <!-- TODO: Doc notes -->
 The location and length as `NSUInteger`{.interpreted-text
 role="class"}s.

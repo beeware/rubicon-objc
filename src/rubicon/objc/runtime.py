@@ -77,9 +77,9 @@ _framework_path = ["/System/Library/Frameworks"]
 def load_library(name):
     """Load and return the C library with the given name.
 
-    If the library could not be found, a :class:`ValueError` is raised.
+    If the library could not be found, a [`ValueError`][] is raised.
 
-    Internally, this function uses :func:`ctypes.util.find_library` to search
+    Internally, this function uses [ctypes.util.find_library][] to search
     for the library in the system-standard locations. If the library cannot be
     found this way, it is attempted to load the library from certain hard-coded
     locations, as a fallback for systems where `find_library` does not work
@@ -111,9 +111,93 @@ def load_library(name):
     raise ValueError(f"Library {name!r} not found")
 
 
-libc = load_library("c")
-libobjc = load_library("objc")
-Foundation = load_library("Foundation")
+# check-docstring-is-first made us do this
+if True:
+    libc = load_library("c")
+    """
+    The [C standard library](https://en.cppreference.com/w/c).
+
+    The following functions are accessible by default:
+
+    * `free`
+    """
+    libobjc = load_library("objc")
+    """
+    The
+    [Objective-C runtime library](https://developer.apple.com/documentation/objectivec).
+
+    The following functions are accessible by default:
+
+    * `class_addIvar`
+    * `class_addMethod`
+    * `class_addProperty`
+    * `class_addProtocol`
+    * `class_copyIvarList`
+    * `class_copyMethodList`
+    * `class_copyPropertyList`
+    * `class_copyProtocolList`
+    * `class_getClassMethod`
+    * `class_getClassVariable`
+    * `class_getInstanceMethod`
+    * `class_getInstanceSize`
+    * `class_getInstanceVariable`
+    * `class_getIvarLayout`
+    * `class_getMethodImplementation`
+    * `class_getName`
+    * `class_getProperty`
+    * `class_getSuperclass`
+    * `class_getVersion`
+    * `class_getWeakIvarLayout`
+    * `class_isMetaClass`
+    * `class_replaceMethod`
+    * `class_respondsToSelector`
+    * `class_setIvarLayout`
+    * `class_setVersion`
+    * `class_setWeakIvarLayout`
+    * `ivar_getName`
+    * `ivar_getOffset`
+    * `ivar_getTypeEncoding`
+    * `method_exchangeImplementations`
+    * `method_getImplementation`
+    * `method_getName`
+    * `method_getTypeEncoding`
+    * `method_setImplementation`
+    * `objc_allocateClassPair`
+    * `objc_copyProtocolList`
+    * `objc_getAssociatedObject`
+    * `objc_getClass`
+    * `objc_getMetaClass`
+    * `objc_getProtocol`
+    * `objc_registerClassPair`
+    * `objc_removeAssociatedObjects`
+    * `objc_setAssociatedObject`
+    * `object_getClass`
+    * `object_getClassName`
+    * `object_getIvar`
+    * `object_setIvar`
+    * `property_getAttributes`
+    * `property_getName`
+    * `property_copyAttributeList`
+    * `protocol_addMethodDescription`
+    * `protocol_addProtocol`
+    * `protocol_addProperty`
+    * `objc_allocateProtocol`
+    * `protocol_conformsToProtocol`
+    * `protocol_copyMethodDescriptionList`
+    * `protocol_copyPropertyList`
+    * `protocol_copyProtocolList`
+    * `protocol_getMethodDescription`
+    * `protocol_getName`
+    * `objc_registerProtocol`
+    * `sel_getName`
+    * `sel_isEqual`
+    * `sel_registerName`
+    """
+    Foundation = load_library("Foundation")
+    """
+    The [Foundation](https://developer.apple.com/documentation/foundation)
+    framework.
+    """
 
 
 @with_encoding(b"@")
@@ -129,18 +213,20 @@ class objc_block(objc_id):
 
     This type tells Rubicon's internals that the object in question is a block
     and not just a regular Objective-C object, which affects method argument and
-    return value conversions. For more details, see :ref:`objc_blocks`.
+    return value conversions. For more details, see [Objective-C Blocks][objc_blocks].
 
-    .. note::
+    /// note | Note
 
-        This type does not correspond to an actual C type or Objective-C class.
-        Although the internal structure of block objects is documented, as well
-        as the fact that they are Objective-C objects, they do not have a
-        documented type or class name and are not fully defined in any header
-        file.
+    This type does not correspond to an actual C type or Objective-C class.
+    Although the internal structure of block objects is documented, as well
+    as the fact that they are Objective-C objects, they do not have a
+    documented type or class name and are not fully defined in any header
+    file.
 
-        Aside from the special conversion behavior, this type is equivalent to
-        :class:`objc_id`.
+    Aside from the special conversion behavior, this type is equivalent to
+    [`objc_id`][rubicon.objc.runtime.objc_id].
+
+    ///
     """
 
 
@@ -148,6 +234,12 @@ class objc_block(objc_id):
 class SEL(c_void_p):
     """The [SEL](https://developer.apple.com/documentation/objectivec/sel?language=objc)
     type from `<objc/objc.h>`.
+
+    The constructor can be called with a [`bytes`][] or [`str`][] object to
+    obtain a selector with that value.
+
+    (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
+    still accepted.)
     """
 
     @property
@@ -160,12 +252,11 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        """The constructor can be called with a [`bytes`][] or [`str`][] object to
-        obtain a selector with that value.
-
-        (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
-        still accepted.)
-        """
+        # The constructor can be called with a [`bytes`][] or [`str`][] object to
+        # obtain a selector with that value.
+        #
+        # (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
+        # still accepted.)
 
         if isinstance(init, (bytes, str)):
             self = libobjc.sel_registerName(ensure_bytes(init))
@@ -197,8 +288,9 @@ class IMP(c_void_p):
     """The [IMP](https://developer.apple.com/documentation/objectivec/imp?language=objc)
     type from `<objc/objc.h>`.
 
-    An :class:`IMP` cannot be called directly --- it must be cast to the
-    correct :func:`~ctypes.CFUNCTYPE` first, to provide the necessary
+    An [`IMP`][rubicon.objc.runtime.IMP] cannot be called directly --- it must be cast
+    to the
+    correct [`CFUNCTYPE`][ctypes.CFUNCTYPE] first, to provide the necessary
     information about its signature.
     """
 
@@ -497,7 +589,13 @@ except AttributeError:
     def object_isClass(obj):
         """Return whether the given Objective-C object is a class (or a metaclass).
 
-        This is the emulated version of the object_isClass runtime function, for systems
+        This is equivalent to the [`libobjc`][rubicon.objc.runtime.libobjc] function
+        [object_isClass](https://developer.apple.com/documentation/objectivec/1418659-object_isclass?language=objc)
+        from `<objc/runtime.h>`, which is only available since OS X 10.10 and
+        iOS 8. This module-level function is provided to support older systems
+        --- it uses the [`libobjc`][rubicon.objc.runtime.libobjc] function if
+        available, and otherwise emulates it. This is the emulated version of the
+        object_isClass runtime function, for systems
         older than OS X 10.10 or iOS 8, where the real function doesn't exist yet.
         """
 
@@ -546,7 +644,8 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """The [objc_method_description](https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc)
+    """
+    The [objc_method_description](https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc)
     structure from `<objc/runtime.h>`.
     """
 
@@ -661,7 +760,8 @@ def ensure_bytes(x):
 
 
 def get_class(name):
-    """Get the Objective-C class with the given name as a :class:`Class` object.
+    """Get the Objective-C class with the given name as a
+    [`Class`][rubicon.objc.runtime.Class] object.
 
     If no class with the given name is loaded, `None` is returned, and
     the Objective-C runtime will log a warning message.
@@ -768,44 +868,47 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
     This is the equivalent of an Objective-C method call like `[receiver sel:args]`.
 
-    .. note::
+    /// note | Note
 
-        Some Objective-C methods take variadic arguments (`varargs`), for example
-        `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/stringwithformat:?language=objc>`_.
-        When using :func:`send_message`, variadic arguments are treated
-        differently from regular arguments: they are not passed as normal
-        function arguments in `*args`, but as a list in a separate `varargs`
-        keyword argument.
+    Some Objective-C methods take variadic arguments (`varargs`), for example
+    `+[NSString stringWithFormat:] <https://developer.apple.com/documentation/foundation/nsstring/stringwithformat:?language=objc>`_.
+    When using :func:`send_message`, variadic arguments are treated
+    differently from regular arguments: they are not passed as normal
+    function arguments in `*args`, but as a list in a separate `varargs`
+    keyword argument.
 
-        This explicit separation of regular and variadic arguments protects
-        against accidentally passing too many arguments into a method. By
-        default these extra arguments would be considered `varargs` and passed on
-        to the method, even if the method in question doesn't take `varargs`.
-        Because of how the Objective-C runtime and most C calling conventions
-        work, this error would otherwise be silently ignored.
+    This explicit separation of regular and variadic arguments protects
+    against accidentally passing too many arguments into a method. By
+    default these extra arguments would be considered `varargs` and passed on
+    to the method, even if the method in question doesn't take `varargs`.
+    Because of how the Objective-C runtime and most C calling conventions
+    work, this error would otherwise be silently ignored.
 
-        The types of `varargs` are not included in the `argtypes` list. Instead,
-        the values are automatically converted to C types using the default
-        [`ctypes`][] argument conversion rules. To ensure that all `varargs` are
-        converted to the expected C types, it is recommended to manually convert
-        all `varargs` to [`ctypes`][] types instead of relying on automatic
-        conversions. For example:
+    The types of `varargs` are not included in the `argtypes` list. Instead,
+    the values are automatically converted to C types using the default
+    [`ctypes`][] argument conversion rules. To ensure that all `varargs` are
+    converted to the expected C types, it is recommended to manually convert
+    all `varargs` to [`ctypes`][] types instead of relying on automatic
+    conversions. For example:
 
-        .. code-block:: python
+    ```python
+    send_message(
+        NSString,
+        "stringWithFormat:",
+        at("%i %s %@"),
+        restype=objc_id,
+        argtypes=[objc_id],
+        varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
+    )
+    ```
 
-            send_message(
-                NSString,
-                "stringWithFormat:",
-                at("%i %s %@"),
-                restype=objc_id,
-                argtypes=[objc_id],
-                varargs=[c_int(123), cast(b"C string", c_char_p), at("ObjC string")],
-            )
+    ///
 
     :param receiver: The object on which to call the method, as an
-        :class:`~rubicon.objc.api.ObjCInstance` or :class:`.objc_id`.
+        [`ObjCInstance`][rubicon.objc.api.ObjCInstance] or
+        [`objc_id`][rubicon.objc.runtime.objc_id].
     :param selector: The name of the method as a [`str`][], [`bytes`][],
-        or :class:`SEL`.
+        or [`SEL`][rubicon.objc.runtime.SEL].
     :param args: The method arguments.
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a [`list`][].
@@ -888,16 +991,17 @@ def send_super(
 
     In practice, the first parameter should always be the special variable
     `__class__`, and the second parameter should be `self`. A typical
-    :func:`send_super` call would be `send_super(__class__, self, 'init')`
-    for example.
+    [`send_super`][rubicon.objc.runtime.send_super] call would be
+    `send_super(__class__, self, 'init')` for example.
 
     The special variable `__class__` is defined by Python and stands for the
     class object that is being created by the current `class` block. The
     exact reasons why `__class__` must be passed manually are somewhat
-    technical, and are not directly relevant to users of :func:`send_super`.
-    For a full explanation, see issue `beeware/rubicon-objc#107
-    <https://github.com/beeware/rubicon-objc/issues/107>`__ and PR
-    `beeware/rubicon-objc#108 <https://github.com/beeware/rubicon-objc/pull/108>`__.
+    technical, and are not directly relevant to users of
+    [`send_super`][rubicon.objc.runtime.send_super].
+    For a full explanation, see issue
+    [beeware/rubicon-objc#107](https://github.com/beeware/rubicon-objc/issues/107) and
+    PR [beeware/rubicon-objc#108](https://github.com/beeware/rubicon-objc/pull/108).
 
     Although it is possible to pass other values than `__class__` and
     `self` for the first two parameters, this is strongly discouraged. Doing
@@ -905,12 +1009,14 @@ def send_super(
     implementation details of the superclasses.
 
     :param cls: The class in whose context the `super` call is happening, as
-        an :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
+        an [`ObjCClass`][rubicon.objc.api.ObjCClass] or
+        [`Class`][rubicon.objc.runtime.Class].
     :param receiver: The object on which to call the method, as an
-        :class:`~rubicon.objc.api.ObjCInstance`, :class:`.objc_id`, or
+        [`ObjCInstance`][rubicon.objc.api.ObjCInstance],
+        [`objc_id`][rubicon.objc.runtime.objc_id], or
         [`c_void_p`][ctypes.c_void_p].
     :param selector: The name of the method as a [`str`][], [`bytes`][],
-        or :class:`SEL`.
+        or [`SEL`][rubicon.objc.runtime.SEL].
     :param args: The method arguments.
     :param restype: The return type of the method.
     :param argtypes: The argument types of the method, as a [`list`][].
@@ -1018,9 +1124,10 @@ def add_method(cls, selector, method, encoding, replace=False):
     To add a class method, add an instance method to the metaclass.
 
     :param cls: The Objective-C class to which to add the method, as an
-        :class:`~rubicon.objc.api.ObjCClass` or :class:`Class`.
+        [`ObjCClass`][rubicon.objc.api.ObjCClass] or
+        [`Class`][rubicon.objc.runtime.Class].
     :param selector: The name for the new method, as a [`str`][],
-        [`bytes`][], or :class:`SEL`.
+        [`bytes`][], or [`SEL`][rubicon.objc.runtime.SEL].
     :param method: The method implementation, as a Python callable or a C
         function address.
     :param encoding: The method's signature (return type and argument types) as
@@ -1028,7 +1135,7 @@ def add_method(cls, selector, method, encoding, replace=False):
         parameters must be included in the signature.
     :param replace: If the class already implements a method with the given
         name, replaces the current implementation if `True`. Raises a
-        :class:`ValueError` error otherwise.
+         [`ValueError`][] error otherwise.
     :return: The ctypes C function pointer object that was created for the
         method's implementation. This return value can be ignored. (In version
         0.4.0 and older, callers were required to manually keep a reference to
@@ -1077,7 +1184,8 @@ def get_ivar(obj, varname, weak=False):
 
     The returned object is a [`ctypes`][] data object.
 
-    For non-object types (everything except :class:`.objc_id` and subclasses),
+    For non-object types (everything except
+    [`objc_id`][rubicon.objc.runtime.objc_id] and subclasses),
     the returned data object is backed by the `ivar`'s actual memory. This means
     that the data object is only usable as long as the "owner" object is alive,
     and writes to it will directly change the `ivar`'s value.
@@ -1148,7 +1256,7 @@ def set_ivar(obj, varname, value, weak=False):
 
 @contextmanager
 def autoreleasepool():
-    """A context manager that has the same effect as a @autoreleasepool block in
+    """A context manager that has the same effect as an @autoreleasepool block in
     Objective-C.
 
     Any objects that are autoreleased within the context will receive a release message
