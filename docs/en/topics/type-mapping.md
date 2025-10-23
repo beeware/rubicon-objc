@@ -35,7 +35,7 @@ such as `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"}
 or `~rubicon.objc.types.NSRange`{.interpreted-text role="class"}, as
 well as standard C types from the [`ctypes`][]
 module, such as `~ctypes.c_byte`{.interpreted-text role="class"} or
-`~ctypes.c_double`{.interpreted-text role="class"}.
+[`c_double`][ctypes.c_double].
 
 For example, a method that takes a C `double` and returns a
 `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"} would be
@@ -51,9 +51,9 @@ Rubicon also allows certain Python types to be used in method
 signatures, and converts them to matching primitive
 [`ctypes`][] types. For example, Python
 `int`{.interpreted-text role="class"} is treated as
-`~ctypes.c_int`{.interpreted-text role="class"}, and
+[`c_int`][ctypes.c_int], and
 `float`{.interpreted-text role="class"} is treated as
-`~ctypes.c_double`{.interpreted-text role="class"}.
+[`c_double`][ctypes.c_double].
 
 /// note | See also
 

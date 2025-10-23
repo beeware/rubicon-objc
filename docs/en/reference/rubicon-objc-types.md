@@ -8,252 +8,45 @@ utilities for working with C types.
 These are commonly used C types from various frameworks.
 
 ::: rubicon.objc.types.c_ptrdiff_t
-([value])<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The [ptrdiff_t](https://en.cppreference.com/w/c/types/ptrdiff_t) type
-from `<stddef.h>`. Equivalent to [`c_long`][ctypes.c_long] on 64-bit systems and `~ctypes.c_int`{.interpreted-text
-role="class"} on 32-bit systems.
 
-<:> NSInteger([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSInteger](https://developer.apple.com/documentation/objectivec/nsinteger?language=objc)
-type from `<objc/NSObjCRuntime.h>`. Equivalent to
-[`c_long`][ctypes.c_long] on 64-bit systems and
-`~ctypes.c_int`{.interpreted-text role="class"} on 32-bit systems.
+::: rubicon.objc.types.NSInteger
 
-<:> NSUInteger([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSUInteger](https://developer.apple.com/documentation/objectivec/nsuinteger?language=objc)
-type from `<objc/NSObjCRuntime.h>`. Equivalent to
-`~ctypes.c_ulong`{.interpreted-text role="class"} on 64-bit systems and
-`~ctypes.c_uint`{.interpreted-text role="class"} on 32-bit systems.
+::: rubicon.objc.types.NSUInteger
 
-<:> CGFloat([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CGFloat](https://developer.apple.com/documentation/corefoundation/cgfloat?language=objc)
-type from `<CoreGraphics/CGBase.h>`. Equivalent to
-`~ctypes.c_double`{.interpreted-text role="class"} on 64-bit systems and
-`~ctypes.c_float`{.interpreted-text role="class"} on 32-bit systems.
+::: rubicon.objc.types.CGFloat
 
-<:> NSPoint([x, .y])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSPoint](https://developer.apple.com/documentation/foundation/nspoint?language=objc)
-structure from `<Foundation/NSGeometry.h>`.
+::: rubicon.objc.types.NSPoint
 
-/// note | Note
+::: rubicon.objc.types.CGPoint
 
-On 64-bit systems this is an alias for `CGPoint`{.interpreted-text
-role="class"}.
+::: rubicon.objc.types.NSSize
 
-///
+::: rubicon.objc.types.CGSize
 
-<:> x y
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
+::: rubicon.objc.types.NSRect
 
+::: rubicon.objc.types.CGRect
 
+::: rubicon.objc.types.UIEdgeInsets
 
-<:> CGPoint([x, .y])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CGPoint](https://developer.apple.com/documentation/corefoundation/cgpoint?language=objc)
-structure from `<CoreGraphics/CGGeometry.h>`.
+::: rubicon.objc.types.NSEdgeInsets
 
-<:> x y
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The X and Y coordinates as `CGFloat`{.interpreted-text role="class"}s.
+::: rubicon.objc.types.NSTimeInterval
 
+::: rubicon.objc.types.CFIndex
 
+::: rubicon.objc.types.UniChar
 
-<:> NSSize([width, .height])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSSize](https://developer.apple.com/documentation/foundation/nssize?language=objc)
-structure from `<Foundation/NSGeometry.h>`.
+::: rubicon.objc.types.unichar
 
-/// note | Note
+::: rubicon.objc.types.CGGlyph
 
-On 64-bit systems this is an alias for `CGSize`{.interpreted-text
-role="class"}.
+::: rubicon.objc.types.CFRange
 
-///
-
-<:> width height
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The width and height as `CGFloat`{.interpreted-text role="class"}s.
-
-
-
-<:> CGSize([width, .height])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CGSize](https://developer.apple.com/documentation/corefoundation/cgsize?language=objc)
-structure from `<CoreGraphics/CGGeometry.h>`.
-
-<:> width height
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The width and height as `CGFloat`{.interpreted-text role="class"}s.
-
-
-
-<:> NSRect([origin, .size])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSRect](https://developer.apple.com/documentation/foundation/nsrect?language=objc)
-structure from `<Foundation/NSGeometry.h>`.
-
-/// note | Note
-
-On 64-bit systems this is an alias for `CGRect`{.interpreted-text
-role="class"}.
-
-///
-
-<:> origin
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The origin as a `NSPoint`{.interpreted-text role="class"}.
-
-
-<:> size
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The size as a `NSSize`{.interpreted-text role="class"}.
-
-
-
-<:> CGRect([origin, .size])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CGRect](https://developer.apple.com/documentation/corefoundation/cgrect?language=objc)
-structure from `<CoreGraphics/CGGeometry.h>`.
-
-<:> origin
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The origin as a `CGPoint`{.interpreted-text role="class"}.
-
-
-<:> size
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The size as a `CGSize`{.interpreted-text role="class"}.
-
-
-
-<:> UIEdgeInsets([top, .left, .bottom, .right])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[UIEdgeInsets](https://developer.apple.com/documentation/uikit/uiedgeinsets?language=objc)
-structure from `<UIKit/UIGeometry.h>`.
-
-<:> top left bottom right
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The insets as `CGFloat`{.interpreted-text role="class"}s.
-
-
-
-<:> NSEdgeInsets([top, .left, .bottom, .right])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSEdgeInsets](https://developer.apple.com/documentation/foundation/nsedgeinsets?language=objc)
-structure from `<Foundation/NSGeometry.h>`.
-
-<:> top left bottom right
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The insets as `CGFloat`{.interpreted-text role="class"}s.
-
-
-
-<:> NSTimeInterval([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSTimeInterval](https://developer.apple.com/documentation/foundation/nstimeinterval?language=objc)
-type from `<Foundation/NSDate.h>`. Equivalent to
-`~ctypes.c_double`{.interpreted-text role="class"}.
-
-<:> CFIndex([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CFIndex](https://developer.apple.com/documentation/corefoundation/cfindex?language=objc)
-type from `<CoreFoundation/CFBase.h>`. Equivalent to
-`~ctypes.c_longlong`{.interpreted-text role="class"} on 64-bit systems
-and [`c_long`][ctypes.c_long] on 32-bit systems.
-
-<:> UniChar([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The `UniChar` type from `<MacTypes.h>`. Equivalent to
-`~ctypes.c_ushort`{.interpreted-text role="class"}.
-
-<:> unichar([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[unichar](https://developer.apple.com/documentation/foundation/unichar?language=objc)
-type from `<Foundation/NSString.h>`. Equivalent to
-`~ctypes.c_ushort`{.interpreted-text role="class"}.
-
-<:> CGGlyph([value])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CGGlyph](https://developer.apple.com/documentation/coregraphics/cgglyph?language=objc)
-type from `<CoreGraphics/CGFont.h>`. Equivalent to
-`~ctypes.c_ushort`{.interpreted-text role="class"}.
-
-<:> CFRange([location, .length])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[CFRange](https://developer.apple.com/documentation/corefoundation/cfrange?language=objc)
-type from `<CoreFoundation/CFBase.h>`.
-
-<:> location length
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The location and length as `CFIndex`{.interpreted-text role="class"}es.
-
-
-
-<:> NSRange([location, .length])
-<!-- TODO: stub candidate -->
-<!-- TODO: stub notes -->
-The
-[NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
-type from `<Foundation/NSRange.h>`.
-
-<:> location length
-<!-- TODO: attribute -->
-<!-- TODO: Doc notes -->
-The location and length as `NSUInteger`{.interpreted-text
-role="class"}s.
+::: rubicon.objc.types.NSRange
 
 ## Common C constants
-
+module level - document in source
 These are commonly used C constants from various frameworks.
 
 <:> UIEdgeInsetsZero
@@ -269,7 +62,7 @@ insets set to zero.
 <!-- TODO: Doc notes -->
 The constant
 [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
-a `NSPoint`{.interpreted-text role="class"} instance with the X and Y
+a [`NSPoint`][rubicon.objc.types.NSPoint] instance with the X and Y
 coordinates set to zero.
 
 
@@ -383,22 +176,22 @@ than typing encodings out by hand.
 | `~ctypes.c_byte`{.interpreted-text role="class"} | `c` |  |
 | `~ctypes.c_ubyte`{.interpreted-text role="class"} | `C` |  |
 | `~ctypes.c_short`{.interpreted-text role="class"} | `s` |  |
-| `~ctypes.c_ushort`{.interpreted-text role="class"} | `S` |  |
+| [`c_c_ushort`][ctypes.c_c_ushort] | `S` |  |
 | [`c_long`][ctypes.c_long] | `l` |  |
-| `~ctypes.c_ulong`{.interpreted-text role="class"} | `L` |  |
-| `~ctypes.c_int`{.interpreted-text role="class"} | `i` | On 32-bit systems, `~ctypes.c_int`{.interpreted-text role="class"} is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
-| `~ctypes.c_uint`{.interpreted-text role="class"} | `I` | On 32-bit systems, `~ctypes.c_uint`{.interpreted-text role="class"} is an alias for `~ctypes.c_ulong`{.interpreted-text role="class"}, and will be encoded as such. |
-| `~ctypes.c_longlong`{.interpreted-text role="class"} | `q` | On 64-bit systems, `~ctypes.c_longlong`{.interpreted-text role="class"} is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
-| `~ctypes.c_ulonglong`{.interpreted-text role="class"} | `Q` | On 64-bit systems, `~ctypes.c_ulonglong`{.interpreted-text role="class"} is an alias for `~ctypes.c_ulong`{.interpreted-text role="class"}, and will be encoded as such. |
-| `~ctypes.c_float`{.interpreted-text role="class"} | `f` |  |
-| `~ctypes.c_double`{.interpreted-text role="class"} | `d` |  |
-| `~ctypes.c_longdouble`{.interpreted-text role="class"} | `D` | On ARM, `~ctypes.c_longdouble`{.interpreted-text role="class"} is an alias for `~ctypes.c_double`{.interpreted-text role="class"}, and will be encoded as such. |
+| [`c_ulong`][ctypes.c_ulong] | `L` |  |
+| [`c_int`][ctypes.c_int] | `i` | On 32-bit systems, [`c_int`][ctypes.c_int] is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
+| [`c_uint`][ctypes.c_uint] | `I` | On 32-bit systems, [`c_uint`][ctypes.c_uint] is an alias for [`c_ulong`][ctypes.c_ulong], and will be encoded as such. |
+| [`c_longlong`][ctypes.c_longlong] | `q` | On 64-bit systems, [`c_longlong`][ctypes.c_longlong] is an alias for [`c_long`][ctypes.c_long], and will be encoded as such. |
+| `~ctypes.c_ulonglong`{.interpreted-text role="class"} | `Q` | On 64-bit systems, `~ctypes.c_ulonglong`{.interpreted-text role="class"} is an alias for [`c_ulong`][ctypes.c_ulong], and will be encoded as such. |
+| [`c_float`][ctypes.c_float] | `f` |  |
+| [`c_double`][ctypes.c_double] | `d` |  |
+| `~ctypes.c_longdouble`{.interpreted-text role="class"} | `D` | On ARM, `~ctypes.c_longdouble`{.interpreted-text role="class"} is an alias for [`c_double`][ctypes.c_double], and will be encoded as such. |
 | `~ctypes.c_char`{.interpreted-text role="class"} | `c` | Only when encoding. Decoding `c` produces `~ctypes.c_byte`{.interpreted-text role="class"}, to allow using `signed char` as a Boolean value. |
 | `~ctypes.c_char_p`{.interpreted-text role="class"} | `*` |  |
 | `POINTER(c_char)` | `*` | Only when encoding. Decoding `*` produces `~ctypes.c_char_p`{.interpreted-text role="class"} for easier use of C strings. |
 | `POINTER(c_byte)` | `*` | Only when encoding. Decoding `*` produces `~ctypes.c_char_p`{.interpreted-text role="class"} for easier use of C strings. |
 | `POINTER(c_ubyte)` | `*` | Only when encoding. Decoding `*` produces `~ctypes.c_char_p`{.interpreted-text role="class"} for easier use of C strings. |
-| `~ctypes.c_wchar`{.interpreted-text role="class"} | `i` | Only when encoding. Decoding `i` produces `~ctypes.c_int`{.interpreted-text role="class"}. |
+| `~ctypes.c_wchar`{.interpreted-text role="class"} | `i` | Only when encoding. Decoding `i` produces [`c_int`][ctypes.c_int]. |
 | `~ctypes.c_wchar_p`{.interpreted-text role="class"} | `^i` | Only when encoding. Decoding `^i` produces `POINTER(c_int)`. |
 | `~ctypes.c_void_p`{.interpreted-text role="class"} | `^v` |  |
 | `UnknownPointer`{.interpreted-text role="class"} | `^?` | This encoding stands for a pointer to a type that cannot be encoded, which in practice means a function pointer. |
@@ -418,18 +211,18 @@ their encodings may vary depending on the system and architecture:
 
 - `ctypes.py_object`{.interpreted-text role="class"}
 - `NSInteger`{.interpreted-text role="class"}
-- `NSUInteger`{.interpreted-text role="class"}
-- `CGFloat`{.interpreted-text role="class"}
-- `NSPoint`{.interpreted-text role="class"}
-- `CGPoint`{.interpreted-text role="class"}
-- `NSSize`{.interpreted-text role="class"}
-- `CGSize`{.interpreted-text role="class"}
+- [`NSUInteger`][rubicon.objc.types.NSUInteger]
+- [`CGFloat`][rubicon.objc.types.CGFloat]
+- [`NSPoint`][rubicon.objc.types.NSPoint]
+- [`CGPoint`][rubicon.objc.types.CGPoint]
+- [`NSSize`][rubicon.objc.types.NSSize]
+- [`CGSize`][rubicon.objc.types.CGSize]
 - `NSRect`{.interpreted-text role="class"}
 - `CGRect`{.interpreted-text role="class"}
 - `UIEdgeInsets`{.interpreted-text role="class"}
 - `NSEdgeInsets`{.interpreted-text role="class"}
 - `NSTimeInterval`{.interpreted-text role="class"}
-- `CFIndex`{.interpreted-text role="class"}
+- [`CFIndex`][rubicon.objc.types.CFIndex]
 - `UniChar`{.interpreted-text role="class"}
 - `unichar`{.interpreted-text role="class"}
 - `CGGlyph`{.interpreted-text role="class"}
@@ -475,8 +268,8 @@ The following mappings are registered by default by Rubicon.
 
 | Python type | <span class="title-ref">Ctype</span> |
 |----|----|
-| `int`{.interpreted-text role="class"} | `~ctypes.c_int`{.interpreted-text role="class"} |
-| `float`{.interpreted-text role="class"} | `~ctypes.c_float`{.interpreted-text role="class"} |
+| `int`{.interpreted-text role="class"} | [`c_int`][ctypes.c_int] |
+| `float`{.interpreted-text role="class"} | [`c_float`][ctypes.c_float] |
 | `bool`{.interpreted-text role="class"} | `~ctypes.c_bool`{.interpreted-text role="class"} |
 | [`bytes`][] | `~ctypes.c_char_p`{.interpreted-text role="class"} |
 | `~rubicon.objc.api.ObjCInstance`{.interpreted-text role="class"} | [`objc_id`][rubicon.objc.runtime.objc_id] |

@@ -594,9 +594,7 @@ except AttributeError:
         from `<objc/runtime.h>`, which is only available since OS X 10.10 and
         iOS 8. This module-level function is provided to support older systems
         --- it uses the [`libobjc`][rubicon.objc.runtime.libobjc] function if
-        available, and otherwise emulates it. This is the emulated version of the
-        object_isClass runtime function, for systems
-        older than OS X 10.10 or iOS 8, where the real function doesn't exist yet.
+        available, and otherwise emulates it.
         """
 
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))

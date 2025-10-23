@@ -657,7 +657,7 @@ register_preferred_encoding(b"L", c_ulong)
 
 # Do not register c_int or c_longlong as preferred.
 # If c_int or c_longlong is the same size as c_long, ctypes makes it an alias
-# for c_long. If we would register c_int and c_longlong as preferred, this
+# for c_long. If we registered c_int and c_longlong as preferred, this
 # could cause c_long to be encoded as b'i' or b'q', instead of b'l'.
 # The same applies to the unsigned versions.
 register_encoding(b"i", c_int)
