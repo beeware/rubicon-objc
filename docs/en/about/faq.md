@@ -1,4 +1,4 @@
-# Why "Rubicon"?
+# Why "Rubicon"? { #faq }
 
 ## So... why the name Rubicon?
 

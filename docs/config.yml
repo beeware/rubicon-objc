@@ -109,3 +109,4 @@ plugins:
           show_symbol_type_toc: true  # This is what they added on place of function() (parens) being displayed in the sidebar ToC
           find_stubs_package: true  # Allows for rendering documentation out of the stubs package
           heading_level: 3  # Default heading level of H3 for class docs.
+          show_symbol_type_heading: true

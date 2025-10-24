@@ -2,7 +2,7 @@
 
 Most Objective-C APIs are exposed through Objective-C classes and
 methods, but some parts are implemented as plain C functions. You might
-also want to want to use a pure C library that provides no Objective-C
+also want to use a pure C library that provides no Objective-C
 interface at all. Calling C functions is quite different from calling
 Objective-C methods and requires some additional work, which will be
 explained in this how-to.

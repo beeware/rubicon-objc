@@ -20,7 +20,7 @@ $ source venv/bin/activate
 (venv) $ python3 -m pip install -Ue ".[dev]"
 ```
 
-Rubicon uses a tool called [Pre-Commit](https://pre-commit.com) to
+Rubicon uses a tool called [pre-commit](https://pre-commit.com) to
 identify simple issues and standardize code formatting. It does this by
 installing a git hook that automatically runs a series of code linters
 prior to finalizing any git commit. To enable pre-commit, run:
@@ -80,7 +80,7 @@ docformatter.............................................................Passed
 1 file changed, 4 insertions(+), 2 deletions(-)
 ```
 
-Rubicon uses [tox](https://tox.wiki/en/latest/) to manage the testing
+Rubicon uses [`tox`](https://tox.wiki/en/latest/) to manage the testing
 process. To set up a testing environment and run the full test suite,
 run:
 
@@ -88,7 +88,7 @@ run:
 (venv) $ tox
 ```
 
-By default this will run the test suite multiple times, once on each
+By default, this will run the test suite multiple times, once on each
 Python version supported by Rubicon, as well as running some pre-commit
 checks of code style and validity. This can take a while, so if you want
 to speed up the process while developing, you can run the tests on one

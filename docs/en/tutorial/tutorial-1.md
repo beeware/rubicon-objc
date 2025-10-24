@@ -1,4 +1,4 @@
-# Your first bridge { #tutorial-1 }
+# Tutorial 1 - Your first bridge { #tutorial-1 }
 
 In this example, we're going to use Rubicon to access the Objective-C
 Foundation library, and the `NSURL` class in that library. `NSURL` is

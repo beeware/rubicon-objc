@@ -308,11 +308,13 @@ class NSRange:
     [NSRange](https://developer.apple.com/documentation/foundation/nsrange?language=objc)
     type from `<Foundation/NSRange.h>`.
     """
+    @property
     def location(self):
         """
         The location as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
         """
         ...
+    @property
     def length(self):
         """
         The length as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
