@@ -15,6 +15,7 @@ build:
     pre_install:
       - python -m pip install --upgrade pip
       - python -m pip install --group 'tox-uv'
+      - python -m pip install --group 'docs'
     pre_build:
       - tox -e docs-lint
 
