@@ -53,13 +53,13 @@ class NSPoint:
     ///
     """
     @property
-    def x(self):
+    def x(self) -> CGFloat:
         """
         The X coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def y(self):
+    def y(self) -> CGFloat:
         """
         The Y coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -72,13 +72,13 @@ class CGPoint:
     structure from `<CoreGraphics/CGGeometry.h>`.
     """
     @property
-    def x(self):
+    def x(self) -> CGFloat:
         """
         The X coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def y(self):
+    def y(self) -> CGFloat:
         """
         The Y coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -98,13 +98,13 @@ class NSSize:
     ///
     """
     @property
-    def width(self):
+    def width(self) -> CGFloat:
         """
         The width as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def height(self):
+    def height(self) -> CGFloat:
         """
         The height as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -117,13 +117,13 @@ class CGSize:
     structure from `<CoreGraphics/CGGeometry.h>`.
     """
     @property
-    def width(self):
+    def width(self) -> CGFloat:
         """
         The width as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def height(self):
+    def height(self) -> CGFloat:
         """
         The height as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -143,13 +143,13 @@ class NSRect:
     ///
     """
     @property
-    def origin(self):
+    def origin(self) -> NSPoint:
         """
         The origin as a [`NSPoint`][rubicon.objc.types.NSPoint].
         """
         ...
     @property
-    def size(self):
+    def size(self) -> NSSize:
         """
         The size as a [`NSSize`][rubicon.objc.types.NSSize].
         """
@@ -162,13 +162,13 @@ class CGRect:
     structure from `<CoreGraphics/CGGeometry.h>`.
     """
     @property
-    def origin(self):
+    def origin(self) -> CGPoint:
         """
         The origin as a [`CGPoint`][rubicon.objc.types.CGPoint].
         """
         ...
     @property
-    def size(self):
+    def size(self) -> CGSize:
         """
         The size as a [`CGSize`][rubicon.objc.types.CGSize].
         """
@@ -181,13 +181,13 @@ class UIEdgeInsets:
     structure from `<UIKit/UIGeometry.h>`.
     """
     @property
-    def top(self):
+    def top(self) -> CGFloat:
         """
         The top inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def left(self):
+    def left(self) -> CGFloat:
         """
         The left inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -199,7 +199,7 @@ class UIEdgeInsets:
         """
         ...
     @property
-    def right(self):
+    def right(self) -> CGFloat:
         """
         The right inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -211,25 +211,25 @@ class NSEdgeInsets:
     structure from `<Foundation/NSGeometry.h>`.
     """
     @property
-    def top(self):
+    def top(self) -> CGFloat:
         """
         The top inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def left(self):
+    def left(self) -> CGFloat:
         """
         The left inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def bottom(self):
+    def bottom(self) -> CGFloat:
         """
         The bottom inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
         ...
     @property
-    def right(self):
+    def right(self) -> CGFloat:
         """
         The right inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
@@ -290,13 +290,13 @@ class CFRange:
     type from `<CoreFoundation/CFBase.h>`.
     """
     @property
-    def location(self):
+    def location(self) -> CFIndex:
         """
         The location as a [`CFIndex`][rubicon.objc.types.CFIndex].
         """
         ...
     @property
-    def length(self):
+    def length(self) -> CFIndex:
         """
         The length as a [`CFIndex`][rubicon.objc.types.CFIndex].
         """
@@ -309,13 +309,13 @@ class NSRange:
     type from `<Foundation/NSRange.h>`.
     """
     @property
-    def location(self):
+    def location(self) -> NSUInteger:
         """
         The location as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
         """
         ...
     @property
-    def length(self):
+    def length(self) -> NSUInteger:
         """
         The length as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
         """

@@ -4,13 +4,13 @@ class objc_property_attribute_t:
     structure from `<objc/runtime.h>`.
     """
     @property
-    def name(self):
+    def name(self) -> bytes:
         """
         The attribute name as a C string ([`bytes`][]).
         """
         ...
     @property
-    def value(self):
+    def value(self) -> bytes:
         """
         The attribute value as a C string ([`bytes`][]).
         """
@@ -22,13 +22,13 @@ class objc_method_description:
     structure from `<objc/runtime.h>`.
     """
     @property
-    def name(self):
+    def name(self) -> SEL:
         """
         The method name as a [`SEL`][rubicon.objc.runtime.SEL].
         """
         ...
     @property
-    def types(self):
+    def types(self) -> bytes:
         """
         The method's signature encoding as a C string ([`bytes`][]).
         """
@@ -39,13 +39,13 @@ class objc_super:
     pyi content
     """
     @property
-    def receiver(self):
+    def receiver(self) -> objc_id:
         """
         The receiver of the call, as an [`objc_id`][rubicon.objc.runtime.objc_id].
         """
         ...
     @property
-    def super_class(self):
+    def super_class(self) -> Class:
         """
         The class in which to start searching for method implementations, as a
         [`Class`][rubicon.objc.runtime.Class].

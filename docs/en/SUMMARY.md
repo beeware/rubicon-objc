@@ -3,10 +3,10 @@
 <!-- rumdl-disable MD007 -->
 
 - [Tutorial](tutorial/index.md)
+    - [Getting Started with Rubicon](tutorial/get-started.md)
     - [Tutorial 1 - Your first bridge](tutorial/tutorial-1.md)
     - [Tutorial 2 - Writing your own class](tutorial/tutorial-2.md)
 - [How-to guides](how-to/index.md)
-    - [Getting Started with Rubicon](how-to/get-started.md)
     - [Contributing to Rubicon ObjC](how-to/contribute/index.md)
         - [Contributing code to Rubicon ObjC](how-to/contribute/code.md)
         - [Contributing to the documentation](how-to/contribute/docs.md)

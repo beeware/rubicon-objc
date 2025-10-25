@@ -8,6 +8,7 @@ class NSObject:
     See the [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
     documentation for a list of operations that Rubicon supports on all objects.
     """
+    @property
     def debugDescription(self) -> str:
         """
         Exposes the Objective-C
@@ -15,7 +16,8 @@ class NSObject:
         property.
         """
         ...
-    def description(self):
+    @property
+    def description(self) -> str:
         """Exposes the Objective-C
         [`description`](https://developer.apple.com/documentation/objectivec/nsobjectprotocol/description?language=objc)
         property.
@@ -69,13 +71,14 @@ class NSString:
     points is required, convert the [`NSString`][rubicon.objc.api.NSString] to
     [`str`][] first.
     """
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Return the value of this [`NSString`][rubicon.objc.api.NSString] as a
         [`str`][].
         """
         ...
-    def UTF8String(self):
+    @property
+    def UTF8String(self) -> str:
         """
         This Objective-C property has been declared using
         [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property]
