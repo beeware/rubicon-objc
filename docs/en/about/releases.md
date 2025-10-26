@@ -6,30 +6,30 @@
 
 - The name of the deprecated `AbstractEventLoopPolicy` symbol has been
   corrected to reflect the restoration of the original name in
-  3.14.0rc1. (#619)
+  3.14.0rc1. ([#619](https://github.com/beeware/rubicon-objc/issues/619))
 
 ### Documentation
 
 - The structure of Rubicon's documentation now matches other BeeWare
-  projects. (#604)
-- The Rubicon docs now use the BeeWare theme. (#621)
+  projects. ([#604](https://github.com/beeware/rubicon-objc/issues/604))
+- The Rubicon docs now use the BeeWare theme. ([#621](https://github.com/beeware/rubicon-objc/issues/621))
 
 ### Misc
 
-- #599, #600, #601, #602, #603, #605, #606, #607, #608, #611,
-  #612, #613, #615, #616, #617, #618, #623, #624, #626, #627
+- [#599](https://github.com/beeware/rubicon-objc/issues/599), [#600](https://github.com/beeware/rubicon-objc/issues/600), [#601](https://github.com/beeware/rubicon-objc/issues/601), [#602](https://github.com/beeware/rubicon-objc/issues/602), [#603](https://github.com/beeware/rubicon-objc/issues/603), [#605](https://github.com/beeware/rubicon-objc/issues/605), [#606](https://github.com/beeware/rubicon-objc/issues/606), [#607](https://github.com/beeware/rubicon-objc/issues/607), [#608](https://github.com/beeware/rubicon-objc/issues/608), [#611](https://github.com/beeware/rubicon-objc/issues/611),
+  [#612](https://github.com/beeware/rubicon-objc/issues/612), [#613](https://github.com/beeware/rubicon-objc/issues/613), [#615](https://github.com/beeware/rubicon-objc/issues/615), [#616](https://github.com/beeware/rubicon-objc/issues/616), [#617](https://github.com/beeware/rubicon-objc/issues/617), [#618](https://github.com/beeware/rubicon-objc/issues/618), [#623](https://github.com/beeware/rubicon-objc/issues/623), [#624](https://github.com/beeware/rubicon-objc/issues/624), [#626](https://github.com/beeware/rubicon-objc/issues/626), [#627](https://github.com/beeware/rubicon-objc/issues/627)
 
 ## 0.5.1 (2025-06-03)
 
 ### Features
 
 - `RubiconEventLoop()` is now exposed as an interface for creating a
-  CoreFoundation compatible event loop. (#557)
+  CoreFoundation compatible event loop. ([#557](https://github.com/beeware/rubicon-objc/issues/557))
 
 ### Bugfixes
 
 - The interface with EventLoopPolicy was updated to account for the
-  eventual deprecation of that API in Python. (#557)
+  eventual deprecation of that API in Python. ([#557](https://github.com/beeware/rubicon-objc/issues/557))
 
 ### Backward Incompatible Changes
 
@@ -40,15 +40,15 @@
   `RubiconEventLoop()` to instantiate an instance of an event loop and
   use that instance directly. This approach can be used on all versions
   of Python; on Python 3.13 and earlier, `RubiconEventLoop()` is a shim
-  that performs the older event loop policy-based instantiation. (#557)
+  that performs the older event loop policy-based instantiation. ([#557](https://github.com/beeware/rubicon-objc/issues/557))
 
 ### Misc
 
-- #551, #552, #554, #555, #556, #559, #560, #561, #562, #564,
-  #565, #566, #567, #568, #569, #570, #571, #572, #573, #574,
-  #575, #576, #577, #578, #579, #580, #581, #582, #583, #584,
-  #585, #586, #587, #588, #589, #590, #591, #592, #593, #594,
-  #595, #596, #597
+- [#551](https://github.com/beeware/rubicon-objc/issues/551), [#552](https://github.com/beeware/rubicon-objc/issues/552), [#554](https://github.com/beeware/rubicon-objc/issues/554), [#555](https://github.com/beeware/rubicon-objc/issues/555), [#556](https://github.com/beeware/rubicon-objc/issues/556), [#559](https://github.com/beeware/rubicon-objc/issues/559), [#560](https://github.com/beeware/rubicon-objc/issues/560), [#561](https://github.com/beeware/rubicon-objc/issues/561), [#562](https://github.com/beeware/rubicon-objc/issues/562), [#564](https://github.com/beeware/rubicon-objc/issues/564),
+  [#565](https://github.com/beeware/rubicon-objc/issues/565), [#566](https://github.com/beeware/rubicon-objc/issues/566), [#567](https://github.com/beeware/rubicon-objc/issues/567), [#568](https://github.com/beeware/rubicon-objc/issues/568), [#569](https://github.com/beeware/rubicon-objc/issues/569), [#570](https://github.com/beeware/rubicon-objc/issues/570), [#571](https://github.com/beeware/rubicon-objc/issues/571), [#572](https://github.com/beeware/rubicon-objc/issues/572), [#573](https://github.com/beeware/rubicon-objc/issues/573), [#574](https://github.com/beeware/rubicon-objc/issues/574),
+  [#575](https://github.com/beeware/rubicon-objc/issues/575), [#576](https://github.com/beeware/rubicon-objc/issues/576), [#577](https://github.com/beeware/rubicon-objc/issues/577), [#578](https://github.com/beeware/rubicon-objc/issues/578), [#579](https://github.com/beeware/rubicon-objc/issues/579), [#580](https://github.com/beeware/rubicon-objc/issues/580), [#581](https://github.com/beeware/rubicon-objc/issues/581), [#582](https://github.com/beeware/rubicon-objc/issues/582), [#583](https://github.com/beeware/rubicon-objc/issues/583), [#584](https://github.com/beeware/rubicon-objc/issues/584),
+  [#585](https://github.com/beeware/rubicon-objc/issues/585), [#586](https://github.com/beeware/rubicon-objc/issues/586), [#587](https://github.com/beeware/rubicon-objc/issues/587), [#588](https://github.com/beeware/rubicon-objc/issues/588), [#589](https://github.com/beeware/rubicon-objc/issues/589), [#590](https://github.com/beeware/rubicon-objc/issues/590), [#591](https://github.com/beeware/rubicon-objc/issues/591), [#592](https://github.com/beeware/rubicon-objc/issues/592), [#593](https://github.com/beeware/rubicon-objc/issues/593), [#594](https://github.com/beeware/rubicon-objc/issues/594),
+  [#595](https://github.com/beeware/rubicon-objc/issues/595), [#596](https://github.com/beeware/rubicon-objc/issues/596), [#597](https://github.com/beeware/rubicon-objc/issues/597)
 
 ## 0.5.0 (2025-01-07)
 
@@ -59,17 +59,17 @@
   manual `retain` calls and subsequent `release` or `autorelease` calls
   from Python are no longer needed with very few exceptions, for example
   when writing implementations of `copy` that return an existing object.
-  (#256)
-- Support for Python 3.14 was added. (#529)
+  ([#256](https://github.com/beeware/rubicon-objc/issues/256))
+- Support for Python 3.14 was added. ([#529](https://github.com/beeware/rubicon-objc/issues/529))
 
 ### Bugfixes
 
 - Protection was added against a potential race condition when loading
-  methods defined on a superclass. (#473)
+  methods defined on a superclass. ([#473](https://github.com/beeware/rubicon-objc/issues/473))
 - A workaround for
   [python/cpython#81061](https://github.com/python/cpython/issues/81061)
   is now conditionally applied only for the Python versions that require
-  it (Python 3.9 and earlier). (#517)
+  it (Python 3.9 and earlier). ([#517](https://github.com/beeware/rubicon-objc/issues/517))
 
 ### Backward Incompatible Changes
 
@@ -77,23 +77,23 @@
   skip releasing an Objective-C object when its Python wrapper is
   garbage collected. This means that fewer `retain` than `release` calls
   will cause segfaults on garbage collection. Review your code carefully
-  for unbalanced `retain` and `release` calls before updating. (#256)
-- Python 3.8 is no longer a supported platform. (#529)
+  for unbalanced `retain` and `release` calls before updating. ([#256](https://github.com/beeware/rubicon-objc/issues/256))
+- Python 3.8 is no longer a supported platform. ([#529](https://github.com/beeware/rubicon-objc/issues/529))
 
 ### Documentation
 
 - Building Rubicon ObjC's documentation now requires the use of Python
-  3.12. (#496)
+  3.12. ([#496](https://github.com/beeware/rubicon-objc/issues/496))
 
 ### Misc
 
-- #464, #466, #467, #469, #470, #472, #473, #474, #475, #476,
-  #477, #478, #479, #480, #481, #482, #483, #484, #485, #486,
-  #487, #488, #489, #490, #491, #492, #493, #494, #499, #500,
-  #502, #503, #505, #506, #507, #508, #509, #510, #511, #512,
-  #513, #514, #515, #516, #518, #519, #520, #521, #522, #523,
-  #524, #525, #526, #527, #528, #530, #531, #532, #533, #534,
-  #535, #536, #537, #538, #541, #544, #546, #548, #549, #550
+- [#464](https://github.com/beeware/rubicon-objc/issues/464), [#466](https://github.com/beeware/rubicon-objc/issues/466), [#467](https://github.com/beeware/rubicon-objc/issues/467), [#469](https://github.com/beeware/rubicon-objc/issues/469), [#470](https://github.com/beeware/rubicon-objc/issues/470), [#472](https://github.com/beeware/rubicon-objc/issues/472), [#473](https://github.com/beeware/rubicon-objc/issues/473), [#474](https://github.com/beeware/rubicon-objc/issues/474), [#475](https://github.com/beeware/rubicon-objc/issues/475), [#476](https://github.com/beeware/rubicon-objc/issues/476),
+  [#477](https://github.com/beeware/rubicon-objc/issues/477), [#478](https://github.com/beeware/rubicon-objc/issues/478), [#479](https://github.com/beeware/rubicon-objc/issues/479), [#480](https://github.com/beeware/rubicon-objc/issues/480), [#481](https://github.com/beeware/rubicon-objc/issues/481), [#482](https://github.com/beeware/rubicon-objc/issues/482), [#483](https://github.com/beeware/rubicon-objc/issues/483), [#484](https://github.com/beeware/rubicon-objc/issues/484), [#485](https://github.com/beeware/rubicon-objc/issues/485), [#486](https://github.com/beeware/rubicon-objc/issues/486),
+  [#487](https://github.com/beeware/rubicon-objc/issues/487), [#488](https://github.com/beeware/rubicon-objc/issues/488), [#489](https://github.com/beeware/rubicon-objc/issues/489), [#490](https://github.com/beeware/rubicon-objc/issues/490), [#491](https://github.com/beeware/rubicon-objc/issues/491), [#492](https://github.com/beeware/rubicon-objc/issues/492), [#493](https://github.com/beeware/rubicon-objc/issues/493), [#494](https://github.com/beeware/rubicon-objc/issues/494), [#499](https://github.com/beeware/rubicon-objc/issues/499), [#500](https://github.com/beeware/rubicon-objc/issues/500),
+  [#502](https://github.com/beeware/rubicon-objc/issues/502), [#503](https://github.com/beeware/rubicon-objc/issues/503), [#505](https://github.com/beeware/rubicon-objc/issues/505), [#506](https://github.com/beeware/rubicon-objc/issues/506), [#507](https://github.com/beeware/rubicon-objc/issues/507), [#508](https://github.com/beeware/rubicon-objc/issues/508), [#509](https://github.com/beeware/rubicon-objc/issues/509), [#510](https://github.com/beeware/rubicon-objc/issues/510), [#511](https://github.com/beeware/rubicon-objc/issues/511), [#512](https://github.com/beeware/rubicon-objc/issues/512),
+  [#513](https://github.com/beeware/rubicon-objc/issues/513), [#514](https://github.com/beeware/rubicon-objc/issues/514), [#515](https://github.com/beeware/rubicon-objc/issues/515), [#516](https://github.com/beeware/rubicon-objc/issues/516), [#518](https://github.com/beeware/rubicon-objc/issues/518), [#519](https://github.com/beeware/rubicon-objc/issues/519), [#520](https://github.com/beeware/rubicon-objc/issues/520), [#521](https://github.com/beeware/rubicon-objc/issues/521), [#522](https://github.com/beeware/rubicon-objc/issues/522), [#523](https://github.com/beeware/rubicon-objc/issues/523),
+  [#524](https://github.com/beeware/rubicon-objc/issues/524), [#525](https://github.com/beeware/rubicon-objc/issues/525), [#526](https://github.com/beeware/rubicon-objc/issues/526), [#527](https://github.com/beeware/rubicon-objc/issues/527), [#528](https://github.com/beeware/rubicon-objc/issues/528), [#530](https://github.com/beeware/rubicon-objc/issues/530), [#531](https://github.com/beeware/rubicon-objc/issues/531), [#532](https://github.com/beeware/rubicon-objc/issues/532), [#533](https://github.com/beeware/rubicon-objc/issues/533), [#534](https://github.com/beeware/rubicon-objc/issues/534),
+  [#535](https://github.com/beeware/rubicon-objc/issues/535), [#536](https://github.com/beeware/rubicon-objc/issues/536), [#537](https://github.com/beeware/rubicon-objc/issues/537), [#538](https://github.com/beeware/rubicon-objc/issues/538), [#541](https://github.com/beeware/rubicon-objc/issues/541), [#544](https://github.com/beeware/rubicon-objc/issues/544), [#546](https://github.com/beeware/rubicon-objc/issues/546), [#548](https://github.com/beeware/rubicon-objc/issues/548), [#549](https://github.com/beeware/rubicon-objc/issues/549), [#550](https://github.com/beeware/rubicon-objc/issues/550)
 
 ## 0.4.9 (2024-05-03)
 
@@ -101,30 +101,30 @@
 
 - Objective-C methods with repeated argument names can now be called by
   using a `__` suffix in the Python keyword argument to provide a unique
-  name. (#148)
+  name. ([#148](https://github.com/beeware/rubicon-objc/issues/148))
 - The error message has been improved when an Objective-C selector
-  matching the provided arguments cannot be found. (#461)
+  matching the provided arguments cannot be found. ([#461](https://github.com/beeware/rubicon-objc/issues/461))
 
 ### Bugfixes
 
 - The handling of structure and union return types was updated to be
   compatible with changes to ctypes introduced in Python 3.13.0a6.
-  (#444)
+  ([#444](https://github.com/beeware/rubicon-objc/issues/444))
 
 ### Backward Incompatible Changes
 
 - The order of keyword arguments used when invoking methods must now
   match the order they are defined in the Objective-C API. Previously
-  arguments could be in any order. (#453)
+  arguments could be in any order. ([#453](https://github.com/beeware/rubicon-objc/issues/453))
 
 ### Documentation
 
-- The README badges were updated to display correctly on GitHub. (#463)
+- The README badges were updated to display correctly on GitHub. ([#463](https://github.com/beeware/rubicon-objc/issues/463))
 
 ### Misc
 
-- #440, #441, #442, #443, #447, #448, #449, #450, #452, #454,
-  #455, #456, #457, #458, #459, #460
+- [#440](https://github.com/beeware/rubicon-objc/issues/440), [#441](https://github.com/beeware/rubicon-objc/issues/441), [#442](https://github.com/beeware/rubicon-objc/issues/442), [#443](https://github.com/beeware/rubicon-objc/issues/443), [#447](https://github.com/beeware/rubicon-objc/issues/447), [#448](https://github.com/beeware/rubicon-objc/issues/448), [#449](https://github.com/beeware/rubicon-objc/issues/449), [#450](https://github.com/beeware/rubicon-objc/issues/450), [#452](https://github.com/beeware/rubicon-objc/issues/452), [#454](https://github.com/beeware/rubicon-objc/issues/454),
+  [#455](https://github.com/beeware/rubicon-objc/issues/455), [#456](https://github.com/beeware/rubicon-objc/issues/456), [#457](https://github.com/beeware/rubicon-objc/issues/457), [#458](https://github.com/beeware/rubicon-objc/issues/458), [#459](https://github.com/beeware/rubicon-objc/issues/459), [#460](https://github.com/beeware/rubicon-objc/issues/460)
 
 ## 0.4.8 (2024-04-03)
 
@@ -132,31 +132,31 @@
 
 - Name clashes caused by re-registering Objective-C classes and
   protocols can now be automatically avoided by marking the class with
-  `auto_rename`. (#181)
+  `auto_rename`. ([#181](https://github.com/beeware/rubicon-objc/issues/181))
 - Apple Silicon is now formally tested by Rubicon's continuous
-  integration configuration. (#374)
-- Support for Python 3.13 was added. (#374)
+  integration configuration. ([#374](https://github.com/beeware/rubicon-objc/issues/374))
+- Support for Python 3.13 was added. ([#374](https://github.com/beeware/rubicon-objc/issues/374))
 - The `__repr__` output for `ObjCBoundMethod`, `ObjCClass`,
   `ObjCInstance`, `ObjCMethod`, `ObjCPartialMethod`, and `ObjCProtocol`
-  were simplified. (#432)
+  were simplified. ([#432](https://github.com/beeware/rubicon-objc/issues/432))
 
 ### Bugfixes
 
 - The `__all__` definition for `rubicon.objc` was corrected to use
-  strings, rather than symbols. (#401)
+  strings, rather than symbols. ([#401](https://github.com/beeware/rubicon-objc/issues/401))
 
 ### Documentation
 
 - The documentation contribution guide was updated to use a more
-  authoritative reStructuredText reference. (#427)
+  authoritative reStructuredText reference. ([#427](https://github.com/beeware/rubicon-objc/issues/427))
 
 ### Misc
 
-- #381, #382, #383, #384, #385, #386, #387, #388, #389, #390,
-  #391, #392, #393, #395, #396, #397, #398, #399, #400, #402,
-  #403, #404, #405, #407, #408, #409, #410, #411, #412, #413,
-  #414, #415, #416, #417, #418, #420, #421, #422, #423, #424,
-  #425, #426, #429, #430, #431, #433, #434, #435, #437, #438
+- [#381](https://github.com/beeware/rubicon-objc/issues/381), [#382](https://github.com/beeware/rubicon-objc/issues/382), [#383](https://github.com/beeware/rubicon-objc/issues/383), [#384](https://github.com/beeware/rubicon-objc/issues/384), [#385](https://github.com/beeware/rubicon-objc/issues/385), [#386](https://github.com/beeware/rubicon-objc/issues/386), [#387](https://github.com/beeware/rubicon-objc/issues/387), [#388](https://github.com/beeware/rubicon-objc/issues/388), [#389](https://github.com/beeware/rubicon-objc/issues/389), [#390](https://github.com/beeware/rubicon-objc/issues/390),
+  [#391](https://github.com/beeware/rubicon-objc/issues/391), [#392](https://github.com/beeware/rubicon-objc/issues/392), [#393](https://github.com/beeware/rubicon-objc/issues/393), [#395](https://github.com/beeware/rubicon-objc/issues/395), [#396](https://github.com/beeware/rubicon-objc/issues/396), [#397](https://github.com/beeware/rubicon-objc/issues/397), [#398](https://github.com/beeware/rubicon-objc/issues/398), [#399](https://github.com/beeware/rubicon-objc/issues/399), [#400](https://github.com/beeware/rubicon-objc/issues/400), [#402](https://github.com/beeware/rubicon-objc/issues/402),
+  [#403](https://github.com/beeware/rubicon-objc/issues/403), [#404](https://github.com/beeware/rubicon-objc/issues/404), [#405](https://github.com/beeware/rubicon-objc/issues/405), [#407](https://github.com/beeware/rubicon-objc/issues/407), [#408](https://github.com/beeware/rubicon-objc/issues/408), [#409](https://github.com/beeware/rubicon-objc/issues/409), [#410](https://github.com/beeware/rubicon-objc/issues/410), [#411](https://github.com/beeware/rubicon-objc/issues/411), [#412](https://github.com/beeware/rubicon-objc/issues/412), [#413](https://github.com/beeware/rubicon-objc/issues/413),
+  [#414](https://github.com/beeware/rubicon-objc/issues/414), [#415](https://github.com/beeware/rubicon-objc/issues/415), [#416](https://github.com/beeware/rubicon-objc/issues/416), [#417](https://github.com/beeware/rubicon-objc/issues/417), [#418](https://github.com/beeware/rubicon-objc/issues/418), [#420](https://github.com/beeware/rubicon-objc/issues/420), [#421](https://github.com/beeware/rubicon-objc/issues/421), [#422](https://github.com/beeware/rubicon-objc/issues/422), [#423](https://github.com/beeware/rubicon-objc/issues/423), [#424](https://github.com/beeware/rubicon-objc/issues/424),
+  [#425](https://github.com/beeware/rubicon-objc/issues/425), [#426](https://github.com/beeware/rubicon-objc/issues/426), [#429](https://github.com/beeware/rubicon-objc/issues/429), [#430](https://github.com/beeware/rubicon-objc/issues/430), [#431](https://github.com/beeware/rubicon-objc/issues/431), [#433](https://github.com/beeware/rubicon-objc/issues/433), [#434](https://github.com/beeware/rubicon-objc/issues/434), [#435](https://github.com/beeware/rubicon-objc/issues/435), [#437](https://github.com/beeware/rubicon-objc/issues/437), [#438](https://github.com/beeware/rubicon-objc/issues/438)
 
 ## 0.4.7 (2023-10-19)
 
@@ -195,13 +195,13 @@
 
 ### Misc
 
-- #295, #296, #297, #298, #299, #301, #302, #303, #305, #306,
-  #307, #310, #311, #312, #314, #315, #319, #320, #321, #326,
-  #327, #328, #329, #330, #331, #332, #335, #336, #337, #338,
-  #341, #342, #343, #344, #345, #346, #348, #349, #350, #351,
-  #353, #354, #355, #356, #358, #359, #360, #361, #362, #363,
-  #364, #365, #366, #367, #368, #369, #370, #371, #372, #373,
-  #375, #376, #377, #378, #379, #380
+- [#295](https://github.com/beeware/rubicon-objc/issues/295), [#296](https://github.com/beeware/rubicon-objc/issues/296), [#297](https://github.com/beeware/rubicon-objc/issues/297), [#298](https://github.com/beeware/rubicon-objc/issues/298), [#299](https://github.com/beeware/rubicon-objc/issues/299), [#301](https://github.com/beeware/rubicon-objc/issues/301), [#302](https://github.com/beeware/rubicon-objc/issues/302), [#303](https://github.com/beeware/rubicon-objc/issues/303), [#305](https://github.com/beeware/rubicon-objc/issues/305), [#306](https://github.com/beeware/rubicon-objc/issues/306),
+  [#307](https://github.com/beeware/rubicon-objc/issues/307), [#310](https://github.com/beeware/rubicon-objc/issues/310), [#311](https://github.com/beeware/rubicon-objc/issues/311), [#312](https://github.com/beeware/rubicon-objc/issues/312), [#314](https://github.com/beeware/rubicon-objc/issues/314), [#315](https://github.com/beeware/rubicon-objc/issues/315), [#319](https://github.com/beeware/rubicon-objc/issues/319), [#320](https://github.com/beeware/rubicon-objc/issues/320), [#321](https://github.com/beeware/rubicon-objc/issues/321), [#326](https://github.com/beeware/rubicon-objc/issues/326),
+  [#327](https://github.com/beeware/rubicon-objc/issues/327), [#328](https://github.com/beeware/rubicon-objc/issues/328), [#329](https://github.com/beeware/rubicon-objc/issues/329), [#330](https://github.com/beeware/rubicon-objc/issues/330), [#331](https://github.com/beeware/rubicon-objc/issues/331), [#332](https://github.com/beeware/rubicon-objc/issues/332), [#335](https://github.com/beeware/rubicon-objc/issues/335), [#336](https://github.com/beeware/rubicon-objc/issues/336), [#337](https://github.com/beeware/rubicon-objc/issues/337), [#338](https://github.com/beeware/rubicon-objc/issues/338),
+  [#341](https://github.com/beeware/rubicon-objc/issues/341), [#342](https://github.com/beeware/rubicon-objc/issues/342), [#343](https://github.com/beeware/rubicon-objc/issues/343), [#344](https://github.com/beeware/rubicon-objc/issues/344), [#345](https://github.com/beeware/rubicon-objc/issues/345), [#346](https://github.com/beeware/rubicon-objc/issues/346), [#348](https://github.com/beeware/rubicon-objc/issues/348), [#349](https://github.com/beeware/rubicon-objc/issues/349), [#350](https://github.com/beeware/rubicon-objc/issues/350), [#351](https://github.com/beeware/rubicon-objc/issues/351),
+  [#353](https://github.com/beeware/rubicon-objc/issues/353), [#354](https://github.com/beeware/rubicon-objc/issues/354), [#355](https://github.com/beeware/rubicon-objc/issues/355), [#356](https://github.com/beeware/rubicon-objc/issues/356), [#358](https://github.com/beeware/rubicon-objc/issues/358), [#359](https://github.com/beeware/rubicon-objc/issues/359), [#360](https://github.com/beeware/rubicon-objc/issues/360), [#361](https://github.com/beeware/rubicon-objc/issues/361), [#362](https://github.com/beeware/rubicon-objc/issues/362), [#363](https://github.com/beeware/rubicon-objc/issues/363),
+  [#364](https://github.com/beeware/rubicon-objc/issues/364), [#365](https://github.com/beeware/rubicon-objc/issues/365), [#366](https://github.com/beeware/rubicon-objc/issues/366), [#367](https://github.com/beeware/rubicon-objc/issues/367), [#368](https://github.com/beeware/rubicon-objc/issues/368), [#369](https://github.com/beeware/rubicon-objc/issues/369), [#370](https://github.com/beeware/rubicon-objc/issues/370), [#371](https://github.com/beeware/rubicon-objc/issues/371), [#372](https://github.com/beeware/rubicon-objc/issues/372), [#373](https://github.com/beeware/rubicon-objc/issues/373),
+  [#375](https://github.com/beeware/rubicon-objc/issues/375), [#376](https://github.com/beeware/rubicon-objc/issues/376), [#377](https://github.com/beeware/rubicon-objc/issues/377), [#378](https://github.com/beeware/rubicon-objc/issues/378), [#379](https://github.com/beeware/rubicon-objc/issues/379), [#380](https://github.com/beeware/rubicon-objc/issues/380)
 
 ## 0.4.6 (2023-04-14)
 
@@ -216,9 +216,9 @@
 
 ### Misc
 
-- #267, #268, #269, #270, #273, #274, #275, #276, #277, #278,
-  #279, #280, #281, #282, #283, #284, #285, #286, #287, #288,
-  #289, #290, #291, #294
+- [#267](https://github.com/beeware/rubicon-objc/issues/267), [#268](https://github.com/beeware/rubicon-objc/issues/268), [#269](https://github.com/beeware/rubicon-objc/issues/269), [#270](https://github.com/beeware/rubicon-objc/issues/270), [#273](https://github.com/beeware/rubicon-objc/issues/273), [#274](https://github.com/beeware/rubicon-objc/issues/274), [#275](https://github.com/beeware/rubicon-objc/issues/275), [#276](https://github.com/beeware/rubicon-objc/issues/276), [#277](https://github.com/beeware/rubicon-objc/issues/277), [#278](https://github.com/beeware/rubicon-objc/issues/278),
+  [#279](https://github.com/beeware/rubicon-objc/issues/279), [#280](https://github.com/beeware/rubicon-objc/issues/280), [#281](https://github.com/beeware/rubicon-objc/issues/281), [#282](https://github.com/beeware/rubicon-objc/issues/282), [#283](https://github.com/beeware/rubicon-objc/issues/283), [#284](https://github.com/beeware/rubicon-objc/issues/284), [#285](https://github.com/beeware/rubicon-objc/issues/285), [#286](https://github.com/beeware/rubicon-objc/issues/286), [#287](https://github.com/beeware/rubicon-objc/issues/287), [#288](https://github.com/beeware/rubicon-objc/issues/288),
+  [#289](https://github.com/beeware/rubicon-objc/issues/289), [#290](https://github.com/beeware/rubicon-objc/issues/290), [#291](https://github.com/beeware/rubicon-objc/issues/291), [#294](https://github.com/beeware/rubicon-objc/issues/294)
 
 ## 0.4.5 (2023-02-03)
 
@@ -231,7 +231,7 @@
 
 ### Misc
 
-- #259, #260, #262, #263, #264, #265, #266
+- [#259](https://github.com/beeware/rubicon-objc/issues/259), [#260](https://github.com/beeware/rubicon-objc/issues/260), [#262](https://github.com/beeware/rubicon-objc/issues/262), [#263](https://github.com/beeware/rubicon-objc/issues/263), [#264](https://github.com/beeware/rubicon-objc/issues/264), [#265](https://github.com/beeware/rubicon-objc/issues/265), [#266](https://github.com/beeware/rubicon-objc/issues/266)
 
 ## 0.4.5rc1 (2023-01-25) { #rc1-2023-01-25 }
 
@@ -242,7 +242,7 @@
 
 ### Misc
 
-- #254
+- [#254](https://github.com/beeware/rubicon-objc/issues/254)
 
 ## 0.4.4 (2023-01-23)
 
@@ -270,8 +270,8 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 ### Misc
 
-- #225, #237, #240, #241, #242, #243, #244, #245, #247, #248,
-  #253
+- [#225](https://github.com/beeware/rubicon-objc/issues/225), [#237](https://github.com/beeware/rubicon-objc/issues/237), [#240](https://github.com/beeware/rubicon-objc/issues/240), [#241](https://github.com/beeware/rubicon-objc/issues/241), [#242](https://github.com/beeware/rubicon-objc/issues/242), [#243](https://github.com/beeware/rubicon-objc/issues/243), [#244](https://github.com/beeware/rubicon-objc/issues/244), [#245](https://github.com/beeware/rubicon-objc/issues/245), [#247](https://github.com/beeware/rubicon-objc/issues/247), [#248](https://github.com/beeware/rubicon-objc/issues/248),
+  [#253](https://github.com/beeware/rubicon-objc/issues/253)
 
 ## 0.4.3 (2022-12-05)
 
@@ -294,7 +294,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 ### Misc
 
-- #227, #228, #229, #232, #233, #234
+- [#227](https://github.com/beeware/rubicon-objc/issues/227), [#228](https://github.com/beeware/rubicon-objc/issues/228), [#229](https://github.com/beeware/rubicon-objc/issues/229), [#232](https://github.com/beeware/rubicon-objc/issues/232), [#233](https://github.com/beeware/rubicon-objc/issues/233), [#234](https://github.com/beeware/rubicon-objc/issues/234)
 
 ### 0.4.2 (2021-11-14)
 
@@ -338,13 +338,13 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 #### Bugfixes
 
 - Fixed incorrect behavior of
-  `~rubicon.objc.api.Block`{.interpreted-text role="class"} when trying
+  [`Block`][rubicon.objc.api.Block] when trying
   to create a block with no arguments and using explicit types. This
   previously caused an incorrect exception about missing argument types;
   now a `no-arg` block is created as expected.
   ([#153](https://github.com/beeware/rubicon-objc/issues/153))
 - Fixed handling of type annotations when passing a bound Python method
-  into `~rubicon.objc.api.Block`{.interpreted-text role="class"}.
+  into [`Block`][rubicon.objc.api.Block].
   ([#153](https://github.com/beeware/rubicon-objc/issues/153))
 - A cooperative entry point for starting event loop has been added. This
   corrects a problem seen when using Python 3.8 on iOS.
@@ -369,8 +369,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   that returns an object, even though the conversion doesn't apply to
   most method calls. If you have code that receives an Objective-C
   number and needs to use it as a Python number, please convert it
-  explicitly using `~rubicon.objc.api.py_from_ns`{.interpreted-text
-  role="func"} or an appropriate Objective-C method.
+  explicitly using [`py_from_ns`][rubicon.objc.api.py_from_ns] or an appropriate Objective-C method.
 
   As a side effect, `NSNumber` and `NSDecimalNumber` values stored in
   Objective-C collections (`NSArray`, `NSDictionary`) are also no longer
@@ -380,8 +379,8 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   `NSNumber` and not a Python `int` as before. If you need the contents
   of an Objective-C collection as Python values, you can use
   [`py_from_ns`][rubicon.objc.api.py_from_ns] to
-  convert either single values (e. g. `py_from_ns(arr[0])`) or the
-  entire collection (e. g. `py_from_ns(arr)`).
+  convert either single values (e.g. `py_from_ns(arr[0])`) or the
+  entire collection (e.g. `py_from_ns(arr)`).
   ([#183](https://github.com/beeware/rubicon-objc/issues/183))
 
 - Removed macOS 10.12 through 10.14 from our automatic test matrix, due
@@ -398,7 +397,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 #### Misc
 
-- #185, #189, #194, #196, #208
+- [#185](https://github.com/beeware/rubicon-objc/issues/185), [#189](https://github.com/beeware/rubicon-objc/issues/189), [#194](https://github.com/beeware/rubicon-objc/issues/194), [#196](https://github.com/beeware/rubicon-objc/issues/196), [#208](https://github.com/beeware/rubicon-objc/issues/208)
 
 ### 0.4.0 (2020-07-04)
 
@@ -406,19 +405,17 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 - Added macOS 10.15 (Catalina) to the test matrix.
   ([#145](https://github.com/beeware/rubicon-objc/pull/145))
-- Added `517`{.interpreted-text role="pep"} and `518`{.interpreted-text
-  role="pep"} build system metadata to `pyproject.toml`.
+- Added [PEP 517](https://peps.python.org/pep-0517/) and [PEP 518](https://peps.python.org/pep-0518/) build system metadata to `pyproject.toml`.
   ([#156](https://github.com/beeware/rubicon-objc/pull/156))
 - Added official support for Python 3.8.
   ([#162](https://github.com/beeware/rubicon-objc/pull/162))
 - Added a `varargs` keyword argument to
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"} to
+  [`send_message`][rubicon.objc.runtime.send_message] to
   allow calling variadic methods more safely.
   ([#174](https://github.com/beeware/rubicon-objc/pull/174))
 - Changed `ObjCMethod` to call methods using
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
-  instead of calling `~rubicon.objc.runtime.IMP`{.interpreted-text
-  role="class"}s directly. This is mainly an internal change and should
+  [`send_message`][rubicon.objc.runtime.send_message]
+  instead of calling [`IMP`][rubicon.objc.runtime.IMP]s directly. This is mainly an internal change and should
   not affect most existing code, although it may improve compatibility
   with Objective-C code that makes heavy use of runtime reflection and
   method manipulation (such as swizzling).
@@ -431,8 +428,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   silently ignored. An exception is now raised if too many arguments are
   passed. ([#123](https://github.com/beeware/rubicon-objc/issues/123))
 - Fixed
-  `ObjCInstance.__str__ <rubicon.objc.api.ObjCInstance.__str__>`{.interpreted-text
-  role="func"} throwing an exception if the object's Objective-C
+  [`ObjCInstance.__str__`][rubicon.objc.api.ObjCInstance.__str__] throwing an exception if the object's Objective-C
   `description` is `nil`.
   ([#125](https://github.com/beeware/rubicon-objc/issues/125))
 - Corrected a slow memory leak caused every time an asyncio timed event
@@ -447,11 +443,9 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   3.8.1 (see [bpo-39295](https://bugs.python.org/issue39295)).
   ([#157](https://github.com/beeware/rubicon-objc/pull/157))
 - Corrected the invocation of `NSApplication.terminate()` when the
-  `~rubicon.objc.eventloop.CocoaLifecycle`{.interpreted-text
-  role="class"} is ended.
+  [`CocoaLifecycle`][rubicon.objc.eventloop.CocoaLifecycle] is ended.
   ([#170](https://github.com/beeware/rubicon-objc/issues/170))
-- Fixed `~rubicon.objc.runtime.send_message`{.interpreted-text
-  role="func"} not accepting
+- Fixed [`send_message`][rubicon.objc.runtime.send_message] not accepting
   [`SEL`][rubicon.objc.runtime.SEL] objects
   for the `selector` parameter. The documentation stated that this is
   allowed, but actually doing so caused a type error.
@@ -460,11 +454,9 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 #### Improved Documentation
 
 - Added detailed
-  `reference documentation </reference/index>`{.interpreted-text
-  role="doc"} for all public APIs of [`rubicon.objc`][rubicon-objc-module].
+  [reference documentation][reference-index] for all public APIs of [`rubicon.objc`][rubicon-objc-module].
   ([#118](https://github.com/beeware/rubicon-objc/pull/118))
-- Added a `topic guide for calling regular C functions
-  </topics/c-functions>`{.interpreted-text role="doc"} using
+- Added a [topic guide for calling regular C functions][c-functions-python] using
   [`ctypes`][] and
   [`rubicon.objc`][rubicon-objc-module].
   ([#147](https://github.com/beeware/rubicon-objc/pull/147))
@@ -477,7 +469,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   ([#139](https://github.com/beeware/rubicon-objc/pull/139))
 
 - Tightened the API of
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"},
+  [`send_message`][rubicon.objc.runtime.send_message],
   removing some previously allowed shortcuts and features that were
   rarely used, or likely to be used by accident in an unsafe way.
 
@@ -486,29 +478,26 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   In most cases, Rubicon's high-level method call syntax provided by
   [`ObjCInstance`][rubicon.objc.api.ObjCInstance] can
   be used instead of
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
+  [`send_message`][rubicon.objc.runtime.send_message].
   This syntax is almost always more convenient to use, more readable and
   less error-prone.
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
+  [`send_message`][rubicon.objc.runtime.send_message]
   should only be used in cases not supported by the high-level syntax.
 
   ///
 
-- Disallowed passing class names as `str`{.interpreted-text
-  role="class"}/[`bytes`][] as the
+- Disallowed passing class names as [`str`][]/[`bytes`][] as the
   `receiver` argument of
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
+  [`send_message`][rubicon.objc.runtime.send_message].
   If you need to send a message to a class object (i. e. call a class
-  method), use `~rubicon.objc.api.ObjCClass`{.interpreted-text
-  role="class"} or `~rubicon.objc.runtime.get_class`{.interpreted-text
-  role="func"} to look up the class, and pass the resulting
+  method), use [`ObjCClass`][rubicon.objc.api.ObjCClass] or [`get_class`][rubicon.objc.runtime.get_class] to look up the class, and pass the resulting
   [`ObjCClass`][rubicon.objc.api.ObjCClass] or
   [`Class`][rubicon.objc.runtime.Class] object
   as the receiver.
 
 - Disallowed passing [`c_void_p`][ctypes.c_void_p]
   objects as the `receiver` argument of
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}.
+  [`send_message`][rubicon.objc.runtime.send_message].
   The `receiver` argument now has to be of type
   [`objc_id`][rubicon.objc.runtime.objc_id], or
   one of its subclasses (such as
@@ -517,14 +506,13 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   [`ObjCInstance`][rubicon.objc.api.ObjCInstance]). All
   Objective-C objects returned by Rubicon's high-level and low-level
   APIs have one of these types. If you need to send a message to an
-  object pointer stored as `~ctypes.c_void_p`{.interpreted-text
-  role="class"}, `~ctypes.cast`{.interpreted-text role="func"} it to
+  object pointer stored as [`c_void_p`][ctypes.c_void_p], [`cast`][ctypes.cast] it to
   [`objc_id`][rubicon.objc.runtime.objc_id] first.
 
 - Removed default values for
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}'s
+  [`send_message`][rubicon.objc.runtime.send_message]'s
   `restype` and `argtypes` keyword arguments. Every
-  `~rubicon.objc.runtime.send_message`{.interpreted-text role="func"}
+  [`send_message`][rubicon.objc.runtime.send_message]
   call now needs to have its return and argument types set explicitly.
   This ensures that all arguments and the return value are converted
   correctly between (Objective-)C and Python.
@@ -559,7 +547,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
 #### Misc
 
-- #143, #145, #155, #158, #159, #164, #173, #178, #179
+- [#143](https://github.com/beeware/rubicon-objc/issues/143), [#145](https://github.com/beeware/rubicon-objc/issues/145), [#155](https://github.com/beeware/rubicon-objc/issues/155), [#158](https://github.com/beeware/rubicon-objc/issues/158), [#159](https://github.com/beeware/rubicon-objc/issues/159), [#164](https://github.com/beeware/rubicon-objc/issues/164), [#173](https://github.com/beeware/rubicon-objc/issues/173), [#178](https://github.com/beeware/rubicon-objc/issues/178), [#179](https://github.com/beeware/rubicon-objc/issues/179)
 
 ### 0.3.1
 
@@ -600,40 +588,34 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   of Python attributes for storage. This fixes name conflicts in some
   situations.
 
-- Added the `~rubicon.objc.runtime.load_library`{.interpreted-text
-  role="func"} function for loading `~ctypes.CDLL`{.interpreted-text
-  role="class"}s by their name instead of their full path.
+- Added the [`load_library`][rubicon.objc.runtime.load_library] function for loading [`CDLL`][ctypes.CDLL]s by their name instead of their full path.
 
 - Split the high-level Rubicon API
   ([`ObjCInstance`][rubicon.objc.api.ObjCInstance],
   [`ObjCClass`][rubicon.objc.api.ObjCClass], etc.)
-  out of [rubicon.objc.runtime][] into a
+  out of [`rubicon.objc.runtime`][rubicon-runtime] into a
   separate [`rubicon.objc.api`][rubicon-objc-api] module. The
-  `~rubicon.objc.runtime`{.interpreted-text role="mod"} module now only
+  [`runtime`][rubicon-runtime] module now only
   contains low-level runtime interfaces like
-  `~rubicon.objc.runtime.libobjc`{.interpreted-text role="data"}.
+  [`libobjc`][rubicon.objc.runtime.libobjc].
 
   This is mostly an internal change, existing code will not be affected
   unless it imports names directly from
-  [rubicon.objc.runtime][].
+  [`rubicon.objc.runtime`][rubicon-runtime].
 
-- Moved `~rubicon.objc.types.c_ptrdiff_t`{.interpreted-text
-  role="class"} from `rubicon.objc.runtime`{.interpreted-text
-  role="mod"} to [`rubicon.objc.types`][].
+- Moved [`c_ptrdiff_t`][rubicon.objc.types.c_ptrdiff_t] from [`runtime`][rubicon-runtime] to [`rubicon.objc.types`][rubicon-types].
 
 - Removed some rarely used names
-  (`~rubicon.objc.runtime.IMP`{.interpreted-text role="class"},
+  ([`IMP`][rubicon.objc.runtime.IMP],
   [`Class`][rubicon.objc.runtime.Class],
-  `~rubicon.objc.runtime.Ivar`{.interpreted-text role="class"},
-  `~rubicon.objc.runtime.Method`{.interpreted-text role="class"},
-  `~rubicon.objc.runtime.get_ivar`{.interpreted-text role="func"},
+  [`Ivar`][rubicon.objc.runtime.Ivar],
+  [`Method`][rubicon.objc.runtime.Method],
+  [`get_ivar`][rubicon.objc.runtime.get_ivar],
   [`objc_id`][rubicon.objc.runtime.objc_id],
-  `~rubicon.objc.runtime.objc_property_t`{.interpreted-text
-  role="class"}, `~rubicon.objc.runtime.set_ivar`{.interpreted-text
-  role="func"}) from the main [`rubicon.objc`][rubicon-objc-module] namespace.
+  [`objc_property_t`][rubicon.objc.runtime.objc_property_t], [`set_ivar`][rubicon.objc.runtime.set_ivar]) from the main [`rubicon.objc`][rubicon-objc-module] namespace.
 
   If needed, these names can be imported explicitly from the
-  [rubicon.objc.runtime][] module.
+  [`rubicon.objc.runtime`][rubicon-runtime] module.
 
 - Fixed `objc_property` setters on non-macOS platforms. (cculianu)
 

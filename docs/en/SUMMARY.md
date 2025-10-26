@@ -3,7 +3,7 @@
 <!-- rumdl-disable MD007 -->
 
 - [Tutorial](tutorial/index.md)
-    - [Getting Started with Rubicon](tutorial/get-started.md)
+    - [Getting Started with Rubicon](tutorial/tutorial-0.md)
     - [Tutorial 1 - Your first bridge](tutorial/tutorial-1.md)
     - [Tutorial 2 - Writing your own class](tutorial/tutorial-2.md)
 - [How-to guides](how-to/index.md)
