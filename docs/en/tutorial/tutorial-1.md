@@ -4,9 +4,7 @@ In this example, we're going to use Rubicon to access the Objective-C
 Foundation library, and the `NSURL` class in that library. `NSURL` is
 the class used to represent and manipulate URLs.
 
-This tutorial assumes you've set up your environment as described in the
-`Getting started guide </how-to/get-started>`{.interpreted-text
-role="doc"}.
+This tutorial assumes you've set up your environment as described in [Tutorial 0][tutorial-0].
 
 ## Accessing NSURL
 
@@ -127,12 +125,11 @@ You now have access to *any* method, on *any* class, in any library, in
 the entire macOS or iOS ecosystem! If you can invoke something in
 Objective-C, you can invoke it in Python - all you need to do is:
 
-> - load the library with ctypes;
-> - register the classes you want to use; and
-> - Use those classes as if they were written in Python.
+* load the library with ctypes;
+* register the classes you want to use; and
+* Use those classes as if they were written in Python.
 
 ## Next steps
 
 The next step is to write your own classes, and expose them into the
-Objective-C runtime. That's the subject of the `next tutorial
-<./tutorial-2>`{.interpreted-text role="doc"}.
+Objective-C runtime. That's the subject of the [next tutorial][tutorial-2].

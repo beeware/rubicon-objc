@@ -1,4 +1,4 @@
-# Getting Started with Rubicon
+# Tutorial 0 - Getting Started with Rubicon { #tutorial-0 }
 
 To use Rubicon, create a new virtual environment, and install it:
 
@@ -8,7 +8,6 @@ $ source venv/bin/activate
 (venv) $ pip install rubicon-objc
 ```
 
-You're now ready to use Rubicon! Your next step is to work through the
-`/tutorial/index`{.interpreted-text role="doc"}, which will take you
+You're now ready to use Rubicon! Next up is [Tutorial 1][tutorial-1], which will take you
 step-by-step through your first steps and introduce you to the important
 concepts you need to become familiar with.
