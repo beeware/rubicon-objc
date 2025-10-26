@@ -1,4 +1,4 @@
-# How to contribute code to Rubicon { #contribute }
+# How to contribute code to Rubicon { #contribute-code }
 
 If you experience problems with Rubicon, [log them on
 GitHub](https://github.com/beeware/rubicon-objc/issues). If you want to
@@ -38,25 +38,21 @@ the problems it has found:
 ```console
 (venv) $ git add some/interesting_file.py
 (venv) $ git commit -m "Minor change"
-black....................................................................Failed
-- hook id: black
-- files were modified by this hook
-
-reformatted some/interesting_file.py
-
-All done! ✨ 🍰 ✨
-1 file reformatted.
-
-flake8...................................................................Passed
-check toml...........................................(no files to check)Skipped
-check yaml...........................................(no files to check)Skipped
+check toml...............................................................Passed
+check yaml...............................................................Passed
 check for case conflicts.................................................Passed
 check docstring is first.................................................Passed
 fix end of files.........................................................Passed
 trim trailing whitespace.................................................Passed
-isort....................................................................Passed
-pyupgrade................................................................Passed
 docformatter.............................................................Passed
+ruff format..............................................................Failed
+- hook id: ruff-format
+- files were modified by this hook
+
+1 file reformatted, 488 files left unchanged
+
+ruff check...............................................................Passed
+codespell................................................................Passed
 ```
 
 You can then re-add any files that were modified as a result of the
@@ -65,17 +61,16 @@ pre-commit checks, and re-commit the change.
 ```console
 (venv) $ git add some/interesting_file.py
 (venv) $ git commit -m "Minor change"
-black....................................................................Passed
-flake8...................................................................Passed
-check toml...........................................(no files to check)Skipped
-check yaml...........................................(no files to check)Skipped
+check toml...............................................................Passed
+check yaml...............................................................Passed
 check for case conflicts.................................................Passed
 check docstring is first.................................................Passed
 fix end of files.........................................................Passed
 trim trailing whitespace.................................................Passed
-isort....................................................................Passed
-pyupgrade................................................................Passed
 docformatter.............................................................Passed
+ruff format..............................................................Passed
+ruff check...............................................................Passed
+codespell................................................................Passed
 [bugfix e3e0f73] Minor change
 1 file changed, 4 insertions(+), 2 deletions(-)
 ```
@@ -106,9 +101,7 @@ Or, to run using a specific version of Python:
 
 substituting the version number that you want to target. You can also
 specify one of the pre-commit checks
-<span class="title-ref">flake8</span>,
-<span class="title-ref">docs</span> or
-<span class="title-ref">package</span> to check code formatting,
+`flake8`, `docs`, or `package` to check code formatting,
 documentation syntax and packaging metadata, respectively.
 
 Now you are ready to start hacking on Rubicon. Have fun!

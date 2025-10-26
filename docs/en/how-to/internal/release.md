@@ -53,12 +53,9 @@ The procedure for cutting a new release is as follows:
     ```
 
 5.  Pushing the tag will start a workflow to create a draft release on
-    GitHub. You can [follow the progress of the workflow on
-    GitHub](https://github.com/beeware/rubicon-objc/actions?query=workflow%3A%22Create+Release%22);
-    once the workflow completes, there should be a new [draft
-    release](https://github.com/beeware/rubicon-objc/releases), and an
-    entry on the [Test PyPI
-    server](https://test.pypi.org/project/rubicon-objc/).
+    GitHub. You can [follow the progress of the workflow on GitHub](https://github.com/beeware/rubicon-objc/actions?query=workflow%3A%22Create+Release%22);
+    once the workflow completes, there should be a new [draft release](https://github.com/beeware/rubicon-objc/releases), and an
+    entry on the [Test PyPI server](https://test.pypi.org/project/rubicon-objc/).
 
     Confirm that this action successfully completes. If it fails,
     there's a couple of possible causes:
@@ -89,8 +86,7 @@ The procedure for cutting a new release is as follows:
     (testvenv) $ #... any other manual checks you want to perform ...
     ```
 
-7.  Log into ReadTheDocs, visit the [Versions
-    tab](https://readthedocs.org/projects/rubicon-objc/versions/), and
+7.  Log into ReadTheDocs, visit the [Versions tab](https://readthedocs.org/projects/rubicon-objc/versions/), and
     activate the new version. Ensure that the build completes; if
     there's a problem, you may need to correct the build configuration,
     roll back and re-tag the release.

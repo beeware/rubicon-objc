@@ -48,4 +48,4 @@ If you have any concerns about this code of conduct, or you wish to report a vio
 
 ## Contributing
 
-If you experience problems with Briefcase, [log them on GitHub](https://github.com/beeware/rubicon-objc/issues). If you want to contribute code, please follow the [Rubicon ObjC code contribution guide][contribute]. For documentation contributions, follow the [Rubicon ObjC docs contribution guide][contribute-docs].
+If you experience problems with Briefcase, [log them on GitHub](https://github.com/beeware/rubicon-objc/issues). If you want to contribute code, please follow the [Rubicon ObjC code contribution guide][contribute-code]. For documentation contributions, follow the [Rubicon ObjC docs contribution guide][contribute-docs].
