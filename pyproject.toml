@@ -53,14 +53,6 @@ pre-commit = [
     "pre-commit == 4.3.0",
 ]
 
-pytest = [
-    "pytest == 8.4.2",
-]
-
-setuptools-scm = [
-    "setuptools_scm == 9.2.1",
-]
-
 towncrier = [
     "towncrier==25.8.0",
 ]
@@ -69,18 +61,17 @@ tox-uv = [
     "tox-uv == 1.28.0",
 ]
 
-dev = [
-    {include-group = "pre-commit"},
-    {include-group = "pytest"},
-    {include-group = "setuptools-scm"},
-    {include-group = "tox-uv"},
+test = [
+    "pytest == 8.4.2",
 ]
 
-tox-py-test-env = [
+dev = [
+    "setuptools_scm == 9.2.1",
     {include-group = "pre-commit"},
-    {include-group = "pytest"},
-    {include-group = "towncrier"},
+    {include-group = "tox-uv"},
+    {include-group = "test"},
 ]
+
 # Docs are always built on a specific Python version; see RTD and tox config files,
 # and the docs contribution guide.
 docs = [
