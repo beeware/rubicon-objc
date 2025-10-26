@@ -1,4 +1,4 @@
-# Using and creating Objective-C protocols
+# Using and creating Objective-C protocols { #objc-protocols }
 
 Protocols are used in Objective-C to declare a set of methods and
 properties for a class to implement. They have a similar purpose to ABCs

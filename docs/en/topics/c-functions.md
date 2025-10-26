@@ -1,4 +1,4 @@
-# Calling plain C functions from Python
+# Calling plain C functions from Python { #c-functions-python }
 
 Most Objective-C APIs are exposed through Objective-C classes and
 methods, but some parts are implemented as plain C functions. You might
@@ -27,7 +27,7 @@ this, we need to find and load the library in which the function is
 defined. In the case of standard C functions, this is the standard C
 library, `libc`. Because this library is commonly used, Rubicon already
 loads it by default and exposes it in Python as
-`rubicon.objc.runtime.libc`{.interpreted-text role="attr"}.
+[`rubicon.objc.runtime.libc`][].
 
 ```pycon
 >>> from rubicon.objc.runtime import libc
@@ -38,12 +38,12 @@ loads it by default and exposes it in Python as
 /// note | Note
 
 For a list of all C libraries that Rubicon loads and exposes by default,
-see the `predefined-c-libraries`{.interpreted-text role="ref"} section
-of the `rubicon.objc.runtime`{.interpreted-text role="mod"} reference
+see the [C libraries][predefined-c-libraries] section
+of the [`rubicon.objc.runtime`][rubicon-runtime] reference
 documentation.
 
 To access a library that is not predefined by Rubicon, you can use the
-`~rubicon.objc.runtime.load_library`{.interpreted-text role="func"}
+[`load_library`][rubicon.objc.runtime.load_library]
 function:
 
 ```pycon
@@ -110,7 +110,7 @@ string). This translates to the following Python `ctypes` code:
 >>> libc.puts.argtypes = [c_char_p]
 ```
 
-Now that we have provided all of the necessary type information, we can
+Now that we have provided all the necessary type information, we can
 call `libc.puts`.
 
 For the `c_char_p` argument, we pass a byte string with the message we
@@ -134,7 +134,7 @@ capture and display output produced by high-level Python functions (such
 as `print`), but not output from low-level C functions (such as `puts`).
 
 The return value of `puts` is ignored in this example. It indicates
-whether or not the call was successful. If `puts` succeeds, it returns a
+whether the call was successful. If `puts` succeeds, it returns a
 non-negative integer (the exact value is not significant and has no
 defined meaning). If `puts` encounters an error, it returns the `EOF`
 constant (on Apple OSes, this is `-1`).
@@ -159,7 +159,7 @@ and `argtypes` only need to be set once per function. This is usually
 done at module level near the beginning of the module, similar to Python
 imports.
 
-## Inline functions (e.g. `NSLocationInRange`) { #inline-functions-e.g.-nslocationinrange }
+## Inline functions (e.g. `NSLocationInRange`)
 
 Regular C functions can be called as explained above, but there is also
 a second kind of C function that needs to be handled differently: inline
@@ -225,7 +225,7 @@ def NSLocationInRange(loc, range):
 
 ///
 
-## Global variables and constants (e.g. `NSFoundationVersionNumber`) { #global-variables-and-constants-e.g.-nsfoundationversionnumber }
+## Global variables and constants (e.g. `NSFoundationVersionNumber`)
 
 Some C libraries expose not just functions, but also global variables.
 An example of this is the Foundation framework, which defines the global
@@ -487,7 +487,7 @@ typedef NSObject<OS_dispatch_queue_main> \
     * OS_OBJC_INDEPENDENT_CLASS dispatch_queue_main_t;
 ```
 
-Finally we're left with the `OS_OBJECT_INDEPENDENT_CLASS` macro, which
+Finally, we're left with the `OS_OBJECT_INDEPENDENT_CLASS` macro, which
 is a compiler attribute that we can ignore.
 
 ```objc

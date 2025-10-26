@@ -1,4 +1,4 @@
-# Memory management for Objective-C instances
+# Memory management for Objective-C instances { #memory-management }
 
 ## Reference counting in Objective-C
 

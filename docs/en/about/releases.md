@@ -379,7 +379,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   a `NSArray` of integer `NSNumber`, `arr[0]` now returns an Objective-C
   `NSNumber` and not a Python `int` as before. If you need the contents
   of an Objective-C collection as Python values, you can use
-  `~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"} to
+  [`py_from_ns`][rubicon.objc.api.py_from_ns] to
   convert either single values (e. g. `py_from_ns(arr[0])`) or the
   entire collection (e. g. `py_from_ns(arr)`).
   ([#183](https://github.com/beeware/rubicon-objc/issues/183))
@@ -607,7 +607,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 - Split the high-level Rubicon API
   ([`ObjCInstance`][rubicon.objc.api.ObjCInstance],
   [`ObjCClass`][rubicon.objc.api.ObjCClass], etc.)
-  out of `rubicon.objc.runtime`{.interpreted-text role="mod"} into a
+  out of [rubicon.objc.runtime][] into a
   separate [`rubicon.objc.api`][rubicon-objc-api] module. The
   `~rubicon.objc.runtime`{.interpreted-text role="mod"} module now only
   contains low-level runtime interfaces like
@@ -615,11 +615,11 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
 
   This is mostly an internal change, existing code will not be affected
   unless it imports names directly from
-  `rubicon.objc.runtime`{.interpreted-text role="mod"}.
+  [rubicon.objc.runtime][].
 
 - Moved `~rubicon.objc.types.c_ptrdiff_t`{.interpreted-text
   role="class"} from `rubicon.objc.runtime`{.interpreted-text
-  role="mod"} to `rubicon.objc.types`{.interpreted-text role="mod"}.
+  role="mod"} to [`rubicon.objc.types`][].
 
 - Removed some rarely used names
   (`~rubicon.objc.runtime.IMP`{.interpreted-text role="class"},
@@ -633,7 +633,7 @@ Toga-iOS 0.3.0dev39, which was the published Toga release at the time.
   role="func"}) from the main [`rubicon.objc`][rubicon-objc-module] namespace.
 
   If needed, these names can be imported explicitly from the
-  `rubicon.objc.runtime`{.interpreted-text role="mod"} module.
+  [rubicon.objc.runtime][] module.
 
 - Fixed `objc_property` setters on non-macOS platforms. (cculianu)
 

@@ -1,4 +1,4 @@
-# `rubicon.objc.runtime` - Low-level Objective-C runtime access
+# `rubicon.objc.runtime` - Low-level Objective-C runtime access { #rubicon-runtime }
 
 This module contains types, functions, and C libraries used for
 low-level access to the Objective-C runtime.

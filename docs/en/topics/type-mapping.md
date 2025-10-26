@@ -1,4 +1,4 @@
-# You're just not my type: Using Objective-C types in Python
+# You're just not my type: Using Objective-C types in Python { #using-objc-types }
 
 Objective-C is a strongly and statically-typed language. Every variable
 has a specific type, and that type cannot change over time. Function
@@ -31,14 +31,14 @@ return anything, you need to add an explicit `-> None` annotation.)
 All other parameter and return types (primitives, pointers, structs)
 need to be annotated to tell Rubicon and Objective-C which type to
 expect. These annotations can use any of the types defined by Rubicon,
-such as `~rubicon.objc.types.NSInteger`{.interpreted-text role="class"}
-or `~rubicon.objc.types.NSRange`{.interpreted-text role="class"}, as
+such as [`NSInteger`][rubicon.objc.types.NSInteger]
+or [`NSRange`][rubicon.objc.types.NSRange], as
 well as standard C types from the [`ctypes`][]
-module, such as `~ctypes.c_byte`{.interpreted-text role="class"} or
+module, such as [`c_byte`][ctypes.c_byte] or
 [`c_double`][ctypes.c_double].
 
 For example, a method that takes a C `double` and returns a
-`~rubicon.objc.types.NSInteger`{.interpreted-text role="class"} would be
+[`NSInteger`][rubicon.objc.types.NSInteger] would be
 defined and annotated like this:
 
 ```python
@@ -57,7 +57,7 @@ signatures, and converts them to matching primitive
 
 /// note | See also
 
-The `rubicon.objc.types`{.interpreted-text role="mod"} reference
+The [`rubicon.objc.types`][rubicon-types] reference
 documentation lists all C type definitions provided by Rubicon, and
 provides additional information about how Rubicon converts types.
 
@@ -72,7 +72,7 @@ the proper Objective-C types, and the return value to an appropriate
 Python type. This makes explicit type conversions between Python and
 Objective-C types unnecessary in many cases.
 
-### Argument conversion { #argument_conversion }
+### Argument conversion { #argument-conversion }
 
 If an Objective-C method expects a C primitive argument, you can pass an
 equivalent Python value instead. For example, a Python
@@ -92,20 +92,20 @@ required structure type.
 If a parameter expects an Objective-C object, you can also pass certain
 Python objects, which are automatically converted to their Objective-C
 counterparts. For example, a Python [`str`][] is converted to an `NSString`, [`bytes`][] to `NSData`, etc. Collections are also supported:
-`[`list`][] and [`dict`][] are converted to `NSArray` and `NSDictionary`, and their
+[`list`][] and [`dict`][] are converted to `NSArray` and `NSDictionary`, and their
 elements are converted recursively.
 
 /// note | Note
 
 All of these conversions can also be performed manually - see
-`manual_conversions`{.interpreted-text role="ref"} for details.
+[Manual conversions][manual-conversions] for details.
 
 ///
 
 ### Return value conversion and wrapping
 
 Primitive values returned from methods are converted using the usual
-[`ctypes`][] conversions, e. g. C integers are
+[`ctypes`][] conversions, e.g. C integers are
 converted to Python [`int`][] and
 floating-point values to Python [`float`][].
 
@@ -113,8 +113,7 @@ Objective-C objects are automatically returned as
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
 objects, so you can call methods on them and access their properties. In
 some cases, Rubicon also provides additional Python methods on
-Objective-C objects -see `python_style_apis_for_objc`{.interpreted-text
-role="ref"} for details.
+Objective-C objects - see [Python-style APIs and methods for Objective-C objects][python-style-apis-for-objc] for details.
 
 ## Invoking Objective-C methods
 
@@ -200,7 +199,7 @@ this example; but you *can* use any unique text you want. For example,
 as would `attribute` and `atribute__to` (as the names are unique in the
 Python namespace).
 
-## Python-style APIs and methods for Objective-C objects { #python_style_apis_for_objc }
+## Python-style APIs and methods for Objective-C objects { #python-style-apis-for-objc }
 
 For some standard Foundation classes, such as lists and dictionaries,
 Rubicon provides additional Python methods to make them behave more like
@@ -210,7 +209,7 @@ manually.
 
 ### Strings
 
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects
+[`NSString`][rubicon.objc.api.NSString] objects
 behave almost exactly like Python [`str`][]
 objects - they can be sliced, concatenated, compared, etc. with other
 Objective-C and Python strings.
@@ -229,20 +228,19 @@ Objective-C and Python strings.
 /// note | Note
 
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
-wrapping a `~rubicon.objc.api.NSString`{.interpreted-text role="class"}
+wrapping a [`NSString`][rubicon.objc.api.NSString]
 internally have the class `ObjCStrInstance`, and you will see this name
-in the `repr`{.interpreted-text role="func"} of
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects.
+in the [`repr`][] of
+[`NSString`][rubicon.objc.api.NSString] objects.
 This is an implementation detail - you should not refer to the
 `ObjCStrInstance` class explicitly in your code.
 
 ///
 
-If you have an `~rubicon.objc.api.NSString`{.interpreted-text
-role="class"}, and you need to pass it to a method that does a specific
+If you have an [`NSString`][rubicon.objc.api.NSString], and you need to pass it to a method that does a specific
 type check for [`str`][], you can use
 `str(nsstring)` to convert the
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} to
+[`NSString`][rubicon.objc.api.NSString] to
 [`str`][]:
 
 ```pycon
@@ -252,10 +250,8 @@ type check for [`str`][], you can use
 ```
 
 Conversely, if you have a [`str`][], and you
-specifically require a `~rubicon.objc.api.NSString`{.interpreted-text
-role="class"}, you can use the `~rubicon.objc.api.at`{.interpreted-text
-role="func"} function to convert the Python instance to an
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"}.
+specifically require a [`NSString`][rubicon.objc.api.NSString], you can use the [`at`][rubicon.objc.api.at] function to convert the Python instance to an
+[`NSString`][rubicon.objc.api.NSString].
 
 ```pycon
 >>> from rubicon.objc import at
@@ -266,15 +262,15 @@ role="func"} function to convert the Python instance to an
 <ObjCStrInstance: __NSCFString at 0x114a94e48: hello world>
 ```
 
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} also
+[`NSString`][rubicon.objc.api.NSString] also
 supports all the utility methods that are available on
 [`str`][], such as `replace` and `split`.
 When these methods return a string, the implementation may return Python
 [`str`][] or Objective-C
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} instances.
+[`NSString`][rubicon.objc.api.NSString] instances.
 If you need to use the return value from these methods, you should
 always use [`str`][] or
-`~rubicon.objc.api.at`{.interpreted-text role="func"} to ensure that you
+[`at`][rubicon.objc.api.at] to ensure that you
 have the right kind of string for your needs.
 
 ```pycon
@@ -289,13 +285,13 @@ False
 
 /// note | Note
 
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} objects
+[`NSString`][rubicon.objc.api.NSString] objects
 behave slightly differently than Python [`str`][] objects in some cases. For technical reasons,
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"}s are not
+[`NSString`][rubicon.objc.api.NSString]s are not
 hashable in Python, which means they cannot be used as
 [`dict`][] keys (but they *can* be used as
-`~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} keys).
-`~rubicon.objc.api.NSString`{.interpreted-text role="class"} also
+[`NSDictionary`][rubicon.objc.api.NSDictionary] keys).
+[`NSString`][rubicon.objc.api.NSString] also
 handles Unicode code points above `U+FFFF` differently than Python
 [`str`][], because the former is based on
 UTF-16.
@@ -304,9 +300,9 @@ UTF-16.
 
 ### Lists
 
-`~rubicon.objc.api.NSArray`{.interpreted-text role="class"} objects
+[`NSArray`][rubicon.objc.api.NSArray] objects
 behave like any other Python sequence - they can be indexed, sliced,
-etc. and standard operations like `len`{.interpreted-text role="func"}
+etc. and standard operations like [`len`][]
 and `in` are supported:
 
 ```pycon
@@ -331,18 +327,18 @@ False
 /// note | Note
 
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
-wrapping a `~rubicon.objc.api.NSArray`{.interpreted-text role="class"}
+wrapping a [`NSArray`][rubicon.objc.api.NSArray]
 internally have the class `ObjCListInstance` or
 `ObjCMutableListInstance`, and you will see these names in the
-`repr`{.interpreted-text role="func"} of
-`~rubicon.objc.api.NSArray`{.interpreted-text role="class"} objects.
+[`repr`][] of
+[`NSArray`][rubicon.objc.api.NSArray] objects.
 This is an implementation detail - you should not refer to the
 `ObjCListInstance` and `ObjCMutableListInstance` classes explicitly in
 your code.
 
 ///
 
-`~rubicon.objc.api.NSMutableArray`{.interpreted-text role="class"}
+[`NSMutableArray`][rubicon.objc.api.NSMutableArray]
 objects additionally support mutating operations, like item and slice
 assignment:
 
@@ -382,17 +378,17 @@ Sequence methods like `index` and `pop` are also supported:
 /// note | Note
 
 Python objects stored in an
-`~rubicon.objc.api.NSArray`{.interpreted-text role="class"} are
+[`NSArray`][rubicon.objc.api.NSArray] are
 converted to Objective-C objects using the rules described in
-`argument_conversion`{.interpreted-text role="ref"}.
+[Argument conversion][argument-conversion].
 
 ///
 
 ### Dictionaries
 
-`~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} objects
+[`NSDictionary`][rubicon.objc.api.NSDictionary] objects
 behave like any other Python mapping - their items can be accessed and
-standard operations like `len`{.interpreted-text role="func"} and `in`
+standard operations like [`len`][] and `in`
 are supported:
 
 ```pycon
@@ -411,18 +407,17 @@ False
 /// note | Note
 
 [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects
-wrapping a `~rubicon.objc.api.NSDictionary`{.interpreted-text
-role="class"} internally have the class `ObjCDictInstance` or
+wrapping a [`NSDictionary`][rubicon.objc.api.NSDictionary] internally have the class `ObjCDictInstance` or
 `ObjCMutableDictInstance`, and you will see these names in the
-`repr`{.interpreted-text role="func"} of
-`~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"}
+[`repr`][] of
+[`NSDictionary`][rubicon.objc.api.NSDictionary]
 objects. This is an implementation detail - you should not refer to the
 `ObjCDictInstance` and `ObjCMutableDictInstance` classes explicitly in
 your code.
 
 ///
 
-`~rubicon.objc.api.NSMutableDictionary`{.interpreted-text role="class"}
+[`NSMutableDictionary`][rubicon.objc.api.NSMutableDictionary]
 objects additionally support mutating operations, like item assignment:
 
 ```pycon
@@ -456,13 +451,13 @@ two
 /// note | Note
 
 Python objects stored in an
-`~rubicon.objc.api.NSDictionary`{.interpreted-text role="class"} are
+[`NSDictionary`][rubicon.objc.api.NSDictionary] are
 converted to Objective-C objects using the rules described in
-`argument_conversion`{.interpreted-text role="ref"}.
+[Argument conversion][argument-conversion].
 
 ///
 
-## Manual conversions { #manual_conversions }
+## Manual conversions { #manual-conversions }
 
 If necessary, you can also manually call Rubicon's type conversion
 functions, to convert objects between Python and Objective-C when
@@ -470,40 +465,35 @@ Rubicon doesn't do so automatically.
 
 ### Converting from Python to Objective-C
 
-The function `~rubicon.objc.api.ns_from_py`{.interpreted-text
-role="func"} (also available as `~rubicon.objc.api.at`{.interpreted-text
-role="func"} for short) can convert most standard Python objects to
+The function [`ns_from_py`][rubicon.objc.api.ns_from_py] (also available as [`at`][rubicon.objc.api.at] for short) can convert most standard Python objects to
 Foundation equivalents. For a full list of possible conversions, see the
 reference documentation for
-`~rubicon.objc.api.ns_from_py`{.interpreted-text role="func"}.
+[`ns_from_py`][rubicon.objc.api.ns_from_py].
 
 These conversions are performed automatically when a Python object is
 passed into an Objective-C method parameter that expects an object - in
 that case you do not need to call
-`~rubicon.objc.api.ns_from_py`{.interpreted-text role="func"} manually
-(see `argument_conversion`{.interpreted-text role="ref"}).
+[`ns_from_py`][rubicon.objc.api.ns_from_py] manually
+(see [Argument conversion][argument-conversion]).
 
 ### Converting from Objective-C to Python
 
-The function `~rubicon.objc.api.py_from_ns`{.interpreted-text
-role="func"} can convert many common Foundation objects to Python
+The function [`py_from_ns`][rubicon.objc.api.py_from_ns] can convert many common Foundation objects to Python
 equivalents. For a full list of possible conversions, see the reference
-documentation for `~rubicon.objc.api.py_from_ns`{.interpreted-text
-role="func"}.
+documentation for [`py_from_ns`][rubicon.objc.api.py_from_ns].
 
 These conversions are not performed automatically by Rubicon. For
 example, if an Objective-C method returns an `NSString`, Rubicon will
-return it as an `~rubicon.objc.api.ObjCInstance`{.interpreted-text
-role="class"} (with some additional Python methods -see
-`python_style_apis_for_objc`{.interpreted-text role="ref"}). Using
-`~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"}, you can
+return it as an [`ObjCInstance`][rubicon.objc.api.ObjCInstance] (with some additional Python methods - see
+[Python-style APIs and methods for Objective-C objects][python-style-apis-for-objc]). Using
+[`py_from_ns`][rubicon.objc.api.py_from_ns], you can
 convert the `NSString` to a real Python [`str`][].
 
 When converting collections, such as `NSArray` or `NSDictionary`,
-`~rubicon.objc.api.py_from_ns`{.interpreted-text role="func"} will
+[`py_from_ns`][rubicon.objc.api.py_from_ns] will
 convert them recursively to a pure Python object. For example, if
 `nsarray` is an `NSArray` containing `NSString`s, `py_from_ns(nsarray)`
-will return a `[`list`][] of
+will return a [`list`][] of
 [`str`][]s. In most cases, that is the
 desired behavior, but you can also avoid this recursive conversion by
 passing the Foundation collection into a Python collection constructor:

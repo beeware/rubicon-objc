@@ -1,4 +1,4 @@
-# `rubicon.objc.types` - Non-Objective-C types and utilities
+# `rubicon.objc.types` - Non-Objective-C types and utilities { #rubicon-types }
 
 This module contains definitions for common C constants and types, and
 utilities for working with C types.
@@ -161,7 +161,7 @@ than typing encodings out by hand.
 | [`c_float`][ctypes.c_float]                           | `f`            |                                                                                                                                                                                                                                                      |
 | [`c_double`][ctypes.c_double]                         | `d`            |                                                                                                                                                                                                                                                      |
 | [`c_longdouble`][ctypes.c_longdouble]                 | `D`            | On ARM, [`c_longdouble`][ctypes.c_longdouble]is an alias for [`c_double`][ctypes.c_double], and will be encoded as such.                                                                                                                             |
-| [`c_char`][ctypes.c_char]                             | `c`            | Only when encoding. Decoding `c` produces `~ctypes.c_byte`{.interpreted-text role="class"}, to allow using `signed char` as a Boolean value.                                                                                                         |
+| [`c_char`][ctypes.c_char]                             | `c`            | Only when encoding. Decoding `c` produces [`ctypes.c_byte`][], to allow using `signed char` as a Boolean value.                                                                                                         |
 | [`c_char_p`][ctypes.c_char_p]                         | `*`            |                                                                                                                                                                                                                                                      |
 | `POINTER(c_char)`                                     | `*`            | Only when encoding. Decoding `*` produces [`c_char_p`][ctypes.c_char_p] for easier use of C strings.                                                                                                                                                 |
 | `POINTER(c_byte)`                                     | `*`            | Only when encoding. Decoding `*` produces [`c_char_p`][ctypes.c_char_p] for easier use of C strings.                                                                                                                                                 |
@@ -213,8 +213,7 @@ required. Most users will not need to use this function directly.
 These functions are used to map Python types to equivalent
 [`ctypes`][] types, and to add or remove such
 mappings. This mechanism is mainly used internally by Rubicon, to for
-example allow `~rubicon.objc.api.ObjCInstance`{.interpreted-text
-role="class"} to be used instead of
+example allow [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used instead of
 [`objc_id`][rubicon.objc.runtime.objc_id] in
 method type annotations. Most users will not need to use these functions
 directly.
