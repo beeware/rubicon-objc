@@ -8,6 +8,4 @@ $ source venv/bin/activate
 (venv) $ pip install rubicon-objc
 ```
 
-You're now ready to use Rubicon! Next up is [Tutorial 1][tutorial-1], which will take you
-step-by-step through your first steps and introduce you to the important
-concepts you need to become familiar with.
+You're now ready to use Rubicon! Next up is [Tutorial 1][tutorial-1], which will take you step-by-step through your first steps and introduce you to the important concepts you need to become familiar with.

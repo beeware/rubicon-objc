@@ -1,17 +1,12 @@
 # `rubicon.objc.runtime` - Low-level Objective-C runtime access { #rubicon-runtime }
 
-This module contains types, functions, and C libraries used for
-low-level access to the Objective-C runtime.
+This module contains types, functions, and C libraries used for low-level access to the Objective-C runtime.
 
-In most cases there is no need to use this module directly --- the
-[`rubicon.objc.api`][rubicon-objc-api] module provides the
-same functionality through a high-level interface.
+In most cases there is no need to use this module directly --- the [`rubicon.objc.api`][rubicon-objc-api] module provides the same functionality through a high-level interface.
 
 ## C libraries { #predefined-c-libraries }
 
-Some commonly used C libraries are provided as
-[`CDLL`][ctypes.CDLL]s. Other libraries can be
-loaded using the [`load_library`][rubicon.objc.runtime.load_library] function.
+Some commonly used C libraries are provided as [`CDLL`][ctypes.CDLL]s. Other libraries can be loaded using the [`load_library`][rubicon.objc.runtime.load_library] function.
 
 ::: rubicon.objc.runtime.load_library
 
@@ -49,8 +44,7 @@ These are various types used by the Objective-C runtime functions.
 
 ## Objective-C runtime utility functions
 
-These utility functions provide easier access from Python to certain
-parts of the Objective-C runtime.
+These utility functions provide easier access from Python to certain parts of the Objective-C runtime.
 
 ::: rubicon.objc.runtime.object_isClass
 

@@ -16,13 +16,11 @@ Get started with a hands-on introduction for beginners.
 
 ### [How-to guides][how-to]
 
-Guides and recipes for common problems and tasks, including how to
-contribute.
+Guides and recipes for common problems and tasks, including how to contribute.
 
 ### [Topic guides][topics]
 
-Deeper explorations of concepts and issues related to Rubicon-ObjC
-usage.
+Deeper explorations of concepts and issues related to Rubicon-ObjC usage.
 
 ### [Reference][reference-index]
 

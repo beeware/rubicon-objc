@@ -1,9 +1,6 @@
 # Topic guides { #topics }
 
-Topic guides are deeper explorations of concepts and issues related to
-Briefcase usage. They aim to provide thorough explanations and
-background information, rather than a step-by-step guide of
-accomplishing specific tasks.
+Topic guides are deeper explorations of concepts and issues related to Briefcase usage. They aim to provide thorough explanations and background information, rather than a step-by-step guide of accomplishing specific tasks.
 
 * [You're just not my type: Using Objective-C types in Python][using-objc-types] - Providing static typing for Python object conversion.
 * [Memory management for Objective-C instances][memory-management] - Reference management in Rubicon.

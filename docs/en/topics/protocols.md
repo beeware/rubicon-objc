@@ -1,13 +1,10 @@
 # Using and creating Objective-C protocols { #objc-protocols }
 
-Protocols are used in Objective-C to declare a set of methods and
-properties for a class to implement. They have a similar purpose to ABCs
-(abstract base classes) in Python.
+Protocols are used in Objective-C to declare a set of methods and properties for a class to implement. They have a similar purpose to ABCs (abstract base classes) in Python.
 
 ## Looking up a protocol
 
-Protocol objects can be looked up using the `ObjCProtocol` constructor,
-similar to how classes can be looked up using `ObjCClass`:
+Protocol objects can be looked up using the `ObjCProtocol` constructor, similar to how classes can be looked up using `ObjCClass`:
 
 ```pycon
 >>> NSCopying = ObjCProtocol('NSCopying')
@@ -15,8 +12,7 @@ similar to how classes can be looked up using `ObjCClass`:
 <ObjCProtocol: NSCopying>
 ```
 
-The `isinstance` function can be used to check whether an object
-conforms to a protocol:
+The `isinstance` function can be used to check whether an object conforms to a protocol:
 
 ```pycon
 >>> isinstance(NSObject.new(), NSCopying)
@@ -27,11 +23,7 @@ True
 
 ## Implementing a protocol
 
-When writing a custom Objective-C class, you might want to have it
-conform to one or multiple protocols. In Rubicon, this is done by using
-the `protocols` keyword argument in the base class list. For example, if
-you have a class `UserAccount` and want it to conform to `NSCopyable`,
-you would write it like this:
+When writing a custom Objective-C class, you might want to have it conform to one or multiple protocols. In Rubicon, this is done by using the `protocols` keyword argument in the base class list. For example, if you have a class `UserAccount` and want it to conform to `NSCopyable`, you would write it like this:
 
 ```python
 class UserAccount(NSObject, protocols=[NSCopying]):
@@ -56,8 +48,7 @@ class UserAccount(NSObject, protocols=[NSCopying]):
         return UserAccount.alloc().initWithUsername(self.username, emailAddress=self.emailAddress)
 ```
 
-We can now use our class. The `copy` method (which uses our implemented
-`copyWithZone:` method) can also be used:
+We can now use our class. The `copy` method (which uses our implemented `copyWithZone:` method) can also be used:
 
 ```pycon
 >>> ua = UserAccount.alloc().initWithUsername_emailAddress_(at('person'), at('person@example.com'))
@@ -76,8 +67,7 @@ True
 
 ## Writing custom protocols
 
-You can also create custom protocols. This works similarly to creating
-custom Objective-C classes:
+You can also create custom protocols. This works similarly to creating custom Objective-C classes:
 
 ```python
 class Named(metaclass=ObjCProtocol):
@@ -88,16 +78,7 @@ class Named(metaclass=ObjCProtocol):
         ...
 ```
 
-There are two notable differences between creating classes and
-protocols:
+There are two notable differences between creating classes and protocols:
 
-1.  Protocols do not need to extend exactly one other protocol - they
-    can also extend multiple protocols, or none at all. When not
-    extending other protocols, as is the case here, we need to
-    explicitly add `metaclass=ObjCProtocol` to the base class list, to
-    tell Python that this is a protocol and not a regular Python class.
-    When extending other protocols, Python detects this automatically.
-2.  Protocol methods do not have a body. Python has no dedicated syntax
-    for functions without a body, so we put `...` in the body instead.
-    (You could technically put code in the body, but this would be
-    misleading and is not recommended.)
+1. Protocols do not need to extend exactly one other protocol - they can also extend multiple protocols, or none at all. When not extending other protocols, as is the case here, we need to explicitly add `metaclass=ObjCProtocol` to the base class list, to tell Python that this is a protocol and not a regular Python class. When extending other protocols, Python detects this automatically.
+2. Protocol methods do not have a body. Python has no dedicated syntax for functions without a body, so we put `...` in the body instead. (You could technically put code in the body, but this would be misleading and is not recommended.)

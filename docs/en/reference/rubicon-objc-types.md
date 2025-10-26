@@ -1,7 +1,6 @@
 # `rubicon.objc.types` - Non-Objective-C types and utilities { #rubicon-types }
 
-This module contains definitions for common C constants and types, and
-utilities for working with C types.
+This module contains definitions for common C constants and types, and utilities for working with C types.
 
 ## Common C type definitions
 
@@ -46,8 +45,7 @@ These are commonly used C types from various frameworks.
 ::: rubicon.objc.types.NSRange
 
 ## Common C constants
-module level - document in source
-These are commonly used C constants from various frameworks.
+module level - document in source These are commonly used C constants from various frameworks.
 
 ::: rubicon.objc.types.UIEdgeInsetsZero
 
@@ -63,9 +61,7 @@ These are commonly used C constants from various frameworks.
 
 ### Architecture detection constants
 
-The following constants provide information about the architecture of
-the current environment. All of them are equivalent to the C compiler
-macros of the same names.
+The following constants provide information about the architecture of the current environment. All of them are equivalent to the C compiler macros of the same names.
 
 ::: rubicon.objc.types.__LP64__
     options:
@@ -96,13 +92,9 @@ Each of the following constants is true if the current environment uses the name
 
 ## Objective-C type encoding conversion
 
-These functions are used to convert Objective-C type encoding strings to
-and from [`ctypes`][] types, and to manage
-custom conversions in both directions.
+These functions are used to convert Objective-C type encoding strings to and from [`ctypes`][] types, and to manage custom conversions in both directions.
 
-All Objective-C encoding strings are represented as
-[`bytes`][] rather than
-[`str`][].
+All Objective-C encoding strings are represented as [`bytes`][] rather than [`str`][].
 
 ::: rubicon.objc.types.ctype_for_encoding
 
@@ -136,13 +128,7 @@ All Objective-C encoding strings are represented as
 
 ### Default registered type encodings
 
-The following table lists Objective-C's standard type encodings for
-primitive types, and the corresponding registered ctypes. These mappings
-can be considered stable, but nonetheless users should not hard code
-these encodings unless necessary. Instead, the
-`encoding_for_ctype`{.interpreted-text role="func"} function should be
-used to encode types, because it is less error-prone and more readable
-than typing encodings out by hand.
+The following table lists Objective-C's standard type encodings for primitive types, and the corresponding registered ctypes. These mappings can be considered stable, but nonetheless users should not hard code these encodings unless necessary. Instead, the [`encoding_for_ctype`][rubicon.objc.types.encoding_for_ctype] function should be used to encode types, because it is less error-prone and more readable than typing encodings out by hand.
 
 | `Ctype`                                               | Type encoding  | Notes                                                                                                                                                                                                                                                |
 |-------------------------------------------------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -176,8 +162,7 @@ than typing encodings out by hand.
 | [`SEL`][rubicon.objc.runtime.SEL]                     | `:`            |                                                                                                                                                                                                                                                      |
 | [`Class`][rubicon.objc.runtime.Class]                 | `#`            |                                                                                                                                                                                                                                                      |
 
-In addition, the following types defined by Rubicon are registered, but
-their encodings may vary depending on the system and architecture:
+In addition, the following types defined by Rubicon are registered, but their encodings may vary depending on the system and architecture:
 
 * [`ctypes.py_object`][]
 * [`NSInteger`][rubicon.objc.types.NSInteger]
@@ -200,23 +185,13 @@ their encodings may vary depending on the system and architecture:
 
 ## Conversion of Python sequences to C structures and arrays
 
-This function is used to convert a Python sequence (such as a
-`tuple`{.interpreted-text role="class"} or [`list`][]) to a specific C structure or array type. This function is
-mainly used internally by Rubicon, to allow passing Python sequences as
-method parameters where a C structure or array would normally be
-required. Most users will not need to use this function directly.
+This function is used to convert a Python sequence (such as a [`tuple`][] or [`list`][]) to a specific C structure or array type. This function is mainly used internally by Rubicon, to allow passing Python sequences as method parameters where a C structure or array would normally be required. Most users will not need to use this function directly.
 
 ::: rubicon.objc.types.compound_value_for_sequence
 
 ## Python to [`ctypes`][] type mapping
 
-These functions are used to map Python types to equivalent
-[`ctypes`][] types, and to add or remove such
-mappings. This mechanism is mainly used internally by Rubicon, to for
-example allow [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used instead of
-[`objc_id`][rubicon.objc.runtime.objc_id] in
-method type annotations. Most users will not need to use these functions
-directly.
+These functions are used to map Python types to equivalent [`ctypes`][] types, and to add or remove such mappings. This mechanism is mainly used internally by Rubicon, to for example allow [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used instead of [`objc_id`][rubicon.objc.runtime.objc_id] in method type annotations. Most users will not need to use these functions directly.
 
 ::: rubicon.objc.types.ctype_for_type
 

@@ -1,12 +1,8 @@
 # `rubicon.objc.api` - The high-level Rubicon API { #rubicon-objc-api }
 
-This module contains Rubicon's main high-level APIs, which allow easy
-interaction with Objective-C classes and objects using Pythonic syntax.
+This module contains Rubicon's main high-level APIs, which allow easy interaction with Objective-C classes and objects using Pythonic syntax.
 
-Nearly all attributes of this module are also available on the main
-[`rubicon.objc`][rubicon-objc-module] module, and if possible
-that module should be used instead of importing
-[`rubicon.objc.api`][rubicon-objc-api] directly.
+Nearly all attributes of this module are also available on the main [`rubicon.objc`][rubicon-objc-module] module, and if possible that module should be used instead of importing [`rubicon.objc.api`][rubicon-objc-api] directly.
 
 ## Objective-C objects
 
@@ -26,13 +22,7 @@ The following classes from the [Objective-C runtime](https://developer.apple.com
 
 /// note | Note
 
-None of the following classes have a usable Python-style constructor -
-for example, you *cannot* call `NSString("hello")` to create an
-Objective-C string from a Python string. To create instances of these
-classes, you should use [`ns_from_py`][rubicon.objc.api.ns_from_py]
-(also called [`at`][rubicon.objc.api.at]): `ns_from_py("hello")`
-returns a [`NSString`][rubicon.objc.api.NSString] instance with the
-value `hello`.
+None of the following classes have a usable Python-style constructor - for example, you *cannot* call `NSString("hello")` to create an Objective-C string from a Python string. To create instances of these classes, you should use [`ns_from_py`][rubicon.objc.api.ns_from_py] (also called [`at`][rubicon.objc.api.at]): `ns_from_py("hello")` returns a [`NSString`][rubicon.objc.api.NSString] instance with the value `hello`.
 
 ///
 
@@ -79,19 +69,14 @@ The following protocols from the [Objective-C runtime](https://developer.apple.c
 
 ## Creating custom Objective-C classes and protocols { #custom-classes-and-protocols }
 
-Custom Objective-C classes are defined using Python `class` syntax, by
-subclassing an existing [`ObjCClass`][rubicon.objc.api.ObjCClass]
-object:
+Custom Objective-C classes are defined using Python `class` syntax, by subclassing an existing [`ObjCClass`][rubicon.objc.api.ObjCClass] object:
 
 ```python
 class MySubclass(NSObject):
     # method, property, etc. definitions go here
 ```
 
-A custom Objective-C class can only have a single superclass, since
-Objective-C does not support multiple inheritance. However, the class
-can conform to any number of protocols, which are specified by adding
-the `protocols` keyword argument to the base class list:
+A custom Objective-C class can only have a single superclass, since Objective-C does not support multiple inheritance. However, the class can conform to any number of protocols, which are specified by adding the `protocols` keyword argument to the base class list:
 
 ```python
 class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
@@ -100,34 +85,20 @@ class MySubclass(NSObject, protocols=[NSCopying, NSMutableCopying]):
 
 /// note | Note
 
-Rubicon requires specifying a superclass when defining a custom
-Objective-C class. If you don't need to extend any specific class, use
-[`NSObject`][rubicon.objc.api.NSObject] as the superclass.
+Rubicon requires specifying a superclass when defining a custom Objective-C class. If you don't need to extend any specific class, use [`NSObject`][rubicon.objc.api.NSObject] as the superclass.
 
-Although Objective-C technically allows defining classes without a base
-class (so-called *root classes*), this is almost never the desired
-behavior (attempting to do so [causes a compiler error by
-default](https://developer.apple.com/documentation/objectivec/objc_root_class)).
-In practice, this feature is only used in the definitions of core
-Objective-C classes like [`NSObject`][rubicon.objc.api.NSObject].
-Because of this, Rubicon does not support defining Objective-C root
-classes.
+Although Objective-C technically allows defining classes without a base class (so-called *root classes*), this is almost never the desired behavior (attempting to do so [causes a compiler error by default](https://developer.apple.com/documentation/objectivec/objc_root_class)). In practice, this feature is only used in the definitions of core Objective-C classes like [`NSObject`][rubicon.objc.api.NSObject]. Because of this, Rubicon does not support defining Objective-C root classes.
 
 ///
 
-Similar syntax is used to define custom Objective-C protocols. Unlike
-classes, protocols can extend multiple other protocols:
+Similar syntax is used to define custom Objective-C protocols. Unlike classes, protocols can extend multiple other protocols:
 
 ```python
 class MyProtocol(NSCopying, NSMutableCopying):
     # method, property, etc. definitions go here
 ```
 
-A custom protocol might not need to extend any other protocol at all. In
-this case, we need to explicitly tell Python to define an
-[`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]. Normally Python detects
-the metaclass automatically by examining the base classes, but in this
-case there are none, so we need to specify the metaclass manually.
+A custom protocol might not need to extend any other protocol at all. In this case, we need to explicitly tell Python to define an [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]. Normally Python detects the metaclass automatically by examining the base classes, but in this case there are none, so we need to specify the metaclass manually.
 
 ```python
 class MyProtocol(metaclass=ObjCProtocol):
@@ -146,59 +117,27 @@ class MyProtocol(metaclass=ObjCProtocol):
 
 ### Method naming
 
-The name of a Python-defined Objective-C method is same as the Python
-method's name, but with all underscores (`_`) replaced with colons (`:`)
---- for example, `initWithWidth_height_` becomes
-`initWithWidth:height:`.
+The name of a Python-defined Objective-C method is same as the Python method's name, but with all underscores (`_`) replaced with colons (`:`) --- for example, `initWithWidth_height_` becomes `initWithWidth:height:`.
 
 /// warning | Warning
 
-The Objective-C *language* imposes certain requirements on the usage of
-colons in method names: a method's name must contain exactly as many
-colons as the method has arguments (excluding the implicit `self` and
-`_cmd` parameters), and the name of a method with arguments must end
-with a colon. For example, a method called `init` takes no arguments,
-`initWithSize:` takes a single argument, `initWithWidth:height:` takes
-two, etc. `initWithSize:spam` is an invalid method name.
+The Objective-C *language* imposes certain requirements on the usage of colons in method names: a method's name must contain exactly as many colons as the method has arguments (excluding the implicit `self` and `_cmd` parameters), and the name of a method with arguments must end with a colon. For example, a method called `init` takes no arguments, `initWithSize:` takes a single argument, `initWithWidth:height:` takes two, etc. `initWithSize:spam` is an invalid method name.
 
-These requirements are not enforced by the Objective-C *runtime*, but
-methods that do not follow them cannot easily be used from regular
-Objective-C code.
+These requirements are not enforced by the Objective-C *runtime*, but methods that do not follow them cannot easily be used from regular Objective-C code.
 
-In addition, although the Objective-C language allows method names with
-multiple consecutive colons or a colon at the start of the name, such
-names are considered bad style and never used in practice. For example,
-`spam::`, `:ham:`, and `:` are unusual, but valid method names.
+In addition, although the Objective-C language allows method names with multiple consecutive colons or a colon at the start of the name, such names are considered bad style and never used in practice. For example, `spam::`, `:ham:`, and `:` are unusual, but valid method names.
 
-Future versions of Rubicon may warn about or disallow such nonstandard
-method names.
+Future versions of Rubicon may warn about or disallow such nonstandard method names.
 
 ///
 
 ### Parameter and return types
 
-The argument and return types of a Python-created Objective-C method are
-determined based on the Python method's type annotations. The
-annotations may contain any [`ctypes`][] type,
-as well as any of the Python types accepted by
-[`ctype_for_type`][rubicon.objc.types.ctype_for_type]. If
-a parameter or the return type is not specified, it defaults to
-[`ObjCInstance`][rubicon.objc.api.ObjCInstance]. The `self` parameter is
-special-cased --- its type is always [`ObjCInstance`][rubicon.objc.api.ObjCInstance], even if annotated otherwise. To annotate a method as
-returning `void`, set its return type to [`None`][].
+The argument and return types of a Python-created Objective-C method are determined based on the Python method's type annotations. The annotations may contain any [`ctypes`][] type, as well as any of the Python types accepted by [`ctype_for_type`][rubicon.objc.types.ctype_for_type]. If a parameter or the return type is not specified, it defaults to [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. The `self` parameter is special-cased --- its type is always [`ObjCInstance`][rubicon.objc.api.ObjCInstance], even if annotated otherwise. To annotate a method as returning `void`, set its return type to [`None`][].
 
-Before being passed to the Python method, any object parameters
-([`objc_id`][rubicon.objc.runtime.objc_id]) are
-automatically converted to [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. If the method returns an Objective-C object, it is
-converted using [`ns_from_py`][rubicon.objc.api.ns_from_py] before being
-returned to Objective-C. These automatic conversions can be disabled by
-using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod] instead of
-[`objc_method`][rubicon.objc.api.objc_method].
+Before being passed to the Python method, any object parameters ([`objc_id`][rubicon.objc.runtime.objc_id]) are automatically converted to [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. If the method returns an Objective-C object, it is converted using [`ns_from_py`][rubicon.objc.api.ns_from_py] before being returned to Objective-C. These automatic conversions can be disabled by using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod] instead of [`objc_method`][rubicon.objc.api.objc_method].
 
-The implicit `_cmd` parameter is not passed to the Python method, as it
-is normally redundant and not needed. If needed, the `_cmd` parameter
-can be accessed by using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod]
-instead of [`objc_method`][rubicon.objc.api.objc_method].
+The implicit `_cmd` parameter is not passed to the Python method, as it is normally redundant and not needed. If needed, the `_cmd` parameter can be accessed by using [`objc_rawmethod`][rubicon.objc.api.objc_rawmethod] instead of [`objc_method`][rubicon.objc.api.objc_method].
 
 ::: rubicon.objc.api.objc_rawmethod
     options:
@@ -224,27 +163,18 @@ instead of [`objc_method`][rubicon.objc.api.objc_method].
 
 ## Objective-C blocks { #objc_blocks }
 
-Blocks are the Objective-C equivalent of function objects, so Rubicon
-provides ways to call Objective-C blocks from Python and to pass Python
-callables to Objective-C as blocks.
+Blocks are the Objective-C equivalent of function objects, so Rubicon provides ways to call Objective-C blocks from Python and to pass Python callables to Objective-C as blocks.
 
 ### Automatic conversion
 
-If an Objective-C method returns a block (according to its type
-encoding), Rubicon will convert the return value to a special
-[`ObjCInstance`][rubicon.objc.api.ObjCInstance] that can be called in
-Python:
+If an Objective-C method returns a block (according to its type encoding), Rubicon will convert the return value to a special [`ObjCInstance`][rubicon.objc.api.ObjCInstance] that can be called in Python:
 
 ```python
 block = an_objc_instance.methodReturningABlock()
 res = block(arg, ...)
 ```
 
-Similarly, if an Objective-C method has a parameter that expects a
-block, you can pass in a Python callable object, and it will be
-converted to an Objective-C block. In this case, the callable object
-needs to have parameter and return type annotations, so that Rubicon can
-expose this type information to the Objective-C runtime:
+Similarly, if an Objective-C method has a parameter that expects a block, you can pass in a Python callable object, and it will be converted to an Objective-C block. In this case, the callable object needs to have parameter and return type annotations, so that Rubicon can expose this type information to the Objective-C runtime:
 
 ```python
 def result_handler(res: objc_id) -> None:
@@ -253,10 +183,7 @@ def result_handler(res: objc_id) -> None:
 an_objc_instance.doSomethingWithResultHandler(result_handler)
 ```
 
-If you are writing a custom Objective-C method (see
-[Creating custom Objective-C classes and protocols][custom-classes-and-protocols]), you can annotate parameter or return types using
-[`objc_block`][rubicon.objc.runtime.objc_block] so
-that Rubicon converts them appropriately:
+If you are writing a custom Objective-C method (see [Creating custom Objective-C classes and protocols][custom-classes-and-protocols]), you can annotate parameter or return types using [`objc_block`][rubicon.objc.runtime.objc_block] so that Rubicon converts them appropriately:
 
 ```python
 class AnObjCClass(NSObject):
@@ -274,25 +201,15 @@ class AnObjCClass(NSObject):
 
 /// note | Note
 
-These automatic conversions are mostly equivalent to the manual
-conversions described in the next section. There are internal technical
-differences between automatic and manual conversions, but they are not
-noticeable to most users.
+These automatic conversions are mostly equivalent to the manual conversions described in the next section. There are internal technical differences between automatic and manual conversions, but they are not noticeable to most users.
 
-The internals of automatic conversion and
-[`objc_block`][rubicon.objc.runtime.objc_block]
-handling may change in the future, so if you need more control over the
-block conversion process, you should use the manual conversions
-described in the next section.
+The internals of automatic conversion and [`objc_block`][rubicon.objc.runtime.objc_block] handling may change in the future, so if you need more control over the block conversion process, you should use the manual conversions described in the next section.
 
 ///
 
 ### Manual conversion
 
-These classes are used to manually convert blocks to Python callables
-and vice versa. You may need to use them to perform these conversions
-outside of Objective-C method calls, or if you need more control over
-the block's type signature.
+These classes are used to manually convert blocks to Python callables and vice versa. You may need to use them to perform these conversions outside of Objective-C method calls, or if you need more control over the block's type signature.
 
 ::: rubicon.objc.api.ObjCBlock
     options:
@@ -306,11 +223,7 @@ the block's type signature.
 
 ## Defining custom subclasses of [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
 
-The following functions can be used to register custom subclasses of
-[`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used when wrapping
-instances of a certain Objective-C class. This mechanism is for example
-used by Rubicon to provide Python-style operators and methods on
-standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and [`NSDictionary`][rubicon.objc.api.NSDictionary].
+The following functions can be used to register custom subclasses of [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to be used when wrapping instances of a certain Objective-C class. This mechanism is for example used by Rubicon to provide Python-style operators and methods on standard Foundation classes, such as [`NSString`][rubicon.objc.api.NSString] and [`NSDictionary`][rubicon.objc.api.NSDictionary].
 
 ::: rubicon.objc.api.register_type_for_objcclass
 

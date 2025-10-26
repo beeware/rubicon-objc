@@ -1,21 +1,11 @@
 # `rubicon.objc` - The main Rubicon module { #rubicon-objc-module }
 
 
-This is the main namespace of Rubicon-ObjC. Rubicon is structured into
-multiple submodules of [`rubicon.objc`][rubicon-objc-module], and
-the most commonly used attributes from these submodules are exported via
-the [`rubicon.objc`][rubicon-objc-module] module. This means that
-most users only need to import and use the main
-[`rubicon.objc`][rubicon-objc-module] module; the individual
-submodules only need to be used for attributes that are not also
-available on [`rubicon.objc`][rubicon-objc-module].
+This is the main namespace of Rubicon-ObjC. Rubicon is structured into multiple submodules of [`rubicon.objc`][rubicon-objc-module], and the most commonly used attributes from these submodules are exported via the [`rubicon.objc`][rubicon-objc-module] module. This means that most users only need to import and use the main [`rubicon.objc`][rubicon-objc-module] module; the individual submodules only need to be used for attributes that are not also available on [`rubicon.objc`][rubicon-objc-module].
 
 ## Exported Attributes
 
-This is a full list of all attributes exported on the
-[`rubicon.objc`][rubicon-objc-module] module. For detailed
-documentation on these attributes, click the links below to visit the
-relevant sections of the submodules' documentation.
+This is a full list of all attributes exported on the [`rubicon.objc`][rubicon-objc-module] module. For detailed documentation on these attributes, click the links below to visit the relevant sections of the submodules' documentation.
 
 ### From `rubicon.objc.api`
 
