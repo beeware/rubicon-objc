@@ -24,7 +24,8 @@ dependencies:
     $ cd rubicon-objc
     $ python3 -m venv venv
     $ source venv/bin/activate
-    (venv) $ python3 -m pip install -Ue ".[dev]"
+    (venv) $ python3 -m pip install -U pip
+    (venv) $ python3 -m pip install -Ue "." --group dev
 
 Rubicon uses a tool called `Pre-Commit <https://pre-commit.com>`__ to identify
 simple issues and standardize code formatting. It does this by installing a git
