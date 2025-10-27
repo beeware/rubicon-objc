@@ -33,6 +33,7 @@ jobs:
     uses: beeware/.github/.github/workflows/pre-commit-run.yml@main
     with:
       pre-commit-source: "--group pre-commit"
+      python-version: "3.13"  # docformatter is not compatible with 3.14
 
   towncrier:
     name: Check towncrier
