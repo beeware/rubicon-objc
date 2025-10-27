@@ -80,6 +80,8 @@ dev = [
 # and the docs contribution guide.
 docs = [
     "beeware-docs-tools @ git+https://github.com/beeware/beeware-docs-tools",
+    # griffe can be removed when the feature is included in a new release of
+    # mkdocstrings-python, which is included through beeware-docs-tools.
     "griffe @ git+https://github.com/kattni/griffe@stub-override",
     {include-group = "setuptools-scm"}
 ]
