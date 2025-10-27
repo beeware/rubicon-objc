@@ -1,3 +1,32 @@
+class SEL:
+    """The [SEL](https://developer.apple.com/documentation/objectivec/sel?language=objc)
+    type from `<objc/objc.h>`.
+
+    The constructor can be called with a [`bytes`][] or [`str`][] object to
+    obtain a selector with that value.
+
+    (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
+    still accepted.)
+    """
+    @property
+    def name(self) -> bytes:
+        """The selector's name as [`bytes`][]."""
+        ...
+
+class objc_id:
+    """The [id](https://developer.apple.com/documentation/objectivec/id?language=objc)
+    type from `<objc/objc.h>`.
+    """
+
+    ...
+
+class Class:
+    """The [Class](https://developer.apple.com/documentation/objectivec/class?language=objc)
+    type from `<objc/objc.h>`.
+    """
+
+    ...
+
 class objc_property_attribute_t:
     """
     The [objc_property_attribute_t](https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc)

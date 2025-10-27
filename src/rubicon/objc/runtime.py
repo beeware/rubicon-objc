@@ -202,6 +202,7 @@ if True:
 
 @with_encoding(b"@")
 class objc_id(c_void_p):
+    # This documentation is duplicated in the runtime typing stub.
     """The [id](https://developer.apple.com/documentation/objectivec/id?language=objc)
     type from `<objc/objc.h>`.
     """
@@ -232,6 +233,7 @@ class objc_block(objc_id):
 
 @with_preferred_encoding(b":")
 class SEL(c_void_p):
+    # This documentation is duplicated in the runtime typing stub.
     """The [SEL](https://developer.apple.com/documentation/objectivec/sel?language=objc)
     type from `<objc/objc.h>`.
 
@@ -279,6 +281,7 @@ class SEL(c_void_p):
 
 @with_preferred_encoding(b"#")
 class Class(objc_id):
+    # This documentation is duplicated in the runtime typing stub.
     """The [Class](https://developer.apple.com/documentation/objectivec/class?language=objc)
     type from `<objc/objc.h>`.
     """
