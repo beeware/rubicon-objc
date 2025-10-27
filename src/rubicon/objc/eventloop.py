@@ -217,9 +217,6 @@ class CFTimerHandle(events.TimerHandle):
 
         self._timeout = timeout
 
-        # Retain a reference to the Handle
-        self._loop._timers.add(self)
-
         # Create the timer event, and add it to the run loop.
         self._timer = libcf.CFRunLoopTimerCreate(
             kCFAllocatorDefault,
@@ -234,6 +231,11 @@ class CFTimerHandle(events.TimerHandle):
         libcf.CFRunLoopAddTimer(
             self._loop._cfrunloop, self._timer, kCFRunLoopCommonModes
         )
+
+        # Retain a reference to the Handle. This is done last to ensure that the
+        # CFTimerHandle isn't put on the loop's cancellation list unless the
+        # timer is fully created and added.
+        self._loop._timers.add(self)
 
     def cancel(self):
         """Cancel the Timer handle."""

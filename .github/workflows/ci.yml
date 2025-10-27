@@ -32,13 +32,14 @@ jobs:
     name: Pre-commit checks
     uses: beeware/.github/.github/workflows/pre-commit-run.yml@main
     with:
-      runner-os: "macos-latest"
+      pre-commit-source: "--group pre-commit"
+      python-version: "3.13"  # docformatter is not compatible with 3.14
 
   towncrier:
     name: Check towncrier
     uses: beeware/.github/.github/workflows/towncrier-run.yml@main
     with:
-      runner-os: "macos-latest"
+      tox-source: "--group tox-uv"
 
   package:
     name: Package Rubicon-ObjC
@@ -92,10 +93,7 @@ jobs:
         path: dist
 
     - name: Install Tox
-      uses: beeware/.github/.github/actions/install-requirement@main
-      with:
-        requirements: tox
-        extra: dev
+      run: python -m pip install --group tox-uv
 
     - name: Test
       run: tox -e py --installpkg dist/rubicon_objc-*.whl

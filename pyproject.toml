@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "setuptools==80.9.0",
-    "setuptools_scm==9.2.0",
+    "setuptools_scm==9.2.1",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -49,32 +49,33 @@ Tracker = "https://github.com/beeware/rubicon-objc/issues"
 Source = "https://github.com/beeware/rubicon-objc"
 
 [dependency-groups]
-# Extras used by developers *of* briefcase are pinned to specific versions to
-# ensure environment consistency.
 pre-commit = [
     "pre-commit == 4.3.0",
 ]
 
 setuptools-scm = [
-    "setuptools_scm == 9.2.0",
+    "setuptools_scm == 9.2.1",
 ]
 
 towncrier = [
-    "towncrier==24.8.0",
+    "towncrier==25.8.0",
 ]
 
 tox-uv = [
     "tox-uv == 1.28.0",
 ]
 
-dev = [
-    "coverage[toml] == 7.10.7",
-    "coverage-conditional-plugin == 0.9.0",
+test = [
     "pytest == 8.4.2",
+]
+
+dev = [
     {include-group = "pre-commit"},
     {include-group = "setuptools-scm"},
     {include-group = "tox-uv"},
+    {include-group = "test"},
 ]
+
 # Docs are always built on a specific Python version; see RTD and tox config files,
 # and the docs contribution guide.
 docs = [

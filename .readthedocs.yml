@@ -9,7 +9,7 @@ version: 2
 build:
   os: ubuntu-24.04
   tools:
-    # Docs are always built on Python 3.12. See also the tox config.
+    # Docs are always built on Python 3.12. See also the tox config and contribution docs.
     python: "3.12"
   jobs:
     post_checkout:
