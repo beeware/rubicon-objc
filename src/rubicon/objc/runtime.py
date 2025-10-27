@@ -254,6 +254,7 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
+        # TODO: Duplicated in class docstring.
         # The constructor can be called with a [`bytes`][] or [`str`][] object to
         # obtain a selector with that value.
         #

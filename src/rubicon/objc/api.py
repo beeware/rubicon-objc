@@ -939,6 +939,7 @@ class ObjCInstance:
     def __new__(
         cls, object_ptr, _name=None, _bases=None, _ns=None, _implicitly_owned=False
     ):
+        # TODO: Duplicated in class docstring.
         # The constructor accepts an [`objc_id`][rubicon.objc.runtime.objc_id] or
         # anything
         # that can be cast to one, such as a [`c_void_p`][ctypes.c_void_p], or an
@@ -1453,6 +1454,7 @@ class ObjCClass(ObjCInstance, type):
         protocols=(),
         auto_rename=None,
     ):
+        # TODO: Duplicated in class docstring.
         # The constructor accepts either the name of an Objective-C class to look up
         # (as [`str`][] or [`bytes`][]), or a pointer to an existing class object
         # (in any form accepted by [`ObjCInstance`][rubicon.objc.api.ObjCInstance]).
@@ -1830,6 +1832,7 @@ class ObjCMetaClass(ObjCClass):
     """The name of this class, as a [`str`][]."""
 
     def __new__(cls, name_or_ptr):
+        # TODO: Duplicated in class docstring.
         # The constructor accepts either the name of an Objective-C metaclass to look
         # up (as [`str`][] or [`bytes`][]), or a pointer to an existing metaclass
         # object (in any form accepted by
@@ -2285,6 +2288,7 @@ class ObjCProtocol(ObjCInstance):
     a protocol with the same name is already exists."""
 
     def __new__(cls, name_or_ptr, bases=None, ns=None, auto_rename=None):
+        # TODO: Duplicated in class docstring.
         # The constructor accepts either the name of an Objective-C protocol to look up
         # (as [`str`][] or [`bytes`][]), or a pointer to an existing protocol object
         # (in any form accepted by [`ObjCInstance`][rubicon.objc.api.ObjCInstance]).
