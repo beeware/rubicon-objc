@@ -25,7 +25,7 @@
     - [`rubicon.objc.runtime` — Low-level Objective-C runtime access](reference/rubicon-objc-runtime.md)
     - [`rubicon.objc.types` — Non Objective-C types and utilities](reference/rubicon-objc-types.md)
 - [About Rubicon Objective-C](about/index.md)
-    - [Why "Rubicon"?](about/faq.md)
+    - [Frequently asked questions](about/faq.md)
     - [Success stories](about/success.md)
     - [Release history](about/releases.md)
     - [Road map](about/roadmap.md)

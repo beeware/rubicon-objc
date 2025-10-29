@@ -258,7 +258,7 @@ This version was yanked from PyPI because of an incompatibility with Toga-iOS 0.
 
 #### Improved Documentation
 
-- Added detailed [reference documentation][reference-index] for all public APIs of [`rubicon.objc`][rubicon-objc-module]. ([#118](https://github.com/beeware/rubicon-objc/pull/118))
+- Added detailed [reference documentation](../reference/index.md) for all public APIs of [`rubicon.objc`][rubicon-objc-module]. ([#118](https://github.com/beeware/rubicon-objc/pull/118))
 - Added a [topic guide for calling regular C functions][c-functions-python] using [`ctypes`][] and [`rubicon.objc`][rubicon-objc-module]. ([#147](https://github.com/beeware/rubicon-objc/pull/147))
 
 #### Deprecations and Removals

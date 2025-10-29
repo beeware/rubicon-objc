@@ -10,23 +10,23 @@ It also includes wrappers of some key data types from the Foundation framework (
 
 ## Table of contents
 
-### [Tutorial][tutorial-index]
+### [Tutorial](tutorial/index.md)
 
 Get started with a hands-on introduction for beginners.
 
-### [How-to guides][how-to]
+### [How-to guides](how-to/index.md)
 
 Guides and recipes for common problems and tasks, including how to contribute.
 
-### [Topic guides][topics]
+### [Topic guides](topics/index.md)
 
 Deeper explorations of concepts and issues related to Rubicon-ObjC usage.
 
-### [Reference][reference-index]
+### [Reference](reference/index.md)
 
 Technical reference - commands, modules, classes, methods
 
-### [About Rubicon-ObjC][about]
+### [About Rubicon-ObjC](about/index.md)
 
 Frequently Asked Questions, success stories, and other details about Rubicon-ObjC as a project.
 
