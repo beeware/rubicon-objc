@@ -25,7 +25,7 @@ loop.run_forever()
 
 The last call (`loop.run_forever()`) will, as the name suggests, run forever - or, at least, until an event handler calls `loop.stop()` to terminate the event loop.
 
-## Integrating asyncio with AppKit and `NSApplication`
+## Integrating asyncio with AppKit and NSApplication
 
 If you're using AppKit and NSApplication, you don't just need to start the CoreFoundation event loop - you need to start the full `NSApplication` life cycle. To do this, you pass the application instance into the call to `loop.run_forever()`:
 
