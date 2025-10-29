@@ -254,13 +254,7 @@ class SEL(c_void_p):
         return libobjc.sel_getName(self)
 
     def __new__(cls, init=None):
-        # TODO: Duplicated in class docstring.
-        # The constructor can be called with a [`bytes`][] or [`str`][] object to
-        # obtain a selector with that value.
-        #
-        # (The normal arguments supported by [`c_void_p`][ctypes.c_void_p] are
-        # still accepted.)
-
+        # See class docstring for usage details.
         if isinstance(init, (bytes, str)):
             self = libobjc.sel_registerName(ensure_bytes(init))
             self._inited = True
@@ -271,6 +265,7 @@ class SEL(c_void_p):
             return self
 
     def __init__(self, init=None):
+        # See class docstring for usage details.
         if not self._inited:
             super().__init__(init)
 

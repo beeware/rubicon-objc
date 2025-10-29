@@ -840,42 +840,41 @@ def for_objcclass(objcclass):
 class ObjCInstance:
     """Python wrapper for an Objective-C instance.
 
-    The constructor accepts an [`objc_id`][rubicon.objc.runtime.objc_id] or anything
-    that can be cast to one, such as a [`c_void_p`][ctypes.c_void_p], or an existing
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance].
+    The constructor accepts an [`objc_id`][rubicon.objc.runtime.objc_id] or
+    anything that can be cast to one, such as a [`c_void_p`][ctypes.c_void_p],
+    or an existing [`ObjCInstance`][rubicon.objc.api.ObjCInstance].
 
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects are cached ---
-    this means that for every
-    Objective-C object there can be at most on
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] object
-    at any time. Rubicon will automatically create new
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s or return existing ones as needed.
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects are cached --- this
+    means that for every Objective-C object there can be at most on
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] object at any time. Rubicon
+    will automatically create new
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s or return existing ones as
+    needed.
 
     The returned object's Python class is not always exactly
     [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. For example, if the passed
     pointer refers to a class or a metaclass, an instance o
     [`ObjCClass`][rubicon.objc.api.ObjCClass] or
-    [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass] is returned as appropriate.
-    Additional custom
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] subclasses may be defined and
-    registered using
+    [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass] is returned as
+    appropriate. Additional custom
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] subclasses may be defined
+    and registered using
     [`register_type_for_objcclass`][rubicon.objc.api.register_type_for_objcclass].
-    Creating an [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
-    from a `nil` pointer returns `None`.
+    Creating an [`ObjCInstance`][rubicon.objc.api.ObjCInstance] from a `nil`
+    pointer returns `None`.
 
     Rubicon retains an Objective-C object when it is wrapped in an
     [`ObjCInstance`][rubicon.objc.api.ObjCInstance] and autoreleases it when the
-    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] is
-    garbage collected.
+    [`ObjCInstance`][rubicon.objc.api.ObjCInstance] is garbage collected.
 
     The only exception to this are objects returned by methods which create an
     object (starting with "alloc", "new", "copy", or "mutableCopy"). We do not
-    explicitly retain them because we already own objects created by us, but we do
-    autorelease them on garbage collection of the Python wrapper.
+    explicitly retain them because we already own objects created by us, but we
+    do autorelease them on garbage collection of the Python wrapper.
 
-    This ensures that the [`ObjCInstance`][rubicon.objc.api.ObjCInstance] can always be
-    used from Python
-    without segfaults while preventing Rubicon from leaking memory.
+    This ensures that the [`ObjCInstance`][rubicon.objc.api.ObjCInstance] can
+    always be used from Python without segfaults while preventing Rubicon from
+    leaking memory.
     """
 
     ptr: objc_id
@@ -939,48 +938,7 @@ class ObjCInstance:
     def __new__(
         cls, object_ptr, _name=None, _bases=None, _ns=None, _implicitly_owned=False
     ):
-        # TODO: Duplicated in class docstring.
-        # The constructor accepts an [`objc_id`][rubicon.objc.runtime.objc_id] or
-        # anything
-        # that can be cast to one, such as a [`c_void_p`][ctypes.c_void_p], or an
-        # existing
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance].
-        #
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] objects are cached --- this
-        # means that for every
-        # Objective-C object there can be at most one
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] object
-        # at any time. Rubicon will automatically create new
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s or return existing ones as
-        # needed.
-        #
-        # The returned object's Python class is not always exactly
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance]. For example, if the passed
-        # pointer refers to a
-        # class or a metaclass, an instance of [`ObjCClass`][rubicon.objc.api.ObjCClass]
-        # or
-        # [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass] is returned as appropriate.
-        # Additional custom
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] subclasses may be defined and
-        # registered using
-        # [`register_type_for_objcclass`][rubicon.objc.api.register_type_for_objcclass].
-        # Creating an
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance]
-        # from a `nil` pointer returns `None`.
-        #
-        # Rubicon retains an Objective-C object when it is wrapped in an
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] and autoreleases it when the
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] is
-        # garbage collected.
-        #
-        # The only exception to this are objects returned by methods which create an
-        # object (starting with "alloc", "new", "copy", or "mutableCopy"). We do not
-        # explicitly retain them because we already own objects created by us, but we do
-        # autorelease them on garbage collection of the Python wrapper.
-        #
-        # This ensures that the [`ObjCInstance`][rubicon.objc.api.ObjCInstance] can
-        # always be used from Python
-        # without segfaults while preventing Rubicon from leaking memory.
+        # See class docstring for usage details.
 
         # Make sure that object_ptr is wrapped in an objc_id.
         if not isinstance(object_ptr, objc_id):
@@ -1454,41 +1412,7 @@ class ObjCClass(ObjCInstance, type):
         protocols=(),
         auto_rename=None,
     ):
-        # TODO: Duplicated in class docstring.
-        # The constructor accepts either the name of an Objective-C class to look up
-        # (as [`str`][] or [`bytes`][]), or a pointer to an existing class object
-        # (in any form accepted by [`ObjCInstance`][rubicon.objc.api.ObjCInstance]).
-        #
-        # If given a pointer, it must refer to an Objective-C class; pointers to
-        # other objects are not accepted. (Use
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to wrap a
-        # pointer that might also refer to other kinds of objects.) If the pointer
-        # refers to a metaclass, an instance of
-        # [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass] is returned
-        # instead. Creating an [`ObjCClass`][rubicon.objc.api.ObjCClass] from a `Nil`
-        # pointer returns `None`.
-        #
-        # [`ObjCClass`][rubicon.objc.api.ObjCClass] can also be called like
-        # [`type`][], with three
-        # arguments (name, bases list, namespace mapping). This form is called
-        # implicitly by Python's `class` syntax, and is used to create a new
-        # Objective-C class from Python (see [Creating custom Objective-C classes
-        # and protocols][custom-classes-and-protocols]).
-        # The bases list must contain exactly one
-        # [`ObjCClass`][rubicon.objc.api.ObjCClass] to be
-        # extended by the new class. An optional `protocols` keyword argument is
-        # also accepted, which must be a sequence of
-        # [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol]s for
-        # the new class to adopt.
-        #
-        # If the name of the class has already registered with the Objective-C
-        # runtime, the `auto_rename` option can be used to ensure that the
-        # Objective-C name for the new class will be unique. A numeric suffix will
-        # be appended to the Objective-C name to ensure uniqueness (for example,
-        # `MyClass` will be renamed to `MyClass_2`, `MyClass_3` etc. until a
-        # unique name is found). By default, classes will *not* be renamed, unless
-        # [`ObjCClass.auto_rename`][rubicon.objc.api.ObjCClass.auto_rename] is set at
-        # the class level.
+        # See class docstring for usage details.
 
         if (bases is None) ^ (attrs is None):
             raise TypeError("ObjCClass arguments 2 and 3 must be given together")
@@ -1832,18 +1756,7 @@ class ObjCMetaClass(ObjCClass):
     """The name of this class, as a [`str`][]."""
 
     def __new__(cls, name_or_ptr):
-        # TODO: Duplicated in class docstring.
-        # The constructor accepts either the name of an Objective-C metaclass to look
-        # up (as [`str`][] or [`bytes`][]), or a pointer to an existing metaclass
-        # object (in any form accepted by
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance]).
-        #
-        # If given a pointer, it must refer to an Objective-C metaclass; pointers
-        # to other objects are not accepted. (Use
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to wrap a
-        # pointer that might also refer to other kinds of objects.) Creating an
-        # [`ObjCMetaClass`][rubicon.objc.api.ObjCMetaClass] from a `Nil` pointer
-        # returns `None`.
+        # See class docstring for usage details.
 
         if isinstance(name_or_ptr, (bytes, str)):
             name = ensure_bytes(name_or_ptr)
@@ -2288,39 +2201,7 @@ class ObjCProtocol(ObjCInstance):
     a protocol with the same name is already exists."""
 
     def __new__(cls, name_or_ptr, bases=None, ns=None, auto_rename=None):
-        # TODO: Duplicated in class docstring.
-        # The constructor accepts either the name of an Objective-C protocol to look up
-        # (as [`str`][] or [`bytes`][]), or a pointer to an existing protocol object
-        # (in any form accepted by [`ObjCInstance`][rubicon.objc.api.ObjCInstance]).
-        #
-        # If given a pointer, it must refer to an Objective-C protocol; pointers
-        # to other objects are not accepted. (Use
-        # [`ObjCInstance`][rubicon.objc.api.ObjCInstance] to wrap a
-        # pointer that might also refer to other kinds of objects.) Creating an
-        # [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] from a `nil` pointer returns
-        # `None`.
-        #
-        # [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] can also be called like
-        # [`type`][], with three
-        # arguments (name, bases list, namespace mapping). This form is called
-        # implicitly by Python's `class` syntax, and is used to create a new
-        # Objective-C protocol from Python (see
-        # [Creating custom Objective-C classes and
-        # protocols][custom-classes-and-protocols]). The bases list can contain any
-        # number of [`ObjCProtocol`][rubicon.objc.api.ObjCProtocol] objects to be
-        # extended by the new
-        # protocol.
-        #
-        # If the name of the protocol has already registered with the Objective-C
-        # runtime, the `auto_rename` option can be used to ensure that the
-        # Objective-C name for the new protocol will be unique. A numeric suffix
-        # will be appended to the Objective-C name to ensure uniqueness (for
-        # example, `MyProtocol` will be renamed to `MyProtocol_2`,
-        # `MyProtocol_3` etc. until a unique name is found). By default,
-        # protocols will *not* be renamed, unless
-        # [`ObjCProtocol.auto_rename`][rubicon.objc.api.ObjCProtocol.auto_rename] is set
-        # at the class level.
-
+        # See class docstring for usage details.
         if (bases is None) ^ (ns is None):
             raise TypeError("ObjCProtocol arguments 2 and 3 must be given together")
 
