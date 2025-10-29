@@ -35,6 +35,7 @@ EventLoopPolicy
 fosstodon
 getter
 getters
+GNUStep
 GTK
 hashable
 Iacta
@@ -57,7 +58,9 @@ NSApplication
 NSURL
 ObjC
 ObjC's
+ObjCClass
 pre
+PyBind
 PyScript
 Pygame
 PyPI
