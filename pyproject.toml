@@ -53,6 +53,10 @@ pre-commit = [
     "pre-commit == 4.3.0",
 ]
 
+setuptools-scm = [
+    "setuptools_scm == 9.2.1",
+]
+
 towncrier = [
     "towncrier==25.8.0",
 ]
@@ -66,8 +70,8 @@ test = [
 ]
 
 dev = [
-    "setuptools_scm == 9.2.1",
     {include-group = "pre-commit"},
+    {include-group = "setuptools-scm"},
     {include-group = "tox-uv"},
     {include-group = "test"},
 ]
@@ -75,19 +79,16 @@ dev = [
 # Docs are always built on a specific Python version; see RTD and tox config files,
 # and the docs contribution guide.
 docs = [
-    "beeware_theme @ git+https://github.com/beeware/beeware-theme",
-    "furo == 2025.9.25",
-    "pyenchant == 3.3.0",
-    "sphinx == 8.2.3",
-    "sphinx_tabs == 3.4.7",
-    "sphinx-autobuild == 2024.10.3",
-    "sphinx-copybutton == 0.5.2",
-    "sphinxcontrib-spelling == 8.0.1",
+    "beeware-docs-tools @ git+https://github.com/beeware/beeware-docs-tools",
+    # griffe can be removed when the feature is included in a new release of
+    # mkdocstrings-python, which is included through beeware-docs-tools.
+    "griffe @ git+https://github.com/kattni/griffe@stub-override",
+    {include-group = "setuptools-scm"}
 ]
 
 [tool.codespell]
 skip = ".git,*.pdf,*.svg"
-# the way to make case sensitive skips of words etc
+# the way to make case-sensitive skips of words etc
 ignore-regex = "\bNd\b"
 ignore-words-list = "re-use,assertIn"
 
@@ -115,9 +116,10 @@ extend-select = [
 [tool.towncrier]
 directory = "changes"
 package = "rubicon.objc"
-filename = "docs/about/releases.rst"
-title_format = "{version} ({project_date})"
-template = "changes/template.rst"
+filename = "docs/about/releases.md"
+title_format = "## {version} ({project_date})"
+issue_format = "[#{issue}](https://github.com/beeware/toga/issues/{issue})"
+template = "changes/template.md"
 type = [
     { directory = "feature", name = "Features", showcontent = true },
     { directory = "bugfix", name = "Bugfixes", showcontent = true },

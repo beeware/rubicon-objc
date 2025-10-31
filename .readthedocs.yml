@@ -12,20 +12,13 @@ build:
     # Docs are always built on Python 3.12. See also the tox config and contribution docs.
     python: "3.12"
   jobs:
+    post_checkout:
+      - git fetch --unshallow
     pre_install:
       - python -m pip install --upgrade pip
       - python -m pip install --group 'tox-uv'
-      - python -m pip install --group 'docs'
     pre_build:
-      - tox -e docs-lint
-
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-  builder: html
-  configuration: docs/conf.py
-  fail_on_warning: true
-
-# Optionally build your docs in additional formats such as PDF
-formats:
-  - epub
-  - pdf
+      - python -m tox -e docs-lint
+    build:
+      html:
+        - python -m tox -e docs-$READTHEDOCS_LANGUAGE -- --output=$READTHEDOCS_OUTPUT/html/

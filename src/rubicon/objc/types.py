@@ -88,7 +88,14 @@ __all__ = [
     "with_preferred_encoding",
 ]
 
-__LP64__ = 8 * struct.calcsize("P") == 64
+# check-docstring-is-first made us do this
+if True:
+    __LP64__ = 8 * struct.calcsize("P") == 64
+    """Indicates whether the current environment is 64-bit.
+
+    If true, C `long`s
+    and pointers are 64 bits in size, otherwise 32 bits.
+    """
 
 # platform.processor() describes the CPU on which the code is running.
 #   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit
@@ -98,8 +105,10 @@ __LP64__ = 8 * struct.calcsize("P") == 64
 # platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
 _processor = platform.processor()
 _any_x86 = _processor in ("i386", "x86_64")
-__i386__ = _any_x86 and not __LP64__
-__x86_64__ = _any_x86 and __LP64__
+# check-docstring-is-first made us do this
+if True:
+    __i386__ = _any_x86 and not __LP64__
+    __x86_64__ = _any_x86 and __LP64__
 
 if _processor:
     _any_arm = _processor.startswith("arm")
@@ -110,8 +119,10 @@ else:
     # architecture. In that case, look for the architecture in the kernel
     # version string.
     _any_arm = "ARM" in platform.version()
-__arm64__ = _any_arm and __LP64__
-__arm__ = _any_arm and not __LP64__
+# check-docstring-is-first made us do this
+if True:
+    __arm64__ = _any_arm and __LP64__
+    __arm__ = _any_arm and not __LP64__
 
 
 _ctype_for_type_map = {
@@ -128,10 +139,10 @@ def ctype_for_type(tp):
     """Look up the C type corresponding to the given Python type.
 
     This conversion is applied to types used in
-    :class:`~rubicon.objc.api.objc_method` signatures,
-    :class:`~rubicon.objc.api.objc_ivar` types, etc. This function translates
-    Python built-in types and :mod:`rubicon.objc` classes to their
-    :mod:`ctypes` equivalents. Unregistered types (including types that are
+    [`objc_method`][rubicon.objc.api.objc_method] signatures,
+    [`objc_ivar`][rubicon.objc.api.objc_ivar] types, etc. This function translates
+    Python built-in types and [`rubicon.objc`][rubicon-objc-module] classes to their
+    [`ctypes`][] equivalents. Unregistered types (including types that are
     already ctypes) are returned unchanged.
     """
 
@@ -359,11 +370,11 @@ def ctype_for_encoding(encoding):
     the encoding (so that future conversions of the same encoding return the
     same C type).
 
-    For example, the type encoding ``{spam=ic}`` is not registered by default.
-    However, the contained types ``i`` and ``c`` are registered, so they are
-    converted individually and used to create a new :class:`~ctypes.Structure`
+    For example, the type encoding `{spam=ic}` is not registered by default.
+    However, the contained types `i` and `c` are registered, so they are
+    converted individually and used to create a new [`ctypes.Structure`][]
     with two fields of the correct types. The new structure type is then
-    registered for the original encoding ``{spam=ic}`` and returned.
+    registered for the original encoding `{spam=ic}` and returned.
 
     :raises ValueError: if the conversion fails at any point
     """
@@ -388,7 +399,8 @@ def encoding_for_ctype(ctype):
 
     Automatic encoding of other compound types (arrays, structures, and unions)
     is currently not supported. To encode such types, a type encoding must be
-    manually provided for them using :func:`register_preferred_encoding` or
+    manually provided for them using
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding] or
     :func:`register_encoding`.
 
     :raises ValueError: if the conversion fails at any point
@@ -420,8 +432,9 @@ def with_preferred_encoding(encoding):
     """Register a preferred conversion between an Objective-C type encoding and the
     decorated C type.
 
-    This is equivalent to calling :func:`register_preferred_encoding` on the
-    decorated C type.
+    This is equivalent to calling
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding] on
+    the decorated C type.
     """
 
     def _with_preferred_encoding_decorator(ctype):
@@ -437,7 +450,8 @@ def register_encoding(encoding, ctype):
 
     "Additional" means that any existing conversions in either direction are
     *not* overwritten with the new conversion. To register an encoding and
-    overwrite existing conversions, use :func:`register_preferred_encoding`.
+    overwrite existing conversions, use
+    [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding].
     """
 
     _ctype_for_encoding_map.setdefault(encoding, ctype)
@@ -613,19 +627,18 @@ def _array_for_sequence(seq, array_type):
 
 
 def compound_value_for_sequence(seq, tp):
-    """Create a C structure or array of type ``tp``, initialized with values from
-    ``seq``.
+    """Create a C structure or array of type `tp`, initialized with values from `seq`.
 
-    If ``tp`` is a :class:`~ctypes.Structure` type, the newly created
+    If `tp` is a [`ctypes.Structure`][] type, the newly created
     structure's fields are initialized in declaration order with the values from
-    ``seq``. ``seq`` must have as many elements as the structure has fields.
+    `seq`. `seq` must have as many elements as the structure has fields.
 
-    If ``tp`` is a :class:`~ctypes.Array` type, the newly created array is
-    initialized with the values from ``seq``. ``seq`` must have as many elements
+    If `tp` is a [`Array`][ctypes.Array] type, the newly created array is
+    initialized with the values from `seq`. `seq` must have as many elements
     as the array type.
 
     In both cases, if a structure field type or the array element type is itself
-    a structure or array type, the corresponding value from ``seq`` is
+    a structure or array type, the corresponding value from `seq` is
     recursively converted as well.
     """
 
@@ -655,7 +668,7 @@ register_preferred_encoding(b"L", c_ulong)
 
 # Do not register c_int or c_longlong as preferred.
 # If c_int or c_longlong is the same size as c_long, ctypes makes it an alias
-# for c_long. If we would register c_int and c_longlong as preferred, this
+# for c_long. If we registered c_int and c_longlong as preferred, this
 # could cause c_long to be encoded as b'i' or b'q', instead of b'l'.
 # The same applies to the unsigned versions.
 register_encoding(b"i", c_int)
@@ -741,17 +754,17 @@ register_preferred_encoding(_PyObjectEncoding, py_object)
 @with_encoding(b"^{?}")
 @with_encoding(b"^(?)")
 class UnknownPointer(c_void_p):
-    """Placeholder for the "unknown pointer" types ``^?``, ``^{?}`` and ``^(?)``.
+    """Placeholder for the "unknown pointer" types `^?`, `^{?}` and `^(?)`.
 
-    Not to be confused with a ``^v`` void pointer.
+    Not to be confused with a `^v` void pointer.
 
-    Usually a ``^?`` is a function pointer, but because the encoding doesn't
-    contain the function signature, you need to manually create a CFUNCTYPE with
-    the proper types, and cast this pointer to it.
+    Usually a `^?` is a function pointer, but because the encoding doesn't contain the
+    function signature, you need to manually create a CFUNCTYPE with the proper types,
+    and cast this pointer to it.
 
-    ``^{?}`` and ``^(?)`` are pointers to a structure or union (respectively)
-    with unknown name and fields. Such a type also cannot be used meaningfully
-    without casting it to the correct pointer type first.
+    `^{?}` and `^(?)` are pointers to a structure or union (respectively) with unknown
+    name and fields. Such a type also cannot be used meaningfully without casting it to
+    the correct pointer type first.
     """
 
 
@@ -861,26 +874,32 @@ else:
 
 
 def NSMakeSize(w, h):
+    """Constructs a new [`NSSize`][rubicon.objc.types.NSSize] object."""
     return NSSize(w, h)
 
 
 def CGSizeMake(w, h):
+    """Constructs a new [`CGSize`][rubicon.objc.types.CGSize] object."""
     return CGSize(w, h)
 
 
 def NSMakeRect(x, y, w, h):
+    """Constructs a new [`NSRect`][rubicon.objc.types.NSRect] object."""
     return NSRect(NSPoint(x, y), NSSize(w, h))
 
 
 def CGRectMake(x, y, w, h):
+    """Constructs a new [`CGRect`][rubicon.objc.types.CGRect] object."""
     return CGRect(CGPoint(x, y), CGSize(w, h))
 
 
 def NSMakePoint(x, y):
+    """Constructs a new [`NSPoint`][rubicon.objc.types.NSPoint] object."""
     return NSPoint(x, y)
 
 
 def CGPointMake(x, y):
+    """Constructs a new [`CGPoint`][rubicon.objc.types.CGPoint] object."""
     return CGPoint(x, y)
 
 
@@ -905,10 +924,19 @@ class UIEdgeInsets(Structure):
 
 
 def UIEdgeInsetsMake(top, left, bottom, right):
+    """Constructs a new [`UIEdgeInsets`][rubicon.objc.types.UIEdgeInsets] object."""
     return UIEdgeInsets(top, left, bottom, right)
 
 
-UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+# check-docstring-is-first made us do this
+if True:
+    UIEdgeInsetsZero = UIEdgeInsets(0, 0, 0, 0)
+    """
+    The constant
+    [UIEdgeInsetsZero](https://developer.apple.com/documentation/uikit/uiedgeinsetszero?language=objc):
+    a [`UIEdgeInsets`][rubicon.objc.types.UIEdgeInsets] instance with all
+    insets set to zero.
+    """
 
 
 # macOS: /System/Library/Frameworks/AppKit.framework/Headers/NSLayoutConstraint.h
@@ -977,11 +1005,34 @@ class NSRange(Structure):
         return f"location={self.location}, length={self.length}"
 
 
-NSZeroPoint = NSPoint(0, 0)
+# check-docstring-is-first made us do this
+if True:
+    NSZeroPoint = NSPoint(0, 0)
+    """
+    The constant
+    [NSZeroPoint](https://developer.apple.com/documentation/foundation/nszeropoint?language=objc):
+    a [`NSPoint`][rubicon.objc.types.NSPoint] instance with the X and Y
+    coordinates set to zero.
+    """
 
 
 if sizeof(c_void_p) == 4:
     NSIntegerMax = 0x7FFFFFFF
+    """
+    The macro constant
+    [NSIntegerMax](https://developer.apple.com/documentation/objectivec/nsintegermax?language=objc)
+    from `<objc/NSObjCRuntime.h>`: the maximum value that a
+    [`NSInteger`][rubicon.objc.types.NSInteger] can hold.
+    """
 elif sizeof(c_void_p) == 8:
     NSIntegerMax = 0x7FFFFFFFFFFFFFFF
-NSNotFound = NSIntegerMax
+# check-docstring-is-first made us do this
+if True:
+    NSNotFound = NSIntegerMax
+    """
+    The constant
+    [NSNotFound](https://developer.apple.com/documentation/foundation/nsnotfound?language=objc)
+    from `<Foundation/NSObjCRuntime.h>`: a
+    [`NSInteger`][rubicon.objc.types.NSInteger] sentinel value indicating that
+    an item was not found (usually when searching in a collection).
+    """
