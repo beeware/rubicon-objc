@@ -594,7 +594,9 @@ def _struct_for_sequence(seq, struct_type):
         )
 
     values = []
-    for value, (_field_name, field_type, *_) in zip(seq, struct_type._fields_):
+    for value, (_field_name, field_type, *_) in zip(
+        seq, struct_type._fields_, strict=True
+    ):
         if issubclass(field_type, (Structure, Array)) and isinstance(
             value, collections.abc.Iterable
         ):

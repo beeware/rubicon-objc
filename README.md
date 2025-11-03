@@ -19,19 +19,19 @@ It also includes wrappers of the some key data types from the Foundation framewo
 
 ## Tutorial
 
-Want to jump in and get started? We have a [hands-on tutorial for beginners](https://rubicon-objc.readthedocs.io/en/latest/tutorial/index.html).
+Want to jump in and get started? We have a [hands-on tutorial for beginners](https://rubicon-objc.beeware.org/en/latest/tutorial).
 
 ## How-to guides
 
-Looking for guidance on how to solve a specific problems? We have [how-to guides and recipes](https://rubicon-objc.readthedocs.io/en/latest/how-to/index.html) for common problems and tasks, including how to contribute.
+Looking for guidance on how to solve a specific problems? We have [how-to guides and recipes](https://rubicon-objc.beeware.org/en/latest/how-to) for common problems and tasks, including how to contribute.
+
+## Topic Guides
+
+Looking for explanations and discussion of key topics and concepts? Our [background](https://rubicon-objc.beeware.org/en/latest/background) guides may help.
 
 ## Reference
 
-Just want the raw technical details? Here's our [Technical reference](https://rubicon-objc.readthedocs.io/en/latest/reference/index.html).
-
-## Background
-
-Looking for explanations and discussion of key topics and concepts? Our [background](https://rubicon-objc.readthedocs.io/en/latest/background/index.html) guides may help.
+Just want the raw technical details? Here's our [Technical reference](https://rubicon-objc.beeware.org/en/latest/reference).
 
 ## Community
 
@@ -51,4 +51,4 @@ If you have any concerns about this code of conduct, or you wish to report a vio
 
 If you experience problems with Rubicon-ObjC, [log them on GitHub](https://github.com/beeware/rubicon-objc/issues).
 
-If you'd like to contribute to Rubicon-ObjC development, our [contribution guide](https://rubicon-objc.readthedocs.io/en/latest/how-to/contribute/index.html) details how to set up a development environment, and other requirements we have as part of our contribution process.
+If you'd like to contribute to Rubicon-ObjC development, our [contribution guide](https://rubicon-objc.beeware.org/en/latest/how-to/contribute) details how to set up a development environment, and other requirements we have as part of our contribution process.

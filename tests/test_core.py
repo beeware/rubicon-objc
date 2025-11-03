@@ -8,6 +8,7 @@ import threading
 import unittest
 import uuid
 import weakref
+from collections.abc import Callable
 from ctypes import (
     ArgumentError,
     Structure,
@@ -22,7 +23,6 @@ from ctypes import (
 )
 from decimal import Decimal
 from enum import Enum
-from typing import Callable
 
 from rubicon.objc import (
     SEL,

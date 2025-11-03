@@ -92,17 +92,29 @@ class NSDictionaryMixinTest(unittest.TestCase):
 
     def test_keys(self):
         a = self.make_dictionary(self.py_dict)
-        for k1, k2 in zip(sorted(a.keys()), sorted(self.py_dict.keys())):
+        for k1, k2 in zip(
+            sorted(a.keys()),
+            sorted(self.py_dict.keys()),
+            strict=True,
+        ):
             self.assertEqual(k1, k2)
 
     def test_values(self):
         a = self.make_dictionary(self.py_dict)
-        for v1, v2 in zip(sorted(a.values()), sorted(self.py_dict.values())):
+        for v1, v2 in zip(
+            sorted(a.values()),
+            sorted(self.py_dict.values()),
+            strict=True,
+        ):
             self.assertEqual(v1, v2)
 
     def test_items(self):
         d = self.make_dictionary(self.py_dict)
-        for i1, i2 in zip(sorted(d.items()), sorted(self.py_dict.items())):
+        for i1, i2 in zip(
+            sorted(d.items()),
+            sorted(self.py_dict.items()),
+            strict=True,
+        ):
             self.assertEqual(i1[0], i2[0])
             self.assertEqual(i1[1], i2[1])
 

@@ -172,7 +172,7 @@ class NSStringTests(unittest.TestCase):
         for pystr in type(self).TEST_STRINGS:
             with self.subTest(pystr=pystr):
                 nsstr = ns_from_py(pystr)
-                for nschar, pychar in zip(nsstr, pystr):
+                for nschar, pychar in zip(nsstr, pystr, strict=True):
                     self.assertEqual(nschar, pychar)
 
     def test_nsstring_find_rfind(self):

@@ -237,7 +237,7 @@ class ObjCMethod:
 
         if convert_args:
             converted_args = []
-            for argtype, arg in zip(self.method_argtypes, args):
+            for argtype, arg in zip(self.method_argtypes, args, strict=True):
                 if isinstance(arg, enum.Enum):
                     # Convert Python enum objects to their values
                     arg = arg.value
@@ -379,7 +379,7 @@ def convert_method_arguments(encoding, args):
     """Used to convert Objective-C method arguments to Python values before passing them
     on to the Python-defined method."""
     new_args = []
-    for e, a in zip(encoding[3:], args):
+    for e, a in zip(encoding[3:], args, strict=True):
         if issubclass(e, (objc_id, ObjCInstance)):
             new_args.append(ObjCInstance(a))
         else:
