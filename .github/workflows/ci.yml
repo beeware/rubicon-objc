@@ -59,13 +59,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Run all Python versions on macOS 15, intel + ARM
         platform: [
-          # X86-64 runners
+          # X86-64 runner
           "macos-15-intel",
-          # M1 runners
-          "macos-14", "macos-15", "macos-26"
+          # M1 runner
+          "macos-15",
         ]
         python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14", "3.15" ]
+
+        include:
+        # Also run the oldest supported Python on macos-14,
+        # and the newest non-dev Python on macos-26.
+        - python-version: "3.10"
+          platform: macos-14
+        - python-version: "3.14"
+          platform: macos-26
 
     steps:
     - name: Checkout
