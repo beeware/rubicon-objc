@@ -284,7 +284,7 @@ class ObjCMutableListInstance(ObjCListInstance):
                         f"to extended slice of size {len(indices)}"
                     )
 
-                for idx, obj in zip(indices, arr):
+                for idx, obj in zip(indices, arr, strict=True):
                     self.replaceObjectAtIndex(idx, withObject=obj)
         else:
             index = (len(self) + item) if item < 0 else item
