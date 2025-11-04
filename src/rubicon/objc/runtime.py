@@ -202,7 +202,8 @@ if True:
 
 @with_encoding(b"@")
 class objc_id(c_void_p):
-    # This documentation is duplicated in the runtime typing stub.
+    # This documentation is duplicated in the runtime typing stub. Ensure both
+    # locations are updated with any changes.
     """The [id](https://developer.apple.com/documentation/objectivec/id?language=objc)
     type from `<objc/objc.h>`.
     """
@@ -233,7 +234,8 @@ class objc_block(objc_id):
 
 @with_preferred_encoding(b":")
 class SEL(c_void_p):
-    # This documentation is duplicated in the runtime typing stub.
+    # This documentation is duplicated in the runtime typing stub. Ensure both
+    # locations are updated with any changes.
     """The [SEL](https://developer.apple.com/documentation/objectivec/sel?language=objc)
     type from `<objc/objc.h>`.
 
@@ -277,7 +279,8 @@ class SEL(c_void_p):
 
 @with_preferred_encoding(b"#")
 class Class(objc_id):
-    # This documentation is duplicated in the runtime typing stub.
+    # This documentation is duplicated in the runtime typing stub. Ensure both
+    # locations are updated with any changes.
     """The [Class](https://developer.apple.com/documentation/objectivec/class?language=objc)
     type from `<objc/objc.h>`.
     """
@@ -313,11 +316,6 @@ class objc_property_t(c_void_p):
 
 
 class objc_property_attribute_t(Structure):
-    """
-    The [objc_property_attribute_t](https://developer.apple.com/documentation/objectivec/objc_property_attribute_t?language=objc)
-    structure from `<objc/runtime.h>`.
-    """
-
     _fields_ = [
         ("name", c_char_p),
         ("value", c_char_p),
@@ -641,11 +639,6 @@ libobjc.property_copyAttributeList.argtypes = [objc_property_t, POINTER(c_uint)]
 
 
 class objc_method_description(Structure):
-    """
-    The [objc_method_description](https://developer.apple.com/documentation/objectivec/objc_method_description?language=objc)
-    structure from `<objc/runtime.h>`.
-    """
-
     _fields_ = [
         ("name", SEL),
         ("types", c_char_p),
@@ -959,10 +952,6 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
 
 
 class objc_super(Structure):
-    """The [objc_super](https://developer.apple.com/documentation/objectivec/objc_super?language=objc)
-    structure from `<objc/message.h>`.
-    """
-
     _fields_ = [
         ("receiver", objc_id),
         ("super_class", Class),
