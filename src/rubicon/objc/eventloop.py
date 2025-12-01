@@ -33,10 +33,19 @@ elif sys.version_info < (3, 16):
     # with an underscore; that was reverted for RC1. See
     # https://github.com/python/cpython/issues/127949 and
     # https://github.com/python/cpython/issues/134657 for details.
-    from asyncio import (  # noqa: I001
-        AbstractEventLoopPolicy,
-        DefaultEventLoopPolicy,
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore",
+            message=(
+                r"'.*?EventLoopPolicy' is deprecated and slated for removal "
+                r"in Python 3.16"
+            ),
+            category=DeprecationWarning,
+        )
+        from asyncio import (  # noqa: I001
+            AbstractEventLoopPolicy,
+            DefaultEventLoopPolicy,
+        )
 
 __all__ = [
     "EventLoopPolicy",
