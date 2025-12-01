@@ -87,6 +87,12 @@ skip = ".git,*.pdf,*.svg"
 ignore-regex = "\bNd\b"
 ignore-words-list = "re-use,assertIn"
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+]
+
 [tool.ruff.lint]
 # In addition to the default rules, these additional rules will be used:
 extend-select = [
