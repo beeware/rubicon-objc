@@ -1,5 +1,7 @@
 # Release History
 
+<!-- towncrier release notes start -->
+
 ## 0.5.2 (2025-08-07)
 
 ### Bugfixes
