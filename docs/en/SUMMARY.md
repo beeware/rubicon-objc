@@ -36,8 +36,8 @@
         - Style guides
             - [Code style guide](how-to/contribute/style/code_style_guide.md)
             - [Documentation style guide](how-to/contribute/style/docs_style_guide.md)
-  - Internal How-to guides
-      - [How to cut a Rubicon ObjC release](how-to/internal/release.md)
+    - Internal How-to guides
+        - [How to cut a Rubicon ObjC release](how-to/internal/release.md)
 - [Topic guides](topics/index.md)
     - [You're just not my type: Using Objective-C types in Python](topics/type-mapping.md)
     - [Memory management for Objective-C instances](topics/memory-management.md)
