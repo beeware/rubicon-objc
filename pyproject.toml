@@ -119,7 +119,7 @@ directory = "changes"
 package = "rubicon.objc"
 filename = "docs/en/about/releases.md"
 title_format = "## {version} ({project_date})"
-issue_format = "[#{issue}](https://github.com/beeware/toga/issues/{issue})"
+issue_format = "[#{issue}](https://github.com/beeware/rubicon-objc/issues/{issue})"
 template = "changes/template.md"
 type = [
     { directory = "feature", name = "Features", showcontent = true },
