@@ -962,6 +962,19 @@ class NSEdgeInsets(Structure):
 
 
 def NSEdgeInsetsMake(top, left, bottom, right):
+    """Create and return an ``NSEdgeInsets`` with the given values.
+
+    Parameters
+    ----------
+    top, left, bottom, right
+        The inset distances (typically ``CGFloat`` values) for each edge.
+
+    Returns
+    -------
+    NSEdgeInsets
+        A new ``NSEdgeInsets`` instance with the supplied edge values.
+    """
+
     return NSEdgeInsets(top, left, bottom, right)
 
 
