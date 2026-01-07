@@ -401,7 +401,7 @@ def encoding_for_ctype(ctype):
     is currently not supported. To encode such types, a type encoding must be
     manually provided for them using
     [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding] or
-    :func:`register_encoding`.
+    [`register_encoding`][rubicon.objc.types.register_encoding].
 
     :raises ValueError: if the conversion fails at any point
     """
@@ -421,7 +421,8 @@ def register_preferred_encoding(encoding, ctype):
 
     "Preferred" means that any existing conversions in each direction are
     overwritten with the new conversion. To register an encoding without
-    overwriting existing conversions, use :func:`register_encoding`.
+    overwriting existing conversions, use
+    [`register_encoding`][rubicon.objc.types.register_encoding].
     """
 
     _ctype_for_encoding_map[encoding] = ctype
@@ -462,7 +463,8 @@ def with_encoding(encoding):
     """Register an additional conversion between an Objective-C type encoding and the
     decorated C type.
 
-    This is equivalent to calling :func:`register_encoding` on the
+    This is equivalent to calling
+    [`register_encoding`][rubicon.objc.types.register_encoding] on the
     decorated C type.
     """
 
@@ -479,8 +481,10 @@ def unregister_encoding(encoding):
 
     Note that this does not remove any conversions in the other direction (from
     a C type to this encoding). These conversions may be replaced with
-    :func:`register_encoding`, or unregistered with :func:`unregister_ctype`. To
-    remove all ctypes for an encoding, use :func:`unregister_encoding_all`.
+    [`register_encoding`][rubicon.objc.types.register_encoding], or unregistered with
+    [`unregister_ctype`][rubicon.objc.types.unregister_ctype]. To remove all ctypes for
+    an encoding, use
+    [`unregister_encoding_all`][rubicon.objc.types.unregister_encoding_all].
 
     If the encoding was not registered previously, nothing happens.
     """
@@ -493,7 +497,7 @@ def unregister_encoding_all(encoding):
     corresponding ctypes.
 
     All conversions from any C type to this encoding are removed recursively
-    using :func:`unregister_ctype_all`.
+    using [`unregister_ctype_all`][rubicon.objc.types.unregister_ctype_all].
 
     If the encoding was not registered previously, nothing happens.
     """
@@ -510,8 +514,10 @@ def unregister_ctype(ctype):
 
     Note that this does not remove any conversions in the other direction (from
     an encoding to this C type). These conversions may be replaced with
-    :func:`register_encoding`, or unregistered with :func:`unregister_encoding`.
-    To remove all encodings for a C type, use :func:`unregister_ctype_all`.
+    [`register_encoding`][rubicon.objc.types.register_encoding], or unregistered
+    with [`unregister_encoding`][rubicon.objc.types.unregister_encoding]. To
+    remove all encodings for a C type, use
+    [`unregister_ctype_all`][rubicon.objc.types.unregister_ctype_all].
 
     If the C type was not registered previously, nothing happens.
     """
@@ -524,7 +530,8 @@ def unregister_ctype_all(ctype):
     type encodings.
 
     All conversions from any type encoding to this C type are removed
-    recursively using :func:`unregister_encoding_all`.
+    recursively using
+    [`unregister_encoding_all`][rubicon.objc.types.unregister_encoding_all].
 
     If the C type was not registered previously, nothing happens.
     """
@@ -578,8 +585,9 @@ def ctypes_for_method_encoding(encoding):
     """Convert a method signature encoding into a sequence of ctypes.
 
     This is equivalent to first splitting the method signature encoding using
-    :func:`split_method_encoding`, and then converting each individual type
-    encoding using :func:`ctype_for_encoding`.
+    [`split_method_encoding`][rubicon.objc.types.split_method_encoding], and
+    then converting each individual type encoding using
+    [`ctype_for_encoding`][rubicon.objc.types.ctype_for_encoding].
     """
 
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
