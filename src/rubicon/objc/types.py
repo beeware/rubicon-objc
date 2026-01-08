@@ -970,10 +970,8 @@ class NSEdgeInsets(Structure):
 
 
 def NSEdgeInsetsMake(top, left, bottom, right):
-    """
-    Create and return an [`NSEdgeInsets`][rubicon.objc.types.NSEdgeInsets] with the 
-    supplied edge values.
-    """
+    """Create and return an [`NSEdgeInsets`][rubicon.objc.types.NSEdgeInsets] with the 
+    supplied edge values."""
     return NSEdgeInsets(top, left, bottom, right)
 
 
