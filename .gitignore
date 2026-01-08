@@ -8,6 +8,8 @@ build
 _build
 distribute-*
 venv*/
+venv/*
+.venv/
 local
 .tox
 .envrc
