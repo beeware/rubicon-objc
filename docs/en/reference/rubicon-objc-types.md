@@ -222,9 +222,9 @@ The following mappings are registered by default by Rubicon.
 
 ::: rubicon.objc.types.CGSizeMake
 
-::: rubicon.objc.types.NSEdgeInsetsMake
-
 Creates an NSEdgeInsets structure using top, left, bottom, and right values.
+
+::: rubicon.objc.types.NSEdgeInsetsMake
 
 ::: rubicon.objc.types.NSMakePoint
 
