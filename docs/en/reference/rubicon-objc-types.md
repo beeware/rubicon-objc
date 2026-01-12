@@ -104,7 +104,7 @@ All Objective-C encoding strings are represented as [`bytes`][] rather than [`st
 
 ::: rubicon.objc.types.with_preferred_encoding
 
-::: rubicon.objc.types.register_encoding
+::: rubicon.objc.types.register_preferred_encoding
 
 ::: rubicon.objc.types.with_encoding
 
@@ -223,6 +223,8 @@ The following mappings are registered by default by Rubicon.
 ::: rubicon.objc.types.CGSizeMake
 
 ::: rubicon.objc.types.NSEdgeInsetsMake
+
+Creates an NSEdgeInsets structure using top, left, bottom, and right values.
 
 ::: rubicon.objc.types.NSMakePoint
 
