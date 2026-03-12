@@ -171,8 +171,8 @@ def test_items(make_dictionary):
     "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
 )
 def test_argument(make_dictionary):
-    objc_example = ObjCClass("Example")
-    example = objc_example.alloc().init()
+    Example = ObjCClass("Example")
+    example = Example.alloc().init()
 
     d = make_dictionary(PY_DICT)
     # Call a method with an NSDictionary instance
@@ -192,8 +192,8 @@ def test_argument(make_dictionary):
     "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
 )
 def test_property(make_dictionary):
-    objc_example = ObjCClass("Example")
-    example = objc_example.alloc().init()
+    Example = ObjCClass("Example")
+    example = Example.alloc().init()
 
     d = make_dictionary(PY_DICT)
     example.dict = d
