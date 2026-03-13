@@ -66,10 +66,7 @@ def assert_method(py_value, method, *args, **kwargs):
         )
 
 
-@pytest.mark.parametrize(
-    "pystr",
-    TEST_STRINGS,
-)
+@pytest.mark.parametrize("pystr", TEST_STRINGS)
 def test_str_nsstring_conversion(pystr):
     """Python str and NSString can be converted to each other manually."""
 

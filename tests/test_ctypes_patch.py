@@ -76,7 +76,8 @@ def test_patch_pointer():
 
 
 @pytest.mark.parametrize(
-    "tp", [ctypes.c_int, ctypes.c_double, ctypes.c_char_p, ctypes.c_void_p]
+    "tp",
+    [ctypes.c_int, ctypes.c_double, ctypes.c_char_p, ctypes.c_void_p],
 )
 def test_no_patch_primitives(tp):
     """Primitive types cannot be patched."""

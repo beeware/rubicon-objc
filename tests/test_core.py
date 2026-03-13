@@ -486,11 +486,20 @@ def test_method_incorrect_argument_count_send():
 
     with pytest.raises(TypeError):
         send_message(
-            obj, "accessIntField", "extra argument 1", restype=c_int, argtypes=[]
+            obj,
+            "accessIntField",
+            "extra argument 1",
+            restype=c_int,
+            argtypes=[],
         )
 
     with pytest.raises(TypeError):
-        send_message(obj, "mutateIntFieldWithValue:", restype=None, argtypes=[c_int])
+        send_message(
+            obj,
+            "mutateIntFieldWithValue:",
+            restype=None,
+            argtypes=[c_int],
+        )
 
     with pytest.raises(TypeError):
         send_message(
@@ -522,16 +531,58 @@ def test_method_send():
 
     obj = Example.alloc().init()
 
-    assert send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]) == 22
-    assert send_message(obj, "accessIntField", restype=c_int, argtypes=[]) == 33
+    assert (
+        send_message(
+            obj,
+            "accessBaseIntField",
+            restype=c_int,
+            argtypes=[],
+        )
+        == 22
+    )
+    assert (
+        send_message(
+            obj,
+            "accessIntField",
+            restype=c_int,
+            argtypes=[],
+        )
+        == 33
+    )
 
     send_message(
-        obj, "mutateBaseIntFieldWithValue:", 8888, restype=None, argtypes=[c_int]
+        obj,
+        "mutateBaseIntFieldWithValue:",
+        8888,
+        restype=None,
+        argtypes=[c_int],
     )
-    send_message(obj, "mutateIntFieldWithValue:", 9999, restype=None, argtypes=[c_int])
+    send_message(
+        obj,
+        "mutateIntFieldWithValue:",
+        9999,
+        restype=None,
+        argtypes=[c_int],
+    )
 
-    assert send_message(obj, "accessBaseIntField", restype=c_int, argtypes=[]) == 8888
-    assert send_message(obj, "accessIntField", restype=c_int, argtypes=[]) == 9999
+    assert (
+        send_message(
+            obj,
+            "accessBaseIntField",
+            restype=c_int,
+            argtypes=[],
+        )
+        == 8888
+    )
+    assert (
+        send_message(
+            obj,
+            "accessIntField",
+            restype=c_int,
+            argtypes=[],
+        )
+        == 9999
+    )
 
 
 def test_send_sel():
@@ -540,7 +591,15 @@ def test_send_sel():
 
     obj = Example.alloc().init()
 
-    assert send_message(obj, SEL("accessIntField"), restype=c_int, argtypes=[]) == 33
+    assert (
+        send_message(
+            obj,
+            SEL("accessIntField"),
+            restype=c_int,
+            argtypes=[],
+        )
+        == 33
+    )
 
 
 def test_send_super():
@@ -590,7 +649,12 @@ def test_send_super_incorrect_argument_count():
 
     with pytest.raises(TypeError):
         send_super(
-            SpecificExample, obj, "method:withArg:", 2, restype=None, argtypes=[]
+            SpecificExample,
+            obj,
+            "method:withArg:",
+            2,
+            restype=None,
+            argtypes=[],
         )
 
     with pytest.raises(TypeError):
@@ -895,7 +959,11 @@ def test_float_method_send():
     Example = ObjCClass("Example")
     example = Example.alloc().init()
     assert send_message(
-        example, "areaOfSquare:", 1.5, restype=c_float, argtypes=[c_float]
+        example,
+        "areaOfSquare:",
+        1.5,
+        restype=c_float,
+        argtypes=[c_float],
     ) == pytest.approx(2.25)
 
 
@@ -911,7 +979,11 @@ def test_double_method_send():
     Example = ObjCClass("Example")
     example = Example.alloc().init()
     assert send_message(
-        example, "areaOfCircle:", 1.5, restype=c_double, argtypes=[c_double]
+        example,
+        "areaOfCircle:",
+        1.5,
+        restype=c_double,
+        argtypes=[c_double],
     ) == pytest.approx(1.5 * math.pi)
 
 
@@ -990,17 +1062,30 @@ def test_struct_return_send():
     example = Example.alloc().init()
 
     assert (
-        send_message(example, "intSizedStruct", restype=struct_int_sized, argtypes=[]).x
+        send_message(
+            example,
+            "intSizedStruct",
+            restype=struct_int_sized,
+            argtypes=[],
+        ).x
         == b"abc"
     )
     assert (
         send_message(
-            example, "oddlySizedStruct", restype=struct_oddly_sized, argtypes=[]
+            example,
+            "oddlySizedStruct",
+            restype=struct_oddly_sized,
+            argtypes=[],
         ).x
         == b"abcd"
     )
     assert (
-        send_message(example, "largeStruct", restype=struct_large, argtypes=[]).x
+        send_message(
+            example,
+            "largeStruct",
+            restype=struct_large,
+            argtypes=[],
+        ).x
         == b"abcdefghijklmnop"
     )
 
@@ -1086,11 +1171,11 @@ def test_partial_method_exception():
     with pytest.raises(
         ValueError,
         match=(
-            "Invalid selector overloaded:invalidArgument:. Available selectors are: "
-            "overloaded, overloaded:, overloaded:extraArg:, "
-            "overloaded:extraArg1:extraArg2:, overloaded:extraArg2:extraArg1:, "
-            "overloaded:orderedArg1:orderedArg2:, "
-            "overloaded:duplicateArg:duplicateArg:"
+            r"Invalid selector overloaded:invalidArgument:. Available selectors are: "
+            r"overloaded, overloaded:, overloaded:extraArg:, "
+            r"overloaded:extraArg1:extraArg2:, overloaded:extraArg2:extraArg1:, "
+            r"overloaded:orderedArg1:orderedArg2:, "
+            r"overloaded:duplicateArg:duplicateArg:"
         ),
     ):
         Example.overloaded(0, invalidArgument=0)

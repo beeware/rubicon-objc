@@ -34,7 +34,10 @@ def make_ns_mutable_array(contents=None):
     return a
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_getitem(make_array):
     a = make_array(PY_LIST)
 
@@ -48,14 +51,20 @@ def test_getitem(make_array):
         a[-len(PY_LIST) - 1]
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_len(make_array):
     a = make_array(PY_LIST)
 
     assert len(a) == len(PY_LIST)
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_iter(make_array):
     a = make_array(PY_LIST)
 
@@ -67,14 +76,20 @@ def test_iter(make_array):
     assert len(keys) == 0
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_contains(make_array):
     a = make_array(PY_LIST)
     for value in PY_LIST:
         assert value in a
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_index(make_array):
     a = make_array(PY_LIST)
     assert a.index("two") == 1
@@ -82,13 +97,19 @@ def test_index(make_array):
         a.index("umpteen")
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_count(make_array):
     a = make_array(PY_LIST)
     assert a.count("one") == 1
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_equivalence(make_array):
     a = make_array(PY_LIST)
     b = make_array(PY_LIST)
@@ -106,7 +127,10 @@ def test_equivalence(make_array):
     assert a != PY_LIST + ["spam", "ham"]
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_slice_access(make_array):
     a = make_array(PY_LIST * 2)
     assert a[1:4] == ["two", "three", "one"]
@@ -115,7 +139,10 @@ def test_slice_access(make_array):
     assert a[1:5:2] == ["two", "one"]
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_argument(make_array):
     Example = ObjCClass("Example")
     example = Example.alloc().init()
@@ -127,7 +154,10 @@ def test_argument(make_array):
     assert example.processArray(PY_LIST) == "two"
 
 
-@pytest.mark.parametrize("make_array", [make_ns_array, make_ns_mutable_array])
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
 def test_property(make_array):
     Example = ObjCClass("Example")
     example = Example.alloc().init()

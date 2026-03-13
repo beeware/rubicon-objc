@@ -38,7 +38,8 @@ def make_ns_mutable_dictionary(contents=None):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_getitem(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -51,7 +52,8 @@ def test_getitem(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_iter(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -64,7 +66,8 @@ def test_iter(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_len(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -72,7 +75,8 @@ def test_len(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_get(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -85,7 +89,8 @@ def test_get(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_contains(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -94,7 +99,8 @@ def test_contains(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_copy(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -104,7 +110,8 @@ def test_copy(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_equivalence(make_dictionary):
     d1 = make_dictionary(PY_DICT)
@@ -128,7 +135,8 @@ def test_equivalence(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_keys(make_dictionary):
     a = make_dictionary(PY_DICT)
@@ -141,7 +149,8 @@ def test_keys(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_values(make_dictionary):
     a = make_dictionary(PY_DICT)
@@ -154,7 +163,8 @@ def test_values(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_items(make_dictionary):
     d = make_dictionary(PY_DICT)
@@ -168,7 +178,8 @@ def test_items(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_argument(make_dictionary):
     Example = ObjCClass("Example")
@@ -189,7 +200,8 @@ def test_argument(make_dictionary):
 
 
 @pytest.mark.parametrize(
-    "make_dictionary", [make_ns_dictionary, make_ns_mutable_dictionary]
+    "make_dictionary",
+    [make_ns_dictionary, make_ns_mutable_dictionary],
 )
 def test_property(make_dictionary):
     Example = ObjCClass("Example")
