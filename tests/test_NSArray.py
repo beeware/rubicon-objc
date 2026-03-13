@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import unittest
+import pytest
 
 from rubicon.objc import (
     NSArray,
@@ -13,373 +13,444 @@ from rubicon.objc import (
 )
 from rubicon.objc.collections import ObjCListInstance
 
-
-class NSArrayMixinTest(unittest.TestCase):
-    py_list = ["one", "two", "three"]
-
-    def make_array(self, contents=None):
-        a = NSMutableArray.alloc().init()
-        if contents is not None:
-            for value in contents:
-                a.addObject(value)
-
-        return NSArray.arrayWithArray(a)
-
-    def test_getitem(self):
-        a = self.make_array(self.py_list)
-
-        for pos, value in enumerate(self.py_list):
-            self.assertEqual(a[pos], value)
-
-        with self.assertRaises(IndexError):
-            a[len(self.py_list) + 10]
-
-        with self.assertRaises(IndexError):
-            a[-len(self.py_list) - 1]
-
-    def test_len(self):
-        a = self.make_array(self.py_list)
-
-        self.assertEqual(len(a), len(self.py_list))
-
-    def test_iter(self):
-        a = self.make_array(self.py_list)
-
-        keys = list(self.py_list)
-        for k in a:
-            self.assertTrue(k in keys)
-            keys.remove(k)
-
-        self.assertTrue(len(keys) == 0)
-
-    def test_contains(self):
-        a = self.make_array(self.py_list)
-        for value in self.py_list:
-            self.assertTrue(value in a)
-
-    def test_index(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.index("two"), 1)
-        with self.assertRaises(ValueError):
-            a.index("umpteen")
-
-    def test_count(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.count("one"), 1)
-
-    def test_copy(self):
-        a = self.make_array(self.py_list)
-        b = a.copy()
-        self.assertEqual(b, a)
-        self.assertEqual(b, self.py_list)
-
-        with self.assertRaises(AttributeError):
-            b.append("four")
-
-    def test_equivalence(self):
-        a = self.make_array(self.py_list)
-        b = self.make_array(self.py_list)
-
-        self.assertEqual(a, self.py_list)
-        self.assertEqual(b, self.py_list)
-        self.assertEqual(a, b)
-        self.assertEqual(self.py_list, a)
-        self.assertEqual(self.py_list, b)
-        self.assertEqual(b, a)
-
-        self.assertNotEqual(a, object())
-        self.assertNotEqual(a, [])
-        self.assertNotEqual(a, self.py_list[:2])
-        self.assertNotEqual(a, self.py_list + ["spam", "ham"])
-
-    def test_slice_access(self):
-        a = self.make_array(self.py_list * 2)
-        self.assertEqual(a[1:4], ["two", "three", "one"])
-        self.assertEqual(a[:-2], ["one", "two", "three", "one"])
-        self.assertEqual(a[4:], ["two", "three"])
-        self.assertEqual(a[1:5:2], ["two", "one"])
-
-    def test_argument(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        a = self.make_array(self.py_list)
-        # Call a method with an NSArray instance
-        self.assertEqual(example.processArray(a), "two")
-        # Call the same method with the Python list
-        self.assertEqual(example.processArray(self.py_list), "two")
-
-    def test_property(self):
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
-
-        a = self.make_array(self.py_list)
-        example.array = a
-
-        self.assertEqual(example.array, self.py_list)
-        self.assertIsInstance(example.array, ObjCListInstance)
-        self.assertEqual(example.array[1], "two")
+PY_LIST = ["one", "two", "three"]
 
 
-class NSMutableArrayMixinTest(NSArrayMixinTest):
-    def make_array(self, contents=None):
-        a = NSMutableArray.alloc().init()
-        if contents is not None:
-            for value in contents:
-                a.addObject(value)
+def make_ns_array(contents=None):
+    a = NSMutableArray.alloc().init()
+    if contents is not None:
+        for value in contents:
+            a.addObject(value)
 
-        return a
+    return NSArray.arrayWithArray(a)
 
-    def test_setitem(self):
-        a = self.make_array(self.py_list)
 
-        a[2] = "four"
-        self.assertEqual(a[2], "four")
+def make_ns_mutable_array(contents=None):
+    a = NSMutableArray.alloc().init()
+    if contents is not None:
+        for value in contents:
+            a.addObject(value)
 
-        with self.assertRaises(IndexError):
-            a[len(a)] = "invalid"
+    return a
 
-        with self.assertRaises(IndexError):
-            a[-len(a) - 1] = "invalid"
 
-    def test_del(self):
-        a = self.make_array(self.py_list)
-        del a[0]
-        self.assertEqual(len(a), 2)
-        self.assertEqual(a[0], "two")
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_getitem(make_array):
+    a = make_array(PY_LIST)
 
-        with self.assertRaises(IndexError):
-            del a[len(a)]
+    for pos, value in enumerate(PY_LIST):
+        assert a[pos] == value
 
-        with self.assertRaises(IndexError):
-            del a[-len(a) - 1]
+    with pytest.raises(IndexError):
+        a[len(PY_LIST) + 10]
 
-    def test_append(self):
-        a = self.make_array()
-        a.append("an item")
-        self.assertTrue("an item" in a)
+    with pytest.raises(IndexError):
+        a[-len(PY_LIST) - 1]
 
-    def test_extend(self):
-        a = self.make_array()
-        a.extend(["an item", "another item"])
-        self.assertTrue("an item" in a)
-        self.assertTrue("another item" in a)
 
-    def test_clear(self):
-        a = self.make_array(self.py_list)
-        a.clear()
-        self.assertEqual(len(a), 0)
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_len(make_array):
+    a = make_array(PY_LIST)
 
-    def test_count(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.count("one"), 1)
+    assert len(a) == len(PY_LIST)
 
-        a.append("one")
-        self.assertEqual(a.count("one"), 2)
 
-    def test_copy(self):
-        a = self.make_array(self.py_list)
-        b = a.copy()
-        self.assertEqual(b, a)
-        self.assertEqual(b, self.py_list)
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_iter(make_array):
+    a = make_array(PY_LIST)
 
+    keys = list(PY_LIST)
+    for k in a:
+        assert k in keys
+        keys.remove(k)
+
+    assert len(keys) == 0
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_contains(make_array):
+    a = make_array(PY_LIST)
+    for value in PY_LIST:
+        assert value in a
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_index(make_array):
+    a = make_array(PY_LIST)
+    assert a.index("two") == 1
+    with pytest.raises(ValueError):
+        a.index("umpteen")
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_count(make_array):
+    a = make_array(PY_LIST)
+    assert a.count("one") == 1
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_equivalence(make_array):
+    a = make_array(PY_LIST)
+    b = make_array(PY_LIST)
+
+    assert a == PY_LIST
+    assert b == PY_LIST
+    assert a == b
+    assert PY_LIST == a
+    assert PY_LIST == b
+    assert b == a
+
+    assert a != object()
+    assert a != []
+    assert a != PY_LIST[:2]
+    assert a != PY_LIST + ["spam", "ham"]
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_slice_access(make_array):
+    a = make_array(PY_LIST * 2)
+    assert a[1:4] == ["two", "three", "one"]
+    assert a[:-2] == ["one", "two", "three", "one"]
+    assert a[4:] == ["two", "three"]
+    assert a[1:5:2] == ["two", "one"]
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_argument(make_array):
+    Example = ObjCClass("Example")
+    example = Example.alloc().init()
+
+    a = make_array(PY_LIST)
+    # Call a method with an NSArray instance
+    assert example.processArray(a) == "two"
+    # Call the same method with the Python list
+    assert example.processArray(PY_LIST) == "two"
+
+
+@pytest.mark.parametrize(
+    "make_array",
+    [make_ns_array, make_ns_mutable_array],
+)
+def test_property(make_array):
+    Example = ObjCClass("Example")
+    example = Example.alloc().init()
+
+    a = make_array(PY_LIST)
+    example.array = a
+
+    assert example.array == PY_LIST
+    assert isinstance(example.array, ObjCListInstance)
+    assert example.array[1] == "two"
+
+
+def test_ns_array_copy():
+    a = make_ns_array(PY_LIST)
+    b = a.copy()
+    assert b == a
+    assert b == PY_LIST
+
+    with pytest.raises(AttributeError):
         b.append("four")
 
-    def test_insert(self):
-        a = self.make_array(self.py_list)
-        a.insert(1, "four")
-        self.assertEqual(a[0], "one")
-        self.assertEqual(a[1], "four")
-        self.assertEqual(a[2], "two")
 
-    def test_pop(self):
-        a = self.make_array(self.py_list)
-        self.assertEqual(a.pop(), "three")
-        self.assertEqual(a.pop(0), "one")
-        self.assertEqual(len(a), 1)
-        self.assertEqual(a[0], "two")
+def test_ns_mutable_array_copy():
+    a = make_ns_mutable_array(PY_LIST)
+    b = a.copy()
+    assert b == a
+    assert b == PY_LIST
 
-    def test_remove(self):
-        a = self.make_array(self.py_list)
-        a.remove("three")
-        self.assertEqual(len(a), 2)
-        self.assertEqual(a[-1], "two")
-        with self.assertRaises(ValueError):
-            a.remove("umpteen")
-
-    def test_slice_assignment1(self):
-        a = self.make_array(self.py_list * 2)
-        a[2:4] = ["four", "five"]
-        self.assertEqual(a, ["one", "two", "four", "five", "two", "three"])
-
-    def test_slice_assignment2(self):
-        a = self.make_array(self.py_list * 2)
-        a[::2] = ["four", "five", "six"]
-        self.assertEqual(a, ["four", "two", "five", "one", "six", "three"])
-
-    def test_slice_assignment3(self):
-        a = self.make_array(self.py_list * 2)
-        a[2:4] = ["four"]
-        self.assertEqual(a, ["one", "two", "four", "two", "three"])
-
-    def test_bad_slice_assignment1(self):
-        a = self.make_array(self.py_list * 2)
-
-        with self.assertRaises(TypeError):
-            a[2:4] = 4
-
-    def test_bad_slice_assignment2(self):
-        a = self.make_array(self.py_list * 2)
-
-        with self.assertRaises(ValueError):
-            a[::2] = [4]
-
-    def test_del_slice1(self):
-        a = self.make_array(self.py_list * 2)
-        del a[-2:]
-        self.assertEqual(len(a), 4)
-        self.assertEqual(a[0], "one")
-        self.assertEqual(a[-1], "one")
-
-    def test_del_slice2(self):
-        a = self.make_array(self.py_list * 2)
-        del a[::2]
-        self.assertEqual(len(a), 3)
-        self.assertEqual(a[0], "two")
-        self.assertEqual(a[1], "one")
-        self.assertEqual(a[2], "three")
-
-    def test_del_slice3(self):
-        a = self.make_array(self.py_list * 2)
-        del a[::-2]
-        self.assertEqual(len(a), 3)
-        self.assertEqual(a[0], "one")
-        self.assertEqual(a[1], "three")
-        self.assertEqual(a[2], "two")
-
-    def test_reverse(self):
-        a = self.make_array(self.py_list)
-        a.reverse()
-
-        for pos, value in enumerate(reversed(self.py_list)):
-            self.assertEqual(a[pos], value)
+    b.append("four")
 
 
-class PythonObjectTest(unittest.TestCase):
-    def test_primitive_list_attribute(self):
-        class PrimitiveListAttrContainer(NSObject):
-            @objc_method
-            def init(self):
-                self.data = [1, 2, 3]
-                return self
+def test_ns_mutable_array_setitem():
+    a = make_ns_mutable_array(PY_LIST)
 
-            @objc_method
-            def initWithList_(self, data):
-                self.data = data
-                return self
+    a[2] = "four"
+    assert a[2] == "four"
 
-        obj1 = PrimitiveListAttrContainer.alloc().init()
-        self.assertEqual(obj1.data, [1, 2, 3])
-        self.assertIsInstance(obj1.data, list)
+    with pytest.raises(IndexError):
+        a[len(a)] = "invalid"
 
-        # If it's set through a method call, it becomes an objc instance
-        obj2 = PrimitiveListAttrContainer.alloc().initWithList_([4, 5, 6])
-        self.assertIsInstance(obj2.data, ObjCListInstance)
-        self.assertEqual(py_from_ns(obj2.data), [4, 5, 6])
+    with pytest.raises(IndexError):
+        a[-len(a) - 1] = "invalid"
 
-        # If it's set by direct attribute access, it becomes a Python object.
-        obj2.data = [7, 8, 9]
-        self.assertIsInstance(obj2.data, list)
-        self.assertEqual(obj2.data, [7, 8, 9])
 
-    def test_primitive_list_property(self):
-        class PrimitiveListContainer(NSObject):
-            data = objc_property()
+def test_ns_mutable_array_del():
+    a = make_ns_mutable_array(PY_LIST)
+    del a[0]
+    assert len(a) == 2
+    assert a[0] == "two"
 
-            @objc_method
-            def init(self):
-                self.data = [1, 2, 3]
-                return self
+    with pytest.raises(IndexError):
+        del a[len(a)]
 
-            @objc_method
-            def initWithList_(self, data):
-                self.data = data
-                return self
+    with pytest.raises(IndexError):
+        del a[-len(a) - 1]
 
-        obj1 = PrimitiveListContainer.alloc().init()
-        self.assertIsInstance(obj1.data, ObjCListInstance)
-        self.assertEqual(py_from_ns(obj1.data), [1, 2, 3])
 
-        obj2 = PrimitiveListContainer.alloc().initWithList_([4, 5, 6])
-        self.assertIsInstance(obj2.data, ObjCListInstance)
-        self.assertEqual(py_from_ns(obj2.data), [4, 5, 6])
+def test_ns_mutable_array_append():
+    a = make_ns_mutable_array()
+    a.append("an item")
+    assert "an item" in a
 
-        obj2.data = [7, 8, 9]
-        self.assertIsInstance(obj2.data, ObjCListInstance)
-        self.assertEqual(py_from_ns(obj2.data), [7, 8, 9])
 
-    def test_object_list_attribute(self):
-        class ObjectListAttrContainer(NSObject):
-            @objc_method
-            def init(self):
-                self.data = ["x1", "y2", "z3"]
-                return self
+def test_ns_mutable_array_extend():
+    a = make_ns_mutable_array()
+    a.extend(["an item", "another item"])
+    assert "an item" in a
+    assert "another item" in a
 
-            @objc_method
-            def initWithList_(self, data):
-                self.data = data
-                return self
 
-        obj1 = ObjectListAttrContainer.alloc().init()
-        self.assertEqual(obj1.data, ["x1", "y2", "z3"])
-        self.assertIsInstance(obj1.data, list)
+def test_ns_mutable_array_clear():
+    a = make_ns_mutable_array(PY_LIST)
+    a.clear()
+    assert len(a) == 0
 
-        # If it's set through a method call, it becomes an objc instance
-        obj2 = ObjectListAttrContainer.alloc().initWithList_(["a4", "b5", "c6"])
-        self.assertEqual(obj2.data, ["a4", "b5", "c6"])
-        self.assertIsInstance(obj2.data, ObjCListInstance)
 
-        # If it's set by direct attribute access, it becomes a Python object.
-        obj2.data = ["i7", "j8", "k9"]
-        self.assertEqual(obj2.data, ["i7", "j8", "k9"])
-        self.assertIsInstance(obj2.data, list)
+def test_ns_mutable_array_count():
+    a = make_ns_mutable_array(PY_LIST)
+    assert a.count("one") == 1
 
-    def test_object_list_property(self):
-        class ObjectListContainer(NSObject):
-            data = objc_property()
+    a.append("one")
+    assert a.count("one") == 2
 
-            @objc_method
-            def init(self):
-                self.data = ["x1", "y2", "z3"]
-                return self
 
-            @objc_method
-            def initWithList_(self, data):
-                self.data = data
-                return self
+def test_ns_mutable_array_insert():
+    a = make_ns_mutable_array(PY_LIST)
+    a.insert(1, "four")
+    assert a[0] == "one"
+    assert a[1] == "four"
+    assert a[2] == "two"
 
-        obj1 = ObjectListContainer.alloc().init()
-        self.assertEqual(obj1.data, ["x1", "y2", "z3"])
-        self.assertIsInstance(obj1.data, ObjCListInstance)
 
-        obj2 = ObjectListContainer.alloc().initWithList_(["a4", "b5", "c6"])
-        self.assertEqual(obj2.data, ["a4", "b5", "c6"])
-        self.assertIsInstance(obj2.data, ObjCListInstance)
+def test_ns_mutable_array_pop():
+    a = make_ns_mutable_array(PY_LIST)
+    assert a.pop() == "three"
+    assert a.pop(0) == "one"
+    assert len(a) == 1
+    assert a[0] == "two"
 
-        obj2.data = ["i7", "j8", "k9"]
-        self.assertEqual(obj2.data, ["i7", "j8", "k9"])
-        self.assertIsInstance(obj2.data, ObjCListInstance)
 
-    def test_multitype_list_property(self):
-        class MultitypeListContainer(NSObject):
-            data = objc_property()
+def test_ns_mutable_array_remove():
+    a = make_ns_mutable_array(PY_LIST)
+    a.remove("three")
+    assert len(a) == 2
+    assert a[-1] == "two"
+    with pytest.raises(ValueError):
+        a.remove("umpteen")
 
-        Example = ObjCClass("Example")
-        example = Example.alloc().init()
 
-        # All types can be stored in a list.
-        obj = MultitypeListContainer.alloc().init()
+def test_ns_mutable_array_slice_assignment1():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    a[2:4] = ["four", "five"]
+    assert a == ["one", "two", "four", "five", "two", "three"]
 
-        obj.data = [4, True, "Hello", example]
-        self.assertIsInstance(obj.data, ObjCListInstance)
-        self.assertEqual(py_from_ns(obj.data), [4, True, "Hello", example])
+
+def test_ns_mutable_array_slice_assignment2():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    a[::2] = ["four", "five", "six"]
+    assert a == ["four", "two", "five", "one", "six", "three"]
+
+
+def test_ns_mutable_array_slice_assignment3():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    a[2:4] = ["four"]
+    assert a == ["one", "two", "four", "two", "three"]
+
+
+def test_ns_mutable_array_bad_slice_assignment1():
+    a = make_ns_mutable_array(PY_LIST * 2)
+
+    with pytest.raises(TypeError):
+        a[2:4] = 4
+
+
+def test_ns_mutable_array_bad_slice_assignment2():
+    a = make_ns_mutable_array(PY_LIST * 2)
+
+    with pytest.raises(ValueError):
+        a[::2] = [4]
+
+
+def test_ns_mutable_array_del_slice1():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    del a[-2:]
+    assert len(a) == 4
+    assert a[0] == "one"
+    assert a[-1] == "one"
+
+
+def test_ns_mutable_array_del_slice2():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    del a[::2]
+    assert len(a) == 3
+    assert a[0] == "two"
+    assert a[1] == "one"
+    assert a[2] == "three"
+
+
+def test_ns_mutable_array_del_slice3():
+    a = make_ns_mutable_array(PY_LIST * 2)
+    del a[::-2]
+    assert len(a) == 3
+    assert a[0] == "one"
+    assert a[1] == "three"
+    assert a[2] == "two"
+
+
+def test_ns_mutable_array_reverse():
+    a = make_ns_mutable_array(PY_LIST)
+    a.reverse()
+
+    for pos, value in enumerate(reversed(PY_LIST)):
+        assert a[pos] == value
+
+
+def test_python_object_primitive_list_attribute():
+    class PrimitiveListAttrContainer(NSObject):
+        @objc_method
+        def init(self):
+            self.data = [1, 2, 3]
+            return self
+
+        @objc_method
+        def initWithList_(self, data):
+            self.data = data
+            return self
+
+    obj1 = PrimitiveListAttrContainer.alloc().init()
+    assert obj1.data == [1, 2, 3]
+    assert isinstance(obj1.data, list)
+
+    # If it's set through a method call, it becomes an objc instance
+    obj2 = PrimitiveListAttrContainer.alloc().initWithList_([4, 5, 6])
+    assert isinstance(obj2.data, ObjCListInstance)
+    assert py_from_ns(obj2.data) == [4, 5, 6]
+
+    # If it's set by direct attribute access, it becomes a Python object.
+    obj2.data = [7, 8, 9]
+    assert isinstance(obj2.data, list)
+    assert obj2.data == [7, 8, 9]
+
+
+def test_python_object_primitive_list_property():
+    class PrimitiveListContainer(NSObject):
+        data = objc_property()
+
+        @objc_method
+        def init(self):
+            self.data = [1, 2, 3]
+            return self
+
+        @objc_method
+        def initWithList_(self, data):
+            self.data = data
+            return self
+
+    obj1 = PrimitiveListContainer.alloc().init()
+    assert isinstance(obj1.data, ObjCListInstance)
+    assert py_from_ns(obj1.data) == [1, 2, 3]
+
+    obj2 = PrimitiveListContainer.alloc().initWithList_([4, 5, 6])
+    assert isinstance(obj2.data, ObjCListInstance)
+    assert py_from_ns(obj2.data) == [4, 5, 6]
+
+    obj2.data = [7, 8, 9]
+    assert isinstance(obj2.data, ObjCListInstance)
+    assert py_from_ns(obj2.data) == [7, 8, 9]
+
+
+def test_python_object_object_list_attribute():
+    class ObjectListAttrContainer(NSObject):
+        @objc_method
+        def init(self):
+            self.data = ["x1", "y2", "z3"]
+            return self
+
+        @objc_method
+        def initWithList_(self, data):
+            self.data = data
+            return self
+
+    obj1 = ObjectListAttrContainer.alloc().init()
+    assert obj1.data == ["x1", "y2", "z3"]
+    assert isinstance(obj1.data, list)
+
+    # If it's set through a method call, it becomes an objc instance
+    obj2 = ObjectListAttrContainer.alloc().initWithList_(["a4", "b5", "c6"])
+    assert obj2.data == ["a4", "b5", "c6"]
+    assert isinstance(obj2.data, ObjCListInstance)
+
+    # If it's set by direct attribute access, it becomes a Python object.
+    obj2.data = ["i7", "j8", "k9"]
+    assert obj2.data == ["i7", "j8", "k9"]
+    assert isinstance(obj2.data, list)
+
+
+def test_python_object_object_list_property():
+    class ObjectListContainer(NSObject):
+        data = objc_property()
+
+        @objc_method
+        def init(self):
+            self.data = ["x1", "y2", "z3"]
+            return self
+
+        @objc_method
+        def initWithList_(self, data):
+            self.data = data
+            return self
+
+    obj1 = ObjectListContainer.alloc().init()
+    assert obj1.data == ["x1", "y2", "z3"]
+    assert isinstance(obj1.data, ObjCListInstance)
+
+    obj2 = ObjectListContainer.alloc().initWithList_(["a4", "b5", "c6"])
+    assert obj2.data == ["a4", "b5", "c6"]
+    assert isinstance(obj2.data, ObjCListInstance)
+
+    obj2.data = ["i7", "j8", "k9"]
+    assert obj2.data == ["i7", "j8", "k9"]
+    assert isinstance(obj2.data, ObjCListInstance)
+
+
+def test_python_object_multitype_list_property():
+    class MultitypeListContainer(NSObject):
+        data = objc_property()
+
+    Example = ObjCClass("Example")
+    example = Example.alloc().init()
+
+    # All types can be stored in a list.
+    obj = MultitypeListContainer.alloc().init()
+
+    obj.data = [4, True, "Hello", example]
+    assert isinstance(obj.data, ObjCListInstance)
+    assert py_from_ns(obj.data) == [4, True, "Hello", example]
