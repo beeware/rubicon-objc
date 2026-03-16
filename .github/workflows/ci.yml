@@ -131,4 +131,63 @@ jobs:
       run: python -m pip install --group tox-uv
 
     - name: Test
-      run: tox -e py --installpkg dist/rubicon_objc-*.whl
+      run: |
+        RUNNER_OS=$(cut -d- -f1 <<< ${{ matrix.platform }})
+        RUNNER_VERSION=$(cut -d- -f2 <<< ${{ matrix.platform }})
+        COVERAGE_FILE=".coverage.${RUNNER_OS}.${RUNNER_VERSION}.${{ matrix.python-version }}" \
+          tox -e py-cov --installpkg dist/rubicon_objc-*.whl
+
+    - name: Store Coverage Data
+      if: always() && contains('success,failure', steps.test.outcome)
+      uses: actions/upload-artifact@v7.0.0
+      with:
+        name: coverage-data-${{ matrix.platform }}-${{ matrix.python-version }}
+        path: ".coverage.*"
+        if-no-files-found: error
+        include-hidden-files: true
+
+    - name: Report Platform Coverage
+      id: coverage
+      if: always() && contains('success,failure', steps.test.outcome)
+      # coverage reporting must use the same Python version used to produce coverage
+      run: tox -qe coverage$(tr -dc "0-9" <<< "${{ matrix.python-version }}")
+
+
+  coverage:
+    name: Project coverage
+    runs-on: ubuntu-24.04
+    needs: unit-tests
+    if: always() && contains('success,failure', needs.unit-tests.result)
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: Setup Python
+      uses: actions/setup-python@v6.2.0
+      with:
+        # Use minimum version of python for coverage to avoid phantom branches
+        # https://github.com/nedbat/coveragepy/issues/1572#issuecomment-1522546425
+        python-version: "3.10"
+
+    - name: Install Tox
+      run: python -m pip install --group tox-uv
+
+    - name: Retrieve Coverage Data
+      uses: actions/download-artifact@v8.0.0
+      with:
+        pattern: coverage-data-*
+        merge-multiple: true
+
+    - name: Project Coverage Report
+      id: project-coverage
+      if: always() || contains('success,failure', needs.platform-coverage.result)
+      run: tox -qe coverage-ci-project-html
+
+    - name: Upload Project Coverage HTML Report
+      if: always() && steps.project-coverage.outcome == 'failure'
+      uses: actions/upload-artifact@v7.0.0
+      with:
+        name: html-coverage-report-project
+        path: htmlcov

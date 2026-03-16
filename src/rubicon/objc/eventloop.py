@@ -17,14 +17,14 @@ from .api import ObjCClass, objc_const
 from .runtime import load_library, objc_id
 from .types import CFIndex
 
-if sys.version_info < (3, 14):
+if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
     from asyncio import (
         AbstractEventLoopPolicy,
         DefaultEventLoopPolicy,
         SafeChildWatcher,
         set_event_loop_policy,
     )
-elif sys.version_info < (3, 16):
+elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
     # Python 3.14 finalized the deprecation of SafeChildWatcher. There's no
     # replacement API; the feature can be removed.
     #
@@ -46,6 +46,8 @@ elif sys.version_info < (3, 16):
             AbstractEventLoopPolicy,
             DefaultEventLoopPolicy,
         )
+else:  # pragma: no-cover-if-lt-py316
+    pass
 
 __all__ = [
     "EventLoopPolicy",
@@ -672,7 +674,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
                 "You can't set a lifecycle on a loop that's already running."
             )
         self._lifecycle = lifecycle
-        if sys.version_info < (3, 14):
+        if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
             self._policy._lifecycle = lifecycle
 
     def _add_callback(self, handle):
@@ -691,7 +693,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self.call_soon(handle._callback, *handle._args)
 
 
-if sys.version_info < (3, 16):
+if sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
 
     class EventLoopPolicy(AbstractEventLoopPolicy):
         """Rubicon event loop policy.
@@ -717,7 +719,7 @@ if sys.version_info < (3, 16):
 
             self._lifecycle = None
             self._default_loop = None
-            if sys.version_info < (3, 14):
+            if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
                 self._watcher_lock = threading.Lock()
                 self._watcher = None
             self._policy = DefaultEventLoopPolicy()
@@ -749,7 +751,7 @@ if sys.version_info < (3, 16):
             loop._policy = self
             return loop
 
-        if sys.version_info < (3, 14):
+        if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
 
             def _init_watcher(self):
                 with events._lock:
@@ -791,7 +793,7 @@ if sys.version_info < (3, 16):
                 self._watcher = watcher
 
 
-if sys.version_info < (3, 14):
+if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
 
     def RubiconEventLoop():
         """Create a new Rubicon CFEventLoop instance."""
@@ -809,7 +811,7 @@ if sys.version_info < (3, 14):
         set_event_loop_policy(policy)
         return policy.new_event_loop()
 
-else:
+else:  # pragma: no-cover-if-lt-py314
     RubiconEventLoop = CFEventLoop
 
 
