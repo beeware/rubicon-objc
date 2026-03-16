@@ -66,6 +66,8 @@ tox-uv = [
 ]
 
 test = [
+    "coverage[toml] == 7.13.4",
+    "coverage-conditional-plugin == 0.9.0",
     "pytest == 9.0.2",
 ]
 
@@ -86,6 +88,42 @@ skip = ".git,*.pdf,*.svg"
 # the way to make case-sensitive skips of words etc
 ignore-regex = "\bNd\b"
 ignore-words-list = "re-use,assertIn"
+
+[tool.coverage.run]
+plugins = ["coverage_conditional_plugin"]
+parallel = true
+branch = true
+relative_files = true
+source_pkgs = ["rubicon"]
+
+[tool.coverage.paths]
+source = [
+    "src",
+    "**/site-packages",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+precision = 1
+exclude_lines = [
+    "pragma: no cover",
+    "@(abc\\.)?abstractmethod",
+    "@runtime_checkable",
+    "NotImplementedError\\(\\)",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.coverage_conditional_plugin.rules]
+no-cover-if-missing-setuptools_scm = "not is_installed('setuptools_scm')"
+no-cover-if-gte-py313 = "sys_version_info >= (3, 13) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-gte-py314 = "sys_version_info >= (3, 14) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-gte-py316 = "sys_version_info >= (3, 16) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-lt-py313 = "sys_version_info < (3, 13) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-lt-py314 = "sys_version_info < (3, 14) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-lt-py316 = "sys_version_info < (3, 16) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-old-or-new = "(sys_version_info >= (3, 6) or sys_version_info < (3, 16)) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -21,7 +21,10 @@ import warnings
 # This module relies on the layout of a few internal Python and ctypes
 # structures. Because of this, it's possible (but not all that likely) that
 # things will break on newer/older Python versions.
-if sys.version_info < (3, 6) or sys.version_info >= (3, 16):
+if sys.version_info < (3, 6) or sys.version_info >= (
+    3,
+    16,
+):  # pragma: no-cover-if-old-or-new
     v = sys.version_info
     warnings.warn(
         "rubicon.objc.ctypes_patch has only been tested with Python 3.6 through 3.15. "
@@ -88,7 +91,7 @@ SETFUNC = ctypes.PYFUNCTYPE(
 )
 
 
-if sys.version_info < (3, 13):
+if sys.version_info < (3, 13):  # pragma: no-cover-if-gte-py313
     # The PyTypeObject structure for the dict class.
     # This is used to determine the size of the PyDictObject structure.
     PyDict_Type = PyTypeObject.from_address(id(dict))
@@ -172,7 +175,7 @@ if sys.version_info < (3, 13):
 
         return StgDictObject.from_address(id(stgdict))
 
-else:
+else:  # pragma: no-cover-if-lt-py313
     # In Python 3.13.0a6 (https://github.com/python/cpython/issues/114314),
     # StgDict was replaced with a new StgInfo data type that requires less
     # metaclass magic.
@@ -247,9 +250,9 @@ def make_callback_returnable(ctype):
         return ctype
 
     # The implementation changed in 3.13.0a6; StgDict was replaced with StgInfo
-    if sys.version_info < (3, 13):
+    if sys.version_info < (3, 13):  # pragma: no-cover-if-gte-py313
         stg = get_stgdict_of_type(ctype)
-    else:
+    else:  # pragma: no-cover-if-lt-py313
         stg = get_stginfo_of_type(ctype)
 
     # Ensure that there is no existing getfunc or setfunc on the stgdict.

@@ -6,17 +6,13 @@ try:
     # Excluded from coverage because a pure test environment (such as the one
     # used by tox in CI) won't have setuptools_scm
     __version__ = get_version("../../..", relative_to=__file__)  # pragma: no cover
-except (ModuleNotFoundError, LookupError):
+except (ModuleNotFoundError, LookupError):  # pragma: no-cover-if-missing-setuptools_scm
     # If setuptools_scm isn't in the environment, the call to import will fail.
     # If it *is* in the environment, but the code isn't a git checkout (e.g.,
     # it's been pip installed non-editable) the call to get_version() will fail.
     # If either of these occurs, read version from the installer metadata.
 
-    # importlib.metadata.version was added in Python 3.8
-    try:
-        from importlib.metadata import version
-    except ModuleNotFoundError:
-        from importlib_metadata import version
+    from importlib.metadata import version
 
     __version__ = version("rubicon-objc")
 
