@@ -16,9 +16,7 @@ from rubicon.objc import (
     at,
     send_message,
 )
-from rubicon.objc.runtime import (
-    objc_id,
-)
+from rubicon.objc.runtime import objc_id
 
 from .conftest import (
     NSString,

@@ -30,8 +30,10 @@ from rubicon.objc.runtime import (
     set_ivar,
 )
 
-NSArray = ObjCClass("NSArray")
-NSString = ObjCClass("NSString")
+from .conftest import (
+    NSArray,
+    NSString,
+)
 
 
 def test_by_name():

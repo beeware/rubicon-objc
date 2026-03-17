@@ -21,7 +21,7 @@ from rubicon.objc import (
 )
 from rubicon.objc.runtime import libobjc
 
-NSString = ObjCClass("NSString")
+from .conftest import NSString
 
 
 def test_by_name():
@@ -63,7 +63,7 @@ def test_requires_protocol():
         ObjCProtocol(random_obj.ptr)
 
 
-def tests():
+def test_derived_protocols():
     """An ObjCProtocol's protocols can be looked up."""
 
     DerivedProtocol = ObjCProtocol("DerivedProtocol")

@@ -17,16 +17,16 @@ from rubicon.objc import (
     objc_method,
     objc_property,
 )
-from rubicon.objc.runtime import (
-    autoreleasepool,
-    libobjc,
-)
+from rubicon.objc.runtime import autoreleasepool, libobjc
 
 from .conftest import (
     NSImage,
     NSString,
-    ObjcWeakref,
 )
+
+
+class ObjcWeakref(NSObject):
+    weak_property = objc_property(weak=True)
 
 
 def assert_lifecycle(object_constructor: Callable[[], ObjCInstance]) -> None:
