@@ -1,25 +1,28 @@
 from __future__ import annotations
+
+from ctypes import Structure, Union, c_int
+
 import pytest
 
 from rubicon.objc import (
     CFRange,
     CGPoint,
+    CGPointMake,
     CGRect,
+    CGRectMake,
     CGSize,
+    CGSizeMake,
     NSEdgeInsets,
     NSEdgeInsetsMake,
+    NSMakePoint,
+    NSMakeRect,
+    NSMakeSize,
     NSPoint,
     NSRange,
     NSRect,
     NSSize,
     UIEdgeInsets,
     UIEdgeInsetsMake,
-    CGSizeMake,
-    CGRectMake,
-    NSMakePoint,
-    CGPointMake,
-    NSMakeRect,
-    NSMakeSize,
 )
 from rubicon.objc.types import (
     __LP64__,
@@ -32,14 +35,10 @@ from rubicon.objc.types import (
     get_ctype_for_type_map,
     get_encoding_for_ctype_map,
     register_ctype_for_type,
-    unregister_ctype,
-    unregister_ctype_all,
     unregister_ctype_for_type,
     unregister_encoding,
     unregister_encoding_all,
 )
-import collections.abc
-from ctypes import c_int, Structure, Union, POINTER, py_object
 
 
 def test_nspoint_repr():
@@ -169,7 +168,9 @@ def test_end_of_encoding_errors():
     with pytest.raises(ValueError, match="Unknown encoding"):
         _end_of_encoding(b"Z", 0)
 
-    with pytest.raises(ValueError, match="Incomplete encoding, missing 1 closing parentheses"):
+    with pytest.raises(
+        ValueError, match="Incomplete encoding, missing 1 closing parentheses"
+    ):
         _end_of_encoding(b"{abc=i", 0)
 
     # Incomplete encoding, reached end of string too early
@@ -218,7 +219,8 @@ def test_encoding_for_ctype_error():
 
 
 def test_encoding_registration_management():
-    """Test unregister functions and map getters (lines 492, 508, 525, 539-542, 549, 556)"""
+    """Test unregister functions and map getters (lines 492, 508, 525, 539-542, 549,
+    556)"""
 
     # dummy registration
     class DummyType(Structure):
@@ -251,7 +253,9 @@ def test_compound_value_errors():
     class MyStruct(Structure):
         _fields_ = [("x", c_int), ("y", c_int)]
 
-    with pytest.raises(ValueError, match="has 2 fields, but a sequence of length 1 was given"):
+    with pytest.raises(
+        ValueError, match="has 2 fields, but a sequence of length 1 was given"
+    ):
         compound_value_for_sequence([1], MyStruct)
 
     MyArray = c_int * 3

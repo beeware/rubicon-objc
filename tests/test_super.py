@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from ctypes import c_int
+from ctypes import c_int, c_void_p
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -9,9 +10,7 @@ from rubicon.objc import (
     ObjCClass,
     send_super,
 )
-from rubicon.objc.runtime import objc_id, Class
-from unittest.mock import MagicMock, patch
-from ctypes import c_void_p
+from rubicon.objc.runtime import Class, objc_id
 
 
 def test_send():
@@ -136,5 +135,7 @@ def test_send_super_root_class():
 
         cls = MagicMock(spec=Class)
         receiver = MagicMock(spec=objc_id)
-        with pytest.raises(ValueError, match="The specified class 'NSObject' is a root class"):
+        with pytest.raises(
+            ValueError, match="The specified class 'NSObject' is a root class"
+        ):
             send_super(cls, receiver, "init")
