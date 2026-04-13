@@ -386,7 +386,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         libcf.CFRelease(self._cfrunloop)
         super().__del__()
 
-    def _add_reader(self, fd, callback, *args):
+    def _add_reader(self, fd, callback, *args, **kwargs):
         try:
             handle = self._sockets[fd]
         except KeyError:
@@ -418,7 +418,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         """
         self._remove_reader(fd)
 
-    def _add_writer(self, fd, callback, *args):
+    def _add_writer(self, fd, callback, *args, **kwargs):
         try:
             handle = self._sockets[fd]
         except KeyError:
