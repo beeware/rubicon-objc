@@ -530,10 +530,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
                 "To recursively run the event loop, call run()."
             )
 
-        try:
-            self.run()
-        finally:
-            self.stop()
+        self.run()
 
     def run_forever_cooperatively(self, lifecycle=None):
         """A non-blocking version of
