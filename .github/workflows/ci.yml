@@ -131,6 +131,7 @@ jobs:
       run: python -m pip install --group tox-uv
 
     - name: Test
+      timeout-minutes: 5
       run: |
         RUNNER_OS=$(cut -d- -f1 <<< ${{ matrix.platform }})
         RUNNER_VERSION=$(cut -d- -f2 <<< ${{ matrix.platform }})
