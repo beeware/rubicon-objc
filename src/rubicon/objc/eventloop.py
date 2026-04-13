@@ -818,8 +818,11 @@ else:  # pragma: no-cover-if-lt-py314
 class CFLifecycle:
     """A lifecycle manager for raw CoreFoundation apps."""
 
-    def __init__(self, cfrunloop):
-        self._cfrunloop = cfrunloop
+    def __init__(self, cfrunloop=None):
+        if cfrunloop:
+            self._cfrunloop = cfrunloop
+        else:
+            self._cfrunloop = libcf.CFRunLoopGetMain()
 
     def start(self):
         libcf.CFRunLoopRun()
@@ -838,10 +841,10 @@ class CocoaLifecycle:
         self._application.run()
 
     def stop(self):
-        self._application.terminate(None)
+        self._application.stop(None)
 
 
-class iOSLifecycle:
+class iOSLifecycle:  # pragma: no cover
     """A life cycle manager for iOS (`UIApplication`) apps."""
 
     def start(self):

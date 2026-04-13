@@ -6,7 +6,11 @@ import time
 
 import pytest
 
-from rubicon.objc.eventloop import RubiconEventLoop
+from rubicon.objc import NSMakePoint, ObjCClass
+from rubicon.objc.eventloop import CFLifecycle, CocoaLifecycle, RubiconEventLoop, libcf
+
+NSApplication = ObjCClass("NSApplication")
+NSEvent = ObjCClass("NSEvent")
 
 
 # Some coroutines with known behavior for testing purposes.
@@ -170,3 +174,41 @@ def test_subprocess(loop):
     # Everything in the sample set, less everything from the result,
     # should be an empty set.
     assert ({"README.md"} - task.result()) == set()
+
+
+def test_cf_lifecycle(loop):
+    """The simple CFLifecycle works."""
+    loop.create_task(stop_loop(loop, 0.6))
+    loop.run_forever(lifecycle=CFLifecycle())
+
+
+def test_cf_lifecycle_explicit(loop):
+    """The simple CFLifecycle works with an explicit event loop."""
+    loop.create_task(stop_loop(loop, 0.6))
+    loop.run_forever(lifecycle=CFLifecycle(libcf.CFRunLoopGetMain()))
+
+
+def test_cocoa_lifecycle(loop):
+    """The full Cocoa Lifecycle works."""
+
+    # Shutting down the Cooca event loop needs a followup event to ensure that
+    # post-stop processing occurs.
+    async def shutdown(delay):
+        await asyncio.sleep(delay)
+        loop.stop()
+        event = NSEvent.otherEventWithType(
+            15,
+            location=NSMakePoint(0, 0),
+            modifierFlags=0,
+            timestamp=0,
+            windowNumber=0,
+            context=None,
+            subtype=0,
+            data1=0,
+            data2=0,
+        )
+        NSApplication.sharedApplication.postEvent(event, atStart=True)
+
+    loop.create_task(shutdown(0.6))
+
+    loop.run_forever(lifecycle=CocoaLifecycle(NSApplication.sharedApplication))
