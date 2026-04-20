@@ -35,6 +35,17 @@ def test_sel_null():
         _ = SEL(None).name
 
 
+def test_sel_repr():
+    """Test SEL.__repr__ (line 275)"""
+    # Null selector
+    sel_null = SEL(None)
+    assert repr(sel_null) == "rubicon.objc.runtime.SEL(None)"
+
+    # Registered selector
+    sel = SEL(b"init")
+    assert repr(sel) == "rubicon.objc.runtime.SEL(b'init')"
+
+
 def test_method_incorrect_argument_count_send():
     """Attempting to call a method with send_message with an incorrect number of
     arguments throws an exception."""
@@ -219,3 +230,9 @@ def test_struct_return_send():
         ).x
         == b"abcdefghijklmnop"
     )
+
+
+def test_send_message_invalid_receiver():
+    """Test send_message invalid receiver (line 917)"""
+    with pytest.raises(TypeError, match="Receiver must be an ObjCInstance or objc_id"):
+        send_message(123, "init", restype=objc_id)

@@ -4,6 +4,7 @@ import functools
 import gc
 import weakref
 from ctypes import c_int
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -23,9 +24,12 @@ from rubicon.objc import (
     objc_property,
 )
 from rubicon.objc.runtime import (
+    Class,
+    add_method,
     autoreleasepool,
     get_ivar,
     libobjc,
+    load_library,
     objc_id,
     set_ivar,
 )
@@ -521,3 +525,54 @@ def test_property_forcing():
     assert not callable(NSBundle.mainBundle), (
         "NSBundle.mainBundle should not be a method"
     )
+
+
+def test_load_library_fail():
+    """Test load_library failure."""
+    with pytest.raises(ValueError, match="Library 'non_existent_library' not found"):
+        load_library("non_existent_library")
+
+
+def test_add_method_existing_error():
+    """Test add_method existing error."""
+    with patch("rubicon.objc.runtime.libobjc") as mock_libobjc:
+        mock_libobjc.class_addMethod.return_value = False
+
+        cls = MagicMock(spec=Class)
+        from rubicon.objc.runtime import SEL
+
+        with pytest.raises(
+            ValueError, match="A method with the name b'init' already exists"
+        ):
+            add_method(cls, b"init", lambda x: None, [None, objc_id, SEL])
+
+
+def test_set_ivar_type_mismatch():
+    """Test set_ivar type mismatch."""
+    with patch("rubicon.objc.runtime.libobjc"):
+        with patch("rubicon.objc.runtime.ctype_for_encoding") as mock_ctype:
+            mock_ctype.return_value = c_int
+
+            obj = MagicMock(spec=objc_id)
+            with pytest.raises(TypeError, match="Incompatible type for ivar 'x'"):
+                set_ivar(obj, "x", "not an int")
+
+
+def test_set_ivar_size_mismatch():
+    """Test set_ivar size mismatch."""
+    from ctypes import Structure
+
+    class MockIvarType(Structure):
+        _fields_ = [("a", c_int)]
+
+    class WrongSizeIvarType(Structure):
+        _fields_ = [("a", c_int), ("b", c_int)]
+
+    with patch("rubicon.objc.runtime.libobjc"):
+        with patch("rubicon.objc.runtime.ctype_for_encoding") as mock_ctype:
+            mock_ctype.return_value = MockIvarType
+
+            obj = MagicMock(spec=objc_id)
+            val = WrongSizeIvarType()
+            with pytest.raises(TypeError, match="Incompatible type for ivar 'x'"):
+                set_ivar(obj, "x", val)
