@@ -49,6 +49,6 @@ If you have any concerns about this code of conduct, or you wish to report a vio
 
 ## Contributing
 
-If you experience problems with Rubicon-ObjC, [log them on GitHub](https://github.com/beeware/rubicon-objc/issues).
+If you experience problems with Rubicon-ObjC, [log them on GitHub](https://rubicon-objc.beeware.org/en/latest/how-to/contribute/how/new-issue/).
 
 If you'd like to contribute to Rubicon-ObjC development, our [contribution guide](https://rubicon-objc.beeware.org/en/latest/how-to/contribute) details how to set up a development environment, and other requirements we have as part of our contribution process.
