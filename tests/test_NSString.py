@@ -69,7 +69,6 @@ def assert_method(py_value, method, *args, **kwargs):
 @pytest.mark.parametrize("pystr", TEST_STRINGS)
 def test_str_nsstring_conversion(pystr):
     """Python str and NSString can be converted to each other manually."""
-
     nsstr = ns_from_py(pystr)
     assert isinstance(nsstr, NSString)
     assert str(nsstr) == pystr
@@ -78,7 +77,6 @@ def test_str_nsstring_conversion(pystr):
 
 def test_nsstring_eq_nsstring():
     """Two NSStrings can be checked for equality."""
-
     first = ns_from_py("first")
     second = ns_from_py("second")
 
@@ -89,7 +87,6 @@ def test_nsstring_eq_nsstring():
 
 def test_str_eq_nsstring():
     """A Python str and a NSString can be checked for equality."""
-
     py_first = "first"
     py_second = "second"
     ns_first = ns_from_py(py_first)
@@ -105,7 +102,6 @@ def test_str_eq_nsstring():
 
 def test_nsstring_as_fspath():
     """An NSString can be interpreted as a 'path-like' object."""
-
     # os.path.dirname requires a 'path-like' object.
     assert os.path.dirname(ns_from_py("/path/base/leaf")) == "/path/base"
 
@@ -114,7 +110,6 @@ def test_nsstring_as_fspath():
 @pytest.mark.parametrize("py_right", TEST_STRINGS)
 def test_nsstring_compare(py_left, py_right):
     """A NSString can be compared to other strings."""
-
     ns_left = ns_from_py(py_left)
     ns_right = ns_from_py(py_right)
 
@@ -127,7 +122,6 @@ def test_nsstring_compare(py_left, py_right):
 @pytest.mark.parametrize("py_needle", NEEDLES)
 def test_nsstring_in(py_needle):
     """The in operator works on NSString."""
-
     py_haystack = HAYSTACK
     ns_haystack = ns_from_py(py_haystack)
     ns_needle = ns_from_py(py_needle)
@@ -140,7 +134,6 @@ def test_nsstring_in(py_needle):
 @pytest.mark.parametrize("pystr", TEST_STRINGS)
 def test_nsstring_len(pystr):
     """``len()`` works on NSString."""
-
     nsstr = ns_from_py(pystr)
     assert len(nsstr) == len(pystr)
 
@@ -148,7 +141,6 @@ def test_nsstring_len(pystr):
 @pytest.mark.parametrize("pystr", TEST_STRINGS)
 def test_nsstring_getitem_index(pystr):
     """The individual elements of a NSString can be accessed."""
-
     nsstr = ns_from_py(pystr)
     for i, pychar in enumerate(pystr):
         assert nsstr[i] == pychar
@@ -158,7 +150,6 @@ def test_nsstring_getitem_index(pystr):
 @pytest.mark.parametrize("step", (None, 1, 2, -1, -2))
 def test_nsstring_getitem_slice(pystr, step):
     """A NSString can be sliced."""
-
     nsstr = ns_from_py(pystr)
     assert nsstr[::step] == pystr[::step]
     assert nsstr[:3:step] == pystr[:3:step]
@@ -169,7 +160,6 @@ def test_nsstring_getitem_slice(pystr, step):
 @pytest.mark.parametrize("pystr", TEST_STRINGS)
 def test_nsstring_iter(pystr):
     """A NSString can be iterated over."""
-
     nsstr = ns_from_py(pystr)
     for nschar, pychar in zip(nsstr, pystr, strict=True):
         assert nschar == pychar
@@ -179,7 +169,6 @@ def test_nsstring_iter(pystr):
 @pytest.mark.parametrize(("start", "end"), RANGES)
 def test_nsstring_find_rfind(py_needle, start, end):
     """The find and rfind methods work on NSString."""
-
     py_haystack = HAYSTACK
     ns_haystack = ns_from_py(py_haystack)
     ns_needle = ns_from_py(py_needle)
@@ -195,7 +184,6 @@ def test_nsstring_find_rfind(py_needle, start, end):
 @pytest.mark.parametrize(("start", "end"), RANGES)
 def test_nsstring_index_rindex(py_needle, start, end):
     """The index and rindex methods work on NSString."""
-
     py_haystack = HAYSTACK
     ns_haystack = ns_from_py(py_haystack)
     ns_needle = ns_from_py(py_needle)
@@ -221,7 +209,6 @@ def test_nsstring_index_rindex(py_needle, start, end):
 @pytest.mark.parametrize("py_right", TEST_STRINGS)
 def test_nsstring_add_radd(py_left, py_right):
     """The + operator works on NSString."""
-
     ns_left = ns_from_py(py_left)
     ns_right = ns_from_py(py_right)
     py_concat = py_left + py_right
@@ -235,7 +222,6 @@ def test_nsstring_add_radd(py_left, py_right):
 @pytest.mark.parametrize("n", (-5, 0, 1, 2, 5))
 def test_nsstring_mul_rmul(py_str, n):
     """The * operator works on NSString."""
-
     ns_str = ns_from_py(py_str)
     py_repeated = py_str * n
     ns_repeated = ns_from_py(py_repeated)

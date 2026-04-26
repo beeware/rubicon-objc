@@ -7,7 +7,6 @@ from rubicon.objc import ObjCClass
 
 def test_field():
     """A field on an instance can be accessed and mutated."""
-
     Example = ObjCClass("Example")
 
     obj = Example.alloc().init()

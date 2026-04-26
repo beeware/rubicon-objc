@@ -26,14 +26,12 @@ from .conftest import NSString
 
 def test_by_name():
     """An Objective-C protocol can be looked up by name."""
-
     ExampleProtocol = ObjCProtocol("ExampleProtocol")
     assert ExampleProtocol.name == "ExampleProtocol"
 
 
 def test_caching():
     """ObjCProtocol instances are cached."""
-
     ExampleProtocol1 = ObjCProtocol("ExampleProtocol")
     ExampleProtocol2 = ObjCProtocol("ExampleProtocol")
 
@@ -42,7 +40,6 @@ def test_caching():
 
 def test_by_pointer():
     """An Objective-C protocol can be created from a pointer."""
-
     example_protocol_ptr = libobjc.objc_getProtocol(b"ExampleProtocol")
     ExampleProtocol = ObjCProtocol(example_protocol_ptr)
     assert ExampleProtocol == ObjCProtocol("ExampleProtocol")
@@ -50,14 +47,12 @@ def test_by_pointer():
 
 def test_nonexistant_protocol():
     """A NameError is raised if a protocol doesn't exist."""
-
     with pytest.raises(NameError):
         ObjCProtocol("DoesNotExist")
 
 
 def test_requires_protocol():
     """ObjCProtocol only accepts protocol pointers."""
-
     random_obj = NSObject.alloc().init()
     with pytest.raises(ValueError):
         ObjCProtocol(random_obj.ptr)
@@ -65,7 +60,6 @@ def test_requires_protocol():
 
 def test_derived_protocols():
     """An ObjCProtocol's protocols can be looked up."""
-
     DerivedProtocol = ObjCProtocol("DerivedProtocol")
     BaseProtocolOne = ObjCProtocol("BaseProtocolOne")
     BaseProtocolTwo = ObjCProtocol("BaseProtocolTwo")
@@ -75,7 +69,6 @@ def test_derived_protocols():
 
 def test_instancecheck():
     """``isinstance()`` works with an ObjCProtocol as the second argument."""
-
     NSCoding = ObjCProtocol("NSCoding")
     NSSecureCoding = ObjCProtocol("NSSecureCoding")
 
@@ -111,7 +104,6 @@ def test_subclasscheck():
 
 def test_auto_rename_global():
     """Test the global automatic renaming option of ObjCProtocol."""
-
     try:
         ObjCProtocol.auto_rename = True
 
@@ -158,7 +150,6 @@ def test_auto_rename_per_class():
 
 def test_no_duplicate_protocols():
     """An Objective-C class cannot adopt a protocol more than once."""
-
     with pytest.raises(ValueError):
 
         class DuplicateProtocol(
@@ -200,7 +191,6 @@ def test_def_property():
 
 def test_def_extends():
     """An ObjCProtocol that extends other protocols can be defined."""
-
     ExampleProtocol = ObjCProtocol("ExampleProtocol")
 
     class ProtocolExtendsProtocols(NSObjectProtocol, ExampleProtocol):
@@ -211,13 +201,11 @@ def test_def_extends():
 
 def test_repr():
     """Test ObjCProtocol repr return correct value."""
-
     assert repr(NSObjectProtocol) == "<ObjCProtocol: NSObject>"
 
 
 def test_interface():
     """An ObjC protocol implementation can be defined in Python."""
-
     Callback = ObjCProtocol("Callback")
     results = {}
 
@@ -291,7 +279,6 @@ def test_interface():
 def test_interface_return_struct():
     """An ObjC protocol implementation that returns values by struct can be defined in
     Python."""
-
     results = {}
     Thing = ObjCClass("Thing")
 

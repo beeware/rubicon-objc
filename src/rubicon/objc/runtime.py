@@ -79,13 +79,11 @@ def load_library(name):
 
     If the library could not be found, a [`ValueError`][] is raised.
 
-    Internally, this function uses [ctypes.util.find_library][] to search
-    for the library in the system-standard locations. If the library cannot be
-    found this way, it is attempted to load the library from certain hard-coded
-    locations, as a fallback for systems where `find_library` does not work
-    (such as iOS).
+    Internally, this function uses [ctypes.util.find_library][] to search for the
+    library in the system-standard locations. If the library cannot be found this way,
+    it is attempted to load the library from certain hard-coded locations, as a fallback
+    for systems where `find_library` does not work (such as iOS).
     """
-
     path = util.find_library(name)
     if path is not None:
         return CDLL(path)
@@ -213,17 +211,16 @@ class objc_id(c_void_p):
 class objc_block(objc_id):
     """The low-level type of block pointers.
 
-    This type tells Rubicon's internals that the object in question is a block
-    and not just a regular Objective-C object, which affects method argument and
-    return value conversions. For more details, see [Objective-C Blocks][objc_blocks].
+    This type tells Rubicon's internals that the object in question is a block and not
+    just a regular Objective-C object, which affects method argument and return value
+    conversions. For more details, see [Objective-C Blocks][objc_blocks].
 
     /// note | Note
 
-    This type does not correspond to an actual C type or Objective-C class.
-    Although the internal structure of block objects is documented, as well
-    as the fact that they are Objective-C objects, they do not have a
-    documented type or class name and are not fully defined in any header
-    file.
+    This type does not correspond to an actual C type or Objective-C class. Although the
+    internal structure of block objects is documented, as well as the fact that they are
+    Objective-C objects, they do not have a documented type or class name and are not
+    fully defined in any header file.
 
     Aside from the special conversion behavior, this type is equivalent to
     [`objc_id`][rubicon.objc.runtime.objc_id].
@@ -249,7 +246,6 @@ class SEL(c_void_p):
     @property
     def name(self):
         """The selector's name as [`bytes`][]."""
-
         if self.value is None:
             raise ValueError("Cannot get name of null selector")
 
@@ -593,7 +589,6 @@ except AttributeError:
         --- it uses the [`libobjc`][rubicon.objc.runtime.libobjc] function if
         available, and otherwise emulates it.
         """
-
         return libobjc.class_isMetaClass(libobjc.object_getClass(obj))
 
 else:
@@ -735,10 +730,9 @@ libobjc.sel_registerName.argtypes = [c_char_p]
 def ensure_bytes(x):
     """Convert the given string to [`bytes`][] if necessary.
 
-    If the argument is already [`bytes`][], it is returned unchanged;
-    if it is [`str`][], it is encoded as UTF-8.
+    If the argument is already [`bytes`][], it is returned unchanged; if it is
+    [`str`][], it is encoded as UTF-8.
     """
-
     if isinstance(x, bytes):
         return x
     # "All char * in the runtime API should be considered to have UTF-8 encoding."
@@ -753,10 +747,9 @@ def get_class(name):
     """Get the Objective-C class with the given name as a
     [`Class`][rubicon.objc.runtime.Class] object.
 
-    If no class with the given name is loaded, `None` is returned, and
-    the Objective-C runtime will log a warning message.
+    If no class with the given name is loaded, `None` is returned, and the Objective-C
+    runtime will log a warning message.
     """
-
     return libobjc.objc_getClass(ensure_bytes(name))
 
 
@@ -767,7 +760,6 @@ def get_class(name):
 def should_use_stret(restype):
     """Return whether a method returning the given type must be called using
     `objc_msgSend_stret` on the current system."""
-
     if type(restype) is not type(Structure):
         # Not needed when restype is not a structure.
         retval = False
@@ -794,7 +786,6 @@ def should_use_stret(restype):
 def should_use_fpret(restype):
     """Return whether a method returning the given type must be called using
     `objc_msgSend_fpret` on the current system."""
-
     if __x86_64__:
         # On x86_64: Use only for long double.
         return restype == c_longdouble
@@ -814,14 +805,13 @@ def _msg_send_for_types(restype, argtypes):
     return and argument types.
 
     :param restype: The return type of the method to be called.
-    :param argtypes: The argument types of the method to be called, excluding
-        the self and _cmd arguments.
-    :return: A C function for `objc_msgSend` or one of its variants, with its
-        return and argument types configured correctly based on the `restype`
-        and `argtypes` arguments. The `restype` and `argtypes` attributes
-        of the returned function *must not* be modified.
+    :param argtypes: The argument types of the method to be called, excluding the self
+        and _cmd arguments.
+    :return: A C function for `objc_msgSend` or one of its variants, with its return and
+        argument types configured correctly based on the `restype` and `argtypes`
+        arguments. The `restype` and `argtypes` attributes of the returned function
+        *must not* be modified.
     """
-
     try:
         # Looking up a C function is relatively slow, so use an existing cached
         # function if possible.
@@ -907,7 +897,6 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         Defaults to `[]`. These arguments are converted according to the
         default [`ctypes`][] conversion rules.
     """
-
     try:
         receiver = receiver._as_parameter_
     except AttributeError:
@@ -1011,7 +1000,6 @@ def send_super(
         Defaults to `[]`. These arguments are converted according to the
         default [`ctypes`][] conversion rules.
     """
-
     # Unwrap ObjCClass to Class if necessary
     try:
         cls = cls._as_parameter_
@@ -1128,7 +1116,6 @@ def add_method(cls, selector, method, encoding, replace=False):
         this function pointer object to ensure that it isn't garbage-collected.
         Rubicon now does this automatically.)
     """
-
     signature = [ctype_for_type(tp) for tp in encoding]
     assert signature[1] == objc_id  # ensure id self typecode
     assert signature[2] == SEL  # ensure SEL cmd typecode
@@ -1155,7 +1142,6 @@ def add_method(cls, selector, method, encoding, replace=False):
 
 def add_ivar(cls, name, vartype):
     """Add a new instance variable of type `vartype` to `cls`."""
-
     return libobjc.class_addIvar(
         cls,
         ensure_bytes(name),
@@ -1170,17 +1156,15 @@ def get_ivar(obj, varname, weak=False):
 
     The returned object is a [`ctypes`][] data object.
 
-    For non-object types (everything except
-    [`objc_id`][rubicon.objc.runtime.objc_id] and subclasses),
-    the returned data object is backed by the `ivar`'s actual memory. This means
-    that the data object is only usable as long as the "owner" object is alive,
-    and writes to it will directly change the `ivar`'s value.
+    For non-object types (everything except [`objc_id`][rubicon.objc.runtime.objc_id]
+    and subclasses), the returned data object is backed by the `ivar`'s actual memory.
+    This means that the data object is only usable as long as the "owner" object is
+    alive, and writes to it will directly change the `ivar`'s value.
 
-    For object types, the returned data object is independent of the `ivar`'s
-    memory. This is because object `ivars` may be weak, and thus cannot always
-    be accessed directly by their address.
+    For object types, the returned data object is independent of the `ivar`'s memory.
+    This is because object `ivars` may be weak, and thus cannot always be accessed
+    directly by their address.
     """
-
     try:
         obj = obj._as_parameter_
     except AttributeError:
@@ -1201,13 +1185,12 @@ def get_ivar(obj, varname, weak=False):
 
 
 def set_ivar(obj, varname, value, weak=False):
-    """Set obj's `ivar` `varname` to value. If `weak` is `True`, only a weak reference
-    to the value is stored.
+    """Set obj's `ivar` `varname` to value.
 
-    value must be a [`ctypes`][] data object whose type matches that of
-    the `ivar`.
+    If `weak` is `True`, only a weak reference to the value is stored.
+
+    value must be a [`ctypes`][] data object whose type matches that of the `ivar`.
     """
-
     try:
         obj = obj._as_parameter_
     except AttributeError:

@@ -81,7 +81,6 @@ def test_patch_pointer():
 )
 def test_no_patch_primitives(tp):
     """Primitive types cannot be patched."""
-
     with pytest.raises(ValueError):
         ctypes_patch.make_callback_returnable(tp)
 

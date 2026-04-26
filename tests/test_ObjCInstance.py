@@ -48,7 +48,6 @@ def assert_lifecycle(object_constructor: Callable[[], ObjCInstance]) -> None:
 
 def test_can_produce_objcclass():
     """Creating an ObjCInstance for a class pointer gives an ObjCClass."""
-
     example_ptr = libobjc.objc_getClass(b"Example")
     Example = ObjCInstance(example_ptr)
     assert Example == ObjCClass("Example")
@@ -57,7 +56,6 @@ def test_can_produce_objcclass():
 
 def test_can_produce_objcmetaclass():
     """Creating an ObjCInstance for a metaclass pointer gives an ObjCMetaClass."""
-
     examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
     ExampleMeta = ObjCInstance(examplemeta_ptr)
     assert ExampleMeta == ObjCMetaClass("Example")
@@ -66,7 +64,6 @@ def test_can_produce_objcmetaclass():
 
 def test_can_produce_objcprotocol():
     """Creating an ObjCInstance for a protocol pointer gives an ObjCProtocol."""
-
     example_protocol_ptr = libobjc.objc_getProtocol(b"ExampleProtocol")
     ExampleProtocol = ObjCInstance(example_protocol_ptr)
     assert ExampleProtocol == ObjCProtocol("ExampleProtocol")
@@ -76,7 +73,6 @@ def test_can_produce_objcprotocol():
 def test_str_repr():
     """An ObjCInstance's str and repr contain the object's description and
     debugDescription, respectively."""
-
     DescriptionTester = ObjCClass("DescriptionTester")
     py_description_string = "normal description string"
     py_debug_description_string = "debug description string"
@@ -98,7 +94,6 @@ def test_str_repr():
 def test_str_repr_with_nil_descriptions():
     """An ObjCInstance's str and repr work even if description and debugDescription are
     nil."""
-
     DescriptionTester = ObjCClass("DescriptionTester")
     tester = DescriptionTester.alloc().initWithDescriptionString(
         None, debugDescriptionString=None
@@ -109,7 +104,6 @@ def test_str_repr_with_nil_descriptions():
 
 def test_python_attribute():
     """Python attributes can be added to an ObjCInstance."""
-
     Thing = ObjCClass("Thing")
     thing = Thing.alloc().init()
 
@@ -132,7 +126,6 @@ def test_python_attribute():
 def test_python_attribute_keep_alive():
     """Python attributes on an ObjCInstance are kept even if the object temporarily has
     no Python references."""
-
     Example = ObjCClass("Example")
     example = Example.alloc().init()
     Thing = ObjCClass("Thing")
@@ -180,7 +173,6 @@ def test_python_attribute_keep_alive():
 
 def test_python_attribute_freed():
     """Python attributes on an ObjCInstance are freed after the instance is released."""
-
     with autoreleasepool():
         obj = NSObject.alloc().init()
 
