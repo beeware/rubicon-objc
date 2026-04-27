@@ -875,6 +875,7 @@ class ObjCInstance:
     [`ObjCInstance`][rubicon.objc.api.ObjCInstance]s to be passed into [`ctypes`][]
     functions.
     """
+
     # Cache dictionary containing every currently existing ObjCInstance object,
     # with the key being the memory address (as an integer) of the Objective-C
     # object that it wraps. Because this is a weak value dictionary, entries are
@@ -2074,6 +2075,7 @@ if True:
     [`NSObjectProtocol`][rubicon.objc.NSObjectProtocol] in Python because it
     would otherwise clash with the [`NSObject`][rubicon.objc.NSObject] class.
     """
+
 # When a Python object is assigned to a new ObjCInstance attribute, the Python
 # object should be kept alive for the lifetime of the ObjCInstance. This is done
 # by wrapping the Python object as a WrappedPyObject that increments the
