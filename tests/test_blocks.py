@@ -198,7 +198,6 @@ def test_block_round_trip():
 def test_block_round_trip_no_arguments():
     """A block that takes no arguments can be created with both ways of specifying
     types."""
-
     BlockRoundTrip = ObjCClass("BlockRoundTrip")
     instance = BlockRoundTrip.alloc().init()
 

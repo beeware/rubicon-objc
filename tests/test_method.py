@@ -64,7 +64,6 @@ def test_non_existent():
 def test_incorrect_argument_count():
     """Attempting to call a method with an incorrect number of arguments throws an
     exception."""
-
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
@@ -81,7 +80,6 @@ def test_incorrect_argument_count():
 def test_incorrect_argument_type():
     """Attempting to call a method with the wrong type of argument throws an
     exception."""
-
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
@@ -106,7 +104,6 @@ def test_incorrect_argument_type():
 
 def test_str_repr():
     """Test ObjCMethod, ObjCPartialMethod, and ObjCBoundMethod str and repr."""
-
     obj = NSObject.new()
 
     # ObjCMethod

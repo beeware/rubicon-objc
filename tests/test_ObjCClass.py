@@ -38,14 +38,12 @@ from .conftest import (
 
 def test_by_name():
     """An Objective-C class can be looked up by name."""
-
     Example = ObjCClass("Example")
     assert Example.name == "Example"
 
 
 def test_caching():
     """ObjCClass instances are cached."""
-
     Example1 = ObjCClass("Example")
     Example2 = ObjCClass("Example")
 
@@ -54,7 +52,6 @@ def test_caching():
 
 def test_by_pointer():
     """An Objective-C class can be created from a pointer."""
-
     example_ptr = libobjc.objc_getClass(b"Example")
     Example = ObjCClass(example_ptr)
     assert Example is ObjCClass("Example")
@@ -62,14 +59,12 @@ def test_by_pointer():
 
 def test_nonexistant():
     """A NameError is raised if a class doesn't exist."""
-
     with pytest.raises(NameError):
         ObjCClass("DoesNotExist")
 
 
 def test_produce_objcmetaclass():
     """Creating an ObjCClass for a metaclass pointer gives an ObjCMetaclass."""
-
     examplemeta_ptr = libobjc.objc_getMetaClass(b"Example")
     ExampleMeta = ObjCClass(examplemeta_ptr)
     assert ExampleMeta == ObjCMetaClass("Example")
@@ -78,7 +73,6 @@ def test_produce_objcmetaclass():
 
 def test_requires_class():
     """ObjCClass only accepts class pointers."""
-
     random_obj = NSObject.alloc().init()
     with pytest.raises(ValueError):
         ObjCClass(random_obj.ptr)
@@ -86,7 +80,6 @@ def test_requires_class():
 
 def test_superclass():
     """An ObjCClass's superclass can be looked up."""
-
     Example = ObjCClass("Example")
     BaseExample = ObjCClass("BaseExample")
 
@@ -97,7 +90,6 @@ def test_superclass():
 
 def test_protocols():
     """An ObjCClass's protocols can be looked up."""
-
     BaseExample = ObjCClass("BaseExample")
     ExampleProtocol = ObjCProtocol("ExampleProtocol")
     DerivedProtocol = ObjCProtocol("DerivedProtocol")
@@ -140,7 +132,6 @@ def test_subclasscheck():
 
 def test_repr():
     """Test ObjCClass repr and str return correct value."""
-
     assert repr(NSObject) == "<ObjCClass: NSObject>"
     assert str(NSObject) == "ObjCClass('NSObject')"
 
@@ -162,7 +153,6 @@ def test_duplicate_registration():
 
 def test_auto_rename_global():
     """Test the global automatic renaming option of ObjCClass."""
-
     try:
         ObjCClass.auto_rename = True
 
@@ -254,7 +244,6 @@ def test_ivars():
 def test_properties():
     """A Python class can have ObjC properties with synthesized getters and setters of
     ObjCInstance type."""
-
     NSURL = ObjCClass("NSURL")
 
     class URLBox(NSObject):
@@ -474,7 +463,6 @@ def test_compatible_name_change():
     """If the class name changes in a compatible way, the wrapper isn't recreated
     (#257)"""
     Example = ObjCClass("Example")
-
     pre_init = Example.alloc()
 
     # Call initWithClassChange(), which does an internal class name change.

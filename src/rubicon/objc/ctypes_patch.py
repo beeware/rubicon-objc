@@ -134,7 +134,6 @@ if sys.version_info < (3, 13):  # pragma: no-cover-if-gte-py313
 
     def unwrap_mappingproxy(proxy):
         """Return the mapping contained in a mapping proxy object."""
-
         if not isinstance(proxy, types.MappingProxyType):
             raise TypeError(
                 "Expected a mapping proxy object, not "
@@ -144,14 +143,14 @@ if sys.version_info < (3, 13):  # pragma: no-cover-if-gte-py313
         return mappingproxyobject.from_address(id(proxy)).mapping
 
     def get_stgdict_of_type(tp):
-        """Return the given ctypes type's StgDict object. If the object's dict is not a
-        StgDict, an error is raised.
+        """Return the given ctypes type's StgDict object.
+
+        If the object's dict is not a StgDict, an error is raised.
 
         This function is roughly equivalent to the PyType_stgdict function in the ctypes
         source code. We cannot use that function directly, because it is not part of
         CPython's public C API, and thus not accessible on some systems (see #113).
         """
-
         if not isinstance(tp, type):
             raise TypeError(
                 "Expected a type object, not "

@@ -93,8 +93,7 @@ if True:
     __LP64__ = 8 * struct.calcsize("P") == 64
     """Indicates whether the current environment is 64-bit.
 
-    If true, C `long`s
-    and pointers are 64 bits in size, otherwise 32 bits.
+    If true, C `long`s and pointers are 64 bits in size, otherwise 32 bits.
     """
 
 # platform.processor() describes the CPU on which the code is running.
@@ -142,29 +141,25 @@ def ctype_for_type(tp):
     [`objc_method`][rubicon.objc.api.objc_method] signatures,
     [`objc_ivar`][rubicon.objc.api.objc_ivar] types, etc. This function translates
     Python built-in types and [`rubicon.objc`][rubicon-objc-module] classes to their
-    [`ctypes`][] equivalents. Unregistered types (including types that are
-    already ctypes) are returned unchanged.
+    [`ctypes`][] equivalents. Unregistered types (including types that are already
+    ctypes) are returned unchanged.
     """
-
     return _ctype_for_type_map.get(tp, tp)
 
 
 def register_ctype_for_type(tp, ctype):
     """Register a conversion from a Python type to a C type."""
-
     _ctype_for_type_map[tp] = ctype
 
 
 def unregister_ctype_for_type(tp):
     """Unregister a conversion from a Python type to a C type."""
-
     del _ctype_for_type_map[tp]
 
 
 def get_ctype_for_type_map():
     """Get a copy of all currently registered type-to-C type conversions as a
     mapping."""
-
     return dict(_ctype_for_type_map)
 
 
@@ -178,7 +173,6 @@ def _end_of_encoding(encoding, start):
     The encoding is not validated very extensively. There are no guarantees what happens
     for invalid encodings; an error may be raised, or a bogus end index may be returned.
     """
-
     if start < 0 or start >= len(encoding):
         raise ValueError(f"Start index {start} not in range({len(encoding)})")
 
@@ -363,22 +357,20 @@ def _ctype_for_unknown_encoding(encoding):
 def ctype_for_encoding(encoding):
     """Return the C type corresponding to an Objective-C type encoding.
 
-    If a C type has been registered for the encoding, that type is returned.
-    Otherwise, if the type encoding represents a compound type (pointer, array,
-    structure, or union), the contained types are converted recursively. A new
-    C type is then created from the converted ctypes, and is registered for
-    the encoding (so that future conversions of the same encoding return the
-    same C type).
+    If a C type has been registered for the encoding, that type is returned. Otherwise,
+    if the type encoding represents a compound type (pointer, array, structure, or
+    union), the contained types are converted recursively. A new C type is then created
+    from the converted ctypes, and is registered for the encoding (so that future
+    conversions of the same encoding return the same C type).
 
-    For example, the type encoding `{spam=ic}` is not registered by default.
-    However, the contained types `i` and `c` are registered, so they are
-    converted individually and used to create a new [`ctypes.Structure`][]
-    with two fields of the correct types. The new structure type is then
-    registered for the original encoding `{spam=ic}` and returned.
+    For example, the type encoding `{spam=ic}` is not registered by default. However,
+    the contained types `i` and `c` are registered, so they are converted individually
+    and used to create a new [`ctypes.Structure`][] with two fields of the correct
+    types. The new structure type is then registered for the original encoding
+    `{spam=ic}` and returned.
 
     :raises ValueError: if the conversion fails at any point
     """
-
     # Remove qualifiers, as documented in Table 6-2 here:
     # https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
     encoding = encoding.lstrip(b"NORVnor")
@@ -405,7 +397,6 @@ def encoding_for_ctype(ctype):
 
     :raises ValueError: if the conversion fails at any point
     """
-
     try:
         return _encoding_for_ctype_map[ctype]
     except KeyError:
@@ -424,7 +415,6 @@ def register_preferred_encoding(encoding, ctype):
     overwriting existing conversions, use
     [`register_encoding`][rubicon.objc.types.register_encoding].
     """
-
     _ctype_for_encoding_map[encoding] = ctype
     _encoding_for_ctype_map[ctype] = encoding
 
@@ -454,7 +444,6 @@ def register_encoding(encoding, ctype):
     overwrite existing conversions, use
     [`register_preferred_encoding`][rubicon.objc.types.register_preferred_encoding].
     """
-
     _ctype_for_encoding_map.setdefault(encoding, ctype)
     _encoding_for_ctype_map.setdefault(ctype, encoding)
 
@@ -488,7 +477,6 @@ def unregister_encoding(encoding):
 
     If the encoding was not registered previously, nothing happens.
     """
-
     _ctype_for_encoding_map.pop(encoding, None)
 
 
@@ -501,7 +489,6 @@ def unregister_encoding_all(encoding):
 
     If the encoding was not registered previously, nothing happens.
     """
-
     _ctype_for_encoding_map.pop(encoding, None)
     for ct, enc in list(_encoding_for_ctype_map.items()):
         if enc == encoding:
@@ -521,7 +508,6 @@ def unregister_ctype(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-
     _encoding_for_ctype_map.pop(ctype, default=None)
 
 
@@ -535,7 +521,6 @@ def unregister_ctype_all(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-
     _encoding_for_ctype_map.pop(ctype, default=None)
     for enc, ct in list(_ctype_for_encoding_map.items()):
         if ct == ctype:
@@ -545,14 +530,12 @@ def unregister_ctype_all(ctype):
 def get_ctype_for_encoding_map():
     """Get a copy of all currently registered encoding-to-C type conversions as a
     map."""
-
     return dict(_ctype_for_encoding_map)
 
 
 def get_encoding_for_ctype_map():
     """Get a copy of all currently registered C type-to-encoding conversions as a
     map."""
-
     return dict(_encoding_for_ctype_map)
 
 
@@ -566,7 +549,6 @@ def split_method_encoding(encoding):
     numbers indicated each argument/return value's offset on the stack. These numbers
     are meaningless on modern architectures.
     """
-
     encodings = []
     start = 0
     while start < len(encoding):
@@ -589,7 +571,6 @@ def ctypes_for_method_encoding(encoding):
     then converting each individual type encoding using
     [`ctype_for_encoding`][rubicon.objc.types.ctype_for_encoding].
     """
-
     return [ctype_for_encoding(enc) for enc in split_method_encoding(encoding)]
 
 
@@ -639,19 +620,17 @@ def _array_for_sequence(seq, array_type):
 def compound_value_for_sequence(seq, tp):
     """Create a C structure or array of type `tp`, initialized with values from `seq`.
 
-    If `tp` is a [`ctypes.Structure`][] type, the newly created
-    structure's fields are initialized in declaration order with the values from
-    `seq`. `seq` must have as many elements as the structure has fields.
+    If `tp` is a [`ctypes.Structure`][] type, the newly created structure's fields are
+    initialized in declaration order with the values from `seq`. `seq` must have as many
+    elements as the structure has fields.
 
-    If `tp` is a [`Array`][ctypes.Array] type, the newly created array is
-    initialized with the values from `seq`. `seq` must have as many elements
-    as the array type.
+    If `tp` is a [`Array`][ctypes.Array] type, the newly created array is initialized
+    with the values from `seq`. `seq` must have as many elements as the array type.
 
-    In both cases, if a structure field type or the array element type is itself
-    a structure or array type, the corresponding value from `seq` is
-    recursively converted as well.
+    In both cases, if a structure field type or the array element type is itself a
+    structure or array type, the corresponding value from `seq` is recursively converted
+    as well.
     """
-
     if issubclass(tp, Structure):
         return _struct_for_sequence(seq, tp)
     elif issubclass(tp, Array):
@@ -1027,7 +1006,6 @@ if True:
     coordinates set to zero.
     """
 
-
 if sizeof(c_void_p) == 4:
     NSIntegerMax = 0x7FFFFFFF
     """
@@ -1036,6 +1014,7 @@ if sizeof(c_void_p) == 4:
     from `<objc/NSObjCRuntime.h>`: the maximum value that a
     [`NSInteger`][rubicon.objc.types.NSInteger] can hold.
     """
+
 elif sizeof(c_void_p) == 8:
     NSIntegerMax = 0x7FFFFFFFFFFFFFFF
 # check-docstring-is-first made us do this

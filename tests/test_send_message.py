@@ -38,7 +38,6 @@ def test_sel_null():
 def test_method_incorrect_argument_count_send():
     """Attempting to call a method with send_message with an incorrect number of
     arguments throws an exception."""
-
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
