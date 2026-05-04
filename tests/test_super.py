@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from ctypes import c_int
+from ctypes import c_int, c_void_p
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -9,6 +10,7 @@ from rubicon.objc import (
     ObjCClass,
     send_super,
 )
+from rubicon.objc.runtime import Class, objc_id
 
 
 def test_send():
@@ -105,3 +107,35 @@ def test_send_varargs():
     )
 
     assert obj.accessBaseIntField() == 11
+
+
+def test_send_super_invalid_cls():
+    """Test send_super invalid cls (line 1039)"""
+    with pytest.raises(TypeError, match="Missing or invalid cls argument"):
+        send_super(123, MagicMock(spec=objc_id), "init")
+
+
+def test_send_super_dealloc_warning():
+    """Test send_super dealloc warning (line 1048-1054)"""
+    cls = MagicMock(spec=Class)
+    receiver = MagicMock(spec=objc_id)
+    with pytest.warns(
+        UserWarning, match="You should not call the superclass dealloc manually"
+    ):
+        result = send_super(cls, receiver, "dealloc")
+        assert result is None
+
+
+def test_send_super_root_class():
+    """Test send_super root class (line 1073-1074)"""
+    # We need to mock libobjc.class_getSuperclass to return NULL
+    with patch("rubicon.objc.runtime.libobjc") as mock_libobjc:
+        mock_libobjc.class_getSuperclass.return_value = c_void_p(None)
+        mock_libobjc.class_getName.return_value = b"NSObject"
+
+        cls = MagicMock(spec=Class)
+        receiver = MagicMock(spec=objc_id)
+        with pytest.raises(
+            ValueError, match="The specified class 'NSObject' is a root class"
+        ):
+            send_super(cls, receiver, "init")
