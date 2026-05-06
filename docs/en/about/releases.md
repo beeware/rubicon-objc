@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 0.5.4 (2026-05-06)
+
+### Features
+
+* `CFLifecycle` will now use the default run loop if a loop instance isn't provided when it is constructed. ([#746](https://github.com/beeware/rubicon-objc/issues/746))
+* The Rubicon Objective C repository now has an `AGENTS.md` file and [Spec Kit](https://github.github.com/spec-kit/) constitution to provide assistance for Generative AI tools. ([#751](https://github.com/beeware/rubicon-objc/issues/751))
+
+### Bugfixes
+
+* Stopping a `CocoaLifecycle` event loop no longer terminates the `NSApplication` instance when it stops. ([#745](https://github.com/beeware/rubicon-objc/issues/745))
+* The event loop has been updated to accommodate an internal `context` keyword argument used when adding and removing socket readers in Python 3.15.0a8. ([#747](https://github.com/beeware/rubicon-objc/issues/747))
+
+### Documentation
+
+* A new contribution guide has been added documentation. ([#688](https://github.com/beeware/rubicon-objc/issues/688))
+
+### Misc
+
+* [#685](https://github.com/beeware/rubicon-objc/issues/685), [#686](https://github.com/beeware/rubicon-objc/issues/686), [#687](https://github.com/beeware/rubicon-objc/issues/687), [#689](https://github.com/beeware/rubicon-objc/issues/689), [#690](https://github.com/beeware/rubicon-objc/issues/690), [#691](https://github.com/beeware/rubicon-objc/issues/691)[#692](https://github.com/beeware/rubicon-objc/issues/692), [#693](https://github.com/beeware/rubicon-objc/issues/693), [#694](https://github.com/beeware/rubicon-objc/issues/694), [#695](https://github.com/beeware/rubicon-objc/issues/695), [#696](https://github.com/beeware/rubicon-objc/issues/696), [#697](https://github.com/beeware/rubicon-objc/issues/697), [#699](https://github.com/beeware/rubicon-objc/issues/699), [#701](https://github.com/beeware/rubicon-objc/issues/701), [#702](https://github.com/beeware/rubicon-objc/issues/702), [#703](https://github.com/beeware/rubicon-objc/issues/703), [#704](https://github.com/beeware/rubicon-objc/issues/704), [#705](https://github.com/beeware/rubicon-objc/issues/705), [#706](https://github.com/beeware/rubicon-objc/issues/706), [#707](https://github.com/beeware/rubicon-objc/issues/707), [#708](https://github.com/beeware/rubicon-objc/issues/708), [#709](https://github.com/beeware/rubicon-objc/issues/709), [#710](https://github.com/beeware/rubicon-objc/issues/710), [#711](https://github.com/beeware/rubicon-objc/issues/711), [#712](https://github.com/beeware/rubicon-objc/issues/712), [#713](https://github.com/beeware/rubicon-objc/issues/713), [#714](https://github.com/beeware/rubicon-objc/issues/714), [#715](https://github.com/beeware/rubicon-objc/issues/715), [#716](https://github.com/beeware/rubicon-objc/issues/716), [#717](https://github.com/beeware/rubicon-objc/issues/717), [#718](https://github.com/beeware/rubicon-objc/issues/718), [#719](https://github.com/beeware/rubicon-objc/issues/719), [#720](https://github.com/beeware/rubicon-objc/issues/720), [#721](https://github.com/beeware/rubicon-objc/issues/721), [#722](https://github.com/beeware/rubicon-objc/issues/722), [#723](https://github.com/beeware/rubicon-objc/issues/723), [#724](https://github.com/beeware/rubicon-objc/issues/724), [#725](https://github.com/beeware/rubicon-objc/issues/725), [#726](https://github.com/beeware/rubicon-objc/issues/726), [#727](https://github.com/beeware/rubicon-objc/issues/727), [#728](https://github.com/beeware/rubicon-objc/issues/728), [#730](https://github.com/beeware/rubicon-objc/issues/730), [#732](https://github.com/beeware/rubicon-objc/issues/732), [#733](https://github.com/beeware/rubicon-objc/issues/733), [#734](https://github.com/beeware/rubicon-objc/issues/734), [#735](https://github.com/beeware/rubicon-objc/issues/735), [#736](https://github.com/beeware/rubicon-objc/issues/736), [#737](https://github.com/beeware/rubicon-objc/issues/737), [#738](https://github.com/beeware/rubicon-objc/issues/738), [#739](https://github.com/beeware/rubicon-objc/issues/739), [#740](https://github.com/beeware/rubicon-objc/issues/740), [#741](https://github.com/beeware/rubicon-objc/issues/741), [#742](https://github.com/beeware/rubicon-objc/issues/742), [#743](https://github.com/beeware/rubicon-objc/issues/743), [#744](https://github.com/beeware/rubicon-objc/issues/744), [#749](https://github.com/beeware/rubicon-objc/issues/749), [#752](https://github.com/beeware/rubicon-objc/issues/752), [#753](https://github.com/beeware/rubicon-objc/issues/753), [#754](https://github.com/beeware/rubicon-objc/issues/754)
+
 ## 0.5.3 (2025-12-03)
 
 ### Features
