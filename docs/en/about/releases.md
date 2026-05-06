@@ -16,7 +16,7 @@
 
 ### Documentation
 
-* A new contribution guide has been added documentation. ([#688](https://github.com/beeware/rubicon-objc/issues/688))
+* A new contribution guide has been added to the documentation. ([#688](https://github.com/beeware/rubicon-objc/issues/688))
 
 ### Misc
 
