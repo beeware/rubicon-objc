@@ -43,7 +43,7 @@ Rubicon is part of the [BeeWare suite](https://beeware.org). You can talk to the
 
 ## Code of Conduct
 
-The BeeWare community has a strict [Code of Conduct](https://beeware.org/community/behavior/). All users and developers are expected to adhere to this code.
+The BeeWare community has a strict [Code of Conduct](https://beeware.org/community/code-of-conduct/). All users and developers are expected to adhere to this code.
 
 If you have any concerns about this code of conduct, or you wish to report a violation of this code, please contact the project founder [Russell Keith-Magee](mailto:russell@beeware.org).
 
