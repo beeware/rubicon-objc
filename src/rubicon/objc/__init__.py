@@ -5,7 +5,10 @@ try:
 
     # Excluded from coverage because a pure test environment (such as the one
     # used by tox in CI) won't have setuptools_scm
-    __version__ = get_version("../../..", relative_to=__file__)  # pragma: no cover
+    # The tag_regex argument is needed as a workaround for setuptools_scm#1434
+    __version__ = get_version(
+        "../../..", relative_to=__file__, tag_regex=None
+    )  # pragma: no cover
 except (ModuleNotFoundError, LookupError):  # pragma: no-cover-if-missing-setuptools_scm
     # If setuptools_scm isn't in the environment, the call to import will fail.
     # If it *is* in the environment, but the code isn't a git checkout (e.g.,
