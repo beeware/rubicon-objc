@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 0.5.6 (2026-07-02)
+
+### Bugfixes
+
+* When used on iOS, Rubicon ObjC no longer attempts to import `NSEvent`. ([#786](https://github.com/beeware/rubicon-objc/issues/786))
+
 ## 0.5.5 (2026-07-02)
 
 ### Bugfixes
