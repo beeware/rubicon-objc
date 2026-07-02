@@ -15,7 +15,7 @@ from ctypes import CFUNCTYPE, POINTER, Structure, c_double, c_int, c_ulong, c_vo
 
 from .api import ObjCClass, objc_const
 from .runtime import load_library, objc_id
-from .types import CFIndex
+from .types import CFIndex, NSMakePoint
 
 if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
     from asyncio import (
@@ -114,6 +114,7 @@ kCFSocketWriteCallBack = 8
 kCFSocketAutomaticallyReenableReadCallBack = 1
 kCFSocketAutomaticallyReenableWriteCallBack = 8
 
+NSEvent = ObjCClass("NSEvent")
 NSRunLoop = ObjCClass("NSRunLoop")
 
 ###########################################################################
@@ -839,6 +840,23 @@ class CocoaLifecycle:
 
     def stop(self):
         self._application.stop(None)
+        # -[NSApplication stop:] only sets a flag that is checked after the
+        # next event is dispatched via `sendEvent:`. If the flag is set by
+        # a scheduled co-routine, it won't be processed. Post a no-op
+        # application-defined event to wake the run loop so the stop flag
+        # is honoured. See #784.
+        event = NSEvent.otherEventWithType(
+            15,  # NSEventTypeApplicationDefined
+            location=NSMakePoint(0, 0),
+            modifierFlags=0,
+            timestamp=0,
+            windowNumber=0,
+            context=None,
+            subtype=0,
+            data1=0,
+            data2=0,
+        )
+        self._application.postEvent(event, atStart=True)
 
 
 class iOSLifecycle:  # pragma: no cover
