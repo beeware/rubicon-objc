@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 0.5.5 (2026-07-02)
+
+### Bugfixes
+
+* If an `NSApplication` using the `CocoaEventLoop` stops the event loop, Rubicon ObjC now guarantees that the `stop` message is processed, ensuring the app fully shuts down. ([#784](https://github.com/beeware/rubicon-objc/issues/784))
+
+### Misc
+
+* [#756](https://github.com/beeware/rubicon-objc/issues/756), [#757](https://github.com/beeware/rubicon-objc/issues/757), [#758](https://github.com/beeware/rubicon-objc/issues/758), [#759](https://github.com/beeware/rubicon-objc/issues/759), [#760](https://github.com/beeware/rubicon-objc/issues/760), [#761](https://github.com/beeware/rubicon-objc/issues/761), [#764](https://github.com/beeware/rubicon-objc/issues/764), [#765](https://github.com/beeware/rubicon-objc/issues/765), [#766](https://github.com/beeware/rubicon-objc/issues/766), [#767](https://github.com/beeware/rubicon-objc/issues/767), [#768](https://github.com/beeware/rubicon-objc/issues/768), [#769](https://github.com/beeware/rubicon-objc/issues/769), [#770](https://github.com/beeware/rubicon-objc/issues/770), [#771](https://github.com/beeware/rubicon-objc/issues/771), [#772](https://github.com/beeware/rubicon-objc/issues/772), [#773](https://github.com/beeware/rubicon-objc/issues/773), [#774](https://github.com/beeware/rubicon-objc/issues/774), [#775](https://github.com/beeware/rubicon-objc/issues/775), [#776](https://github.com/beeware/rubicon-objc/issues/776), [#777](https://github.com/beeware/rubicon-objc/issues/777), [#778](https://github.com/beeware/rubicon-objc/issues/778), [#779](https://github.com/beeware/rubicon-objc/issues/779), [#780](https://github.com/beeware/rubicon-objc/issues/780), [#781](https://github.com/beeware/rubicon-objc/issues/781), [#782](https://github.com/beeware/rubicon-objc/issues/782), [#783](https://github.com/beeware/rubicon-objc/issues/783)
+
 ## 0.5.4 (2026-05-06)
 
 ### Features
