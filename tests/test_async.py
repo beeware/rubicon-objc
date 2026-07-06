@@ -150,6 +150,7 @@ def test_call_at(loop):
     assert (end - start) < 0.4
 
 
+@pytest.mark.skipif(sys.platform == "ios", reason="iOS doesn't support subprocesses")
 def test_subprocess(loop):
     async def list_dir():
         proc = await asyncio.create_subprocess_shell(

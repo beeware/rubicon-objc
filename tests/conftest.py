@@ -3,6 +3,7 @@ from __future__ import annotations
 import faulthandler
 import os
 import platform
+import sys
 from ctypes import Structure, c_char
 
 from rubicon.objc import ObjCClass
@@ -19,10 +20,11 @@ except Exception:
 ##########################################################################
 # Load AppKit and define some useful classes
 ##########################################################################
-appkit = load_library("AppKit")
+if sys.platform != "ios":
+    appkit = load_library("AppKit")
+    NSImage = ObjCClass("NSImage")
 
 NSArray = ObjCClass("NSArray")
-NSImage = ObjCClass("NSImage")
 NSString = ObjCClass("NSString")
 
 ##########################################################################
