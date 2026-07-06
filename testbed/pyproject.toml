@@ -1,0 +1,54 @@
+# This project was generated with 0.4.3 using template: https://github.com/beeware/briefcase-template @ v0.4.3
+[tool.briefcase]
+project_name = "Rubicon ObjC Testbed"
+bundle = "com.example"
+version = "0.0.1"
+url = "https://rubicon-objc.beeware.org"
+license = "BSD-3-Clause"
+license-files = ["../LICENSE"]
+author = "BeeWare Team"
+author_email = "team@beeware.org"
+
+[tool.briefcase.app.testbed]
+formal_name = "Rubicon ObjC Testbed"
+description = "A testbed for Rubicon ObjC"
+long_description = """More details about the app should go here.
+"""
+sources = [
+    "src/testbed",
+]
+test_sources = [
+    "tests",
+    "../tests",
+]
+
+requires = [
+    # Add your cross-platform app requirements here
+    "rubicon-objc",
+]
+test_requires = [
+    # Add your cross-platform test requirements here
+    "pytest"
+]
+requirement_installer_args = ["-f", "../dist", "--pre"]
+
+
+[tool.briefcase.app.testbed.macOS]
+supported = false
+
+[tool.briefcase.app.testbed.linux]
+supported = false
+
+[tool.briefcase.app.testbed.windows]
+supported = false
+
+# Mobile deployments
+[tool.briefcase.app.testbed.iOS]
+supported = true
+
+[tool.briefcase.app.testbed.android]
+supported = false
+
+# Web deployments
+[tool.briefcase.app.testbed.web]
+supported = false

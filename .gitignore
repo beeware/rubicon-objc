@@ -2,6 +2,7 @@
 *~
 .*.sw[op]
 *.egg-info
+*.dist-info
 .coverage
 dist
 build
@@ -11,6 +12,7 @@ venv*/
 venv/*
 .venv/
 local
+logs
 .tox
 .envrc
 
