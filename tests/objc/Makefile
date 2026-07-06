@@ -10,7 +10,7 @@ HEADER_FILES = $(wildcard *.h)
 SOURCE_FILES = $(wildcard *.m)
 OBJ_FILES = $(addprefix $(OBJECTS_DIR)/,$(addsuffix .o,$(SOURCE_FILES)))
 
-LIB_NAME = librubiconharness.dylib
+LIB_NAME = librubiconharness.so
 
 all: $(OUTPUT_DIR)/$(LIB_NAME)
 
