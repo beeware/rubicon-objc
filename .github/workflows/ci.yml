@@ -40,6 +40,11 @@ jobs:
 
   towncrier:
     name: Check towncrier
+    # Mirror the permissions the reusable workflow declares; granting less
+    # than the called workflow requests is rejected at workflow startup.
+    permissions:
+      contents: read
+      pull-requests: write
     uses: beeware/.github/.github/workflows/towncrier-run.yml@741cc5a311012ee0ee195938889a337449d01eeb  # main
     with:
       tox-source: "--group tox-uv"

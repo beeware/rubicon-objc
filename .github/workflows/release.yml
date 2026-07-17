@@ -12,11 +12,13 @@ jobs:
   ci:
     name: CI
     # The called workflow's package job needs id-token/attestations to
-    # create the provenance attestation.
+    # create the provenance attestation, and its towncrier job needs
+    # pull-requests (mirroring the towncrier-run reusable workflow).
     permissions:
       contents: read
       id-token: write
       attestations: write
+      pull-requests: write
     uses: ./.github/workflows/ci.yml
     with:
       attest-package: "true"
