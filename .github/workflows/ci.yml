@@ -36,12 +36,9 @@ jobs:
     uses: beeware/.github/.github/workflows/pre-commit-run.yml@741cc5a311012ee0ee195938889a337449d01eeb  # main
     with:
       pre-commit-source: "--group pre-commit"
-      python-version: "3.13"  # docformatter is not compatible with 3.14
 
   towncrier:
     name: Check towncrier
-    # Mirror the permissions the reusable workflow declares; granting less
-    # than the called workflow requests is rejected at workflow startup.
     permissions:
       contents: read
       pull-requests: write
@@ -69,8 +66,6 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
         with:
           fetch-depth: 1
-          # Nothing in this job pushes, so the token doesn't need to be
-          # persisted in .git/config.
           persist-credentials: false
 
       - name: Set up Python
@@ -197,8 +192,6 @@ jobs:
 
     - name: Project Coverage Report
       id: project-coverage
-      # (the second clause references the unit-tests job; there is no
-      # "platform-coverage" job, so the old condition was vacuously true)
       if: always() || contains(fromJSON('["success", "failure"]'), needs.unit-tests.result)
       run: tox -qe coverage-ci-project-html
 

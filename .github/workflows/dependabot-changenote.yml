@@ -8,8 +8,6 @@ on:
 jobs:
   changenote:
     name: Dependabot Change Note
-    # Mirror the permissions the reusable workflow declares; the push itself
-    # is authenticated with BRUTUS_PAT_TOKEN, not the job's GITHUB_TOKEN.
     permissions:
       contents: read
       pull-requests: write
