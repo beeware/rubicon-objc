@@ -50,7 +50,7 @@ Source = "https://github.com/beeware/rubicon-objc"
 
 [dependency-groups]
 pre-commit = [
-    "pre-commit == 4.6.0",
+    "pre-commit == 4.6.1",
 ]
 
 setuptools-scm = [
