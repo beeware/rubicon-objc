@@ -27,6 +27,6 @@ repos:
         - tomli
       args: ["--skip=CODE_OF_CONDUCT.md"]
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.27.0
+    rev: v1.28.0
     hooks:
     - id: zizmor
