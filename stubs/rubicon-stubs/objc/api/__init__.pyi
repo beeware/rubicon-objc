@@ -15,14 +15,12 @@ class NSObject:
         [`debugDescription`](https://developer.apple.com/documentation/objectivec/nsobjectprotocol/debugdescription?language=objc)
         property.
         """
-        ...
     @property
     def description(self) -> str:
         """Exposes the Objective-C
         [`description`](https://developer.apple.com/documentation/objectivec/nsobjectprotocol/description?language=objc)
         property.
         """
-        ...
 
 class NSNumber:
     """
@@ -35,8 +33,6 @@ class NSNumber:
     [`ns_from_py`][rubicon.objc.ns_from_py].
     """
 
-    ...
-
 class NSDecimalNumber:
     """
     The
@@ -47,8 +43,6 @@ class NSDecimalNumber:
     [`py_from_ns`][rubicon.objc.py_from_ns] and
     [`ns_from_py`][rubicon.objc.ns_from_py].
     """
-
-    ...
 
 class NSString:
     """
@@ -71,12 +65,6 @@ class NSString:
     points is required, convert the [`NSString`][rubicon.objc.api.NSString] to
     [`str`][] first.
     """
-    def __str__(self) -> str:
-        """
-        Return the value of this [`NSString`][rubicon.objc.api.NSString] as a
-        [`str`][].
-        """
-        ...
     @property
     def UTF8String(self) -> str:
         """
@@ -84,7 +72,6 @@ class NSString:
         [`ObjCClass.declare_property()`][rubicon.objc.api.ObjCClass.declare_property]
         and can always be accessed using attribute syntax.
         """
-        ...
 
 class NSData:
     """
@@ -96,8 +83,6 @@ class NSData:
     [`py_from_ns`][rubicon.objc.py_from_ns] and
     [`ns_from_py`][rubicon.objc.ns_from_py].
     """
-
-    ...
 
 class NSArray:
     """
@@ -125,8 +110,6 @@ class NSArray:
     `__ne__()`, `index()`, `count()`, and `copy()`.
     """
 
-    ...
-
 class NSMutableArray:
     """
     The
@@ -141,8 +124,6 @@ class NSMutableArray:
     including: `__setitem__()`, `__delitem__()`, `append()`, `clear()`, `extend()`,
     `insert()`, `pop()`, `remove()`, and `reverse()`.
     """
-
-    ...
 
 class NSDictionary:
     """
@@ -199,8 +180,6 @@ class NSDictionary:
     [`set`][] or [`list`][] first.
     """
 
-    ...
-
 class NSMutableDictionary:
     """
     The
@@ -216,8 +195,6 @@ class NSMutableDictionary:
     and `update()`.
     """
 
-    ...
-
 class Protocol:
     """
     The
@@ -231,8 +208,6 @@ class Protocol:
     provides an easier interface for working with protocols.
     """
 
-    ...
-
 class NSObjectProtocol:
     """
     The
@@ -241,8 +216,6 @@ class NSObjectProtocol:
     [`NSObjectProtocol`][rubicon.objc.NSObjectProtocol] in Python because it
     would otherwise clash with the [`NSObject`][rubicon.objc.NSObject] class.
     """
-
-    ...
 
 def at(pyobj):
     """Alias for [`ns_from_py`][rubicon.objc.ns_from_py]."""

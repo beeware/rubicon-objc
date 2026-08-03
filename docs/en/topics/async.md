@@ -37,9 +37,9 @@ from rubicon.objc.eventloop import RubiconEventLoop, CocoaLifecycle
 from ctypes import cdll, util
 from rubicon.objc import ObjCClass
 
-appkit = cdll.LoadLibrary(util.find_library('AppKit'))
-NSApplication = ObjCClass('NSApplication')
-NSApplication.declare_class_property('sharedApplication')
+appkit = cdll.LoadLibrary(util.find_library("AppKit"))
+NSApplication = ObjCClass("NSApplication")
+NSApplication.declare_class_property("sharedApplication")
 app = NSApplication.sharedApplication
 
 # Create an event loop, and run it, using the NSApplication!

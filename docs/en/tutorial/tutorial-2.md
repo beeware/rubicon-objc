@@ -53,6 +53,7 @@ To expose value to the Objective-C runtime, we need to make one small change, an
 ```python
 from rubicon.objc import NSObject, objc_method, objc_property
 
+
 class PureHandler(NSObject):
     value = objc_property()
 

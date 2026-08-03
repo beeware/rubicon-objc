@@ -121,7 +121,11 @@ The translated Python code looks like this:
 
 ```python
 def NSLocationInRange(loc, range):
-    return True if (not (loc < range.location) and (loc - range.location) < range.length) else False
+    return (
+        True
+        if (not (loc < range.location) and (loc - range.location) < range.length)
+        else False
+    )
 ```
 
 You can then put this translated function into your Python code and call it in place of the corresponding C inline function.
@@ -261,8 +265,10 @@ from rubicon.objc.runtime import load_library
 libSystem = load_library("System")
 libdispatch = libSystem
 
+
 class struct_dispatch_queue_s(Structure):
-    pass # No _fields_, because this is an opaque structure.
+    pass  # No _fields_, because this is an opaque structure.
+
 
 _dispatch_main_q = struct_dispatch_queue_s.in_dll(libdispatch, "_dispatch_main_q")
 ```
@@ -367,6 +373,7 @@ from rubicon.objc import ObjCInstance
 from rubicon.objc.runtime import objc_id
 
 # This requires the _dispatch_main_q Python code from before.
+
 
 def dispatch_get_main_queue():
     return ObjCInstance(cast(byref(_dispatch_main_q), objc_id))

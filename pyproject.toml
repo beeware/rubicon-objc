@@ -150,6 +150,15 @@ extend-select = [
     # "SIM",    # flake8-simplify
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# PEP8 module naming conventions aren't appropriate
+"tests/test_NS*.py" = ["N999"]
+"tests/test_ObjC*.py" = ["N999"]
+# Ignores needed to pass the Ruff 0.16 update.
+"src/rubicon/objc/api.py" = ["PLW0642", "RUF012"]
+"tests/conftest.py" = ["BLE001"]
+"tests/test_NSString.py" = ["BLE001", "PLR0124"]
+
 [tool.rumdl]
 flavor = "mkdocs"
 include = ["**/*.md"]

@@ -30,6 +30,7 @@ from ctypes import (
 )
 
 __all__ = [
+    "__LP64__",
     "CFIndex",
     "CFRange",
     "CGFloat",
@@ -60,13 +61,12 @@ __all__ = [
     "UIEdgeInsetsZero",
     "UniChar",
     "UnknownPointer",
-    "__LP64__",
     "__arm64__",
     "__arm__",
     "__i386__",
     "__x86_64__",
-    "compound_value_for_sequence",
     "c_ptrdiff_t",
+    "compound_value_for_sequence",
     "ctype_for_encoding",
     "ctype_for_type",
     "ctypes_for_method_encoding",
@@ -344,7 +344,7 @@ def _ctype_for_unknown_encoding(encoding):
         raise ValueError(
             f"An unknown encoding cannot appear outside of a pointer: {encoding}"
         )
-    elif encoding.startswith(b"T") or encoding.startswith(b"t"):
+    elif encoding.startswith((b"T", b"t")):
         raise ValueError(f"128-bit integers are not supported by ctypes: {encoding}")
     elif encoding.startswith(b"j"):
         raise ValueError(f"Complex numbers are not supported by ctypes: {encoding}")

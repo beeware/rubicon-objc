@@ -42,7 +42,7 @@ elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
             ),
             category=DeprecationWarning,
         )
-        from asyncio import (  # noqa: I001
+        from asyncio import (
             AbstractEventLoopPolicy,
             DefaultEventLoopPolicy,
         )
@@ -50,8 +50,8 @@ else:  # pragma: no-cover-if-lt-py316
     pass
 
 __all__ = [
-    "EventLoopPolicy",
     "CocoaLifecycle",
+    "EventLoopPolicy",
     "RubiconEventLoop",
     "iOSLifecycle",
 ]

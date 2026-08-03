@@ -180,6 +180,7 @@ Similarly, if an Objective-C method has a parameter that expects a block, you ca
 def result_handler(res: objc_id) -> None:
     print(ObjCInstance(res))
 
+
 an_objc_instance.doSomethingWithResultHandler(result_handler)
 ```
 
@@ -191,6 +192,7 @@ class AnObjCClass(NSObject):
     def methodReturningABlock() -> objc_block:
         def the_block(arg: NSInteger) -> NSUInteger:
             return abs(arg)
+
         return the_block
 
     @objc_method

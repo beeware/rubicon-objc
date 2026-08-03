@@ -5,8 +5,6 @@ class c_ptrdiff_t:
     and [`c_int`][ctypes.c_int] on 32-bit systems.
     """
 
-    ...
-
 class NSInteger:
     """
     The
@@ -15,8 +13,6 @@ class NSInteger:
     [`c_long`][ctypes.c_long] on 64-bit systems and
     [`c_int`][ctypes.c_int] on 32-bit systems.
     """
-
-    ...
 
 class NSUInteger:
     """
@@ -27,8 +23,6 @@ class NSUInteger:
     [`c_uint`][ctypes.c_uint] on 32-bit systems.
     """
 
-    ...
-
 class CGFloat:
     """
     The
@@ -37,8 +31,6 @@ class CGFloat:
     [`c_double`][ctypes.c_double] on 64-bit systems and
     [`c_float`][ctypes.c_float] on 32-bit systems.
     """
-
-    ...
 
 class NSPoint:
     """
@@ -57,13 +49,11 @@ class NSPoint:
         """
         The X coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def y(self) -> CGFloat:
         """
         The Y coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
 
 class CGPoint:
     """
@@ -76,13 +66,11 @@ class CGPoint:
         """
         The X coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def y(self) -> CGFloat:
         """
         The Y coordinate as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
 
 class NSSize:
     """
@@ -102,13 +90,11 @@ class NSSize:
         """
         The width as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def height(self) -> CGFloat:
         """
         The height as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
 
 class CGSize:
     """
@@ -121,13 +107,11 @@ class CGSize:
         """
         The width as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def height(self) -> CGFloat:
         """
         The height as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
 
 class NSRect:
     """
@@ -147,13 +131,11 @@ class NSRect:
         """
         The origin as a [`NSPoint`][rubicon.objc.types.NSPoint].
         """
-        ...
     @property
     def size(self) -> NSSize:
         """
         The size as a [`NSSize`][rubicon.objc.types.NSSize].
         """
-        ...
 
 class CGRect:
     """
@@ -166,13 +148,11 @@ class CGRect:
         """
         The origin as a [`CGPoint`][rubicon.objc.types.CGPoint].
         """
-        ...
     @property
     def size(self) -> CGSize:
         """
         The size as a [`CGSize`][rubicon.objc.types.CGSize].
         """
-        ...
 
 class UIEdgeInsets:
     """
@@ -185,19 +165,16 @@ class UIEdgeInsets:
         """
         The top inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def left(self) -> CGFloat:
         """
         The left inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def bottom(self) -> CGFloat:
         """
         The bottom inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def right(self) -> CGFloat:
         """
@@ -215,25 +192,21 @@ class NSEdgeInsets:
         """
         The top inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def left(self) -> CGFloat:
         """
         The left inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def bottom(self) -> CGFloat:
         """
         The bottom inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
     @property
     def right(self) -> CGFloat:
         """
         The right inset as a [`CGFloat`][rubicon.objc.types.CGFloat].
         """
-        ...
 
 class NSTimeInterval:
     """
@@ -241,8 +214,6 @@ class NSTimeInterval:
     [NSTimeInterval](https://developer.apple.com/documentation/foundation/nstimeinterval?language=objc)
     type from `<Foundation/NSDate.h>`. Equivalent to [`c_double`][ctypes.c_double].
     """
-
-    ...
 
 class CFIndex:
     """
@@ -253,15 +224,11 @@ class CFIndex:
     and [`c_long`][ctypes.c_long] on 32-bit systems.
     """
 
-    ...
-
 class UniChar:
     """
     The `UniChar` type from `<MacTypes.h>`. Equivalent to
     [`c_ushort`][ctypes.c_ushort].
     """
-
-    ...
 
 class unichar:
     """
@@ -271,8 +238,6 @@ class unichar:
     [`c_ushort`][ctypes.c_ushort].
     """
 
-    ...
-
 class CGGlyph:
     """
     The
@@ -280,8 +245,6 @@ class CGGlyph:
     type from `<CoreGraphics/CGFont.h>`. Equivalent to
     [`c_ushort`][ctypes.c_ushort].
     """
-
-    ...
 
 class CFRange:
     """
@@ -294,13 +257,11 @@ class CFRange:
         """
         The location as a [`CFIndex`][rubicon.objc.types.CFIndex].
         """
-        ...
     @property
     def length(self) -> CFIndex:
         """
         The length as a [`CFIndex`][rubicon.objc.types.CFIndex].
         """
-        ...
 
 class NSRange:
     """
@@ -313,10 +274,8 @@ class NSRange:
         """
         The location as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
         """
-        ...
     @property
     def length(self) -> NSUInteger:
         """
         The length as a [`NSUInteger`][rubicon.objc.types.NSUInteger].
         """
-        ...

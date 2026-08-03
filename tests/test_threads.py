@@ -20,7 +20,7 @@ def test_wrapper_creation():
 
     # The underlying problem is a race condition, so we need to try a
     # bunch of times to make it happen.
-    for _ in range(0, 1000):
+    for _ in range(1000):
         # Flush the ObjC instance cache
         ObjCInstance._cached_objects = {}
 
@@ -58,7 +58,7 @@ def test_method_cache():
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
-    for _ in range(0, 1000):
+    for _ in range(1000):
         # Manually clear the method/property cache on Example.
         # This returns the attributes set in ObjCClass.__new__
         # to their initial values.
@@ -92,7 +92,7 @@ def test_accessor_cache():
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
-    for _ in range(0, 1000):
+    for _ in range(1000):
         # Manually clear the method/property cache on Example.
         # This returns the attributes set in ObjCClass.__new__
         # to their initial values.
@@ -126,7 +126,7 @@ def test_mutator_cache():
     Example = ObjCClass("Example")
     obj = Example.alloc().init()
 
-    for _ in range(0, 1000):
+    for _ in range(1000):
         # Manually clear the method/property cache on Example.
         # This returns the attributes set in ObjCClass.__new__
         # to their initial values.
