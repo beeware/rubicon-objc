@@ -15,7 +15,7 @@ NSEvent = ObjCClass("NSEvent")
 
 # Some coroutines with known behavior for testing purposes.
 async def do_stuff(results, x):
-    for i in range(0, x):
+    for i in range(x):
         results.append(i)
         await asyncio.sleep(0.1)
 

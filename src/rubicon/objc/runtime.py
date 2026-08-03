@@ -41,12 +41,12 @@ from .types import (
 )
 
 __all__ = [
+    "IMP",
+    "SEL",
     "Class",
     "Foundation",
-    "IMP",
     "Ivar",
     "Method",
-    "SEL",
     "add_ivar",
     "add_method",
     "autoreleasepool",
@@ -933,7 +933,7 @@ def send_message(receiver, selector, *args, restype, argtypes=None, varargs=None
         sel = selector.name.decode(errors="backslashreplace")
         valid_args = ", ".join(t.__name__ for t in argtypes)
         error.args = [f"{sel} {err}; argtypes: {valid_args}"]
-        raise error
+        raise
 
     if restype == c_void_p:
         result = c_void_p(result)

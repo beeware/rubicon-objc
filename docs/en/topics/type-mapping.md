@@ -81,9 +81,7 @@ Keyword arguments *must* be passed in the order they are defined in the selector
 ```python
 # Invoke -initFileURLWithPath:isDirectory:relativeToURL
 my_url.initFileURLWithPath(
-    "something/",
-    isDirectory=True,
-    relativeToURL="file:///Users/brutus/"
+    "something/", isDirectory=True, relativeToURL="file:///Users/brutus/"
 )
 ```
 
@@ -100,7 +98,7 @@ NSLayoutConstraint.constraintWithItem(
     toItem=second_item,
     attribute__2=second_attribute,
     multiplier=2.0,
-    constant=1.0
+    constant=1.0,
 )
 ```
 
@@ -145,7 +143,7 @@ Conversely, if you have a [`str`][], and you specifically require a [`NSString`]
 ```pycon
 >>> from rubicon.objc import at
 # Create a Python string
->>> py_str = 'hello world'
+>>> py_str = "hello world"
 # Convert to an Objective-C string
 >>> at(py_str)
 <ObjCStrInstance: __NSCFString at 0x114a94e48: hello world>

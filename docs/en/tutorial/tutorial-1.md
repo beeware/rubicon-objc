@@ -41,7 +41,7 @@ Sometimes, an Objective-C method definition will use the same keyword argument n
 ...     toItem=second_item,
 ...     attribute__2=second_attribute,
 ...     multiplier=2.0,
-...     constant=1.0
+...     constant=1.0,
 ... )
 ```
 
@@ -62,7 +62,7 @@ Now that you have an instance of `NSURL`, you'll want to manipulate it. `NSURL` 
 You can also invoke methods on the instance:
 
 ```pycon
->>> longer = absolute.URLByAppendingPathComponent('how/first-time/')
+>>> longer = absolute.URLByAppendingPathComponent("how/first-time/")
 ```
 
 If you want to output an object at the console, you can use the Objective-C property `description`, or for debugging output, `debugDescription`:

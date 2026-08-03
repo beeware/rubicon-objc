@@ -7,7 +7,7 @@ Protocols are used in Objective-C to declare a set of methods and properties for
 Protocol objects can be looked up using the `ObjCProtocol` constructor, similar to how classes can be looked up using `ObjCClass`:
 
 ```pycon
->>> NSCopying = ObjCProtocol('NSCopying')
+>>> NSCopying = ObjCProtocol("NSCopying")
 >>> NSCopying
 <ObjCProtocol: NSCopying>
 ```
@@ -45,13 +45,17 @@ class UserAccount(NSObject, protocols=[NSCopying]):
     # which calls copyWithZone: internally.
     @objc_method
     def copyWithZone_(self, zone):
-        return UserAccount.alloc().initWithUsername(self.username, emailAddress=self.emailAddress)
+        return UserAccount.alloc().initWithUsername(
+            self.username, emailAddress=self.emailAddress
+        )
 ```
 
 We can now use our class. The `copy` method (which uses our implemented `copyWithZone:` method) can also be used:
 
 ```pycon
->>> ua = UserAccount.alloc().initWithUsername_emailAddress_(at('person'), at('person@example.com'))
+>>> ua = UserAccount.alloc().initWithUsername_emailAddress_(
+...     at("person"), at("person@example.com")
+... )
 >>> ua
 <ObjCInstance: UserAccount at 0x106543210: <UserAccount: 0x106543220>>
 >>> ua.copy()
@@ -74,8 +78,7 @@ class Named(metaclass=ObjCProtocol):
     name = objc_property()
 
     @objc_method
-    def sayName(self):
-        ...
+    def sayName(self): ...
 ```
 
 There are two notable differences between creating classes and protocols:

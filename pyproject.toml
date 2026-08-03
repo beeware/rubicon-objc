@@ -150,6 +150,26 @@ extend-select = [
     # "SIM",    # flake8-simplify
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Ignores needed to pass the Ruff 0.16 update.
+"src/rubicon/objc/api.py" = [
+    "PLW0642",  # Reassigned `cls`/`self` variable
+    "RUF012",   # Mutable default value for class attribute
+]
+"tests/conftest.py" = [
+    "BLE001",  # Do not catch blind exception
+]
+"tests/test_NSString.py" = [
+    "BLE001",  # Do not catch blind exception
+    "PLR0124", # Name compared with itself
+]
+"tests/test_NS*.py" = [
+    "N999",  # Invalid module name (mixed-case NS-prefixed test modules)
+]
+"tests/test_ObjC*.py" = [
+    "N999",  # Invalid module name (mixed-case ObjC-prefixed test modules)
+]
+
 [tool.rumdl]
 flavor = "mkdocs"
 include = ["**/*.md"]
