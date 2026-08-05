@@ -115,6 +115,7 @@ kCFSocketAutomaticallyReenableReadCallBack = 1
 kCFSocketAutomaticallyReenableWriteCallBack = 8
 
 if sys.platform != "ios":
+    load_library("AppKit")
     NSEvent = ObjCClass("NSEvent")
 NSRunLoop = ObjCClass("NSRunLoop")
 
