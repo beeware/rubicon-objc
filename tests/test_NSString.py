@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import operator
 import os
 
 import pytest
@@ -11,6 +12,7 @@ TEST_STRINGS = ("", "abcdef", "Uñîçö∂€")
 HAYSTACK = "abcdabcdabcdef"
 NEEDLES = ["", "a", "bcd", "def", HAYSTACK, "nope", "dcb"]
 RANGES = [(None, None), (None, 6), (6, None), (4, 10)]
+NON_STRINGS = (42, 4.2, None, [1, 2], object())
 
 
 def assert_method(py_value, method, *args, **kwargs):
@@ -119,6 +121,36 @@ def test_nsstring_compare(py_left, py_right):
     assert (ns_left > ns_right) == (py_left > py_right)
 
 
+@pytest.mark.parametrize("py_left", TEST_STRINGS)
+@pytest.mark.parametrize("py_right", TEST_STRINGS)
+def test_nsstring_compare_str(py_left, py_right):
+    """A NSString can be compared to a Python str."""
+    ns_left = ns_from_py(py_left)
+
+    assert (ns_left < py_right) == (py_left < py_right)
+    assert (ns_left <= py_right) == (py_left <= py_right)
+    assert (ns_left >= py_right) == (py_left >= py_right)
+    assert (ns_left > py_right) == (py_left > py_right)
+
+
+@pytest.mark.parametrize("other", NON_STRINGS)
+def test_nsstring_eq_non_string(other):
+    """A NSString is never equal to a non-string object."""
+    nsstr = ns_from_py("abcdef")
+
+    assert (nsstr == other) is False
+
+
+@pytest.mark.parametrize("other", NON_STRINGS)
+def test_nsstring_compare_non_string(other):
+    """Ordering a NSString against a non-string object is a TypeError."""
+    nsstr = ns_from_py("abcdef")
+
+    for op in (operator.lt, operator.le, operator.ge, operator.gt):
+        with pytest.raises(TypeError):
+            op(nsstr, other)
+
+
 @pytest.mark.parametrize("py_needle", NEEDLES)
 def test_nsstring_in(py_needle):
     """The in operator works on NSString."""
@@ -129,6 +161,15 @@ def test_nsstring_in(py_needle):
         assert ns_needle in ns_haystack
     else:
         assert ns_needle not in ns_haystack
+
+
+@pytest.mark.parametrize("other", NON_STRINGS)
+def test_nsstring_in_non_string(other):
+    """Using a non-string as the left operand of ``in`` is a TypeError."""
+    ns_haystack = ns_from_py(HAYSTACK)
+
+    with pytest.raises(TypeError, match="requires str or NSString as left operand"):
+        operator.contains(ns_haystack, other)
 
 
 @pytest.mark.parametrize("pystr", TEST_STRINGS)
@@ -227,6 +268,28 @@ def test_nsstring_mul_rmul(py_str, n):
     ns_repeated = ns_from_py(py_repeated)
     assert (ns_str * n) == ns_repeated
     assert (n * ns_str) == ns_repeated
+
+
+@pytest.mark.parametrize("other", NON_STRINGS)
+def test_nsstring_add_non_string(other):
+    """A non-string cannot be concatenated to a NSString."""
+    ns_str = ns_from_py("abcdef")
+
+    with pytest.raises(TypeError, match="unsupported operand type"):
+        ns_str + other
+
+    with pytest.raises(TypeError):
+        other + ns_str
+
+
+@pytest.mark.parametrize("other", NON_STRINGS)
+@pytest.mark.parametrize("method", ("find", "index", "rfind", "rindex"))
+def test_nsstring_find_non_string(method, other):
+    """Searching a NSString for a non-string is a TypeError."""
+    ns_haystack = ns_from_py(HAYSTACK)
+
+    with pytest.raises(TypeError, match="must be str or NSString"):
+        getattr(ns_haystack, method)(other)
 
 
 def test_nsstring_capitalize():
