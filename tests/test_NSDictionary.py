@@ -232,6 +232,13 @@ def test_ns_mutable_dictionary_del():
         d["one"]
 
 
+def test_ns_mutable_dictionary_del_missing():
+    d = make_ns_mutable_dictionary(PY_DICT)
+    with pytest.raises(KeyError):
+        del d["four"]
+    assert len(d) == 3
+
+
 def test_ns_mutable_dictionary_clear():
     d = make_ns_mutable_dictionary(PY_DICT)
     d.clear()
