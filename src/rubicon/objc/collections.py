@@ -139,7 +139,7 @@ class ObjCStrInstance(ObjCInstance):
     def __mul__(self, other):
         try:
             count = operator.index(other)
-        except AttributeError:
+        except TypeError:
             return NotImplemented
 
         if count <= 0:

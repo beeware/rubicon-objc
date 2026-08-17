@@ -8,7 +8,7 @@ import pytest
 from rubicon.objc import ns_from_py, py_from_ns
 from rubicon.objc.api import NSString
 
-TEST_STRINGS = ("", "abcdef", "Uñîçö∂€")
+TEST_STRINGS = ("", "abcdef", "zyxwvu", "Uñîçö∂€")
 HAYSTACK = "abcdabcdabcdef"
 NEEDLES = ["", "a", "bcd", "def", HAYSTACK, "nope", "dcb"]
 RANGES = [(None, None), (None, 6), (6, None), (4, 10)]
@@ -268,6 +268,20 @@ def test_nsstring_mul_rmul(py_str, n):
     ns_repeated = ns_from_py(py_repeated)
     assert (ns_str * n) == ns_repeated
     assert (n * ns_str) == ns_repeated
+
+
+@pytest.mark.parametrize("py_str", TEST_STRINGS)
+def test_nsstring_mul_other_without_index(py_str):
+    """If the 'other" value defines __rmul__, but not __index__, __rmul__ is called."""
+
+    class HasRmul:
+        def __rmul__(self, other):
+            return f"rmul with {other}"
+
+    ns_str = ns_from_py(py_str)
+    other = HasRmul()
+
+    assert py_str * other == ns_str * other
 
 
 @pytest.mark.parametrize("other", NON_STRINGS)
