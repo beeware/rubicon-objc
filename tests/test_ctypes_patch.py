@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ctypes
+import sys
 
 import pytest
 
@@ -136,3 +137,51 @@ def test_patched_type_returned_often():
         struct = get_struct()
         assert struct.spam == 123
         assert struct.ham == 123
+
+before_313 = pytest.mark.skipif(
+    sys.version_info >= (3, 13),
+    reason="StgDict was replaced by StgInfo in Python 3.13",
+)
+since_313 = pytest.mark.skipif(
+    sys.version_info < (3, 13),
+    reason="StgInfo was introduced in Python 3.13",
+)
+
+
+@before_313
+def test_unwrap_mappingproxy_not_a_proxy():
+    """Unwrapping something other than a mapping proxy is a TypeError."""
+    with pytest.raises(TypeError, match="Expected a mapping proxy object"):
+        ctypes_patch.unwrap_mappingproxy({"spam": 1})
+
+
+@before_313
+@pytest.mark.parametrize("value", [42, "abc", None, ctypes.c_int(1)])
+def test_get_stgdict_of_type_not_a_type(value):
+    """Looking up the StgDict of a non-type is a TypeError."""
+    with pytest.raises(TypeError, match="Expected a type object"):
+        ctypes_patch.get_stgdict_of_type(value)
+
+
+@before_313
+@pytest.mark.parametrize("tp", [int, str, object])
+def test_get_stgdict_of_type_not_a_ctype(tp):
+    """Looking up the StgDict of a non-ctypes type is a TypeError."""
+    with pytest.raises(TypeError, match="must be a StgDict"):
+        ctypes_patch.get_stgdict_of_type(tp)
+
+
+@since_313
+@pytest.mark.parametrize("tp", [42, "abc", None, int, object])
+def test_get_stginfo_of_type_not_a_ctype(tp):
+    """Looking up the StgInfo of anything but a ctypes type is a TypeError."""
+    with pytest.raises(TypeError, match="Expected a ctypes structure type"):
+        ctypes_patch.get_stginfo_of_type(tp)
+
+
+@since_313
+@pytest.mark.parametrize("tp", [ctypes.Structure, ctypes.Union])
+def test_get_stginfo_of_type_uninitialized(tp):
+    """The abstract ctypes base classes have no initialized StgInfo."""
+    with pytest.raises(TypeError, match="has not been initialized"):
+        ctypes_patch.get_stginfo_of_type(tp)
