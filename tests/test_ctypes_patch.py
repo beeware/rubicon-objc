@@ -138,6 +138,7 @@ def test_patched_type_returned_often():
         assert struct.spam == 123
         assert struct.ham == 123
 
+
 before_313 = pytest.mark.skipif(
     sys.version_info >= (3, 13),
     reason="StgDict was replaced by StgInfo in Python 3.13",
