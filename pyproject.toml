@@ -84,6 +84,49 @@ docs = [
     # "beeware-docs-tools @ file://../beeware-docs-tools",
 ]
 
+[tool.briefcase]
+project_name = "Rubicon ObjC Testbed"
+bundle = "org.beeware"
+
+[tool.briefcase.app.testbed]
+formal_name = "Rubicon ObjC Testbed"
+description = "A testbed for Rubicon ObjC"
+long_description = """More details about the app should go here.
+"""
+sources = [
+    "testbed",
+]
+test_sources = [
+    "./tests",
+]
+
+requires = [
+    ".",
+]
+test_requires = [
+    "pytest == 9.1.1"
+]
+
+[tool.briefcase.app.testbed.macOS]
+supported = true
+
+[tool.briefcase.app.testbed.linux]
+supported = false
+
+[tool.briefcase.app.testbed.windows]
+supported = false
+
+# Mobile deployments
+[tool.briefcase.app.testbed.iOS]
+supported = true
+
+[tool.briefcase.app.testbed.android]
+supported = false
+
+# Web deployments
+[tool.briefcase.app.testbed.web]
+supported = false
+
 [tool.codespell]
 skip = ".git,*.pdf,*.svg"
 # the way to make case-sensitive skips of words etc
