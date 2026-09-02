@@ -18,7 +18,7 @@ sources = [
     "src/testbed",
 ]
 test_sources = [
-    "tests",
+    # "tests",
     "../tests",
 ]
 
@@ -34,7 +34,7 @@ requirement_installer_args = ["-f", "../dist", "--pre"]
 
 
 [tool.briefcase.app.testbed.macOS]
-supported = false
+supported = true
 
 [tool.briefcase.app.testbed.linux]
 supported = false
