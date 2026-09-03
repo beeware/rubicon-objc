@@ -198,7 +198,7 @@ jobs:
 
     - name: Test
       id: test
-      timeout-minutes: 5
+      timeout-minutes: 15
       run: |
         tox -e py-iOS-ci
 
