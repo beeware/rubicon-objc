@@ -160,18 +160,12 @@ jobs:
   iOS-tests:
     name: Unit tests (iOS)
     needs: [ pre-commit, towncrier, package ]
-    runs-on: ${{ matrix.platform }}
+    runs-on: macos-26
     continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
-        # Run all Python versions on macOS 26, intel + ARM
-        platform: [
-          # X86-64 runner
-          "macos-26-intel",
-          # M1 runner
-          "macos-26",
-        ]
+        # Run all Python versions
         python-version: [ "3.11", "3.12", "3.13", "3.14" ]
 
     steps:
