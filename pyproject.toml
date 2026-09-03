@@ -50,7 +50,7 @@ Source = "https://github.com/beeware/rubicon-objc"
 
 [dependency-groups]
 briefcase = [
-    "briefcase == 0.4.4",
+    "briefcase @ git+https://github.com/beeware/briefcase",
 ]
 
 pre-commit = [
@@ -105,11 +105,12 @@ test_sources = [
 ]
 
 requires = [
-    ".",
+    "rubicon-objc",
 ]
 test_requires = [
     "pytest == 9.1.1"
 ]
+requirement_installer_args = ["--pre", "-f", "./dist"]
 
 [tool.briefcase.app.testbed.macOS]
 supported = true
