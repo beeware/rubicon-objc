@@ -49,6 +49,10 @@ Tracker = "https://github.com/beeware/rubicon-objc/issues"
 Source = "https://github.com/beeware/rubicon-objc"
 
 [dependency-groups]
+briefcase = [
+    "briefcase == 0.4.4",
+]
+
 pre-commit = [
     "pre-commit == 4.6.2",
 ]
@@ -94,10 +98,10 @@ description = "A testbed for Rubicon ObjC"
 long_description = """More details about the app should go here.
 """
 sources = [
-    "testbed",
+    "testbed/testbed",
 ]
 test_sources = [
-    "./tests",
+    "tests",
 ]
 
 requires = [

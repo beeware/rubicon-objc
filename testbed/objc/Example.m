@@ -286,9 +286,9 @@ static int _staticIntField = 11;
     return [array objectAtIndex:1];
 }
 
--(NSSize) testThing:(int) value
+-(CGSize) testThing:(int) value
 {
-    return [_thing computeSize:NSMakeSize(0, value)];
+    return [_thing computeSize:CGSizeMake(0, value)];
 }
 
 @end

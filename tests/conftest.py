@@ -20,7 +20,10 @@ except Exception:
 ##########################################################################
 # Load AppKit and define some useful classes
 ##########################################################################
-if sys.platform != "ios":
+if sys.platform == "ios":
+    appkit = None
+    NSImage = None
+else:
     appkit = load_library("AppKit")
     NSImage = ObjCClass("NSImage")
 
@@ -32,7 +35,10 @@ NSString = ObjCClass("NSString")
 ##########################################################################
 try:
     rubiconharness = load_library(
-        os.path.abspath("tests/objc/build/librubiconharness.dylib")
+        os.path.join(
+            os.path.dirname(__file__),
+            f"librubiconharness-{sys.implementation._multiarch}",
+        ),
     )
 except ValueError as exc:
     raise ValueError(

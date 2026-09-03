@@ -1,20 +1,21 @@
-OBJCC = clang
+OBJCC = xcrun --sdk iphoneos clang -target arm64-apple-ios13.0
 OBJCLD_SHARED = $(OBJCC) -shared
 
-OBJCLDFLAGS = -fobjc-link-runtime
+OBJCLDFLAGS = -fobjc-link-runtime -framework CoreGraphics
 
 OUTPUT_DIR = build
-OBJECTS_DIR = $(OUTPUT_DIR)/objects
+TESTS_DIR = ../../tests
+OBJECTS_DIR = $(OUTPUT_DIR)/objects/iphoneos
 
 HEADER_FILES = $(wildcard *.h)
 SOURCE_FILES = $(wildcard *.m)
 OBJ_FILES = $(addprefix $(OBJECTS_DIR)/,$(addsuffix .o,$(SOURCE_FILES)))
 
-LIB_NAME = librubiconharness.so
+LIB_NAME = librubiconharness-arm64-iphoneos.so
 
-all: $(OUTPUT_DIR)/$(LIB_NAME)
+all: $(TESTS_DIR)/$(LIB_NAME)
 
-$(OUTPUT_DIR)/$(LIB_NAME): $(OBJ_FILES)
+$(TESTS_DIR)/$(LIB_NAME): $(OBJ_FILES)
 	@mkdir -p $(@D)
 	$(OBJCLD_SHARED) $(OBJCLDFLAGS) $(OBJ_FILES) $(OBJCLDLIBS) -o $@
 

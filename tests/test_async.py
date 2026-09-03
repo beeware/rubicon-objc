@@ -9,8 +9,12 @@ import pytest
 from rubicon.objc import NSMakePoint, ObjCClass
 from rubicon.objc.eventloop import CFLifecycle, CocoaLifecycle, RubiconEventLoop, libcf
 
-NSApplication = ObjCClass("NSApplication")
-NSEvent = ObjCClass("NSEvent")
+try:
+    NSApplication = ObjCClass("NSApplication")
+    NSEvent = ObjCClass("NSEvent")
+except NameError:
+    NSApplication = None
+    NSEvent = None
 
 
 # Some coroutines with known behavior for testing purposes.
@@ -189,6 +193,7 @@ def test_cf_lifecycle_explicit(loop):
     loop.run_forever(lifecycle=CFLifecycle(libcf.CFRunLoopGetMain()))
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Test is macOS specific")
 def test_cocoa_lifecycle(loop):
     """The full Cocoa Lifecycle works."""
 
