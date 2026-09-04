@@ -201,7 +201,7 @@ jobs:
     name: Project coverage
     runs-on: ubuntu-24.04
     needs: macOS-tests
-    if: always() && contains(fromJSON('["success", "failure"]'), needs.unit-tests.result)
+    if: always() && contains(fromJSON('["success", "failure"]'), needs.macOS-tests.result)
     steps:
     - name: Checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -227,7 +227,7 @@ jobs:
 
     - name: Project Coverage Report
       id: project-coverage
-      if: always() || contains(fromJSON('["success", "failure"]'), needs.unit-tests.result)
+      if: always() || contains(fromJSON('["success", "failure"]'), needs.macOS-tests.result)
       run: tox -qe coverage-ci-project-html
 
     - name: Upload Project Coverage HTML Report
