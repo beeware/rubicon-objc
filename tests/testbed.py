@@ -30,10 +30,10 @@ def run_tests():
         + args
     )
 
-    # Add a short pause to make sure any log tailing gets a chance to flush. Run a
-    # couple of times to make sure any log streaming dropouts don't prevent
-    # Briefcase from seeing the output.
-    for _ in range(6):
+    # Don't exit the test suite, as this causes confusion for Briefcase.
+    # Keep running, and output the termination code every 5 seconds to
+    # make sure it gets captured.
+    while True:
         print(f">>>>>>>>>> EXIT {returncode} <<<<<<<<<<")
         time.sleep(5)
 
