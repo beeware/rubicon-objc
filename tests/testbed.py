@@ -35,7 +35,7 @@ def run_tests():
     # Briefcase from seeing the output.
     for _ in range(6):
         print(f">>>>>>>>>> EXIT {returncode} <<<<<<<<<<")
-        time.sleep(0.5)
+        time.sleep(5)
 
 
 if __name__ == "__main__":
