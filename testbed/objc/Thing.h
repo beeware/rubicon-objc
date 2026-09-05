@@ -1,3 +1,4 @@
+#import <CoreGraphics/CGGeometry.h>
 #import <Foundation/Foundation.h>
 
 @interface Thing : NSObject {
@@ -11,7 +12,7 @@
 
 -(NSString *) toString;
 
--(NSSize) computeSize: (NSSize) input;
--(NSRect) computeRect: (NSRect) input;
+-(CGSize) computeSize: (CGSize) input;
+-(CGRect) computeRect: (CGRect) input;
 
 @end

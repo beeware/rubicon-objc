@@ -2,6 +2,7 @@
 *~
 .*.sw[op]
 *.egg-info
+*.dist-info
 .coverage
 dist
 build
@@ -11,8 +12,11 @@ venv*/
 venv/*
 .venv/
 local
+logs
 .tox
 .envrc
+*.so
+*.dylib
 
 # markdown-checker failure output
 comment.md
@@ -27,7 +31,8 @@ comment.md
 # VS Code
 .vscode/
 
-# AI tooling (SpecKit v0.8.0)
+# AI tooling
+.kilo/
 .opencode/
 .specify/scripts
 .specify/templates
