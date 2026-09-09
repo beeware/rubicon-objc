@@ -7,6 +7,7 @@
 dist
 build
 _build
+logs/
 distribute-*
 venv*/
 venv/*
@@ -15,8 +16,9 @@ local
 logs
 .tox
 .envrc
-*.so
 *.dylib
+*.so
+*.DS_Store
 
 # markdown-checker failure output
 comment.md
