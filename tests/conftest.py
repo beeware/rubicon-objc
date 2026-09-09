@@ -3,6 +3,7 @@ from __future__ import annotations
 import faulthandler
 import os
 import platform
+import sys
 from ctypes import Structure, c_char
 
 from rubicon.objc import ObjCClass
@@ -19,10 +20,14 @@ except Exception:
 ##########################################################################
 # Load AppKit and define some useful classes
 ##########################################################################
-appkit = load_library("AppKit")
+if sys.platform == "ios":
+    appkit = None
+    NSImage = None
+else:
+    appkit = load_library("AppKit")
+    NSImage = ObjCClass("NSImage")
 
 NSArray = ObjCClass("NSArray")
-NSImage = ObjCClass("NSImage")
 NSString = ObjCClass("NSString")
 
 ##########################################################################
@@ -30,7 +35,10 @@ NSString = ObjCClass("NSString")
 ##########################################################################
 try:
     rubiconharness = load_library(
-        os.path.abspath("tests/objc/build/librubiconharness.dylib")
+        os.path.join(
+            os.path.dirname(__file__),
+            f"librubiconharness-{sys.implementation._multiarch}",
+        ),
     )
 except ValueError as exc:
     raise ValueError(

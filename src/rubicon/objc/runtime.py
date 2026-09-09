@@ -1,4 +1,5 @@
 import os
+import sys
 import warnings
 from contextlib import contextmanager
 from ctypes import (
@@ -84,21 +85,40 @@ def load_library(name):
     it is attempted to load the library from certain hard-coded locations, as a fallback
     for systems where `find_library` does not work (such as iOS).
     """
-    path = util.find_library(name)
-    if path is not None:
-        return CDLL(path)
-
     # On iOS (and probably also watchOS and tvOS), ctypes.util.find_library
     # doesn't work and always returns None. This is because the sandbox hides
     # all system libraries from the filesystem and pretends they don't exist.
-    # However, they can still be loaded if the path is known, so we try to load
-    # the library from a few known locations.
-
-    for loc in _lib_path:
+    # However we can construct the explicit path to the app bundle's Framework
+    # folder.
+    if sys.platform == "ios":
+        # Try to load the name as-provided
         try:
-            return CDLL(os.path.join(loc, "lib" + name + ".dylib"))
+            return CDLL(name)
         except OSError:
             pass
+
+        # iOS builds will relocate the libraries from the source directory,
+        # leaving a `.fwork` folder pointing at the final location.
+        fwork_path = os.path.abspath(name + ".fwork")
+        if os.path.exists(fwork_path):
+            with open(fwork_path) as file:
+                framework_binary = file.read().strip().split("/", 1)[-1]
+                try:
+                    return CDLL(framework_binary)
+                except OSError:
+                    pass
+    else:
+        path = util.find_library(name)
+        if path is not None:
+            return CDLL(path)
+
+    # Also try to load the library from a few known locations.
+    for extension in [".dylib", ".so"]:
+        for loc in _lib_path:
+            try:
+                return CDLL(os.path.join(loc, "lib" + name + extension))
+            except OSError:
+                pass
 
     for loc in _framework_path:
         try:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import gc
+import sys
 import uuid
 import weakref
 from collections.abc import Callable
@@ -332,6 +333,10 @@ def test_init_change_lifecycle():
     assert_lifecycle(create_object)
 
 
+@pytest.mark.skipif(
+    sys.platform != "darwin",
+    reason="TODO: Need a test that is cross platform",
+)
 def test_init_none():
     """We do not segfault if init returns nil."""
     with autoreleasepool():
