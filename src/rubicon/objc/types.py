@@ -100,28 +100,13 @@ if True:
 #   * On a 64-bit Intel machine it is always "x86_64", even if Python is built as 32-bit
 #   * M1 MacBooks return "arm"
 #   * iPhones (as of the late 2022 support packages) return "arm64"
-# This *won't* work on older iOS support builds, as it relies on the customized
-# platform values added in https://github.com/beeware/Python-Apple-support/commit/2f42105838ab8f6f7e703ddb929d97758a36145e
 _processor = platform.processor()
 _any_x86 = _processor in ("i386", "x86_64")
-# check-docstring-is-first made us do this
-if True:
-    __i386__ = _any_x86 and not __LP64__
-    __x86_64__ = _any_x86 and __LP64__
-
-if _processor:
-    _any_arm = _processor.startswith("arm")
-else:
-    # Fallback when running on iOS without the support package,
-    # where platform.processor() is an empty string
-    # and the "model" field of uname/platform doesn't indicate the processor
-    # architecture. In that case, look for the architecture in the kernel
-    # version string.
-    _any_arm = "ARM" in platform.version()
-# check-docstring-is-first made us do this
-if True:
-    __arm64__ = _any_arm and __LP64__
-    __arm__ = _any_arm and not __LP64__
+_any_arm = _processor.startswith("arm")
+__i386__ = _any_x86 and not __LP64__
+__x86_64__ = _any_x86 and __LP64__
+__arm64__ = _any_arm and __LP64__
+__arm__ = _any_arm and not __LP64__
 
 
 _ctype_for_type_map = {
@@ -718,7 +703,8 @@ if __LP64__:
     _UIEdgeInsetsEncoding = b"{UIEdgeInsets=dddd}"
     _NSEdgeInsetsEncoding = b"{NSEdgeInsets=dddd}"
     _PyObjectEncoding = b"^{_object=q^{_typeobject}}"
-else:
+else:  # pragma: no cover
+    # Can't easily test 32 bit platforms
     c_ptrdiff_t = c_int
     NSInteger = c_int
     NSUInteger = c_uint
@@ -774,7 +760,8 @@ class NSPoint(Structure):
 
 if _CGPointEncoding == _NSPointEncoding:
     CGPoint = NSPoint
-else:
+else:  # pragma: no cover
+    # Can't easily test 32 bit platforms
 
     @with_preferred_encoding(_CGPointEncoding)
     class CGPoint(Structure):
@@ -806,7 +793,8 @@ class NSSize(Structure):
 
 if _CGSizeEncoding == _NSSizeEncoding:
     CGSize = NSSize
-else:
+else:  # pragma: no cover
+    # Can't easily test 32 bit platforms
 
     @with_preferred_encoding(_CGSizeEncoding)
     class CGSize(Structure):
@@ -842,7 +830,8 @@ class NSRect(Structure):
 
 if _CGRectEncoding == _NSRectEncoding:
     CGRect = NSRect
-else:
+else:  # pragma: no cover
+    # Can't easily test 32 bit platforms
 
     @with_preferred_encoding(_CGRectEncoding)
     class CGRect(Structure):
@@ -1006,7 +995,8 @@ if True:
     coordinates set to zero.
     """
 
-if sizeof(c_void_p) == 4:
+if sizeof(c_void_p) == 4:  # pragma: no cover
+    # Can't easily test 32 bit platforms
     NSIntegerMax = 0x7FFFFFFF
     """
     The macro constant
@@ -1017,6 +1007,10 @@ if sizeof(c_void_p) == 4:
 
 elif sizeof(c_void_p) == 8:
     NSIntegerMax = 0x7FFFFFFFFFFFFFFF
+else:  # pragma: no cover
+    # This shouldn't happen; pointers can only be 4 or 8 bytes.
+    pass
+
 # check-docstring-is-first made us do this
 if True:
     NSNotFound = NSIntegerMax

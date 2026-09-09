@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import importlib.util
-import platform
 from ctypes import (
     POINTER,
     Structure,
@@ -77,24 +75,14 @@ def clean_registries():
         registry.update(contents)
 
 
-@pytest.fixture
-def unregistered_type():
+class UnregisteredType:
     """A Python type that has no registered ctype."""
 
-    class Spam:
-        pass
 
-    return Spam
-
-
-@pytest.fixture
-def unregistered_struct():
+class UnregisteredStruct(Structure):
     """A ctypes structure that has no registered type encoding."""
 
-    class Spam(Structure):
-        _fields_ = [("spam", c_int)]
-
-    return Spam
+    _fields_ = [("spam", c_int)]
 
 
 def test_nspoint_repr():
@@ -231,57 +219,30 @@ def test_make_function(make, args, expected):
     assert bytes(made) == bytes(expected)
 
 
-def test_arm_detected_without_processor(monkeypatch):
-    """The architecture is detected from the kernel version if the processor is unknown.
-
-    This is the situation on iOS without the Python-Apple-support customizations of the
-    `platform` module.
-    """
-    monkeypatch.setattr(platform, "processor", lambda: "")
-    monkeypatch.setattr(
-        platform,
-        "version",
-        lambda: (
-            "Darwin Kernel Version 23.0.0: root:xnu-10002.1.13~1/RELEASE_ARM64_T8103"
-        ),
-    )
-
-    spec = importlib.util.spec_from_file_location(
-        "rubicon_objc_types_copy", rubicon.objc.types.__file__
-    )
-    types_copy = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(types_copy)
-
-    assert types_copy.__arm64__ == __LP64__
-    assert types_copy.__arm__ != __LP64__
-    assert not types_copy.__i386__
-    assert not types_copy.__x86_64__
-
-
-def test_ctype_for_type_unregistered(unregistered_type):
+def test_ctype_for_type_unregistered():
     """An unregistered type is returned unchanged."""
-    assert ctype_for_type(unregistered_type) is unregistered_type
+    assert ctype_for_type(UnregisteredType) is UnregisteredType
 
 
-def test_register_ctype_for_type(clean_registries, unregistered_type):
+def test_register_ctype_for_type(clean_registries):
     """A type-to-ctype conversion can be registered and unregistered."""
-    register_ctype_for_type(unregistered_type, c_int)
+    register_ctype_for_type(UnregisteredType, c_int)
 
-    assert ctype_for_type(unregistered_type) is c_int
-    assert get_ctype_for_type_map()[unregistered_type] is c_int
+    assert ctype_for_type(UnregisteredType) is c_int
+    assert get_ctype_for_type_map()[UnregisteredType] is c_int
 
-    unregister_ctype_for_type(unregistered_type)
+    unregister_ctype_for_type(UnregisteredType)
 
-    assert ctype_for_type(unregistered_type) is unregistered_type
-    assert unregistered_type not in get_ctype_for_type_map()
+    assert ctype_for_type(UnregisteredType) is UnregisteredType
+    assert UnregisteredType not in get_ctype_for_type_map()
 
 
-def test_get_ctype_for_type_map_is_a_copy(clean_registries, unregistered_type):
+def test_get_ctype_for_type_map_is_a_copy(clean_registries):
     """Modifying the returned type map doesn't affect the registry."""
     type_map = get_ctype_for_type_map()
-    type_map[unregistered_type] = c_int
+    type_map[UnregisteredType] = c_int
 
-    assert ctype_for_type(unregistered_type) is unregistered_type
+    assert ctype_for_type(UnregisteredType) is UnregisteredType
 
 
 def test_get_encoding_maps_are_copies(clean_registries):
@@ -299,14 +260,14 @@ def test_get_encoding_maps_are_copies(clean_registries):
     assert encoding_for_ctype(c_double) == b"d"
 
 
-def test_unregister_encoding(clean_registries, unregistered_struct):
+def test_unregister_encoding(clean_registries):
     """Unregistering an encoding leaves the reverse conversion in place."""
-    register_preferred_encoding(b"{Spam=i}", unregistered_struct)
+    register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
     unregister_encoding(b"{Spam=i}")
 
-    assert ctype_for_encoding(b"{Spam=i}") is not unregistered_struct
-    assert encoding_for_ctype(unregistered_struct) == b"{Spam=i}"
+    assert ctype_for_encoding(b"{Spam=i}") is not UnregisteredStruct
+    assert encoding_for_ctype(UnregisteredStruct) == b"{Spam=i}"
 
 
 def test_unregister_unknown_encoding(clean_registries):
@@ -319,33 +280,33 @@ def test_unregister_unknown_encoding_all(clean_registries):
     unregister_encoding_all(b"{unknown=i}")
 
 
-def test_unregister_ctype(clean_registries, unregistered_struct):
+def test_unregister_ctype(clean_registries):
     """Unregistering a ctype currently fails.
 
     `unregister_ctype()` passes the default value to `dict.pop()` as a keyword argument,
     which `dict.pop()` doesn't accept.
     """
-    register_preferred_encoding(b"{Spam=i}", unregistered_struct)
+    register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
     with pytest.raises(TypeError, match="takes no keyword arguments"):
-        unregister_ctype(unregistered_struct)
+        unregister_ctype(UnregisteredStruct)
 
 
-def test_unregister_ctype_all(clean_registries, unregistered_struct):
+def test_unregister_ctype_all(clean_registries):
     """Unregistering a ctype and all its encodings fails the same way."""
-    register_preferred_encoding(b"{Spam=i}", unregistered_struct)
+    register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
     with pytest.raises(TypeError, match="takes no keyword arguments"):
-        unregister_ctype_all(unregistered_struct)
+        unregister_ctype_all(UnregisteredStruct)
 
 
-def test_unregister_encoding_all(clean_registries, unregistered_struct):
+def test_unregister_encoding_all(clean_registries):
     """Unregistering an encoding and all its ctypes fails the same way.
 
     It unregisters every ctype registered for the encoding with
     `unregister_ctype_all()`.
     """
-    register_preferred_encoding(b"{Spam=i}", unregistered_struct)
+    register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
     with pytest.raises(TypeError, match="takes no keyword arguments"):
         unregister_encoding_all(b"{Spam=i}")
@@ -454,7 +415,7 @@ def test_encoding_for_ctype_pointer():
     assert encoding_for_ctype(POINTER(POINTER(c_int))) == b"^^i"
 
 
-def test_encoding_for_unknown_ctype(unregistered_struct):
+def test_encoding_for_unknown_ctype():
     """A ctype that cannot be converted raises an error.
 
     The documented error is a `ValueError`, but a type without a known encoding is
@@ -462,7 +423,7 @@ def test_encoding_for_unknown_ctype(unregistered_struct):
     `AttributeError` before the `ValueError` can be raised.
     """
     with pytest.raises(AttributeError, match="has no attribute '_type_'"):
-        encoding_for_ctype(unregistered_struct)
+        encoding_for_ctype(UnregisteredStruct)
 
 
 @pytest.mark.parametrize(

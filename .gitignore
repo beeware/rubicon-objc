@@ -2,10 +2,12 @@
 *~
 .*.sw[op]
 *.egg-info
+*.dist-info
 .coverage
 dist
 build
 _build
+logs/
 distribute-*
 venv*/
 venv/*
@@ -13,6 +15,9 @@ venv/*
 local
 .tox
 .envrc
+*.dylib
+*.so
+*.DS_Store
 
 # markdown-checker failure output
 comment.md
