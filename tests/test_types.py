@@ -416,13 +416,8 @@ def test_encoding_for_ctype_pointer():
 
 
 def test_encoding_for_unknown_ctype():
-    """A ctype that cannot be converted raises an error.
-
-    The documented error is a `ValueError`, but a type without a known encoding is
-    assumed to be a pointer type, so the missing `_type_` attribute surfaces as an
-    `AttributeError` before the `ValueError` can be raised.
-    """
-    with pytest.raises(AttributeError, match="has no attribute '_type_'"):
+    """A ctype that cannot be converted raises a ValueError."""
+    with pytest.raises(ValueError, match="No type encoding known for ctype"):
         encoding_for_ctype(UnregisteredStruct)
 
 
