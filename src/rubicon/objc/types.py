@@ -387,7 +387,7 @@ def encoding_for_ctype(ctype):
     except KeyError:
         try:
             return b"^" + encoding_for_ctype(ctype._type_)
-        except KeyError as exc:
+        except AttributeError as exc:
             raise ValueError(f"No type encoding known for ctype {ctype}") from exc
 
 
