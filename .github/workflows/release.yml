@@ -16,7 +16,7 @@ jobs:
       id-token: write
       attestations: write
       pull-requests: write
-    uses: ./.github/workflows/ci.yml
+    uses: $/.github/workflows/ci.yml
     with:
       attest-package: "true"
 
