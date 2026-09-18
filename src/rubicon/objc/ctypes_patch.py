@@ -268,6 +268,10 @@ def make_callback_returnable(ctype):
     @GETFUNC
     def getfunc(ptr, size):
         actual_size = ctypes.sizeof(ctype)
+        # ctypes only ever calls getfunc with size=0 (callback returns) or the
+        # field's registered size (always sizeof(ctype) as long as _fields_ is
+        # immutable, which ctypes enforces). There's no API that can trigger a
+        # size mismatch.
         if size != 0 and size != actual_size:  # pragma: no cover
             raise ValueError(
                 f"getfunc for ctype {ctype}: Requested size {size} "
@@ -279,6 +283,7 @@ def make_callback_returnable(ctype):
     @SETFUNC
     def setfunc(ptr, value, size):
         actual_size = ctypes.sizeof(ctype)
+        # See getfunc() above for why this is unreachable.
         if size != 0 and size != actual_size:  # pragma: no cover
             raise ValueError(
                 f"setfunc for ctype {ctype}: Requested size {size} "
