@@ -188,28 +188,16 @@ def test_get_stginfo_of_type_uninitialized(tp):
         ctypes_patch.get_stginfo_of_type(tp)
 
 
-@before_313
-def test_no_patch_setfunc_only_stgdict():
+def test_no_patch_setfunc_only():
     """A type that already has a setfunc, but no getfunc, cannot be patched."""
 
     class OnlySetfunc(ctypes.Structure):
         _fields_ = [("x", ctypes.c_int)]
 
-    stg = ctypes_patch.get_stgdict_of_type(OnlySetfunc)
-    stg.setfunc = ctypes_patch.SETFUNC(lambda ptr, value, size: None)
-
-    with pytest.raises(ValueError, match="already has a setfunc"):
-        ctypes_patch.make_callback_returnable(OnlySetfunc)
-
-
-@since_313
-def test_no_patch_setfunc_only_stginfo():
-    """A type that already has a setfunc, but no getfunc, cannot be patched."""
-
-    class OnlySetfunc(ctypes.Structure):
-        _fields_ = [("x", ctypes.c_int)]
-
-    stg = ctypes_patch.get_stginfo_of_type(OnlySetfunc)
+    if sys.version_info < (3, 13):
+        stg = ctypes_patch.get_stgdict_of_type(OnlySetfunc)
+    else:
+        stg = ctypes_patch.get_stginfo_of_type(OnlySetfunc)
     stg.setfunc = ctypes_patch.SETFUNC(lambda ptr, value, size: None)
 
     with pytest.raises(ValueError, match="already has a setfunc"):
