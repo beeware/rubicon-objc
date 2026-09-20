@@ -186,3 +186,19 @@ def test_get_stginfo_of_type_uninitialized(tp):
     """The abstract ctypes base classes have no initialized StgInfo."""
     with pytest.raises(TypeError, match="has not been initialized"):
         ctypes_patch.get_stginfo_of_type(tp)
+
+
+def test_no_patch_setfunc_only():
+    """A type that already has a setfunc, but no getfunc, cannot be patched."""
+
+    class OnlySetfunc(ctypes.Structure):
+        _fields_ = [("x", ctypes.c_int)]
+
+    if sys.version_info < (3, 13):
+        stg = ctypes_patch.get_stgdict_of_type(OnlySetfunc)
+    else:
+        stg = ctypes_patch.get_stginfo_of_type(OnlySetfunc)
+    stg.setfunc = ctypes_patch.SETFUNC(lambda ptr, value, size: None)
+
+    with pytest.raises(ValueError, match="already has a setfunc"):
+        ctypes_patch.make_callback_returnable(OnlySetfunc)

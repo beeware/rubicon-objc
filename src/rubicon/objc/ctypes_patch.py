@@ -268,7 +268,9 @@ def make_callback_returnable(ctype):
     @GETFUNC
     def getfunc(ptr, size):
         actual_size = ctypes.sizeof(ctype)
-        if size != 0 and size != actual_size:
+        # This next check is no-cover because it's a safety catch - it shouldn't
+        # be possible to call with a non-zero size that doesn't match the ctype.
+        if size != 0 and size != actual_size:  # pragma: no cover
             raise ValueError(
                 f"getfunc for ctype {ctype}: Requested size {size} "
                 f"does not match actual size {actual_size}"
@@ -279,7 +281,9 @@ def make_callback_returnable(ctype):
     @SETFUNC
     def setfunc(ptr, value, size):
         actual_size = ctypes.sizeof(ctype)
-        if size != 0 and size != actual_size:
+        # This next check is no-cover because it's a safety catch - it shouldn't
+        # be possible to call with a non-zero size that doesn't match the ctype.
+        if size != 0 and size != actual_size:  # pragma: no cover
             raise ValueError(
                 f"setfunc for ctype {ctype}: Requested size {size} "
                 f"does not match actual size {actual_size}"
