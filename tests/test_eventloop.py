@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import socket
 import sys
 import threading
@@ -43,6 +44,15 @@ def sock():
     sock = socket.socket()
     yield sock
     sock.close()
+
+
+@contextlib.contextmanager
+def tolerating_child_watcher_deprecation():
+    """SafeChildWatcher only emits a DeprecationWarning on Python 3.12+;
+    tolerate it either way instead of asserting it must occur."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        yield
 
 
 def test_socket_handle_ignores_notification_for_unknown_fd(loop, sock):
@@ -219,7 +229,7 @@ def test_get_default_loop_is_memoized(policy):
 def test_get_child_watcher_is_memoized(policy):
     policy.get_default_loop()
 
-    with pytest.warns(DeprecationWarning):
+    with tolerating_child_watcher_deprecation():
         watcher = policy.get_child_watcher()
 
     assert policy.get_child_watcher() is watcher
@@ -233,9 +243,8 @@ def test_set_child_watcher_closes_previous_watcher(policy):
     from asyncio import SafeChildWatcher
 
     policy.get_default_loop()
-    with pytest.warns(DeprecationWarning):
+    with tolerating_child_watcher_deprecation():
         policy.get_child_watcher()
-    with pytest.warns(DeprecationWarning):
         new_watcher = SafeChildWatcher()
 
     policy.set_child_watcher(new_watcher)
@@ -252,7 +261,7 @@ def test_set_child_watcher_without_existing_watcher(policy):
 
     assert policy._watcher is None
 
-    with pytest.warns(DeprecationWarning):
+    with tolerating_child_watcher_deprecation():
         watcher = SafeChildWatcher()
     policy.set_child_watcher(watcher)
 
@@ -268,8 +277,7 @@ def test_init_watcher_skips_attach_loop_off_main_thread(policy):
     policy.get_default_loop()
 
     def create_watcher():
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
+        with tolerating_child_watcher_deprecation():
             policy.get_child_watcher()
 
     thread = threading.Thread(target=create_watcher)
