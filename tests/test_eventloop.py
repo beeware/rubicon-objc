@@ -55,7 +55,8 @@ def tolerating_child_watcher_deprecation():
         yield
 
 
-def test_socket_handle_ignores_notification_for_unknown_fd(loop, sock):
+def test_socket_handle_unknown_fd(loop, sock):
+    """A notification for an fd the loop no longer tracks is ignored."""
     handle = CFSocketHandle(loop=loop, fd=sock.fileno())
     del loop._sockets[sock.fileno()]
 
@@ -67,9 +68,8 @@ def test_socket_handle_ignores_notification_for_unknown_fd(loop, sock):
     libcf.CFSocketInvalidate(handle._cf_socket)
 
 
-def test_socket_handle_cancel_is_noop_while_reader_active(loop, sock):
-    """cancel() only tears down the socket once both reader and writer are
-    disabled."""
+def test_socket_handle_cancel_partial(loop, sock):
+    """Cancelling a socket handle is a no-op while a reader/writer is active."""
     fd = sock.fileno()
     handle = CFSocketHandle(loop=loop, fd=fd)
     handle.enable_read(lambda: None, ())
@@ -80,7 +80,8 @@ def test_socket_handle_cancel_is_noop_while_reader_active(loop, sock):
     handle.disable_read()
 
 
-def test_add_reader_and_remove_reader(loop, sock):
+def test_add_remove_reader(loop, sock):
+    """Adding and removing a reader registers and deregisters its socket."""
     fd = sock.fileno()
     loop.add_reader(fd, lambda: None)
     assert fd in loop._sockets
@@ -89,18 +90,22 @@ def test_add_reader_and_remove_reader(loop, sock):
     assert fd not in loop._sockets
 
 
-def test_add_writer(loop, sock):
+def test_add_remove_writer(loop, sock):
+    """Adding and removing a writer registers and deregisters its socket."""
     fd = sock.fileno()
     loop.add_writer(fd, lambda: None)
     assert fd in loop._sockets
     loop.remove_writer(fd)
 
 
-def test_remove_reader_for_unregistered_fd_returns_false(loop):
+def test_remove_reader_unregistered(loop):
+    """Removing a reader for an unregistered file descriptor reports failure."""
     assert loop._remove_reader(99999) is False
 
 
-def test_call_soon_rejects_coroutine_function(loop):
+def test_call_soon_coroutine_rejected(loop):
+    """call_soon() rejects coroutine functions."""
+
     async def coro():
         pass
 
@@ -108,7 +113,8 @@ def test_call_soon_rejects_coroutine_function(loop):
         loop.call_soon(coro)
 
 
-def test_run_raises_if_another_loop_is_running(loop):
+def test_run_nested_loop_error(loop):
+    """run() refuses to start while another event loop is already running."""
     sentinel = object()
     events._set_running_loop(sentinel)
     try:
@@ -118,9 +124,8 @@ def test_run_raises_if_another_loop_is_running(loop):
         events._set_running_loop(None)
 
 
-def test_run_supports_recursive_invocation(loop):
-    """Unlike run_forever(), run() can be called recursively (e.g. for a
-    modal event loop)."""
+def test_run_recursive(loop):
+    """run() can be invoked recursively, e.g. to drive a modal event loop."""
     order = []
 
     def inner():
@@ -136,7 +141,8 @@ def test_run_supports_recursive_invocation(loop):
     assert order == ["inner-start", "inner-end"]
 
 
-def test_run_until_complete_raises_if_loop_stopped_early(loop):
+def test_run_until_complete_stopped_early(loop):
+    """run_until_complete() raises if the loop stops before the future completes."""
     future = loop.create_future()
     loop.call_soon(loop.stop)
 
@@ -144,7 +150,9 @@ def test_run_until_complete_raises_if_loop_stopped_early(loop):
         loop.run_until_complete(future)
 
 
-def test_run_forever_raises_if_already_running(loop):
+def test_run_forever_recursive_error(loop):
+    """run_forever() refuses to be called recursively."""
+
     def inner():
         with pytest.raises(RuntimeError, match="Recursively calling run_forever"):
             loop.run_forever()
@@ -154,7 +162,8 @@ def test_run_forever_raises_if_already_running(loop):
     loop.run_forever()
 
 
-def test_run_forever_cooperatively_defers_lifecycle_start(loop):
+def test_run_forever_cooperatively(loop):
+    """run_forever_cooperatively() marks the loop as running without blocking."""
     assert not loop.is_running()
 
     loop.run_forever_cooperatively()
@@ -172,7 +181,8 @@ def test_run_forever_cooperatively_defers_lifecycle_start(loop):
     events._set_running_loop(None)
 
 
-def test_close_cancels_pending_timers(loop):
+def test_close_cancels_timers(loop):
+    """Closing the loop cancels any pending timers."""
     handle = loop.call_later(5, lambda: None)
     assert handle in loop._timers
 
@@ -182,14 +192,16 @@ def test_close_cancels_pending_timers(loop):
     assert not loop._timers
 
 
-def test_set_lifecycle_twice_raises_value_error(loop):
+def test_set_lifecycle_twice(loop):
+    """Setting the lifecycle a second time is rejected."""
     loop._set_lifecycle(CFLifecycle())
 
     with pytest.raises(ValueError, match="already set"):
         loop._set_lifecycle(CFLifecycle())
 
 
-def test_set_lifecycle_while_running_raises_runtime_error(loop):
+def test_set_lifecycle_while_running(loop):
+    """Setting the lifecycle while the loop is running is rejected."""
     loop._lifecycle = None
     loop._running = True
     try:
@@ -199,7 +211,8 @@ def test_set_lifecycle_while_running_raises_runtime_error(loop):
         loop._running = False
 
 
-def test_add_callback_skips_cancelled_handle(loop):
+def test_add_callback_cancelled(loop):
+    """Adding a cancelled callback handle does not schedule it."""
     handle = loop.call_soon(lambda: None)
     handle.cancel()
 
@@ -208,7 +221,8 @@ def test_add_callback_skips_cancelled_handle(loop):
     assert handle not in loop._timers
 
 
-def test_new_event_loop_creates_independent_loops(policy):
+def test_new_event_loop(policy):
+    """Each additional call to new_event_loop() returns an independent loop."""
     default_loop = policy.new_event_loop()
     other_loop = policy.new_event_loop()
     try:
@@ -219,6 +233,7 @@ def test_new_event_loop_creates_independent_loops(policy):
 
 
 def test_get_default_loop_is_memoized(policy):
+    """get_default_loop() returns the same loop instance on repeated calls."""
     assert policy.get_default_loop() is policy.get_default_loop()
 
 
@@ -227,6 +242,7 @@ def test_get_default_loop_is_memoized(policy):
     reason="Child watcher support was removed in Python 3.14",
 )
 def test_get_child_watcher_is_memoized(policy):
+    """get_child_watcher() returns the same watcher instance on repeated calls."""
     policy.get_default_loop()
 
     with tolerating_child_watcher_deprecation():
@@ -239,7 +255,8 @@ def test_get_child_watcher_is_memoized(policy):
     sys.version_info >= (3, 14),
     reason="Child watcher support was removed in Python 3.14",
 )
-def test_set_child_watcher_closes_previous_watcher(policy):
+def test_set_child_watcher_replaces(policy):
+    """Setting a new child watcher closes the previous one."""
     from asyncio import SafeChildWatcher
 
     policy.get_default_loop()
@@ -256,7 +273,8 @@ def test_set_child_watcher_closes_previous_watcher(policy):
     sys.version_info >= (3, 14),
     reason="Child watcher support was removed in Python 3.14",
 )
-def test_set_child_watcher_without_existing_watcher(policy):
+def test_set_child_watcher_first(policy):
+    """Setting a child watcher works even when none was previously set."""
     from asyncio import SafeChildWatcher
 
     assert policy._watcher is None
@@ -272,8 +290,8 @@ def test_set_child_watcher_without_existing_watcher(policy):
     sys.version_info >= (3, 14),
     reason="Child watcher support was removed in Python 3.14",
 )
-def test_init_watcher_skips_attach_loop_off_main_thread(policy):
-    """A watcher created off the main thread is left unattached."""
+def test_init_watcher_off_main_thread(policy):
+    """A watcher created off the main thread is left unattached to a loop."""
     policy.get_default_loop()
 
     def create_watcher():
