@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 0.5.7 (2026-09-30)
+
+### Features
+
+* iOS is now actively tested as part of the Rubicon's development process. ([#788](https://github.com/beeware/rubicon-objc/issues/788))
+
+### Bugfixes
+
+* The macOS event loop integration no longer requires an explicit load of the `AppKit` library before being imported. ([#806](https://github.com/beeware/rubicon-objc/issues/806))
+* Multiplying an `NSString` by an object that defines `__rmul__`, but not `__index__`, will now correctly fall back to the `__rmul__` implementation on the "other" object. ([#816](https://github.com/beeware/rubicon-objc/issues/816))
+* `encoding_for_ctype()` now raises `ValueError` for a C type with no known encoding; previously it raised an `AttributeError`. Raising `ValueError` was (and remains) the documented behavior. ([#826](https://github.com/beeware/rubicon-objc/issues/826))
+
+### Backward Incompatible Changes
+
+* Rubicon ObjC now requires the implementation of `platform.processor()` provided by the Python library to be fully functioning. This wasn't the case for BeeWare Apple support packages prior to 2022; this legacy support has been removed. ([#820](https://github.com/beeware/rubicon-objc/issues/820))
+* Support for Python 3.10 has been removed. ([#822](https://github.com/beeware/rubicon-objc/issues/822))
+
+### Misc
+
+* [#729](https://github.com/beeware/rubicon-objc/issues/729), [#729](https://github.com/beeware/rubicon-objc/issues/729), [#729](https://github.com/beeware/rubicon-objc/issues/729), [#729](https://github.com/beeware/rubicon-objc/issues/729), [#789](https://github.com/beeware/rubicon-objc/issues/789), [#790](https://github.com/beeware/rubicon-objc/issues/790), [#791](https://github.com/beeware/rubicon-objc/issues/791), [#794](https://github.com/beeware/rubicon-objc/issues/794), [#795](https://github.com/beeware/rubicon-objc/issues/795), [#796](https://github.com/beeware/rubicon-objc/issues/796), [#797](https://github.com/beeware/rubicon-objc/issues/797), [#798](https://github.com/beeware/rubicon-objc/issues/798), [#799](https://github.com/beeware/rubicon-objc/issues/799), [#800](https://github.com/beeware/rubicon-objc/issues/800), [#801](https://github.com/beeware/rubicon-objc/issues/801), [#802](https://github.com/beeware/rubicon-objc/issues/802), [#803](https://github.com/beeware/rubicon-objc/issues/803), [#804](https://github.com/beeware/rubicon-objc/issues/804), [#805](https://github.com/beeware/rubicon-objc/issues/805), [#807](https://github.com/beeware/rubicon-objc/issues/807), [#808](https://github.com/beeware/rubicon-objc/issues/808), [#809](https://github.com/beeware/rubicon-objc/issues/809), [#810](https://github.com/beeware/rubicon-objc/issues/810), [#811](https://github.com/beeware/rubicon-objc/issues/811), [#812](https://github.com/beeware/rubicon-objc/issues/812), [#813](https://github.com/beeware/rubicon-objc/issues/813), [#814](https://github.com/beeware/rubicon-objc/issues/814), [#815](https://github.com/beeware/rubicon-objc/issues/815), [#818](https://github.com/beeware/rubicon-objc/issues/818), [#819](https://github.com/beeware/rubicon-objc/issues/819), [#821](https://github.com/beeware/rubicon-objc/issues/821), [#824](https://github.com/beeware/rubicon-objc/issues/824), [#825](https://github.com/beeware/rubicon-objc/issues/825), [#828](https://github.com/beeware/rubicon-objc/issues/828), [#829](https://github.com/beeware/rubicon-objc/issues/829), [#830](https://github.com/beeware/rubicon-objc/issues/830), [#831](https://github.com/beeware/rubicon-objc/issues/831), [#833](https://github.com/beeware/rubicon-objc/issues/833), [#834](https://github.com/beeware/rubicon-objc/issues/834), [#835](https://github.com/beeware/rubicon-objc/issues/835), [#837](https://github.com/beeware/rubicon-objc/issues/837), [#838](https://github.com/beeware/rubicon-objc/issues/838)
+
 ## 0.5.6 (2026-07-02)
 
 ### Bugfixes
@@ -128,7 +149,7 @@
 
 ### Bugfixes
 
-- The handling of structure and union return types was updated to be compatible with changes to ctypes introduced in Python 3.13.0a6. ([#444](https://github.com/beeware/rubicon-objc/issues/444))
+- The handling of structure and union return types was updated to be compatible with changes to `ctypes` introduced in Python 3.13.0a6. ([#444](https://github.com/beeware/rubicon-objc/issues/444))
 
 ### Backward Incompatible Changes
 
