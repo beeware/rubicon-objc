@@ -24,7 +24,7 @@ if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
         SafeChildWatcher,
         set_event_loop_policy,
     )
-elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
+elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316, no-cover-if-lt-py314
     # Python 3.14 finalized the deprecation of SafeChildWatcher. There's no
     # replacement API; the feature can be removed.
     #
