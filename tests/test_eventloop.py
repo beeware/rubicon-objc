@@ -192,6 +192,17 @@ def test_close_cancels_timers(loop):
     assert not loop._timers
 
 
+def test_close_cancels_accept_futures(loop):
+    """Closing the loop cancels any pending accept() futures."""
+    future = loop.create_future()
+    loop._accept_futures = {future}
+
+    loop.close()
+
+    assert future.cancelled()
+    assert not loop._accept_futures
+
+
 def test_set_lifecycle_twice(loop):
     """Setting the lifecycle a second time is rejected."""
     loop._set_lifecycle(CFLifecycle())
