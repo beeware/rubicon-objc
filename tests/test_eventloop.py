@@ -223,6 +223,18 @@ def test_close_cancels_accept_futures(loop):
     assert not loop._accept_futures
 
 
+def test_set_lifecycle_without_policy_sync(monkeypatch, loop):
+    """Python 3.14+ does not copy the lifecycle onto the deprecated policy object."""
+    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
+    loop._policy._lifecycle = None
+    lifecycle = CFLifecycle()
+
+    loop._set_lifecycle(lifecycle)
+
+    assert loop._lifecycle is lifecycle
+    assert loop._policy._lifecycle is None
+
+
 def test_set_lifecycle_twice(loop):
     """Setting the lifecycle a second time is rejected."""
     loop._set_lifecycle(CFLifecycle())
