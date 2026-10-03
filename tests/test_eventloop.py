@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import importlib
 import socket
 import sys
 import threading
@@ -53,6 +54,25 @@ def tolerating_child_watcher_deprecation():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         yield
+
+
+@pytest.mark.skipif(
+    sys.platform not in ("darwin", "ios"),
+    reason="Requires Apple Objective-C runtime",
+)
+def test_ios_has_no_nsevent():
+    """Re-importing eventloop with sys.platform set to iOS must not define NSEvent."""
+    name = "rubicon.objc.eventloop"
+    saved_platform = sys.platform
+    try:
+        sys.platform = "ios"
+        sys.modules.pop(name, None)
+        module = importlib.import_module(name)
+        assert not hasattr(module, "NSEvent")
+    finally:
+        sys.platform = saved_platform
+        sys.modules.pop(name, None)
+        importlib.import_module(name)
 
 
 def test_socket_handle_unknown_fd(loop, sock):
