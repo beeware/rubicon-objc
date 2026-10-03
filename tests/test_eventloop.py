@@ -223,16 +223,49 @@ def test_close_cancels_accept_futures(loop):
     assert not loop._accept_futures
 
 
-def test_set_lifecycle_without_policy_sync(monkeypatch, loop):
-    """Python 3.14+ does not copy the lifecycle onto the deprecated policy object."""
-    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="Policy lifecycle sync was removed in Python 3.14",
+)
+def test_set_lifecycle_syncs_policy(loop):
+    """_set_lifecycle copies the lifecycle onto the deprecated policy object."""
     loop._policy._lifecycle = None
     lifecycle = CFLifecycle()
 
     loop._set_lifecycle(lifecycle)
 
     assert loop._lifecycle is lifecycle
+    assert loop._policy._lifecycle is lifecycle
+
+
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="Policy lifecycle sync was removed in Python 3.14",
+)
+def test_set_lifecycle_skips_policy_sync(monkeypatch, loop):
+    """_set_lifecycle does not copy the lifecycle onto the policy from 3.14 onward."""
+    loop._policy._lifecycle = None
+    lifecycle = CFLifecycle()
+    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
+
+    loop._set_lifecycle(lifecycle)
+
+    assert loop._lifecycle is lifecycle
     assert loop._policy._lifecycle is None
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14),
+    reason="Loops are not tied to EventLoopPolicy from Python 3.14 onward",
+)
+def test_set_lifecycle_ignores_policy(loop):
+    """_set_lifecycle does not copy the lifecycle onto a policy object."""
+    lifecycle = CFLifecycle()
+
+    loop._set_lifecycle(lifecycle)
+
+    assert loop._lifecycle is lifecycle
+    assert not hasattr(loop, "_policy")
 
 
 def test_set_lifecycle_twice(loop):
@@ -349,16 +382,27 @@ def test_init_watcher_off_main_thread(policy):
 
 
 @pytest.mark.skipif(
-    sys.version_info >= (3, 14),
-    reason="Child watcher support was removed in Python 3.14",
+    sys.version_info < (3, 14),
+    reason="Child watcher APIs exist before Python 3.14",
 )
-def test_policy_omits_child_watcher(monkeypatch):
-    """Re-importing eventloop with a 3.14 version_info drops child-watcher APIs."""
+def test_policy_has_no_child_watcher():
+    """EventLoopPolicy on Python 3.14+ has no child-watcher APIs."""
+    with pytest.warns(DeprecationWarning):
+        policy = EventLoopPolicy()
+
+    assert "get_child_watcher" not in EventLoopPolicy.__dict__
+    assert not hasattr(policy, "_watcher_lock")
+
+
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="Requires import-time Python version before 3.14",
+)
+def test_policy_omits_child_watcher_on_reimport(monkeypatch):
+    """Re-importing eventloop with 3.14 version_info drops child-watcher APIs."""
     name = "rubicon.objc.eventloop"
     monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
-    for key in list(sys.modules):
-        if key.startswith("rubicon"):
-            del sys.modules[key]
+    sys.modules.pop(name, None)
     try:
         module = importlib.import_module(name)
         assert "get_child_watcher" not in module.EventLoopPolicy.__dict__
@@ -367,9 +411,7 @@ def test_policy_omits_child_watcher(monkeypatch):
             policy = module.EventLoopPolicy()
         assert not hasattr(policy, "_watcher_lock")
     finally:
-        for key in list(sys.modules):
-            if key.startswith("rubicon"):
-                del sys.modules[key]
+        sys.modules.pop(name, None)
         importlib.import_module(name)
 
 
