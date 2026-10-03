@@ -24,7 +24,7 @@ if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
         SafeChildWatcher,
         set_event_loop_policy,
     )
-elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
+elif sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316, no-cover-if-lt-py314
     # Python 3.14 finalized the deprecation of SafeChildWatcher. There's no
     # replacement API; the feature can be removed.
     #
@@ -468,27 +468,21 @@ class CFEventLoop(unix_events.SelectorEventLoop):
     def run(self):
         """Internal implementation of run using the CoreFoundation event loop."""
         recursive = self.is_running()
-        if (
-            not recursive
-            and hasattr(events, "_get_running_loop")
-            and events._get_running_loop()
-        ):
+        if not recursive and events._get_running_loop():
             raise RuntimeError(
                 "Cannot run the event loop while another loop is running"
             )
 
         if not recursive:
             self._running = True
-            if hasattr(events, "_set_running_loop"):
-                events._set_running_loop(self)
+            events._set_running_loop(self)
 
         try:
             self._lifecycle.start()
         finally:
             if not recursive:
                 self._running = False
-                if hasattr(events, "_set_running_loop"):
-                    events._set_running_loop(None)
+                events._set_running_loop(None)
 
     def run_until_complete(self, future, **kw):
         """Run until the Future is done.
@@ -560,8 +554,7 @@ class CFEventLoop(unix_events.SelectorEventLoop):
             )
 
         self._running = True
-        if hasattr(events, "_set_running_loop"):
-            events._set_running_loop(self)
+        events._set_running_loop(self)
 
         # Start the lifecycle, but invoke it as a deferred event on the event
         # loop. iOSLifeCycle.start() starts the NSRunLoop; this ensures
