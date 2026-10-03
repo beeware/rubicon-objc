@@ -348,6 +348,31 @@ def test_init_watcher_off_main_thread(policy):
     assert policy._watcher is not None
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14),
+    reason="Child watcher support was removed in Python 3.14",
+)
+def test_policy_omits_child_watcher(monkeypatch):
+    """Re-importing eventloop with a 3.14 version_info drops child-watcher APIs."""
+    name = "rubicon.objc.eventloop"
+    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
+    for key in list(sys.modules):
+        if key.startswith("rubicon"):
+            del sys.modules[key]
+    try:
+        module = importlib.import_module(name)
+        assert "get_child_watcher" not in module.EventLoopPolicy.__dict__
+
+        with pytest.warns(DeprecationWarning):
+            policy = module.EventLoopPolicy()
+        assert not hasattr(policy, "_watcher_lock")
+    finally:
+        for key in list(sys.modules):
+            if key.startswith("rubicon"):
+                del sys.modules[key]
+        importlib.import_module(name)
+
+
 def test_eventloop_import_without_policy(monkeypatch):
     """Python 3.16 drops EventLoopPolicy; RubiconEventLoop becomes CFEventLoop."""
     name = "rubicon.objc.eventloop"
