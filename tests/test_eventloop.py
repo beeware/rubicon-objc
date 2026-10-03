@@ -334,3 +334,25 @@ def test_init_watcher_off_main_thread(policy):
     thread.join()
 
     assert policy._watcher is not None
+
+
+def test_eventloop_import_without_policy(monkeypatch):
+    """Python 3.16 drops EventLoopPolicy; RubiconEventLoop becomes CFEventLoop."""
+    name = "rubicon.objc.eventloop"
+
+    if sys.version_info >= (3, 16):
+        import rubicon.objc.eventloop as module
+
+        assert module.RubiconEventLoop is module.CFEventLoop
+        assert not hasattr(module, "EventLoopPolicy")
+        return
+
+    monkeypatch.setattr(sys, "version_info", (3, 16, 0, "final", 0))
+    sys.modules.pop(name, None)
+    try:
+        module = importlib.import_module(name)
+        assert module.RubiconEventLoop is module.CFEventLoop
+        assert not hasattr(module, "EventLoopPolicy")
+    finally:
+        sys.modules.pop(name, None)
+        importlib.import_module(name)
