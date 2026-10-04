@@ -297,6 +297,15 @@ def test_add_callback_cancelled(loop):
     assert handle not in loop._timers
 
 
+def test_add_callback_schedules(loop):
+    """_add_callback schedules the handle callback through call_soon."""
+    handle = events.Handle(lambda: None, (), loop)
+
+    loop._add_callback(handle)
+
+    assert len(loop._timers) == 1
+
+
 def test_new_event_loop(policy):
     """Each additional call to new_event_loop() returns an independent loop."""
     default_loop = policy.new_event_loop()
