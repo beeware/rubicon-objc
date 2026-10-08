@@ -172,6 +172,8 @@ no-cover-if-lt-py313 = "sys_version_info < (3, 13) and os_environ.get('COVERAGE_
 no-cover-if-lt-py314 = "sys_version_info < (3, 14) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 no-cover-if-lt-py316 = "sys_version_info < (3, 16) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 no-cover-if-old-or-new = "(sys_version_info >= (3, 6) or sys_version_info < (3, 16)) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
+no-cover-if-ios = "sys_platform == 'ios'"
+no-cover-if-not-ios = "sys_platform != 'ios'"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

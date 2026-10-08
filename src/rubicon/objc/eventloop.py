@@ -114,9 +114,11 @@ kCFSocketWriteCallBack = 8
 kCFSocketAutomaticallyReenableReadCallBack = 1
 kCFSocketAutomaticallyReenableWriteCallBack = 8
 
-if sys.platform != "ios":
+if sys.platform != "ios":  # pragma: no-cover-if-ios
     load_library("AppKit")
     NSEvent = ObjCClass("NSEvent")
+else:  # pragma: no-cover-if-not-ios
+    pass
 NSRunLoop = ObjCClass("NSRunLoop")
 
 ###########################################################################
