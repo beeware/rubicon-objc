@@ -671,6 +671,8 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._lifecycle = lifecycle
         if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
             self._policy._lifecycle = lifecycle
+        else:  # pragma: no-cover-if-lt-py314
+            pass
 
     def _add_callback(self, handle):
         """Add a callback to be invoked ASAP.
@@ -717,6 +719,8 @@ if sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
             if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314
                 self._watcher_lock = threading.Lock()
                 self._watcher = None
+            else:  # pragma: no-cover-if-lt-py314
+                pass
             self._policy = DefaultEventLoopPolicy()
             self._policy.new_event_loop = self.new_event_loop
             self.get_event_loop = self._policy.get_event_loop
@@ -786,6 +790,13 @@ if sys.version_info < (3, 16):  # pragma: no-cover-if-gte-py316
                     self._watcher.close()
 
                 self._watcher = watcher
+
+        else:  # pragma: no-cover-if-lt-py314
+            pass
+
+
+else:  # pragma: no-cover-if-lt-py316
+    pass
 
 
 if sys.version_info < (3, 14):  # pragma: no-cover-if-gte-py314

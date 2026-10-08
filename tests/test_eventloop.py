@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import importlib
 import socket
 import sys
 import threading
@@ -220,22 +219,6 @@ def test_set_lifecycle_syncs_policy(loop):
 
 
 @pytest.mark.skipif(
-    sys.version_info >= (3, 14),
-    reason="Policy lifecycle sync was removed in Python 3.14",
-)
-def test_set_lifecycle_skips_policy_sync(monkeypatch, loop):
-    """_set_lifecycle does not copy the lifecycle onto the policy from 3.14 onward."""
-    loop._policy._lifecycle = None
-    lifecycle = CFLifecycle()
-    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
-
-    loop._set_lifecycle(lifecycle)
-
-    assert loop._lifecycle is lifecycle
-    assert loop._policy._lifecycle is None
-
-
-@pytest.mark.skipif(
     sys.version_info < (3, 14),
     reason="Loops are not tied to EventLoopPolicy from Python 3.14 onward",
 )
@@ -385,43 +368,12 @@ def test_policy_has_no_child_watcher():
 
 
 @pytest.mark.skipif(
-    sys.version_info >= (3, 14),
-    reason="Requires import-time Python version before 3.14",
+    sys.version_info < (3, 16),
+    reason="EventLoopPolicy is removed in Python 3.16",
 )
-def test_policy_omits_child_watcher_on_reimport(monkeypatch):
-    """Re-importing eventloop with 3.14 version_info drops child-watcher APIs."""
-    name = "rubicon.objc.eventloop"
-    monkeypatch.setattr(sys, "version_info", (3, 14, 0, "final", 0))
-    sys.modules.pop(name, None)
-    try:
-        module = importlib.import_module(name)
-        assert "get_child_watcher" not in module.EventLoopPolicy.__dict__
+def test_rubicon_event_loop_without_policy():
+    """On Python 3.16+, RubiconEventLoop is CFEventLoop and EventLoopPolicy is gone."""
+    import rubicon.objc.eventloop as module
 
-        with pytest.warns(DeprecationWarning):
-            policy = module.EventLoopPolicy()
-        assert not hasattr(policy, "_watcher_lock")
-    finally:
-        sys.modules.pop(name, None)
-        importlib.import_module(name)
-
-
-def test_eventloop_import_without_policy(monkeypatch):
-    """Python 3.16 drops EventLoopPolicy; RubiconEventLoop becomes CFEventLoop."""
-    name = "rubicon.objc.eventloop"
-
-    if sys.version_info >= (3, 16):
-        import rubicon.objc.eventloop as module
-
-        assert module.RubiconEventLoop is module.CFEventLoop
-        assert not hasattr(module, "EventLoopPolicy")
-        return
-
-    monkeypatch.setattr(sys, "version_info", (3, 16, 0, "final", 0))
-    sys.modules.pop(name, None)
-    try:
-        module = importlib.import_module(name)
-        assert module.RubiconEventLoop is module.CFEventLoop
-        assert not hasattr(module, "EventLoopPolicy")
-    finally:
-        sys.modules.pop(name, None)
-        importlib.import_module(name)
+    assert module.RubiconEventLoop is module.CFEventLoop
+    assert not hasattr(module, "EventLoopPolicy")
