@@ -493,7 +493,7 @@ def unregister_ctype(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-    _encoding_for_ctype_map.pop(ctype, default=None)
+    _encoding_for_ctype_map.pop(ctype, None)
 
 
 def unregister_ctype_all(ctype):
@@ -506,7 +506,7 @@ def unregister_ctype_all(ctype):
 
     If the C type was not registered previously, nothing happens.
     """
-    _encoding_for_ctype_map.pop(ctype, default=None)
+    _encoding_for_ctype_map.pop(ctype, None)
     for enc, ct in list(_ctype_for_encoding_map.items()):
         if ct == ctype:
             unregister_encoding_all(enc)
