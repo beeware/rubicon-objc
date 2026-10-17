@@ -559,10 +559,11 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         events._set_running_loop(self)
 
         # Start the lifecycle, but invoke it as a deferred event on the event
-        # loop. iOSLifeCycle.start() starts the NSRunLoop; this ensures
-        # that a full NSRunLoop is running, not just one that responds to
-        # iOS events. See #228 for the sort of behavior that occurs on threads
-        # if the NSRunLoop isn't started.
+        # loop. By default iOSLifecycle starts a nested NSRunLoop, which
+        # releases the GIL even if the native launcher holds it while running
+        # UIApplicationMain (see #228 and #846). Launchers that release the
+        # GIL themselves can use iOSLifecycle(nested=False) to let UIKit
+        # control the run-loop modes.
         self.call_soon(self._lifecycle.start)
 
     def call_soon(self, callback, *args, context=None):
@@ -867,11 +868,23 @@ class CocoaLifecycle:
         self._application.postEvent(event, atStart=True)
 
 
-class iOSLifecycle:  # pragma: no cover
-    """A life cycle manager for iOS (`UIApplication`) apps."""
+class iOSLifecycle:
+    """A life cycle manager for iOS (`UIApplication`) apps.
+
+    :param nested: Whether to enter a nested `NSRunLoop` when started. The
+        default preserves compatibility with native launchers that hold the
+        Python GIL while running `UIApplicationMain`. Set to `False` with
+        `run_forever_cooperatively()` only when the native launcher releases
+        the GIL around `UIApplicationMain`, allowing UIKit to select the
+        run-loop mode. This lifecycle does not retain or own the application.
+    """
+
+    def __init__(self, *, nested=True):
+        self._nested = nested
 
     def start(self):
-        NSRunLoop.currentRunLoop.run()
+        if self._nested:
+            NSRunLoop.currentRunLoop.run()
 
     def stop(self):
         libcf.CFRunLoopStop(libcf.CFRunLoopGetMain())
