@@ -7,15 +7,18 @@ import sys
 import threading
 import warnings
 from asyncio import events
+from unittest.mock import Mock
 
 import pytest
 
+from rubicon.objc import eventloop
 from rubicon.objc.eventloop import (
     CFEventLoop,
     CFLifecycle,
     CFSocketHandle,
     EventLoopPolicy,
     RubiconEventLoop,
+    iOSLifecycle,
     kCFSocketReadCallBack,
     libcf,
 )
@@ -179,6 +182,56 @@ def test_run_forever_cooperatively(loop):
     # behind so the fixture's teardown can close the loop.
     loop._running = False
     events._set_running_loop(None)
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"nested": True}])
+def test_ios_lifecycle_legacy_loop(monkeypatch, kwargs):
+    """Existing callers keep the nested loop required by older iOS launchers."""
+    native_loop = Mock()
+    monkeypatch.setattr(eventloop, "NSRunLoop", native_loop)
+
+    iOSLifecycle(**kwargs).start()
+
+    native_loop.currentRunLoop.run.assert_called_once_with()
+
+
+def test_ios_lifecycle_native_loop(loop, monkeypatch):
+    """A host-owned loop delivers worker callbacks without entering NSRunLoop.run."""
+    # Guard against accidentally reintroducing a permanent nested loop, which
+    # would hang the test even after its watchdog calls CFRunLoopStop.
+    native_loop = Mock()
+    monkeypatch.setattr(eventloop, "NSRunLoop", native_loop)
+    lifecycle = iOSLifecycle(nested=False)
+    loop.run_forever_cooperatively(lifecycle=lifecycle)
+    started = threading.Event()
+    received = []
+    main_thread = threading.get_ident()
+
+    def receive():
+        received.append(threading.get_ident())
+        loop.stop()
+
+    def worker():
+        if started.wait(2):
+            loop.call_soon_threadsafe(receive)
+
+    thread = threading.Thread(target=worker)
+    thread.start()
+    loop.call_soon(started.set)
+    loop.call_later(2, loop.stop)
+    try:
+        # Like a correctly configured UIKit host, this native call releases
+        # the GIL while running the outer loop. It services the deferred
+        # lifecycle.start callback as well as the callback from the worker.
+        libcf.CFRunLoopRun()
+    finally:
+        thread.join(2)
+        loop._running = False
+        events._set_running_loop(None)
+
+    assert not thread.is_alive()
+    assert received == [main_thread]
+    native_loop.currentRunLoop.run.assert_not_called()
 
 
 def test_close_cancels_timers(loop):
