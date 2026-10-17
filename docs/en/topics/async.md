@@ -64,7 +64,7 @@ loop.run_forever_cooperatively(lifecycle=iOSLifecycle())
 
 By default, `iOSLifecycle` starts a nested `NSRunLoop` when UIKit first processes the registered callbacks. This preserves compatibility with older native launchers that hold Python's global interpreter lock (GIL) while running `UIApplicationMain`. Entering the nested loop releases the GIL, allowing background Python threads to run. However, `NSRunLoop.run()` uses the default run-loop mode, preventing UIKit from selecting its tracking mode during scrolling.
 
-### Using UIKit's run loop directly
+### Using the UIKit run loop directly
 
 If your native launcher releases the GIL around `UIApplicationMain`, disable the nested loop:
 
