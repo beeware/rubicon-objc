@@ -62,20 +62,25 @@ loop = RubiconEventLoop()
 loop.run_forever_cooperatively(lifecycle=iOSLifecycle())
 ```
 
-By default, `iOSLifecycle` starts a nested `NSRunLoop` when UIKit first processes the registered callbacks. This preserves compatibility with older native launchers that hold Python's global interpreter lock (GIL) while running `UIApplicationMain`. Entering the nested loop releases the GIL, allowing background Python threads to run. However, `NSRunLoop.run()` uses the default run-loop mode, preventing UIKit from selecting its tracking mode during scrolling.
+By default, `iOSLifecycle` checks the native launcher's capability flag, `sys._ios_app_main_releases_gil`. If the flag is exactly `True`, UIKit owns the run loop and can select its tracking mode during scrolling. Rubicon's callbacks continue to run in the common modes, including the tracking mode. The native application retains ownership of its event loop and application lifetime.
 
-### Using the UIKit run loop directly
+If the flag is absent or is not `True`, `iOSLifecycle` starts a nested `NSRunLoop` when UIKit first processes the registered callbacks. This preserves compatibility with older native launchers that hold Python's global interpreter lock (GIL) while running `UIApplicationMain`. Entering the nested loop releases the GIL, allowing background Python threads to run. However, `NSRunLoop.run()` uses the default run-loop mode, preventing UIKit from selecting its tracking mode during scrolling.
 
-If your native launcher releases the GIL around `UIApplicationMain`, disable the nested loop:
+Updating Rubicon alone preserves nesting with an older launcher. Updating the launcher alone preserves nesting with older Rubicon versions. Updating both automatically uses the UIKit loop through the existing `iOSLifecycle()` call; no Toga or application code change is required. Existing applications must regenerate or patch their native launcher and rebuild it to pick up the launcher change. Updating Python dependencies alone does not replace the native code.
 
-```python
-loop = RubiconEventLoop()
-loop.run_forever_cooperatively(lifecycle=iOSLifecycle(nested=False))
+### Native launcher capability
+
+The flag is a promise made by the native launcher, not a Python version check or a statement that the GIL is currently released. After initializing Python and before importing application code, a launcher that releases the GIL around `UIApplicationMain` advertises this capability:
+
+```objective-c
+if (PySys_SetObject("_ios_app_main_releases_gil", Py_True) < 0) {
+    // Abort startup using the launcher's error handling.
+    PyErr_Print();
+    return 1;
+}
 ```
 
-UIKit then controls the run-loop modes, and Rubicon's callbacks continue to run in the common modes, including the tracking mode. The native application retains ownership of its event loop and application lifetime.
-
-The native Objective-C launcher must detach Python's thread state before entering `UIApplicationMain`, and restore it before using Python's C API again. For example:
+After application code returns, the launcher must detach Python's thread state before entering `UIApplicationMain`, and restore it before using Python's C API again:
 
 ```objective-c
 PyThreadState *thread_state = PyEval_SaveThread();
@@ -87,6 +92,10 @@ PyThreadState *thread_state = PyEval_SaveThread();
 }
 ```
 
-The `@finally` block also restores the thread state if an Objective-C exception leaves `UIApplicationMain`. Rubicon's ctypes callbacks acquire the GIL when calling into Python.
+The `@finally` block also restores the thread state if an Objective-C exception leaves `UIApplicationMain`. Rubicon's ctypes callbacks acquire the GIL when calling into Python. `PySys_SetObject` keeps a reference to the capability value; the launcher does not transfer ownership of `Py_True` or retain an Objective-C application object for this capability.
 
-Do not set `nested=False` with a launcher that still holds the GIL: background threads can stall until an unrelated main-thread callback gives them an opportunity to run. Waking the run loop cannot release the GIL. Changing Rubicon alone does not update an existing application's native launcher; inspect and rebuild the generated application as well. See [Python's thread-state documentation](https://docs.python.org/3/c-api/threads.html#detaching-the-thread-state-from-extension-code) for details.
+Do not set this flag in application code to bypass detection. A launcher that still holds the GIL must leave the flag absent or set it to `False`: otherwise background threads can stall until an unrelated main-thread callback gives them an opportunity to run. Waking the run loop cannot release the GIL. See [Python's thread-state documentation](https://docs.python.org/3/c-api/threads.html#detaching-the-thread-state-from-extension-code) for details.
+
+### Overriding automatic detection
+
+`iOSLifecycle(nested=True)` always uses the nested loop. `iOSLifecycle(nested=False)` always uses the UIKit loop, and is only suitable for a native launcher known to release the GIL, even if it does not advertise the capability. Omitting `nested`, or passing `None`, selects the automatic behavior.

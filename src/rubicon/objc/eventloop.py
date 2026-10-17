@@ -559,11 +559,10 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         events._set_running_loop(self)
 
         # Start the lifecycle, but invoke it as a deferred event on the event
-        # loop. By default iOSLifecycle starts a nested NSRunLoop, which
-        # releases the GIL even if the native launcher holds it while running
-        # UIApplicationMain (see #228 and #846). Launchers that release the
-        # GIL themselves can use iOSLifecycle(nested=False) to let UIKit
-        # control the run-loop modes.
+        # loop. iOSLifecycle uses the launcher's capability flag to decide
+        # whether UIKit can own the run loop. Older launchers need a nested
+        # NSRunLoop to release the GIL while UIApplicationMain runs
+        # (see #228 and #846).
         self.call_soon(self._lifecycle.start)
 
     def call_soon(self, callback, *args, context=None):
@@ -872,14 +871,19 @@ class iOSLifecycle:
     """A life cycle manager for iOS (`UIApplication`) apps.
 
     :param nested: Whether to enter a nested `NSRunLoop` when started. The
-        default preserves compatibility with native launchers that hold the
-        Python GIL while running `UIApplicationMain`. Set to `False` with
-        `run_forever_cooperatively()` only when the native launcher releases
-        the GIL around `UIApplicationMain`, allowing UIKit to select the
-        run-loop mode. This lifecycle does not retain or own the application.
+        default, `None`, uses UIKit's own run loop only if the native launcher
+        sets `sys._ios_app_main_releases_gil` to `True` before this lifecycle
+        is created. Otherwise it preserves nesting for older launchers that
+        hold the Python GIL while running `UIApplicationMain`. Explicit
+        `True` or `False` overrides this detection. Use `False` only with
+        `run_forever_cooperatively()` and a launcher that releases the GIL
+        around `UIApplicationMain`. This lifecycle does not retain or own
+        the application.
     """
 
-    def __init__(self, *, nested=True):
+    def __init__(self, *, nested=None):
+        if nested is None:
+            nested = getattr(sys, "_ios_app_main_releases_gil", False) is not True
         self._nested = nested
 
     def start(self):

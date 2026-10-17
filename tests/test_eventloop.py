@@ -184,24 +184,50 @@ def test_run_forever_cooperatively(loop):
     events._set_running_loop(None)
 
 
-@pytest.mark.parametrize("kwargs", [{}, {"nested": True}])
-def test_ios_lifecycle_legacy_loop(monkeypatch, kwargs):
-    """Existing callers keep the nested loop required by older iOS launchers."""
+@pytest.mark.parametrize(
+    "capability, kwargs, expected_nested",
+    [
+        (None, {}, True),
+        (False, {}, True),
+        (True, {}, False),
+        (True, {"nested": None}, False),
+        ("true", {}, True),
+        (1, {}, True),
+        (True, {"nested": True}, True),
+        (None, {"nested": False}, False),
+        (False, {"nested": False}, False),
+    ],
+)
+def test_ios_lifecycle_launcher_capability(
+    monkeypatch, capability, kwargs, expected_nested
+):
+    """Only an explicit launcher capability disables nesting by default."""
+    if capability is None:
+        monkeypatch.delattr(sys, "_ios_app_main_releases_gil", raising=False)
+    else:
+        monkeypatch.setattr(
+            sys, "_ios_app_main_releases_gil", capability, raising=False
+        )
     native_loop = Mock()
     monkeypatch.setattr(eventloop, "NSRunLoop", native_loop)
 
     iOSLifecycle(**kwargs).start()
 
-    native_loop.currentRunLoop.run.assert_called_once_with()
+    if expected_nested:
+        native_loop.currentRunLoop.run.assert_called_once_with()
+    else:
+        native_loop.currentRunLoop.run.assert_not_called()
 
 
-def test_ios_lifecycle_native_loop(loop, monkeypatch):
+@pytest.mark.parametrize("kwargs", [{}, {"nested": False}])
+def test_ios_lifecycle_native_loop(loop, monkeypatch, kwargs):
     """A host-owned loop delivers worker callbacks without entering NSRunLoop.run."""
     # Guard against accidentally reintroducing a permanent nested loop, which
     # would hang the test even after its watchdog calls CFRunLoopStop.
     native_loop = Mock()
     monkeypatch.setattr(eventloop, "NSRunLoop", native_loop)
-    lifecycle = iOSLifecycle(nested=False)
+    monkeypatch.setattr(sys, "_ios_app_main_releases_gil", True, raising=False)
+    lifecycle = iOSLifecycle(**kwargs)
     loop.run_forever_cooperatively(lifecycle=lifecycle)
     started = threading.Event()
     received = []
