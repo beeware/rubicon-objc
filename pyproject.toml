@@ -53,7 +53,7 @@ briefcase = [
 ]
 
 pre-commit = [
-    "pre-commit == 4.6.2",
+    "pre-commit == 4.7.0",
 ]
 
 setuptools-scm = [
