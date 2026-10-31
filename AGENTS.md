@@ -57,6 +57,7 @@ Warnings are errors: `pyproject.toml` sets `filterwarnings = ["error"]`. A test 
 7. **Internals.** Anything not exported from `rubicon.objc.__init__` or otherwise documented in `docs/` is internal and may change; keep the internal/public split obvious (naming, module location).
 8. **Memory-sensitive code.** Changes touching `ctypes`, `objc_msgSend`, block trampolines, or manual retain/release MUST add tests that cover reference counts and MUST document ownership rules in the docstring.
 9. **Style.** Enforced by `ruff` (rules in `pyproject.toml [tool.ruff.lint]`), `codespell`, and `rumdl`. Run pre-commit before declaring work done. Do not disable a rule inline without justification in the PR.
+10. **Tests.** Name the behaviour, not the setup: `test_stgdict_plain_dict`, not a sentence of arguments and expected values. Give every test a one-line docstring that says what it verifies. When a change is for coverage, finish the module: cover the remaining blocks, and delete guards that only existed for Python versions this project no longer supports.
 
 ## Pull request checklist (what CI will verify)
 
