@@ -36,6 +36,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: 3.16",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Software Development",
 ]
@@ -171,7 +172,6 @@ no-cover-if-gte-py316 = "sys_version_info >= (3, 16) and os_environ.get('COVERAG
 no-cover-if-lt-py313 = "sys_version_info < (3, 13) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 no-cover-if-lt-py314 = "sys_version_info < (3, 14) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 no-cover-if-lt-py316 = "sys_version_info < (3, 16) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
-no-cover-if-old-or-new = "(sys_version_info >= (3, 6) or sys_version_info < (3, 16)) and os_environ.get('COVERAGE_EXCLUDE_PYTHON_VERSION') != 'disable'"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

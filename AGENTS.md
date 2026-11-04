@@ -14,7 +14,7 @@ Rubicon-ObjC is a Python to Objective-C runtime bridge, maintained as part of th
 - `docs/en/` — MkDocs documentation (tutorials, how-to, reference, background). Built via `beeware-docs-tools`.
 - `changes/` — `towncrier` news fragments. Every user-visible change ships a fragment here.
 - `stubs/` — type stubs used by the docs toolchain.
-- `pyproject.toml`, `tox.ini`, `.pre-commit-config.yaml` — canonical source for dependencies, supported Python versions (3.10–3.15), lint rules, test matrix, and coverage configuration.
+- `pyproject.toml`, `tox.ini`, `.pre-commit-config.yaml` — canonical source for dependencies, supported Python versions (3.11–3.16), lint rules, test matrix, and coverage configuration.
 - `.specify/` — SpecKit workspace (constitution, templates, extensions). Do not edit `.specify/memory/constitution.md` outside the `/speckit.constitution` workflow.
 
 

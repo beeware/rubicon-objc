@@ -105,7 +105,7 @@ jobs:
           # M1 runner
           "macos-26",
         ]
-        python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15" ]
+        python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15", "3.16" ]
         include:
         # Also run the oldest supported Python on macos-15
         - platform: macos-15

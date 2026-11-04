@@ -1,38 +1,24 @@
-"""This module provides a workaround to allow callback functions to return composite
-types (most importantly structs).
+"""This module provides a workaround to allow callback functions to return
+composite types (most importantly structs).
 
-Currently, ctypes callback functions (created by passing a Python callable to a
-CFUNCTYPE object) are only able to return what ctypes considers a "simple" type. This
-includes void (None), scalars (c_int, c_float, etc.), c_void_p, c_char_p, c_wchar_p, and
-py_object. Returning "composite" types (structs, unions, and non-"simple" pointers) is
-not possible. This issue has been reported on the Python bug tracker (
-https://github.com/python/cpython/issues/49960).
+Until Python 3.16.0a2, ctypes callback functions (created by passing a Python
+callable to a CFUNCTYPE object) were only able to return what ctypes considers a
+"simple" type. This includes void (None), scalars (c_int, c_float, etc.),
+c_void_p, c_char_p, c_wchar_p, and py_object. Returning "composite" types
+(structs, unions, and non-"simple" pointers) is not possible. See
+https://github.com/python/cpython/issues/49960 for more details.
 
-For pointers, the easiest workaround is to return a c_void_p instead of the correctly
-typed pointer, and to cast the value on both sides. For structs and unions there is no
-easy workaround, which is why this somewhat hacky workaround is necessary.
+For pointers, the easiest workaround is to return a c_void_p instead of the
+correctly typed pointer, and to cast the value on both sides. For structs and
+unions there is no easy workaround, so this hacky workaround is necessary.
+
+A fix for this issue was included in Python 3.16.0a2, removing the need for a
+workaround.
 """
 
 import ctypes
 import sys
 import types
-import warnings
-
-# This module relies on the layout of a few internal Python and ctypes
-# structures. Because of this, it's possible (but not all that likely) that
-# things will break on newer/older Python versions.
-if sys.version_info < (3, 6) or sys.version_info >= (
-    3,
-    16,
-):  # pragma: no-cover-if-old-or-new
-    v = sys.version_info
-    warnings.warn(
-        "rubicon.objc.ctypes_patch has only been tested with Python 3.6 through 3.15. "
-        f"You are using Python {v.major}.{v.minor}.{v.micro}. Most likely things will "
-        "work properly, but you may experience crashes if Python's internals have "
-        "changed significantly.",
-        stacklevel=2,
-    )
 
 
 # The PyTypeObject struct from "Include/object.h".
