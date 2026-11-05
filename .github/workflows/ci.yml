@@ -107,9 +107,13 @@ jobs:
         ]
         python-version: [ "3.11", "3.12", "3.13", "3.14", "3.15", "3.16" ]
         include:
-        # Also run the oldest supported Python on macos-15
+        # Also run the oldest supported Python on macOS 15
         - platform: macos-15
           python-version: "3.11"
+
+        # Also run the neweset supported Python on macOS 27
+        - platform: xcode-27
+          python-version: "3.x"
 
     steps:
     - name: Checkout
