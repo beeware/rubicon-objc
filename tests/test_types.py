@@ -48,6 +48,7 @@ from rubicon.objc.types import (
     get_ctype_for_type_map,
     get_encoding_for_ctype_map,
     register_ctype_for_type,
+    register_encoding,
     register_preferred_encoding,
     split_method_encoding,
     unregister_ctype,
@@ -281,35 +282,50 @@ def test_unregister_unknown_encoding_all(clean_registries):
 
 
 def test_unregister_ctype(clean_registries):
-    """Unregistering a ctype currently fails.
-
-    `unregister_ctype()` passes the default value to `dict.pop()` as a keyword argument,
-    which `dict.pop()` doesn't accept.
-    """
+    """Unregistering a ctype leaves the encoding-to-ctype conversion in place."""
     register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
-    with pytest.raises(TypeError, match="takes no keyword arguments"):
-        unregister_ctype(UnregisteredStruct)
+    unregister_ctype(UnregisteredStruct)
+
+    assert ctype_for_encoding(b"{Spam=i}") is UnregisteredStruct
+    with pytest.raises(ValueError, match="No type encoding known"):
+        encoding_for_ctype(UnregisteredStruct)
 
 
 def test_unregister_ctype_all(clean_registries):
-    """Unregistering a ctype and all its encodings fails the same way."""
+    """Unregistering a ctype removes every registered encoding for that ctype."""
     register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
-    with pytest.raises(TypeError, match="takes no keyword arguments"):
-        unregister_ctype_all(UnregisteredStruct)
+    unregister_ctype_all(UnregisteredStruct)
+
+    assert b"{Spam=i}" not in get_ctype_for_encoding_map()
+    assert UnregisteredStruct not in get_encoding_for_ctype_map()
+
+
+def test_unregister_ctype_all_multiple_encodings(clean_registries):
+    """Unregistering a ctype clears all encodings that map to it."""
+    register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
+    register_encoding(b"{Ham=i}", UnregisteredStruct)
+
+    unregister_ctype_all(UnregisteredStruct)
+
+    assert b"{Spam=i}" not in get_ctype_for_encoding_map()
+    assert b"{Ham=i}" not in get_ctype_for_encoding_map()
+    assert UnregisteredStruct not in get_encoding_for_ctype_map()
 
 
 def test_unregister_encoding_all(clean_registries):
-    """Unregistering an encoding and all its ctypes fails the same way.
+    """Unregistering an encoding and all its ctypes clears both directions.
 
     It unregisters every ctype registered for the encoding with
     `unregister_ctype_all()`.
     """
     register_preferred_encoding(b"{Spam=i}", UnregisteredStruct)
 
-    with pytest.raises(TypeError, match="takes no keyword arguments"):
-        unregister_encoding_all(b"{Spam=i}")
+    unregister_encoding_all(b"{Spam=i}")
+
+    assert b"{Spam=i}" not in get_ctype_for_encoding_map()
+    assert UnregisteredStruct not in get_encoding_for_ctype_map()
 
 
 @pytest.mark.parametrize(
