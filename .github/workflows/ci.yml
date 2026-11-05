@@ -111,9 +111,9 @@ jobs:
         - platform: macos-15
           python-version: "3.11"
 
-        # Also run the neweset supported Python on macOS 27
+        # Also run the newest stable Python on macOS 27
         - platform: xcode-27
-          python-version: "3.x"
+          python-version: "3.15"
 
     steps:
     - name: Checkout
