@@ -6,7 +6,7 @@
 
 ### Features
 
-* iOS is now actively tested as part of the Rubicon's development process. ([#788](https://github.com/beeware/rubicon-objc/issues/788))
+* iOS is now actively tested as part of Rubicon's development process. ([#788](https://github.com/beeware/rubicon-objc/issues/788))
 
 ### Bugfixes
 
