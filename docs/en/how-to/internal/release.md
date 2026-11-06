@@ -56,7 +56,7 @@ The procedure for cutting a new release is as follows:
         same service monitoring as PyPI-proper, so it sometimes has
         problems. However, it's also not critical to the release
         process; if this step fails, you can perform Step 6 by manually
-        downloading the "packages" artifact from the GitHub workflow
+        downloading the "packages" artefact from the GitHub workflow
         instead.
     b.  Something else fails in the build process. If the problem can be
         fixed without a code change to the Rubicon-ObjC repository
