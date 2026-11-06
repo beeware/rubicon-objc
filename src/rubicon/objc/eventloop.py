@@ -558,13 +558,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._running = True
         events._set_running_loop(self)
 
-        # Start the lifecycle, but invoke it as a deferred event on the event
-        # loop. iOSLifecycle uses the launcher's capability flag to decide
-        # whether UIKit can own the run loop. Older launchers need a nested
-        # NSRunLoop to release the GIL while UIApplicationMain runs
-        # (see #228 and #846).
-        self.call_soon(self._lifecycle.start)
-
     def call_soon(self, callback, *args, context=None):
         """Arrange for a callback to be called as soon as possible.
 
@@ -868,27 +861,11 @@ class CocoaLifecycle:
 
 
 class iOSLifecycle:
-    """A life cycle manager for iOS (`UIApplication`) apps.
-
-    :param nested: Whether to enter a nested `NSRunLoop` when started. The
-        default, `None`, uses UIKit's own run loop only if the native launcher
-        sets `sys._ios_app_main_releases_gil` to `True` before this lifecycle
-        is created. Otherwise it preserves nesting for older launchers that
-        hold the Python GIL while running `UIApplicationMain`. Explicit
-        `True` or `False` overrides this detection. Use `False` only with
-        `run_forever_cooperatively()` and a launcher that releases the GIL
-        around `UIApplicationMain`. This lifecycle does not retain or own
-        the application.
-    """
-
-    def __init__(self, *, nested=None):
-        if nested is None:
-            nested = getattr(sys, "_ios_app_main_releases_gil", False) is not True
-        self._nested = nested
+    """A life cycle manager for iOS (`UIApplication`) apps."""
 
     def start(self):
-        if self._nested:
-            NSRunLoop.currentRunLoop.run()
+        # UIKit owns the run loop
+        pass
 
     def stop(self):
         libcf.CFRunLoopStop(libcf.CFRunLoopGetMain())
