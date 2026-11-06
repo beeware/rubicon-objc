@@ -11,7 +11,7 @@ Rubicon-ObjC is a Python to Objective-C runtime bridge, maintained as part of th
 
 - `src/rubicon/objc/` — the package. Public API is what is re-exported from `rubicon.objc.__init__`. Key modules: `api.py`, `runtime.py`, `types.py`, `collections.py`, `ctypes_patch.py`, `eventloop.py`.
 - `tests/` — `pytest` suite. Tests that exercise real Objective-C classes live under `tests/objc/` and are built with `make -C tests/objc` before the Python tests run (handled automatically by `tox`).
-- `docs/en/` — MkDocs documentation (tutorials, how-to, reference, background). Built via `beeware-docs-tools`.
+- `docs/en/` — Zensical documentation (tutorials, how-to, reference, background). Configured by `docs/zensical.toml` (shared settings and `nav`) and `docs/zensical.<lang>.toml` (per-language settings). Built via `beeware-docs-tools`.
 - `changes/` — `towncrier` news fragments. Every user-visible change ships a fragment here.
 - `stubs/` — type stubs used by the docs toolchain.
 - `pyproject.toml`, `tox.ini`, `.pre-commit-config.yaml` — canonical source for dependencies, supported Python versions (3.10–3.15), lint rules, test matrix, and coverage configuration.
@@ -27,7 +27,7 @@ Rubicon-ObjC is a Python to Objective-C runtime bridge, maintained as part of th
 - **Pre-commit**: `pre-commit run --all-files` — MUST pass before PR.
 - **Packaging / testbed driver**: `briefcase`.
 - **Release notes**: `towncrier` (config in root `pyproject.toml`).
-- **Docs**: MkDocs; built with the `docs` dependency group.
+- **Docs**: Zensical; built with the `docs` dependency group.
 
 Do not replace or bypass these tools. Add new dependencies only with a clear need and a compatible license (BSD-3-Clause friendly).
 
