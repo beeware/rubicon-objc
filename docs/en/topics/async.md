@@ -51,15 +51,31 @@ Again, this will run "forever" -- until either `loop.stop()` is called, or `term
 
 ## Integrating asyncio with iOS and UIApplication
 
-If you're using UIKit and UIApplication on iOS, you need to use the iOS life cycle. To do this, you pass an `iOSLifecycle` object into the call to `loop.run_forever()`:
+If you're embedding Python in a UIKit application, use `run_forever_cooperatively()` with an `iOSLifecycle`. This registers asyncio callbacks and returns control to the native launcher, which is then expected to call `UIApplicationMain`:
 
 ```python
 # Import the Event Loop and lifecycle
 from rubicon.objc.eventloop import RubiconEventLoop, iOSLifecycle
 
-# Create an event loop, and run it, using the UIApplication!
+# Register asyncio callbacks before the native launcher starts UIApplicationMain.
 loop = RubiconEventLoop()
-loop.run_forever(lifecycle=iOSLifecycle())
+loop.run_forever_cooperatively(lifecycle=iOSLifecycle())
 ```
 
 Again, this will run "forever" -- until either `loop.stop()` is called, or `terminate:` is invoked on the UIApplication.
+
+### Native launcher capability
+
+After application code returns, the launcher must detach Python's thread state before entering `UIApplicationMain`, and restore it before using Python's C API again:
+
+```objective-c
+PyThreadState *thread_state = PyEval_SaveThread();
+@try {
+    UIApplicationMain(argc, argv, nil, @"PythonAppDelegate");
+}
+@finally {
+    PyEval_RestoreThread(thread_state);
+}
+```
+
+The `@finally` block also restores the thread state if an Objective-C exception leaves `UIApplicationMain`. Rubicon's ctypes callbacks acquire the GIL when calling into Python.
