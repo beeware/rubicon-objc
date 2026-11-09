@@ -71,7 +71,7 @@ tox-uv = [
 test = [
     "coverage[toml] == 7.17.0",
     "coverage-conditional-plugin == 0.9.0",
-    "pytest == 9.1.1",
+    "pytest == 9.2.0",
 ]
 
 dev = [
@@ -107,7 +107,7 @@ requires = [
     "rubicon-objc",
 ]
 test_requires = [
-    "pytest == 9.1.1"
+    "pytest == 9.2.0"
 ]
 requirement_installer_args = ["--pre", "-f", "./dist"]
 
