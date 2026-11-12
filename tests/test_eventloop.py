@@ -14,11 +14,13 @@ from rubicon.objc.eventloop import (
     CFEventLoop,
     CFLifecycle,
     CFSocketHandle,
-    EventLoopPolicy,
     RubiconEventLoop,
     kCFSocketReadCallBack,
     libcf,
 )
+
+if sys.version_info < (3, 16):
+    from rubicon.objc.eventloop import EventLoopPolicy
 
 
 @pytest.fixture
@@ -32,11 +34,12 @@ def loop():
 
 @pytest.fixture
 def policy():
-    with pytest.warns(DeprecationWarning):
-        policy = EventLoopPolicy()
-    yield policy
-    if policy._default_loop is not None:
-        policy._default_loop.close()
+    if sys.version_info < (3, 16):
+        with pytest.warns(DeprecationWarning):
+            policy = EventLoopPolicy()
+        yield policy
+        if policy._default_loop is not None:
+            policy._default_loop.close()
 
 
 @pytest.fixture
@@ -270,7 +273,11 @@ def test_add_callback_schedules(loop):
     assert len(loop._timers) == 1
 
 
-def test_new_event_loop(policy):
+@pytest.mark.skipif(
+    sys.version_info >= (3, 16),
+    reason="EventLoopPolicy is removed in Python 3.16",
+)
+def test_policy_new_event_loop(policy):
     """Each additional call to new_event_loop() returns an independent loop."""
     default_loop = policy.new_event_loop()
     other_loop = policy.new_event_loop()
@@ -281,7 +288,11 @@ def test_new_event_loop(policy):
         other_loop.close()
 
 
-def test_get_default_loop_is_memoized(policy):
+@pytest.mark.skipif(
+    sys.version_info >= (3, 16),
+    reason="EventLoopPolicy is removed in Python 3.16",
+)
+def test_policy_get_default_loop_is_memoized(policy):
     """get_default_loop() returns the same loop instance on repeated calls."""
     assert policy.get_default_loop() is policy.get_default_loop()
 
@@ -358,18 +369,19 @@ def test_init_watcher_off_main_thread(policy):
     sys.version_info < (3, 14),
     reason="Child watcher APIs exist before Python 3.14",
 )
-def test_policy_has_no_child_watcher():
+@pytest.mark.skipif(
+    sys.version_info >= (3, 16),
+    reason="EventLoopPolicy doesn't exist on 3.16",
+)
+def test_policy_has_no_child_watcher(policy):
     """EventLoopPolicy on Python 3.14+ has no child-watcher APIs."""
-    with pytest.warns(DeprecationWarning):
-        policy = EventLoopPolicy()
-
     assert "get_child_watcher" not in EventLoopPolicy.__dict__
     assert not hasattr(policy, "_watcher_lock")
 
 
 @pytest.mark.skipif(
     sys.version_info < (3, 16),
-    reason="EventLoopPolicy is removed in Python 3.16",
+    reason="EventLoopPolicy was removed in Python 3.16",
 )
 def test_rubicon_event_loop_without_policy():
     """On Python 3.16+, RubiconEventLoop is CFEventLoop and EventLoopPolicy is gone."""

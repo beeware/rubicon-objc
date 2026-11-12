@@ -5,6 +5,12 @@ import sys
 
 import pytest
 
+if sys.version_info >= (3, 16):
+    pytest.skip(
+        reason="ctypes_patch not required on Python 3.16+",
+        allow_module_level=True,
+    )
+
 from rubicon.objc import ctypes_patch
 
 
