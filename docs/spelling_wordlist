@@ -3,6 +3,7 @@ alloc
 APIs
 AppKit
 argtypes
+artefact
 asyncio
 Autorelease
 autorelease
@@ -15,6 +16,7 @@ bpo
 Bugfixes
 callables
 cdecl
+CI
 CoreFoundation
 cppreference
 CPython

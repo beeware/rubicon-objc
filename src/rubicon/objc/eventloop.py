@@ -558,13 +558,6 @@ class CFEventLoop(unix_events.SelectorEventLoop):
         self._running = True
         events._set_running_loop(self)
 
-        # Start the lifecycle, but invoke it as a deferred event on the event
-        # loop. iOSLifeCycle.start() starts the NSRunLoop; this ensures
-        # that a full NSRunLoop is running, not just one that responds to
-        # iOS events. See #228 for the sort of behavior that occurs on threads
-        # if the NSRunLoop isn't started.
-        self.call_soon(self._lifecycle.start)
-
     def call_soon(self, callback, *args, context=None):
         """Arrange for a callback to be called as soon as possible.
 
@@ -867,11 +860,12 @@ class CocoaLifecycle:
         self._application.postEvent(event, atStart=True)
 
 
-class iOSLifecycle:  # pragma: no cover
+class iOSLifecycle:
     """A life cycle manager for iOS (`UIApplication`) apps."""
 
     def start(self):
-        NSRunLoop.currentRunLoop.run()
+        # UIKit owns the run loop
+        pass
 
     def stop(self):
         libcf.CFRunLoopStop(libcf.CFRunLoopGetMain())
