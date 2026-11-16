@@ -7,6 +7,7 @@
 dist
 build
 _build
+docs/_build.*.toml
 logs/
 distribute-*
 venv*/
