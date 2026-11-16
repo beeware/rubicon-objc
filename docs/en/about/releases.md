@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 0.6.0 (2026-11-16)
+
+### Features
+
+* Support for Python 3.16 was added. ([#863](https://github.com/beeware/rubicon-objc/issues/863))
+
+### Bugfixes
+
+* Encodings can now be unregistered without triggering a `TypeError`. ([#844](https://github.com/beeware/rubicon-objc/issues/844))
+* The iOS life cycle no longer uses a nested run loop, ensuring that UIKit's scrolling modes are able to be handled without interruption. ([#846](https://github.com/beeware/rubicon-objc/issues/846))
+
+### Backward Incompatible Changes
+
+* iOS Applications using Rubicon ObjC must ensure that the GIL has been released before `UIApplicationMain` is invoked. See the docs on [Native launcher capability][native-launcher-capability] for details. ([#846](https://github.com/beeware/rubicon-objc/issues/846))
+
+### Misc
+
+* [#729](https://github.com/beeware/rubicon-objc/issues/729), [#839](https://github.com/beeware/rubicon-objc/issues/839), [#840](https://github.com/beeware/rubicon-objc/issues/840), [#841](https://github.com/beeware/rubicon-objc/issues/841), [#842](https://github.com/beeware/rubicon-objc/issues/842), [#843](https://github.com/beeware/rubicon-objc/issues/843), [#848](https://github.com/beeware/rubicon-objc/issues/848), [#849](https://github.com/beeware/rubicon-objc/issues/849), [#850](https://github.com/beeware/rubicon-objc/issues/850), [#851](https://github.com/beeware/rubicon-objc/issues/851), [#852](https://github.com/beeware/rubicon-objc/issues/852), [#853](https://github.com/beeware/rubicon-objc/issues/853), [#854](https://github.com/beeware/rubicon-objc/issues/854), [#855](https://github.com/beeware/rubicon-objc/issues/855), [#856](https://github.com/beeware/rubicon-objc/issues/856), [#858](https://github.com/beeware/rubicon-objc/issues/858), [#859](https://github.com/beeware/rubicon-objc/issues/859), [#860](https://github.com/beeware/rubicon-objc/issues/860), [#861](https://github.com/beeware/rubicon-objc/issues/861), [#862](https://github.com/beeware/rubicon-objc/issues/862), [#865](https://github.com/beeware/rubicon-objc/issues/865), [#866](https://github.com/beeware/rubicon-objc/issues/866), [#867](https://github.com/beeware/rubicon-objc/issues/867), [#868](https://github.com/beeware/rubicon-objc/issues/868), [#869](https://github.com/beeware/rubicon-objc/issues/869)
+
 ## 0.5.7 (2026-09-30)
 
 ### Features
